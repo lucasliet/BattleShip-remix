@@ -954,7 +954,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     nx_create_nro(${PROJECT_NAME}
         NACP ${PROJECT_NAME}.nacp
     )
-    add_custom_target(ssb64_nro DEPENDS ${PROJECT_NAME}.nro)
+    # nx_create_nro already registers the user-facing build target
+    # (${PROJECT_NAME}_nro == ssb64_nro); nothing extra to declare here.
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
