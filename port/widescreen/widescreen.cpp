@@ -8,9 +8,17 @@
 namespace {
 
 constexpr const char* kWidescreenCVar = "gEnhancements.Widescreen";
+// 0 = Stretch (legacy wide pixels), 1 = Center4_3 (letterboxed 2D,
+// undistorted). The battle-HUD Spread markers land with the decomp-side
+// anchor PRs; Center4_3 is the interim default so nothing distorts.
+constexpr const char* kWidescreen2DPolicyCVar = "gEnhancements.Widescreen2DPolicy";
 
 bool widescreen_enabled() {
     return CVarGetInteger(kWidescreenCVar, 1) != 0;
+}
+
+int widescreen_2d_policy() {
+    return CVarGetInteger(kWidescreen2DPolicyCVar, 1);
 }
 
 } // namespace
@@ -30,12 +38,13 @@ extern "C" void port_widescreen_tick(void) {
     /* Mirror the CVar state into libultraship's Fast3D interpreter via the
      * GfxSetWidescreenActive bridge. When active, Interpreter::AdjXForAspectRatio
      * compresses post-projection clip-space X by (4/3)/window_aspect, expanding
-     * the visible 4:3 frustum into the wider window. The pillarbox/letterbox
-     * for non-battle scenes is handled passively: the game emits 2D rect ops
-     * (HUD, backgrounds, menus) which libultraship leaves at their authored
-     * 4:3 NDC range, while 3D vertex ops get the FOV expansion. So title
-     * screens and menus end up 4:3-centered with black side strips, while
-     * battles render native widescreen — no per-scene gating required.
+     * the visible 4:3 frustum into the wider window. 2D rect ops (HUD,
+     * backgrounds, menus) follow the 2D anchor policy CVar:
+     * gEnhancements.Widescreen2DPolicy — 1 (default) = Center4_3, mapping the
+     * authored 320-space into the centered 4:3 region with pixel aspect 1:1
+     * (menus/title/2D effects letterbox; no distortion); 0 = legacy Stretch
+     * (authored NDC across the full wide FB). The battle-HUD Spread markers
+     * come with the decomp-side anchor PRs (see docs/switch_port_2026-10-12.md).
      *
      * AdjXForAspectRatio derived from Ship of Harkinian's libultraship fork
      *   Copyright (c) The Harbour Masters
@@ -46,6 +55,14 @@ extern "C" void port_widescreen_tick(void) {
     if (active != s_last) {
         s_last = active;
         GfxSetWidescreenActive(active);
+    }
+    const int policy = widescreen_2d_policy();
+    static int s_last_policy = -1;
+    if (policy != s_last_policy || (active != 0 && s_last_policy == -1)) {
+        s_last_policy = policy;
+        // Off => Stretch keeps the CVar-off behavior byte-identical (the
+        // anchor transform is a no-op when widescreen is inactive anyway).
+        GfxSetUIAnchorMode(active ? policy : 0);
     }
 }
 
