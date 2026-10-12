@@ -1,0 +1,58 @@
+name: build-switch
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore: ['docs/**', '*.md']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-switch:
+    # Ephemeral runner: the containment rule that binds local machines
+    # (.toolchain/ inside the repo, no system installs) doesn't apply to
+    # CI; the devkitPro container is the standard for Switch homebrew.
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:20260219   # date-pinned, not :latest
+    steps:
+      - name: Install host deps
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends python3 python3-pil
+          # devkitPro's switch-tinyxml2 portlib is 6.0.0 (2017) — too old
+          # for the LUS FetchContent expectations; libultraship's
+          # switch.cmake FetchContent path provides 10.x instead. Keep the
+          # portlib out of the way so find_package falls through.
+          dkp-pacman -R --noconfirm switch-tinyxml2 || true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Cache ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: switch-ccache-${{ github.sha }}
+          restore-keys: switch-ccache-
+
+      - name: Configure
+        run: |
+          cmake -S . -B build-switch -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBATTLESHIP_SWITCH=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DSSB64_VERSION=us
+        env:
+          DEVKITPRO: /opt/devkitpro
+
+      - name: Build NRO
+        run: cmake --build build-switch --target ssb64_nro -j "$(nproc)"
+        env:
+          DEVKITPRO: /opt/devkitpro
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: battleship-switch
+          path: build-switch/ssb64.nro
