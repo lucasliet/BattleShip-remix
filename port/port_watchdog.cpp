@@ -23,7 +23,7 @@
  * the symbols aren't linkable. For the Android spike, stub these out — a
  * production build can either raise minSdk or use libunwind directly.
  */
-#if defined(__ANDROID__) && __ANDROID_API__ < 33
+#if (defined(__ANDROID__) && __ANDROID_API__ < 33) || defined(__SWITCH__)
 static inline int backtrace(void * /*frames*/[], int /*max*/) { return 0; }
 static inline void backtrace_symbols_fd(void *const /*frames*/[], int /*n*/, int /*fd*/) {}
 #else

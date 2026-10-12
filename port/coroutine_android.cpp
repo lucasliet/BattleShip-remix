@@ -1,9 +1,10 @@
 /**
- * coroutine_android.cpp — ARM coroutine impl for Android (bionic).
+ * coroutine_android.cpp — ARM coroutine impl for Android (bionic) and
+ * Nintendo Switch homebrew (libnx).
  *
  * Bionic libc dropped getcontext/makecontext/swapcontext (they were
  * never supported on ARM), so the POSIX ucontext path in
- * coroutine_posix.cpp doesn't compile here. Instead, we ship a minimal
+ * coroutine_posix.cpp doesn't compile there. Instead, we ship a minimal
  * asm context-switch that saves the AAPCS callee-saved set — same approach
  * as boost::context's fcontext_t — and drive it from this file:
  *   arm64-v8a   -> port/coroutine_aarch64.S  (AAPCS64)
@@ -14,11 +15,11 @@
  * time.
  */
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__SWITCH__)
 
 #if !defined(__aarch64__) && !defined(__arm__)
-#  error "Android coroutine backend supports arm64-v8a (coroutine_aarch64.S) "  \
-         "and armeabi-v7a (coroutine_armv7.S) only. Add an x86/x86_64 swap "    \
+#  error "This coroutine backend supports arm64-v8a (coroutine_aarch64.S) "  \
+         "and armeabi-v7a (coroutine_armv7.S) only. Add an x86/x86_64 swap " \
          "if you need those ABIs."
 #endif
 
@@ -30,8 +31,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#if defined(__ANDROID__)
 #include <sys/mman.h>
 #include <unistd.h>
+#endif
 
 #define MIN_STACK_SIZE 32768
 
@@ -133,7 +136,22 @@ PortCoroutine *port_coroutine_create(void (*entry)(void *), void *arg, size_t st
     /* mmap the stack with a PROT_NONE guard page at the low end so a
      * coroutine stack overflow faults immediately instead of silently
      * corrupting adjacent heap. mmap returns page-aligned memory, which
-     * satisfies AAPCS64's 16-byte sp alignment requirement. */
+     * satisfies AAPCS64's 16-byte sp alignment requirement.
+     *
+     * Switch (libnx homebrew) has no anonymous mmap in newlib — allocate
+     * from the heap with aligned_alloc instead. No guard page is possible;
+     * MIN_STACK_SIZE keeps overflow to adjacent-heap corruption contained
+     * to this app's own heap, and the allocator's canaries catch gross
+     * overflow at free() time in debug allocator builds. */
+#if defined(__SWITCH__)
+    stack_size = (stack_size + 15u) & ~(size_t)15u;
+    co->stack_total = stack_size;
+    void *stk = aligned_alloc(16, co->stack_total);
+    if (!stk) {
+        free(co);
+        return nullptr;
+    }
+#else
     long ps_v = sysconf(_SC_PAGESIZE);
     size_t ps = (ps_v > 0) ? (size_t)ps_v : 4096;
     stack_size = (stack_size + ps - 1) & ~(ps - 1);
@@ -145,6 +163,7 @@ PortCoroutine *port_coroutine_create(void (*entry)(void *), void *arg, size_t st
         return nullptr;
     }
     mprotect(stk, ps, PROT_NONE);
+#endif
     co->stack_mem  = stk;
     co->entry      = entry;
     co->arg        = arg;
@@ -177,7 +196,11 @@ void port_coroutine_destroy(PortCoroutine *co) {
         abort();
     }
     if (co->stack_mem) {
+#if defined(__SWITCH__)
+        free(co->stack_mem);
+#else
         munmap(co->stack_mem, co->stack_total);
+#endif
     }
     free(co);
 }

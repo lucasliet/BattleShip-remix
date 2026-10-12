@@ -14,10 +14,20 @@ if(BATTLESHIP_UWP)
     add_compile_definitions(_UWP=1 BATTLESHIP_UWP=1)
 endif()
 
+# Nintendo Switch homebrew (devkitA64/libnx): no JIT (W^X), no subprocesses,
+# no desktop shell integrations. Assets (o2r) are generated host-side and
+# shipped on the SD card; the console build never extracts anything.
+if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+    set(NON_PORTABLE ON CACHE BOOL "Store writable data in platform app storage" FORCE)
+    set(DISABLE_SCRIPTING ON CACHE BOOL "Switch homebrew has no executable-memory JIT" FORCE)
+    set(LUS_ENABLE_POSTPROCESS_TRANSPILER OFF CACHE BOOL "Switch uses packaged shaders" FORCE)
+    set(BUILD_CROWD_CONTROL OFF CACHE BOOL "" FORCE)
+endif()
+
 # Android needs ASM for the aarch64 coroutine context-switch
 # (port/coroutine_aarch64.S). Enable it before any add_library/add_executable
 # call sees an .S source. ASM is preprocessed by clang on the way through.
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+if (CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     enable_language(ASM)
 endif()
 
@@ -27,7 +37,7 @@ endif()
 # and the in-engine call sites (#ifndef DISABLE_SCRIPTING). Forced ON for
 # Android: funchook/TinyCC have no Android target and the loader is desktop-only.
 # Set BEFORE add_subdirectory(libultraship) so the engine half sees it too.
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+if (CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     set(DISABLE_SCRIPTING ON CACHE BOOL "Disable the mod system (scripting + hooks)" FORCE)
 endif()
 
@@ -552,6 +562,17 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
         "port/enhancements/(Updater|DiscordRichPresence|ShaderDownloader)\\.cpp$")
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/port_window_icon\\.cpp$")
 endif()
+if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+    # libnx: no ucontext (coroutine_posix), no Win32 backend, no
+    # extraction wizard (o2r ships on the SD), no native dialogs,
+    # no window icon, no curl/discord shell integrations.
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/coroutine_(posix|win32)\\.cpp$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/first_run\\.cpp$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/native_dialog\\.cpp$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/port_window_icon\\.cpp$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX
+        "port/enhancements/(Updater|DiscordRichPresence|ShaderDownloader)\\.cpp$")
+endif()
 if(BATTLESHIP_UWP)
     # Xbox packages are updated as MSIX and cannot use these Win32
     # shell-out/IPC integrations.
@@ -562,7 +583,8 @@ if(BATTLESHIP_UWP)
 endif()
 # Treat the generated icon header as a source so CMake schedules it ahead
 # of any port TU compilation (port_window_icon.cpp #includes it).
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP
+    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     list(APPEND SSB64_SRC_PORT ${SSB64_ICON_GEN})
 endif()
 # Arrow + nameplate baked headers — added as sources so CMake schedules their
@@ -846,7 +868,8 @@ endif()
 # Fetch Discord RPC (desktop only — Android drops Discord Rich Presence
 # along with the rest of the network-dependent features).
 ################################################################################
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP
+    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     # discord-rpc v3.4.0's CMakeLists declares cmake_minimum_required(VERSION 2.x),
     # which CMake 3.30+ refuses to honor. Force a baseline policy version for the
     # fetched subdir so the build still configures with current CMake.
@@ -920,6 +943,20 @@ else()
     set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${SSB64_APP_NAME}")
 endif()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+    # NRO homebrew package. nx_create_nro produces ${PROJECT_NAME}.nro next
+    # to the ELF; ssb64_nro is the user-facing build target.
+    nx_generate_nacp(${PROJECT_NAME}.nacp
+        NAME "${SSB64_APP_NAME}"
+        AUTHOR "BattleShip"
+        VERSION "${SSB64_VERSION}"
+    )
+    nx_create_nro(${PROJECT_NAME}
+        NACP ${PROJECT_NAME}.nacp
+    )
+    add_custom_target(ssb64_nro DEPENDS ${PROJECT_NAME}.nro)
+endif()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(ssb64_game PROPERTIES
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
@@ -948,7 +985,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/debug_tools
     ${SSB64_CSS_GEN_DIR}                         # CSS icon baked headers (arrow_data.h)
 )
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP
+    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     target_include_directories(${PROJECT_NAME} PRIVATE
         ${SSB64_ICON_GEN_DIR}                         # Generated icon header (port_icon_data.h)
         ${discord_rpc_SOURCE_DIR}/include             # Discord Rich Presence
@@ -966,6 +1004,11 @@ endif()
 ################################################################################
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+    add_dependencies(${PROJECT_NAME} libultraship)
+    target_link_libraries(${PROJECT_NAME} PRIVATE libultraship)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+    # SDL2/glad come from the devkitPro portlibs via libultraship's
+    # switch.cmake; the exe needs nothing beyond the engine itself.
     add_dependencies(${PROJECT_NAME} libultraship)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship)
 elseif(BATTLESHIP_UWP)
@@ -1081,7 +1124,7 @@ endif()
 # these into the APK assets/ at Gradle time via android/app/build.gradle.kts).
 ################################################################################
 
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     configure_file(
         ${CMAKE_SOURCE_DIR}/gamecontrollerdb.txt
         ${CMAKE_BINARY_DIR}/gamecontrollerdb.txt
@@ -1259,8 +1302,9 @@ endif()
 # port/android_torch_bridge.cpp + RomImporter.java).
 ################################################################################
 
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
 # Accept .z64 (big-endian), .n64 (little-endian), or .v64 (byteswapped).
+# (Switch builds never touch the baserom — assets ship prebuilt on SD.)
 # Torch's Cartridge::Normalize converts non-z64 byte orders in-memory.
 set(SSB64_BASEROM "")
 foreach(ext z64 n64 v64)

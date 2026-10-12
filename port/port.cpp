@@ -959,6 +959,22 @@ static int PortInitImpl(int argc, char* argv[]) {
 			PortShutdown();
 			return 1;
 		}
+#elif defined(__SWITCH__)
+		// Switch homebrew: no subprocesses and no file dialogs, so neither
+		// the Torch sidecar nor the wizard can run. The .o2r archives are
+		// generated on a desktop and shipped on the SD card
+		// (scripts/switch/pack.sh lays out dist/switch/SD).
+		std::error_code ec;
+		const std::string targetO2r =
+			Ship::Context::GetPathRelativeToAppDirectory(SSB64_O2R_NAME);
+		if (!std::filesystem::exists(targetO2r, ec) &&
+		    !std::filesystem::exists(PortLocateFile(SSB64_O2R_NAME), ec)) {
+			port_log("SSB64: missing %s — copy it to sdmc:/switch/BattleShip/ "
+			         "(generate on a desktop build; see BUILDING.md Switch section)\n",
+			         SSB64_O2R_NAME);
+			PortShutdown();
+			return 1;
+		}
 #else
 		const std::string targetO2r =
 			Ship::Context::GetPathRelativeToAppDirectory(SSB64_O2R_NAME);
@@ -1274,6 +1290,14 @@ int main(int argc, char* argv[]) {
 	}
 	port_log("SSB64: main entered\n");
 
+#ifdef __SWITCH__
+	/* App-owned early Switch init: socket/nxlink stdio, applet-mode
+	 * detection and error-applet plumbing. libultraship drives only the
+	 * PostInitPhase half from Context::Init — without this PreInit call
+	 * there is no nxlink logging and applet-mode boots die on allocation. */
+	Ship::Switch::Init(Ship::SwitchPhase::PreInitPhase);
+#endif
+
 #ifdef __APPLE__
 	/* Disable the macOS press-and-hold accent/diacritic popup for this app.
 	 * SDL keeps a Cocoa text-input context alive for the game window, so
@@ -1310,6 +1334,12 @@ int main(int argc, char* argv[]) {
 	signal(SIGILL,  portSignalHandler);
 	signal(SIGSEGV, portSignalHandler);
 	signal(SIGTERM, portSignalHandler);
+#elif !defined(__SWITCH__)
+	// Switch homebrew: libnx exposes signal() but our handler relies on
+	// execinfo backtraces that newlib doesn't ship; a faulting handler on
+	// HOS would replace the system crash reporter's actionable core dump
+	// with a silent exit. Leave signals at their defaults there.
+	signal(SIGSEGV, portSignalHandler);
 #endif
 
 	// Initialize RenderDoc trigger BEFORE PortInit so the RenderDoc DLL

@@ -1,0 +1,153 @@
+{
+ "_comment": "Gerado dos dkp-libs.db/dkp-osx.db oficiais (snapshot 2026-10-12). setup-toolchain.sh verifica cada sha256 contra estes pinos; drift do upstream = aborto.",
+ "base_urls": {
+  "libs": "https://pkg.devkitpro.org/packages",
+  "osx": "https://pkg.devkitpro.org/packages/osx/x86_64"
+ },
+ "host": [
+  {
+   "file": "cmake-3.31.6-macos-universal.tar.gz",
+   "name": "cmake",
+   "sha256": "330b9514f5112e5ed4fb08b8b05803b776fd9b539a6ae12927d14dcc0ee2ba8d",
+   "url": "https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-macos-universal.tar.gz",
+   "version": "3.31.6"
+  },
+  {
+   "file": "ninja-mac.zip",
+   "name": "ninja",
+   "sha256": "c99048673aa765960a99cf10c6ddb9f1fad506099ff0a0e137ad8960a88f321b",
+   "url": "https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-mac.zip",
+   "version": "1.13.2"
+  }
+ ],
+ "packages": {
+  "libs": {
+   "devkitA64": {
+    "depends": [
+     "devkita64-binutils>=2.46.0-1",
+     "devkita64-gcc>=16.1.0-1",
+     "devkita64-newlib>=4.6.0.20260123-4"
+    ],
+    "filename": "devkitA64-r30-1-any.pkg.tar.zst",
+    "sha256": "66f100490dafe506495ee083bc932aa2c2f231b5dafaa2b203d1832389b700e9",
+    "version": "r30-1"
+   },
+   "devkita64-cmake": {
+    "depends": [],
+    "filename": "devkita64-cmake-1.1.3-1-any.pkg.tar.zst",
+    "sha256": "f2baa41f2b776ea5e7c5340464d2ba1bcccbc73a96c3293c91ae13df9ee5d467",
+    "version": "1.1.3-1"
+   },
+   "devkita64-newlib": {
+    "depends": [],
+    "filename": "devkita64-newlib-4.6.0.20260123-4-any.pkg.tar.zst",
+    "sha256": "fc97ba1009a94b68f8714c3cc548ef697ca82687b72fe0c05a7ca3df81beb53e",
+    "version": "4.6.0.20260123-4"
+   },
+   "devkita64-rules": {
+    "depends": [],
+    "filename": "devkita64-rules-1.1.1-1-any.pkg.tar.zst",
+    "sha256": "2649cf7827243447070073acc2aa2fee152a0592fc30e827ceed803c565a1ede",
+    "version": "1.1.1-1"
+   },
+   "dkp-cmake-common-utils": {
+    "depends": [],
+    "filename": "dkp-cmake-common-utils-1.5.3-1-any.pkg.tar.zst",
+    "sha256": "9ddb64ff16962e6532d2a2bce1d7ae8eef4f6f5b859f145c2e58b87b7b164701",
+    "version": "1.5.3-1"
+   },
+   "libnx": {
+    "depends": [],
+    "filename": "libnx-4.12.0-1-any.pkg.tar.zst",
+    "sha256": "c6950bdf8e4b872ece492225368c03e633776329548a7494f91aa1e8f239cd8a",
+    "version": "4.12.0-1"
+   },
+   "switch-cmake": {
+    "depends": [
+     "devkita64-cmake",
+     "switch-tools",
+     "uam",
+     "switch-pkg-config"
+    ],
+    "filename": "switch-cmake-1.5.2-1-any.pkg.tar.zst",
+    "sha256": "7eee6a98312991faac73246f93d88740fb234d90ac5bd19ca969d6e227a59c8f",
+    "version": "1.5.2-1"
+   },
+   "switch-glad": {
+    "depends": [],
+    "filename": "switch-glad-0.1.27-1-any.pkg.tar.xz",
+    "sha256": "a2b159f7a483ec114066067a2e991e65a39ea8708c2cbcac7cfe1c9ec31ea8da",
+    "version": "0.1.27-1"
+   },
+   "switch-libpng": {
+    "depends": [],
+    "filename": "switch-libpng-1.6.48-1-any.pkg.tar.zst",
+    "sha256": "99ea23b88c00dc678fff4290064916d5795db1f7445829420b689b29ac0078ff",
+    "version": "1.6.48-1"
+   },
+   "switch-mesa": {
+    "depends": [],
+    "filename": "switch-mesa-20.1.0-5-any.pkg.tar.zst",
+    "sha256": "78328415d06bff75af07091243844ded5a63dc4d4520d2c708787b8d80ad386d",
+    "version": "20.1.0-5"
+   },
+   "switch-pkg-config": {
+    "depends": [],
+    "filename": "switch-pkg-config-0.28-4-any.pkg.tar.xz",
+    "sha256": "ccba20970fcd151d0212b44913e04df76b5cf295c1d48df686aa9991f5490b2e",
+    "version": "0.28-4"
+   },
+   "switch-sdl2": {
+    "depends": [
+     "switch-mesa",
+     "libnx"
+    ],
+    "filename": "switch-sdl2-2.28.5-4-any.pkg.tar.zst",
+    "sha256": "395b2fe3cd7fed9d3edc443a35cd40d2b7e8dce8730a5acffc8fb9a85b52c031",
+    "version": "2.28.5-4"
+   },
+   "switch-zlib": {
+    "depends": [],
+    "filename": "switch-zlib-1.3.1-1-any.pkg.tar.zst",
+    "sha256": "53cb5dc4006c96cd4195dabc15b46f07a63ad99c91939ce921db33556396442c",
+    "version": "1.3.1-1"
+   }
+  },
+  "osx": {
+   "devkita64-binutils": {
+    "depends": [],
+    "filename": "devkita64-binutils-2.46.0-1-x86_64.pkg.tar.zst",
+    "sha256": "e45e9bdfcf4177918a93fab3dc439bce72d51be8c9f5b6afdfc11fc418ff0806",
+    "version": "2.46.0-1"
+   },
+   "devkita64-gcc": {
+    "depends": [
+     "devkita64-binutils",
+     "devkita64-newlib",
+     "devkita64-rules"
+    ],
+    "filename": "devkita64-gcc-16.1.0-1-x86_64.pkg.tar.zst",
+    "sha256": "c120da3a908fe2606d7c6913570cb6a8763bca0c99a8173235a708567a102595",
+    "version": "16.1.0-1"
+   },
+   "general-tools": {
+    "depends": [],
+    "filename": "general-tools-1.4.4-1-x86_64.pkg.tar.zst",
+    "sha256": "71c1aa8d3e178cd6b921f169272bf61abcad1af98f28b0296e83ccff720226b6",
+    "version": "1.4.4-1"
+   },
+   "switch-tools": {
+    "depends": [],
+    "filename": "switch-tools-1.13.1-1-x86_64.pkg.tar.zst",
+    "sha256": "eb5facfb3468228968ad34a3ff949bf7e5e95b47a3bf29b0e5878cf26ab64ee0",
+    "version": "1.13.1-1"
+   },
+   "uam": {
+    "depends": [],
+    "filename": "uam-1.1.0-1-x86_64.pkg.tar.xz",
+    "sha256": "6129f683a5694e4935e7d853a5416587d56714713617f42f555ff2134ed0fa32",
+    "version": "1.1.0-1"
+   }
+  }
+ }
+}

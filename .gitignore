@@ -114,3 +114,6 @@ debug_traces/
 # Local extraction / scratch directories used during debugging
 extract/
 test.zip
+
+# Contained Switch toolchain (setup-toolchain.sh)
+.toolchain/
