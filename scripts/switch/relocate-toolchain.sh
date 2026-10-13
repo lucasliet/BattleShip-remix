@@ -23,7 +23,9 @@ grep -rlF "$OLD" "$DKP" \
   --include='*.pc' --include='*.la' --include='*.cmake' \
   --include='*.specs' --include='*.sh' --include='*.py' \
   2>/dev/null | while read -r f; do
-  sed -i '' "s|$OLD|$DKP|g" "$f"
+  # $DKP itself contains $OLD (…/.toolchain/opt/devkitpro), so shield paths that
+  # are already relocated or a re-run would nest the prefix inside itself.
+  sed -i '' -e "s|$DKP|@@DKP@@|g" -e "s|$OLD|$DKP|g" -e "s|@@DKP@@|$DKP|g" "$f"
 done
 
 # Sanity: the pkg-config wrapper must now resolve portlibs under the repo.

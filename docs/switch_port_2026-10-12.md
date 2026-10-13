@@ -39,7 +39,7 @@ Ver `BUILDING.md` § "Nintendo Switch". Resumo:
 
 ```bash
 scripts/switch/setup-toolchain.sh   # uma vez
-scripts/switch/build.sh us          # build-switch/ssb64.nro
+scripts/switch/build.sh us          # build-switch/BattleShip.nro
 scripts/switch/pack.sh              # dist/switch/SD layout
 ```
 

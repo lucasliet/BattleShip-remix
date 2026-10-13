@@ -1,10 +1,11 @@
 # Building BattleShip
 
 BattleShip builds with CMake and the `libultraship` + `torch` submodules.
-Both the **US** (NTSC-U v1.0, `NALE`) and **JP** (Nintendo All-Star!
-Dairantou Smash Brothers, `NALJ`) versions are supported. The decomp game
+The **US** (NTSC-U v1.0, `NALE`), **JP** (Nintendo All-Star!
+Dairantou Smash Brothers, `NALJ`) and **Remix** (`baserom.remix.z64`)
+versions are supported. The decomp game
 code is region-conditionally compiled, so each version is its own build —
-pick the version at configure time with `-DSSB64_VERSION=us|jp` and use a
+pick the version at configure time with `-DSSB64_VERSION=us|jp|remix` and use a
 separate build directory per version.
 
 The flow is **three commands per version, per platform**: configure,
@@ -19,19 +20,21 @@ of the build (cached afterwards) — there is no separate extract step.
 - A legal ROM at the repo root matching the version you are building:
   - **US:** `baserom.us.z64` — `cmake -DSSB64_VERSION=us` (default)
   - **JP:** `baserom.jp.z64` — `cmake -DSSB64_VERSION=jp`
+  - **Remix:** `baserom.remix.z64` — `cmake -DSSB64_VERSION=remix`
 
   | Version | Game code | SHA‑1 | MD5 |
   |---------|-----------|-------|-----|
   | US (NTSC-U v1.0) | `NALE` | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
   | JP (NALJ v1.0)   | `NALJ` | `4b71f0e01878696733eefa9c80d11c147ecb4984` | `66db457b130d31a286a23d6e4dd9726e` |
 
-  A dump that doesn't match these hashes will not work.
+  A dump that doesn't match these hashes will not work. The Remix dump has
+  no hash row here yet, so verify it against your own source.
 
 `.z64` is shown above; `.n64`/`.v64` are also accepted.
 
 ## Linux / macOS
 
-Replace `<ver>` with `us` or `jp`.
+Replace `<ver>` with `us`, `jp` or `remix`.
 
 ```bash
 # 1. configure
@@ -57,7 +60,7 @@ configure time — use a distinct build dir, e.g. `build-<ver>-release`).
 
 ## Windows
 
-From a Developer PowerShell, replace `<ver>` with `us` or `jp`
+From a Developer PowerShell, replace `<ver>` with `us`, `jp` or `remix`
 (`cmake.exe` is typically at `C:\Program Files\CMake\bin\cmake.exe`):
 
 ```powershell
@@ -78,7 +81,7 @@ it with `-G "Visual Studio 17 2022" -T v143` if a runner has several.
 ## Notes
 
 - Each version's assets and binary live entirely in that version's build
-  directory; US and JP never clobber each other. Run the binary from its
+  directory; US, JP and Remix never clobber each other. Run the binary from its
   build dir (it loads `BattleShip.o2r` relative to the working
   directory).
 - Switching versions is just a different build dir + `-DSSB64_VERSION`;
@@ -160,11 +163,14 @@ downloaded and extracted into `.toolchain/` inside the repository
 scripts/switch/setup-toolchain.sh          # add --offline to use the cache only
 
 # 2. Build the .nro
-scripts/switch/build.sh us                 # -> build-switch/ssb64.nro
+scripts/switch/build.sh us                 # -> build-switch/BattleShip.nro
+VERSION=remix scripts/switch/build.sh      # -> build-switch/BattleShip-Remix.nro
 
 # 3. Package the SD card layout
 scripts/switch/build.sh us && scripts/switch/pack.sh
 #    dist/switch/SD/switch/BattleShip/{BattleShip.nro, *.o2r, ...}
+VERSION=remix scripts/switch/build.sh && VERSION=remix scripts/switch/pack.sh
+#    dist/switch/SD/switch/BattleShip-Remix/{BattleShip-Remix.nro, *.o2r, ...}
 ```
 
 Requirements: macOS (Apple Silicon, Rosetta 2 — devkitPro only ships

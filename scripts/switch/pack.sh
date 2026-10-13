@@ -13,16 +13,18 @@ ROOT=${0:A:h:h:h}
 BUILD_DIR="$ROOT/build-switch"
 SD="$ROOT/dist/switch/SD"
 
-APP="BattleShip"
+VER="${VERSION:-remix}"
+[[ "$VER" == "us" || "$VER" == "jp" || "$VER" == "remix" ]] || { echo "VERSION must be us|jp|remix (got '$VER')" >&2; exit 1; }
+if [[ "$VER" == "remix" ]]; then APP="BattleShip-Remix"; else APP="BattleShip"; fi
 TARGET_DIR="$SD/switch/$APP"
 
-[[ -f "$BUILD_DIR/ssb64.nro" ]] || { echo "ERRO: NRO ausente; rode scripts/switch/build.sh antes." >&2; exit 1; }
+[[ -f "$BUILD_DIR/$APP.nro" ]] || { echo "ERRO: NRO ausente; rode scripts/switch/build.sh antes." >&2; exit 1; }
 
 mkdir -p "$TARGET_DIR"
-cp "$BUILD_DIR/ssb64.nro" "$TARGET_DIR/$APP.nro"
+cp "$BUILD_DIR/$APP.nro" "$TARGET_DIR/$APP.nro"
 
 # Runtime archives generated host-side (user's own ROM). Required on the SD.
-for f in BattleShip.o2r BattleShip.o2r.recipe f3d.o2r; do
+for f in "$APP.o2r" "$APP.o2r.recipe" f3d.o2r; do
   src="$ROOT/build/$f"
   [[ -f "$src" ]] || src="$ROOT/$f"
   if [[ -f "$src" ]]; then cp "$src" "$TARGET_DIR/"; else

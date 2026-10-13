@@ -38,14 +38,14 @@
 $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-# ROM version: us (default) or jp. The JP build is a SEPARATE
+# ROM version: us (default), jp or remix. The JP build is a SEPARATE
 # application — own .exe name, zip, app-data dir — so a user can keep
 # both and they never touch each other's ROM/o2r/saves. $AppName
 # mirrors CMake SSB64_APP_NAME / OUTPUT_NAME. US keeps the historical
 # "BattleShip" identity so existing links / the in-app updater are
 # unaffected.
 $Ver = if ($env:SSB64_VERSION) { $env:SSB64_VERSION } else { "us" }
-if ($Ver -ne "us" -and $Ver -ne "jp") { Write-Error "SSB64_VERSION must be us|jp"; exit 1 }
+if ($Ver -ne "us" -and $Ver -ne "jp" -and $Ver -ne "remix") { Write-Error "SSB64_VERSION must be us|jp|remix"; exit 1 }
 if ($env:SSB64_ENABLE_SCRIPTING) {
     $EnableScripting = $env:SSB64_ENABLE_SCRIPTING -in @("1", "ON", "TRUE", "YES", "on", "true", "yes")
 } else {
@@ -60,7 +60,7 @@ $PackageFlavor = if ($EnableScripting) { "scripting" } else { "standard" }
 $ZipSuffix = "-windows"
 $BuildDir = Join-Path $Root "build-bundle-win-$Ver-$PackageFlavor"
 $DistDir = Join-Path $Root "dist"
-$AppName = if ($Ver -eq "jp") { "BattleShip-JP" } else { "BattleShip" }
+$AppName = switch ($Ver) { "jp" { "BattleShip-JP" } "remix" { "BattleShip-Remix" } default { "BattleShip" } }
 $StageName = $AppName
 $StageDir = Join-Path $DistDir $StageName
 $ZipPath = Join-Path $DistDir "$AppName$ZipSuffix.zip"

@@ -36,17 +36,21 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# ROM version: us (default) or jp. The JP build is a SEPARATE
+# ROM version: us (default), jp or remix. The JP build is a SEPARATE
 # application — own binary name, AppImage, app-data dir — so a user can
 # keep both and they never touch each other's ROM/o2r/saves. APP_NAME
 # mirrors CMake SSB64_APP_NAME / OUTPUT_NAME. US keeps the historical
 # "BattleShip" identity so existing links / the in-app updater are
 # unaffected.
 VER="${SSB64_VERSION:-us}"
-[[ "$VER" == "us" || "$VER" == "jp" ]] || { echo "SSB64_VERSION must be us|jp" >&2; exit 1; }
+[[ "$VER" == "us" || "$VER" == "jp" || "$VER" == "remix" ]] || { echo "SSB64_VERSION must be us|jp|remix" >&2; exit 1; }
 BUILD_DIR="$ROOT/build-bundle-linux-$VER"
 DIST_DIR="$ROOT/dist"
-[[ "$VER" == "jp" ]] && APP_NAME="BattleShip-JP" || APP_NAME="BattleShip"
+case "$VER" in
+    jp) APP_NAME="BattleShip-JP" ;;
+    remix) APP_NAME="BattleShip-Remix" ;;
+    *) APP_NAME="BattleShip" ;;
+esac
 APPDIR="$DIST_DIR/$APP_NAME.AppDir"
 APPIMAGE="$DIST_DIR/${APP_NAME}-x86_64.AppImage"
 JOBS="${JOBS:-$(nproc 2>/dev/null || echo 4)}"

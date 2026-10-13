@@ -55,4 +55,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: battleship-switch
-          path: build-switch/ssb64.nro
+          path: build-switch/BattleShip.nro

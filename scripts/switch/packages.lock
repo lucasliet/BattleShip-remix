@@ -79,6 +79,12 @@
     "sha256": "a2b159f7a483ec114066067a2e991e65a39ea8708c2cbcac7cfe1c9ec31ea8da",
     "version": "0.1.27-1"
    },
+   "switch-libdrm_nouveau": {
+    "depends": [],
+    "filename": "switch-libdrm_nouveau-1.0.1-2-any.pkg.tar.xz",
+    "sha256": "c587c9c3114ad0b49e8b39c2f2c5238fc5c17bca1be1139996a10fce6c3026d8",
+    "version": "1.0.1-2"
+   },
    "switch-libpng": {
     "depends": [],
     "filename": "switch-libpng-1.6.48-1-any.pkg.tar.zst",
@@ -86,7 +92,9 @@
     "version": "1.6.48-1"
    },
    "switch-mesa": {
-    "depends": [],
+    "depends": [
+     "switch-libdrm_nouveau"
+    ],
     "filename": "switch-mesa-20.1.0-5-any.pkg.tar.zst",
     "sha256": "78328415d06bff75af07091243844ded5a63dc4d4520d2c708787b8d80ad386d",
     "version": "20.1.0-5"

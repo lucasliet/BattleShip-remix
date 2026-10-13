@@ -31,7 +31,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# ROM version: us (default) or jp. The JP build is a SEPARATE
+# ROM version: us (default), jp or remix. The JP build is a SEPARATE
 # application — its own binary name, .app, .dmg, app-data dir and
 # bundle id — so a user can keep both installed and they never touch
 # each other's ROM/o2r/saves. APP_NAME mirrors CMake SSB64_APP_NAME /
@@ -39,12 +39,15 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # accordingly. US keeps the historical "BattleShip" identity so existing
 # installs / the in-app updater / release links are unaffected.
 VER="${SSB64_VERSION:-us}"
-[[ "$VER" == "us" || "$VER" == "jp" ]] || { echo "SSB64_VERSION must be us|jp" >&2; exit 1; }
+[[ "$VER" == "us" || "$VER" == "jp" || "$VER" == "remix" ]] || { echo "SSB64_VERSION must be us|jp|remix" >&2; exit 1; }
 BUILD_DIR="$ROOT/build-bundle-$VER"
 DIST_DIR="$ROOT/dist"
 if [[ "$VER" == "jp" ]]; then
     APP_NAME="BattleShip-JP"
     APP_BUNDLE_ID="com.ssb-decomp-re.battleship-jp"
+elif [[ "$VER" == "remix" ]]; then
+    APP_NAME="BattleShip-Remix"
+    APP_BUNDLE_ID="com.ssb-decomp-re.battleship-remix"
 else
     APP_NAME="BattleShip"
     APP_BUNDLE_ID="com.ssb-decomp-re.battleship"
