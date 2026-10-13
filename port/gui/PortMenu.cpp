@@ -357,7 +357,7 @@ void RenderPostProcessDiagnostics(WidgetInfo& /*widget*/) {
     }
 }
 
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__)
 // Shader-pack downloader UI is gated off on Android (the libretro
 // catalog fetch + ZIP-extract pipeline doesn't fit Play Store distro;
 // port/enhancements/ShaderDownloader.cpp is not compiled into libmain.so).
@@ -946,9 +946,11 @@ void PortMenu::AddMenuSettings() {
         .RaceDisable(false)
         .CustomFunction(RenderPostProcessShaderPicker);
 
+#if !defined(__SWITCH__)
     AddWidget(path, "Shader Pack Downloader", WIDGET_CUSTOM)
         .RaceDisable(false)
         .CustomFunction(RenderShaderPackDownloader);
+#endif
 
     AddWidget(path, "Shader Runtime Diagnostics", WIDGET_CUSTOM)
         .RaceDisable(false)
@@ -1708,7 +1710,7 @@ void PortMenu::AddMenuAbout() {
     AddWidget(path, "Zorkats: C Modding Documentation", WIDGET_TEXT);
 
 
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__)
     // BUILT-IN UPDATER — hidden on Android. App updates come through the
     // Play Store on mobile; a curl-driven GitHub-releases updater can't
     // replace a system-managed installation, and the curl shell-out
@@ -1891,7 +1893,7 @@ void PortMenu::DrawElement() {
     }
 
     RenderPostProcessLowResWarnModal();
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__)
     RenderShaderPackModal();
 #endif
 }

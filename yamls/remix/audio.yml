@@ -1,0 +1,93 @@
+# SSB64 Audio ROM Segments
+#
+# Remix ROM (baserom.remix.z64) addresses. Derived from the US yamls by locating
+# the same bytes in the Remix ROM. Entries marked DIFFERENT keep the US size.
+# These are outside the LBReloc file table and must be extracted separately.
+#
+# All segments are contiguous in ROM: each segment's (offset + size) equals the
+# next segment's offset. Sizes verified against ROM_START / ROM_END externs.
+#
+# Byte-swap notes (for Phase 3 — audio synthesis on PC):
+#   - CTL files contain ALBankFile structs with big-endian pointers and fields.
+#     Byte-swap will be handled at load time in the audio bridge, NOT here.
+#   - TBL files are raw ADPCM sample byte-streams — no endianness concern.
+#   - SBK header has big-endian s16/u32 fields; sequence data is byte-stream.
+#   - FGM files use SYAudioPackage format (s32 count + uintptr_t array) —
+#     big-endian fields need swap at load time.
+#   - All entries stay as BLOB; byte-swap is a runtime concern, not extraction.
+#
+# Game code reference: dSYAudioPublicSettings in src/sys/audio.c (lines 91-131)
+
+:config:
+  segments:
+    - [0x00, 0x000000]
+
+# ALSeqFile format: s16 seqCount + ALSeqData[] (u32 offset, s16 len) + sequence byte-stream.
+# Referenced by: dSYAudioPublicSettings.sbk_start (&S1_music_sbk_ROM_START)
+S1_music_sbk:
+  type: SSB64:REMIXAUDIO
+  bank: S1_music_sbk
+  symbol: S1_music_sbk
+  offset: 0x2504750
+
+# ALBankFile format: SFX instrument definitions (ALBank, ALInstrument, ALSound, ALWaveTable, etc.)
+# Pointers inside are big-endian offsets relative to CTL base — need byte-swap at load time.
+# Referenced by: dSYAudioPublicSettings.bank1_start/bank1_end (&B1_sounds1_ctl_ROM_START/END)
+# SSB64:REMIXAUDIO rebuilds the ctl as the Remix runtime image (vanilla bytes + code image + zeros).
+# Output matches tools/remix_dump_audio.py byte for byte.
+B1_sounds1_ctl:
+  type: SSB64:REMIXAUDIO
+  bank: B1_sounds1_ctl
+  symbol: B1_sounds1_ctl
+  offset: 0x252B560
+
+# Raw ADPCM sample data for sound bank 1 (SFX). Byte-stream, no endianness concern.
+# Paired with B1_sounds1_ctl — CTL offsets index into this TBL.
+# SSB64:REMIXAUDIO slices the TBL up to the last sample referenced by the Remix ctl.
+B1_sounds1_tbl:
+  type: SSB64:REMIXAUDIO
+  bank: B1_sounds1_tbl
+  symbol: B1_sounds1_tbl
+  offset: 0x2531C80
+
+# ALBankFile format: music instrument definitions. Same struct layout as sounds1_ctl.
+# Referenced by: dSYAudioPublicSettings.bank2_start/bank2_end (&B1_sounds2_ctl_ROM_START/END)
+B1_sounds2_ctl:
+  type: SSB64:REMIXAUDIO
+  bank: B1_sounds2_ctl
+  symbol: B1_sounds2_ctl
+  offset: 0x26485F0
+
+# Raw ADPCM sample data for sound bank 2 (music). Byte-stream, no endianness concern.
+# Paired with B1_sounds2_ctl — CTL offsets index into this TBL.
+B1_sounds2_tbl:
+  type: SSB64:REMIXAUDIO
+  bank: B1_sounds2_tbl
+  symbol: B1_sounds2_tbl
+  offset: 0x2658190
+
+# SYAudioPackage format: s32 count + uintptr_t data[]. Purpose unknown.
+# Referenced by: dSYAudioPublicSettings.unk50/unk54 (&fgm_unk_ROM_START/END)
+fgm_unk:
+  type: SSB64:REMIXAUDIO
+  bank: fgm_unk
+  symbol: fgm_unk
+  offset: 0x2934370
+
+# SYAudioPackage format: s32 count + uintptr_t data[]. FGM sound-effect lookup table.
+# Referenced by: dSYAudioPublicSettings.fgm_table_start/fgm_table_end (&fgm_tbl_ROM_START/END)
+fgm_tbl:
+  type: SSB64:REMIXAUDIO
+  bank: fgm_tbl
+  symbol: fgm_tbl
+  offset: 0x2934B90
+  # DIFFERENT: 3575 of 11728 bytes differ from vanilla at the same relative offset
+
+# SYAudioPackage format: s32 count + uintptr_t data[]. FGM microcode/parameter data.
+# Referenced by: dSYAudioPublicSettings.fgm_ucode_start/fgm_ucode_end (&fgm_ucd_ROM_START/END)
+fgm_ucd:
+  type: SSB64:REMIXAUDIO
+  bank: fgm_ucd
+  symbol: fgm_ucd
+  offset: 0x2937960
+  # DIFFERENT: 3815 of 19232 bytes differ from vanilla at the same relative offset

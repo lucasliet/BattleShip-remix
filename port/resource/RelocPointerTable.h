@@ -45,6 +45,14 @@ void *portRelocResolvePointerDebug(uint32_t token, const char *file, int line);
 void *portRelocTryResolvePointer(uint32_t token);
 
 /**
+ * Resolver consulted when a value does not decode as a token, before it is
+ * reported as stale. Returns NULL for values it does not own. Used by Remix,
+ * whose own data stores raw 0x804xxxxx RAM addresses where tokens are expected.
+ */
+typedef void *(*PortRelocFallbackResolver)(uint32_t value);
+void portRelocSetFallbackResolver(PortRelocFallbackResolver resolver);
+
+/**
  * Reset the token table (hard wipe — clears all slots, resets free list).
  *
  * Historically called from lbRelocInitSetup() on every scene boundary,

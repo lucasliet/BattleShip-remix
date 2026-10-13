@@ -16,7 +16,9 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <signal.h>
+#ifndef __SWITCH__
 #include <sys/ucontext.h>
+#endif
 #include <unistd.h>
 /*
  * Bionic exposes <execinfo.h> only at API 33+. We target a lower minSdk so
@@ -324,6 +326,7 @@ size_t FormatHex(char *buf, uintptr_t value) {
  *
  * Only async-signal-safe operations are used: write(2), backtrace(3),
  * backtrace_symbols_fd(3), signal(2), raise(3). */
+#ifndef __SWITCH__
 void CrashSignalHandler(int sig, siginfo_t *info, void *ucontext) {
     const char *name = "SIGUNKNOWN";
     switch (sig) {
@@ -367,6 +370,7 @@ void CrashSignalHandler(int sig, siginfo_t *info, void *ucontext) {
     sigaction(sig, &sa, nullptr);
     raise(sig);
 }
+#endif /* !__SWITCH__ */
 #endif
 
 constexpr uint64_t kHangThresholdMs = 3000;
@@ -458,7 +462,7 @@ void WatchdogLoop() {
                          (unsigned long long)yc);
             std::fflush(stderr);
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__SWITCH__)
             /* Ask the main thread to dump its own backtrace via SIGUSR1. One
              * dump per hang is enough — clearing sBacktraceDone lets the next
              * distinct hang dump again. */
@@ -485,7 +489,7 @@ void WatchdogLoop() {
 extern "C" void port_watchdog_init(void) {
     bool expected = false;
     if (!sStarted.compare_exchange_strong(expected, true)) return;
-#if !defined(_WIN32)
+#if !defined(_WIN32) && !defined(__SWITCH__)
     sMainThread = pthread_self();
 
     /* Self-pipe for ProbeReadable (see comment there). Created up front

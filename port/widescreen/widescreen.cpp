@@ -13,8 +13,16 @@ constexpr const char* kWidescreenCVar = "gEnhancements.Widescreen";
 // anchor PRs; Center4_3 is the interim default so nothing distorts.
 constexpr const char* kWidescreen2DPolicyCVar = "gEnhancements.Widescreen2DPolicy";
 
+#ifdef __SWITCH__
+// Hardware test: Center4_3 leaves side bars on battle backdrops and offsets the
+// CSS fighters from the selector, so the Switch stays 4:3 until the Phase 2 anchors land.
+constexpr int kWidescreenDefault = 0;
+#else
+constexpr int kWidescreenDefault = 1;
+#endif
+
 bool widescreen_enabled() {
-    return CVarGetInteger(kWidescreenCVar, 1) != 0;
+    return CVarGetInteger(kWidescreenCVar, kWidescreenDefault) != 0;
 }
 
 int widescreen_2d_policy() {

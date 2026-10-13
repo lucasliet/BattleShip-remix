@@ -41,6 +41,7 @@
 #endif
 #if !defined(__ANDROID__)
 #include "port_window_icon.h"
+#include "widescreen/widescreen.h"
 #endif
 #if defined(__ANDROID__)
 #include <android/api-level.h>  // android_get_device_api_level (audio-driver gate)
@@ -51,8 +52,12 @@
 #endif
 #include "renderdoc_trigger.h"
 #include "port_log.h"
+#include "port_input_script.h"
 #include "fighter_registry.h"
+#include "remix/remix_roster.h"
+#include "remix/remix_ram_image.h"
 #include "focus.h"
+#include "remix/remix_command_hooks.h"
 #include "shaders/fast3d_shader_manifest.h"
 
 #ifndef DISABLE_SCRIPTING
@@ -731,7 +736,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	 * latched here); changing it mid-session triggers an mCurDimensions FB
 	 * resize that's racy and crashes. Document this on the menu tooltip. */
 	if (auto cv = sContext->GetConsoleVariables()) {
-		const bool widescreen_on = cv->GetInteger("gEnhancements.Widescreen", 1) != 0;
+		const bool widescreen_on = port_widescreen_enabled() != 0;
 		cv->SetFloat("gAdvancedResolution.AspectRatioX", 4.0f);
 		cv->SetFloat("gAdvancedResolution.AspectRatioY", 3.0f);
 
@@ -915,7 +920,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 			port_log("SSB64: Port menu attached\n");
 		}
 
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__)
 		// Linux: WMs only show the app icon if SDL_SetWindowIcon is called
 		// on the live window. .ico/.icns paths are baked into the .exe /
 		// .app on Windows / macOS so this is a no-op there. Android pulls
@@ -1076,6 +1081,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	// EventSystemRegisterEvent, which dereferences Context::GetEventSystem()).
 	PortRegisterEvents();
 	ssb64::RegisterFocusListener();
+	RegisterRemixCommandListeners();
 	port_log("SSB64: Engine events registered\n");
 
 #ifndef DISABLE_SCRIPTING
@@ -1173,6 +1179,11 @@ static int PortInitImpl(int argc, char* argv[]) {
 	 * vanilla arrays, so synth fkinds never OOB those tables. */
 	port_fighter_seed_vanilla();
 	port_log("SSB64: fighter registry seeded\n");
+#ifdef REGION_REMIX
+	/* Before the roster: synth motion rows are mapped into the image when built. */
+	remix_ram_image_load();
+	remix_roster_load();
+#endif
 
 #ifndef DISABLE_SCRIPTING
 	/* Mount mods/ entries (folders, .o2r, .zip) into the LUS
@@ -1334,12 +1345,6 @@ int main(int argc, char* argv[]) {
 	signal(SIGILL,  portSignalHandler);
 	signal(SIGSEGV, portSignalHandler);
 	signal(SIGTERM, portSignalHandler);
-#elif !defined(__SWITCH__)
-	// Switch homebrew: libnx exposes signal() but our handler relies on
-	// execinfo backtraces that newlib doesn't ship; a faulting handler on
-	// HOS would replace the system crash reporter's actionable core dump
-	// with a silent exit. Leave signals at their defaults there.
-	signal(SIGSEGV, portSignalHandler);
 #endif
 
 	// Initialize RenderDoc trigger BEFORE PortInit so the RenderDoc DLL
@@ -1439,6 +1444,7 @@ int main(int argc, char* argv[]) {
 	int frame = 0;
 	bool firstRunHintShown = false;
 	while (WindowIsRunning()) {
+		port_input_script_tick();
 		PortPushFrame();
 		frame++;
 

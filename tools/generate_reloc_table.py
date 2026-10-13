@@ -28,6 +28,7 @@ from pathlib import Path
 VERSIONS = {
     "us": {"yaml_dir": "yamls/us", "stem": "RelocFileTable.us", "file_count": 2132},
     "jp": {"yaml_dir": "yamls/jp", "stem": "RelocFileTable.jp", "file_count": 2107},
+    "remix": {"yaml_dir": "yamls/remix", "stem": "RelocFileTable.remix", "file_count": 5455},
 }
 
 # Defaults (US) so the module is importable without selecting a version.

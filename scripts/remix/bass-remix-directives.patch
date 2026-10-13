@@ -1,0 +1,48 @@
+--- a/bass/core/assemble.cpp
++++ b/bass/core/assemble.cpp
+@@ -163,9 +163,45 @@
+     }
+     fp.seek(offset);
+     while(!fp.end() && length--) write(fp.read());
++    return true;
++  }
++
++  //read8|read16|read32 name, filename, offset (big-endian, Smash Remix fork)
++  if(s.match("read8 ?*") || s.match("read16 ?*") || s.match("read32 ?*")) {
++    unsigned width = s.beginsWith("read8 ") ? 1 : s.beginsWith("read16 ") ? 2 : 4;
++    lstring p = s.ltrim<1>(width == 1 ? "read8 " : width == 2 ? "read16 " : "read32 ").qsplit(",").strip();
++    string name = p.take(0);
++    int64_t value = 0;
++    if(!p(0).match("\"*\"")) {
++      //two-argument form reads the target being assembled
++      if(!p.size()) error("missing offset: ", name);
++      unsigned offset = evaluate(p.take(0));
++      if(targetFile.open() && offset + width <= targetFile.size()) {
++        unsigned restore = targetFile.offset();
++        targetFile.seek(offset);
++        for(unsigned n = 0; n < width; n++) value = (value << 8) | targetFile.read();
++        targetFile.seek(restore);
++      }
++      setConstant(name, value);
++      return true;
++    }
++    string filename = {filepath(), p.take(0).trim<1>("\"")};
++    file fp;
++    if(!fp.open(filename, file::mode::read)) error("file not found: ", filename);
++    if(!p.size()) error("missing offset: ", name);
++    unsigned offset = evaluate(p.take(0));
++    if(offset + width > fp.size()) error("offset too large: ", offset);
++    fp.seek(offset);
++    for(unsigned n = 0; n < width; n++) value = (value << 8) | fp.read();
++    setConstant(name, value);
+     return true;
+   }
+ 
++  //export filename, offset, length (Smash Remix fork; output side file not needed for symbols)
++  if(s.match("export ?*")) {
++    return true;
++  }
++
+   //fill length [, with]
+   if(s.match("fill ?*")) {
+     lstring p = s.ltrim<1>("fill ").qsplit(",").strip();

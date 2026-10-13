@@ -69,6 +69,11 @@ enum {
 };
 
 typedef struct FighterDescriptor {
+    /* Vanilla fkind whose decomp tables a synth reuses. Vanilla rows hold their
+     * own fkind. Vanilla-indexed tables (kirby copy[], offset_add[], ...) use it
+     * when fkind >= nFTKindEnumCount. */
+    int                          parent_fkind;
+
     /* Files */
     struct FTData               *ft_data;
 
@@ -225,6 +230,13 @@ void  port_fighter_register(int fkind, const FighterDescriptor *src);
 /* Returns NULL if fkind out of range / unregistered. Field-specific
  * accessors below return safe defaults instead. */
 const FighterDescriptor *port_fighter_descriptor(int fkind);
+
+/* One past the highest registered fkind; rows below it may still be empty. */
+int                         port_fighter_kind_limit(void);
+
+/* Vanilla fkind whose tables a fighter reads. Returns fkind itself for vanilla
+ * fkinds and for unregistered fkinds. */
+int                         port_fighter_parent_fkind(int fkind);
 
 struct FTData              *port_fighter_data(int fkind);
 struct FTStatusDesc        *port_fighter_special_descs(int fkind);

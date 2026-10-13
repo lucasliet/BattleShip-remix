@@ -32,7 +32,11 @@ namespace fs = std::filesystem;
 // from a JP ROM into the JP app-data dir, and never looks at a US ROM /
 // US o2r (and vice versa). US strings are kept verbatim so US behaviour
 // is byte-for-byte unchanged.
-#if defined(REGION_JP)
+#if defined(REGION_REMIX)
+static constexpr const char* kRegion  = "remix";
+static constexpr const char* kRomBase = "baserom.remix";
+static constexpr const char* kRomDesc = "Smash Remix 2.0.1 ROM";
+#elif defined(REGION_JP)
 static constexpr const char* kRegion  = "jp";
 static constexpr const char* kRomBase = "baserom.jp";
 static constexpr const char* kRomDesc = "Japanese (NALJ) \"Nintendo All-Star! "

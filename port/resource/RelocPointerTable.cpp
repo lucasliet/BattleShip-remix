@@ -169,6 +169,13 @@ void *portRelocResolvePointer(uint32_t token)
     return portRelocResolvePointerDebug(token, nullptr, 0);
 }
 
+static PortRelocFallbackResolver sFallbackResolver = nullptr;
+
+void portRelocSetFallbackResolver(PortRelocFallbackResolver resolver)
+{
+    sFallbackResolver = resolver;
+}
+
 void *portRelocResolvePointerDebug(uint32_t token, const char *file, int line)
 {
     if (token == 0) {
@@ -176,6 +183,11 @@ void *portRelocResolvePointerDebug(uint32_t token, const char *file, int line)
     }
     uint32_t index = 0;
     if (!decodeToken(token, &index)) {
+        if (sFallbackResolver != nullptr) {
+            if (void *fallback = sFallbackResolver(token)) {
+                return fallback;
+            }
+        }
         /* Rate-limit: an APPEAR figatree binding pass can resolve the same
          * stale token thousands of times per frame (each joint stream re-
          * checks). spdlog flushes on error so unrate-limited logging stalls

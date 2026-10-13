@@ -1,0 +1,22 @@
+# Smash Remix 2.0.1 data that is not a LBReloc file or an audio segment.
+#
+# Output name is <this file's path under yamls/remix>/<entry key>, so this file yields remix/fighters.
+# The blob is the FTData struct table of the Remix ROM (struct table at ROM 0x92610, 97 fighters).
+# Format: docs/remix/implementation_plan.md ("remix/fighters"). Reference: tools/remix_dump_fighters.py.
+
+:config:
+  segments:
+    - [0x00, 0x000000]
+
+fighters:
+  type: SSB64:REMIXFIGHTERS
+  symbol: remix_fighters
+
+# Remix RAM image: Boot.asm DMAs ROM 0x02C00000 to RAM 0x80400000 (at most 0x400000 bytes).
+# Synth motion scripts and their goto/subroutine targets are raw 0x804xxxxx RAM
+# addresses into it. Read at runtime by port/remix/remix_ram_image.cpp.
+ram_image:
+  type: SSB64:REMIXBLOB
+  offset: 0x2C00000
+  size: 0x400000
+  symbol: remix_ram_image

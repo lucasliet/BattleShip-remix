@@ -16,6 +16,15 @@
  */
 
 #include "renderdoc_trigger.h"
+
+#ifdef __SWITCH__
+// RenderDoc has no libnx build (no dlopen, renderdoc_app.h rejects the
+// platform); keep the init/frame/shutdown contract as no-ops.
+extern "C" void portRenderDocInit(void) {}
+extern "C" void portRenderDocOnFrame(unsigned int) {}
+extern "C" void portRenderDocShutdown(void) {}
+#else
+
 #include "renderdoc_app.h"
 #include "port_log.h"
 
@@ -217,3 +226,5 @@ extern "C" void portRenderDocShutdown(void)
     // init/shutdown symmetry without ifdefs.
     sRdocApi = nullptr;
 }
+
+#endif // __SWITCH__

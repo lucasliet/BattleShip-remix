@@ -29,6 +29,7 @@
 #include "resource/RelocFileTable.h"
 #include "resource/RelocPointerTable.h"
 #include "bridge/lbreloc_byteswap.h"
+#include "bridge/lbreloc_figatree.h"
 
 extern "C" void port_aobj_register_halfswapped_range(void *base, unsigned long size);
 
@@ -258,8 +259,23 @@ extern "C" void port_taskman_evict_arena_caches(const void *base, size_t size)
 	}
 }
 
+static std::vector<bool> sRelocMarkedFigatreeFiles;
+
+extern "C" void portRelocMarkFighterFigatreeFile(unsigned int file_id)
+{
+	if (file_id >= RELOC_FILE_COUNT) {
+		spdlog::warn("portRelocMarkFighterFigatreeFile: file_id {} out of range (count {})", file_id,
+		             RELOC_FILE_COUNT);
+		return;
+	}
+	sRelocMarkedFigatreeFiles.resize(RELOC_FILE_COUNT, false);
+	sRelocMarkedFigatreeFiles[file_id] = true;
+}
+
 static bool portRelocIsFighterFigatreeFile(u32 file_id)
 {
+	if (file_id < sRelocMarkedFigatreeFiles.size() && sRelocMarkedFigatreeFiles[file_id]) return true;
+
 	static const char sFighterAnimPrefix[] = "reloc_animations/FT";
 	static const char sFighterSubmotionPrefix[] = "reloc_submotions/FT";
 	/* SCExplainMain contains arrays of FTKeyEvent u16s (per-player
@@ -708,16 +724,20 @@ extern "C" void portRelocLoadFileFromBytes(
 		u16 next_reloc = (u16)(*slot >> 16);
 		u16 words_num  = (u16)(*slot & 0xFFFF);
 
-		/* An intern target outside the file means this chain word is not a
-		 * chain word (corruption, or the walk already left the rails). */
+		/* Shipped files can carry a well-formed chain word whose target lies
+		 * past the file end: Smash Remix's PEACH_TURNIP_GFX (5144) lists two
+		 * unused face images at word 0x930/0x9B2 of a 0x498-word file. On N64
+		 * that pointer reaches into whatever follows the file in the heap.
+		 * Null the slot and keep walking so the fixups after it still apply;
+		 * the step bound above keeps a corrupt chain contained. */
 		if ((size_t)words_num * sizeof(u32) >= copySize)
 		{
-			spdlog::error("lbReloc bridge: file_id {} intern chain target OOB "
-			              "(slot_off={} target_words={} copySize={}) — stopping walk",
-			              file_id, reloc_intern, words_num, copySize);
-			port_log("SSB64: chainWalk STOP intern-target-oob file=%u slot=0x%x tgt=0x%x size=0x%zx\n",
-			         file_id, (unsigned)reloc_intern, (unsigned)words_num, copySize);
-			break;
+			spdlog::warn("lbReloc bridge: file_id {} intern chain target OOB "
+			             "(slot_off={} target_words={} copySize={}) — slot nulled",
+			             file_id, reloc_intern, words_num, copySize);
+			*slot = 0;
+			reloc_intern = next_reloc;
+			continue;
 		}
 
 		// All reloc chain entries are intra-file pointers.  Tokenize them

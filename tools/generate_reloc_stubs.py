@@ -60,6 +60,8 @@ SRC_DIR = (ROOT / "decomp" / "src") if (ROOT / "decomp" / "src").is_dir() else (
 VERSIONS = {
     "us": {"symbols": "reloc_data_symbols.us.txt", "header": "reloc_data.us.h"},
     "jp": {"symbols": "reloc_data_symbols.jp.txt", "header": "reloc_data.jp.h"},
+    # remix shares the US symbol table and header; its file ids >= 2132 are unnamed and have no symbols here.
+    "remix": {"symbols": "reloc_data_symbols.us.txt", "header": "reloc_data.us.h"},
 }
 
 # Defaults (US) so the module is importable without selecting a version.

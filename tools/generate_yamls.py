@@ -4,7 +4,7 @@ generate_yamls.py — Reads the SSB64 ROM's LBReloc file table and generates
 Torch YAML extraction configs for every relocatable file as BLOBs.
 
 Usage:
-    python tools/generate_yamls.py [--version {us,jp}] [path/to/baserom.z64]
+    python tools/generate_yamls.py [--version {us,jp,remix}] [path/to/baserom.z64]
 
 With no arguments: version=us, ROM=baserom.us.z64, output=yamls/us
 (the legacy contract — CMake invokes it argument-less, US output is
@@ -38,7 +38,12 @@ RELOC_TABLE_ENTRY_SIZE = 12  # bytes
 VERSIONS = {
     "us": {"reloc_table_rom_addr": 0x001AC870, "reloc_file_count": 2132},
     "jp": {"reloc_table_rom_addr": 0x001ACAF0, "reloc_file_count": 2107},
+    "remix": {"reloc_table_rom_addr": 0x001AC870, "reloc_file_count": 5455},
 }
+
+# Remix keeps the vanilla US ids for 0..2131 (2065 byte-identical, 67 edited),
+# so it names files from the US header and appends new ids as file_<N>.
+HEADER_VERSION = {"us": "us", "jp": "jp", "remix": "us"}
 
 # Set by select_version() from the chosen --version; default to US so the
 # module-level constants stay valid for any code importing this module.
@@ -558,7 +563,7 @@ def main():
 
     # Per-version generated header (reloc_data.us.h / reloc_data.jp.h);
     # the decomp's selector shim picks the right one by REGION_* at compile.
-    header_name = f"reloc_data.{version}.h"
+    header_name = f"reloc_data.{HEADER_VERSION[version]}.h"
     header_path = str(repo_root / "include" / header_name)
     if not os.path.isfile(header_path):
         print(f"Error: {header_name} not found at {header_path}")

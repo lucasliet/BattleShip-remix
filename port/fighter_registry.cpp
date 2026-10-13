@@ -49,6 +49,21 @@ const FighterDescriptor *port_fighter_descriptor(int fkind)
     return get(fkind);
 }
 
+int port_fighter_kind_limit(void)
+{
+    return static_cast<int>(sRegistry.size());
+}
+
+/* Mirrors PORT_VANILLA_FKIND_COUNT in decomp/src/ft/ftport.c. */
+static constexpr int PORT_VANILLA_FKIND_COUNT_MIRROR = 27;
+
+int port_fighter_parent_fkind(int fkind)
+{
+    if (fkind < PORT_VANILLA_FKIND_COUNT_MIRROR) return fkind;
+    if (const auto *r = get(fkind)) return r->parent_fkind;
+    return fkind;
+}
+
 struct FTData *port_fighter_data(int fkind)
 {
     if (const auto *r = get(fkind)) return r->ft_data;

@@ -117,10 +117,10 @@ option(SSB64_STAGE_CYCLE_DEMO "Boot directly into attract-demo stage cycle for r
 # compiled (#if REGION_US / REGION_JP), so US and JP are separate builds —
 # use a dedicated build dir per version. The user still supplies their own
 # ROM (baserom.<version>.{z64,n64,v64}); no assets are shipped.
-set(SSB64_VERSION "us" CACHE STRING "ROM version to build: us or jp")
-set_property(CACHE SSB64_VERSION PROPERTY STRINGS us jp)
-if(NOT SSB64_VERSION MATCHES "^(us|jp)$")
-    message(FATAL_ERROR "SSB64_VERSION must be 'us' or 'jp' (got '${SSB64_VERSION}')")
+set(SSB64_VERSION "remix" CACHE STRING "ROM version to build: remix, us or jp")
+set_property(CACHE SSB64_VERSION PROPERTY STRINGS remix us jp)
+if(NOT SSB64_VERSION MATCHES "^(remix|us|jp)$")
+    message(FATAL_ERROR "SSB64_VERSION must be 'remix', 'us' or 'jp' (got '${SSB64_VERSION}')")
 endif()
 # Android ships US-only. The Android build pipeline (Gradle asset staging,
 # touch overlay, JNI bridges) has only ever been tested against the US
@@ -136,6 +136,12 @@ if (BATTLESHIP_UWP AND NOT SSB64_VERSION STREQUAL "us")
     message(FATAL_ERROR "The UWP package supports the US ROM only")
 endif()
 string(TOUPPER "${SSB64_VERSION}" SSB64_VERSION_UC)
+# Text assets (credits) that Remix inherits from the US release.
+if(SSB64_VERSION STREQUAL "remix")
+    set(SSB64_TEXT_VERSION "us")
+else()
+    set(SSB64_TEXT_VERSION "${SSB64_VERSION}")
+endif()
 message(STATUS "SSB64 ROM version: ${SSB64_VERSION}")
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
@@ -333,10 +339,10 @@ add_custom_target(GenerateRelocArtifacts
 
 add_custom_target(GenerateCreditsAssets
     BYPRODUCTS ${SSB64_CREDITS_GENERATED_FILES}
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py staff.credits.${SSB64_VERSION}.txt
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py titles.credits.${SSB64_VERSION}.txt
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py -paragraphFont -multiline info.credits.${SSB64_VERSION}.txt
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py -paragraphFont companies.credits.${SSB64_VERSION}.txt
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py staff.credits.${SSB64_TEXT_VERSION}.txt
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py titles.credits.${SSB64_TEXT_VERSION}.txt
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py -paragraphFont -multiline info.credits.${SSB64_TEXT_VERSION}.txt
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py -paragraphFont companies.credits.${SSB64_TEXT_VERSION}.txt
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decomp/src/credits
     COMMENT "Encoding credits text assets (${SSB64_VERSION})"
 )
@@ -534,7 +540,7 @@ file(GLOB_RECURSE SSB64_SRC_PORT CONFIGURE_DEPENDS "port/*.cpp" "port/*.c" "port
 list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/stubs/")
 # RelocFileTable.{us,jp}.cpp both define gRelocFileTable — compile only the
 # selected version's table (the rest are siblings for the other version).
-list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/resource/RelocFileTable\\.(us|jp)\\.cpp$")
+list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/resource/RelocFileTable\\.(us|jp|remix)\\.cpp$")
 list(APPEND SSB64_SRC_PORT
     ${CMAKE_CURRENT_SOURCE_DIR}/port/resource/RelocFileTable.${SSB64_VERSION}.cpp)
 # coroutine_test.cpp has its own main(); only built standalone when
@@ -646,6 +652,8 @@ endif()
 # the app-data directory), and the per-platform package scripts.
 if(SSB64_VERSION STREQUAL "jp")
     set(SSB64_APP_NAME "BattleShip-JP")
+elseif(SSB64_VERSION STREQUAL "remix")
+    set(SSB64_APP_NAME "BattleShip-Remix")
 else()
     set(SSB64_APP_NAME "BattleShip")
 endif()
@@ -736,7 +744,12 @@ endif()
 # nuances on shared assets), so a US-built pack would silently miss on JP
 # and no JP-only pack has been authored. Drop port/hires/ from the JP build
 # entirely and gate the port.cpp / PortMenu.cpp integration on PORT_HIRES_ENABLED.
-if(SSB64_VERSION STREQUAL "us")
+# Remix is a US-region game: every `#if REGION_US` decomp branch must stay
+# active; REGION_REMIX only selects the file table and asset pipeline.
+if(SSB64_VERSION STREQUAL "remix")
+    list(APPEND SSB64_COMPILE_DEFS REGION_US=1 VERSION_US=1)
+endif()
+if(SSB64_VERSION MATCHES "^(us|remix)$")
     list(APPEND SSB64_COMPILE_DEFS PORT_HIRES_ENABLED=1)
 else()
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/hires/")
@@ -1008,10 +1021,19 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
     add_dependencies(${PROJECT_NAME} libultraship)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
-    # SDL2/glad come from the devkitPro portlibs via libultraship's
-    # switch.cmake; the exe needs nothing beyond the engine itself.
+    # SDL2/glad come from the devkitPro portlibs. libultraship's switch.cmake
+    # only exposes those includes to ImGui (PRIVATE), so port/ TUs that pull
+    # ship/audio/SDLAudioPlayer.h or imgui's imconfig.h need them directly.
     add_dependencies(${PROJECT_NAME} libultraship)
+    target_sources(${PROJECT_NAME} PRIVATE port/coroutine_aarch64.S)
+    target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE
+        ${DEVKITPRO}/portlibs/switch/include
+        ${DEVKITPRO}/portlibs/switch/include/SDL2)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship)
+    # newlib's libg.a already defines __assert(file, line, expr); the decomp's
+    # IDO-style __assert(expr, file, line) stub in n64_stubs.c would collide
+    # with it at link time, so rename the decomp one.
+    target_compile_definitions(ssb64_game PRIVATE __assert=ssb64_ido_assert)
 elseif(BATTLESHIP_UWP)
     add_dependencies(${PROJECT_NAME} libultraship TorchExternal)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship SDL2 LIBUWP GLFW3)

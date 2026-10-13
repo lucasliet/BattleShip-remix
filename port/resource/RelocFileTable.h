@@ -12,7 +12,9 @@
  * SSB64_VERSION).
  */
 
-#if defined(REGION_US)
+#if defined(REGION_REMIX)
+#include "RelocFileTable.remix.h"
+#elif defined(REGION_US)
 #include "RelocFileTable.us.h"
 #elif defined(REGION_JP)
 #include "RelocFileTable.jp.h"

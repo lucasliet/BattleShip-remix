@@ -31,3 +31,16 @@ e2929e10fccc0aa84e5776227e798abc07cedabf:
       headers: include/assets
       code: src/assets
       modding: src/assets
+
+13716381ed5e29be2606e0f4724b18fd00789d04:
+  name: "Smash Remix 2.0.1"
+  path: yamls/remix
+  config:
+    gbi: F3DEX2
+    sort: OFFSET
+    logging: INFO
+    output:
+      binary: BattleShip.o2r
+      headers: include/assets
+      code: src/assets
+      modding: src/assets

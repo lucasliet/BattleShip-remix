@@ -322,12 +322,17 @@ class BankParser {
         return it != cache.end() ? it->second : nullptr;
     }
 
+    // Remix banks reference offsets beyond the vanilla-sized CTL blob; reject
+    // anything that would read outside it instead of faulting.
+    bool fits(u32 off, size_t need) const { return (size_t)off + need <= ctlSize; }
+
 public:
     BankParser(const u8* c, size_t cs, u8* t, ALHeap* h)
         : ctl(c), ctlSize(cs), tbl(t), heap(h) {}
 
     ALEnvelope* parseEnvelope(u32 off) {
         if (auto* p = (ALEnvelope*)lookup(off)) return p;
+        if (!fits(off, 14)) return nullptr;
         const u8* r = ctl + off;
         auto* e = (ALEnvelope*)alHeapAlloc(heap, 1, sizeof(ALEnvelope));
         e->attackTime   = readBE32s(r + 0);
@@ -340,6 +345,7 @@ public:
 
     ALKeyMap* parseKeyMap(u32 off) {
         if (auto* p = (ALKeyMap*)lookup(off)) return p;
+        if (!fits(off, 6)) return nullptr;
         const u8* r = ctl + off;
         auto* k = (ALKeyMap*)alHeapAlloc(heap, 1, sizeof(ALKeyMap));
         k->velocityMin = r[0];
@@ -353,6 +359,7 @@ public:
 
     ALADPCMBook* parseBook(u32 off) {
         if (auto* p = (ALADPCMBook*)lookup(off)) return p;
+        if (!fits(off, 8)) return nullptr;
         const u8* r = ctl + off;
         s32 order = readBE32s(r + 0);
         s32 npred = readBE32s(r + 4);
@@ -363,6 +370,7 @@ public:
             return nullptr;
         }
         s32 bookLen = order * npred * 16; // 8 entries per predictor-order pair, each s16
+        if (!fits(off, 8 + bookLen * sizeof(s16))) return nullptr;
         size_t totalSize = 8 + bookLen * (s32)sizeof(s16); // 8 for order+npred header
         auto* b = (ALADPCMBook*)alHeapAlloc(heap, 1, (s32)totalSize);
         b->order = order;
@@ -375,6 +383,7 @@ public:
 
     ALADPCMloop* parseADPCMLoop(u32 off) {
         if (auto* p = (ALADPCMloop*)lookup(off)) return p;
+        if (!fits(off, 44)) return nullptr;
         const u8* r = ctl + off;
         auto* l = (ALADPCMloop*)alHeapAlloc(heap, 1, sizeof(ALADPCMloop));
         l->start = readBE32(r + 0);
@@ -389,6 +398,7 @@ public:
 
     ALRawLoop* parseRawLoop(u32 off) {
         if (auto* p = (ALRawLoop*)lookup(off)) return p;
+        if (!fits(off, 12)) return nullptr;
         const u8* r = ctl + off;
         auto* l = (ALRawLoop*)alHeapAlloc(heap, 1, sizeof(ALRawLoop));
         l->start = readBE32(r + 0);
@@ -399,6 +409,7 @@ public:
 
     ALWaveTable* parseWaveTable(u32 off) {
         if (auto* p = (ALWaveTable*)lookup(off)) return p;
+        if (!fits(off, 20)) return nullptr;
         const u8* r = ctl + off;
         auto* w = (ALWaveTable*)alHeapAlloc(heap, 1, sizeof(ALWaveTable));
         u32 baseOff = readBE32(r + 0);
@@ -421,6 +432,7 @@ public:
 
     ALSound* parseSound(u32 off) {
         if (auto* p = (ALSound*)lookup(off)) return p;
+        if (!fits(off, 16)) return nullptr;
         const u8* r = ctl + off;
         auto* s = (ALSound*)alHeapAlloc(heap, 1, sizeof(ALSound));
         u32 envOff = readBE32(r + 0);
@@ -437,11 +449,17 @@ public:
 
     ALInstrument* parseInstrument(u32 off) {
         if (auto* p = (ALInstrument*)lookup(off)) return p;
+        if (!fits(off, 16)) return nullptr;
         const u8* r = ctl + off;
         s16 soundCount = readBE16s(r + 14);
         // Variable-length: base struct + soundCount pointer slots
         size_t allocSize = sizeof(ALInstrument) + (soundCount > 1 ? (soundCount - 1) * sizeof(ALSound*) : 0);
         auto* inst = (ALInstrument*)alHeapAlloc(heap, 1, (s32)allocSize);
+        if (!inst) {
+            spdlog::error("audio_bridge: heap exhausted parsing instrument at 0x{:x} (soundCount={}, {} bytes, ctl {} bytes)",
+                          off, soundCount, allocSize, ctlSize);
+            return nullptr;
+        }
         inst->volume    = r[0];
         inst->pan       = r[1];
         inst->priority  = r[2];
@@ -457,7 +475,7 @@ public:
         inst->bendRange = readBE16s(r + 12);
         inst->soundCount = soundCount;
         for (s16 i = 0; i < soundCount; i++) {
-            u32 sndOff = readBE32(r + 16 + i * 4);
+            u32 sndOff = fits(off, 16 + (i + 1) * 4) ? readBE32(r + 16 + i * 4) : 0;
             inst->soundArray[i] = sndOff ? parseSound(sndOff) : NULL;
         }
         return cached(off, inst);
@@ -465,6 +483,7 @@ public:
 
     ALBank* parseBank(u32 off) {
         if (auto* p = (ALBank*)lookup(off)) return p;
+        if (!fits(off, 12)) return nullptr;
         const u8* r = ctl + off;
         s16 instCount = readBE16s(r + 0);
         size_t allocSize = sizeof(ALBank) + (instCount > 1 ? (instCount - 1) * sizeof(ALInstrument*) : 0);
@@ -476,7 +495,7 @@ public:
         u32 percOff = readBE32(r + 8);
         bank->percussion = percOff ? parseInstrument(percOff) : NULL;
         for (s16 i = 0; i < instCount; i++) {
-            u32 instOff = readBE32(r + 12 + i * 4);
+            u32 instOff = fits(off, 12 + (i + 1) * 4) ? readBE32(r + 12 + i * 4) : 0;
             bank->instArray[i] = instOff ? parseInstrument(instOff) : NULL;
         }
         return cached(off, bank);
@@ -486,6 +505,7 @@ public:
         s16 bankCount = readBE16s(ctl + 2);
         size_t allocSize = sizeof(ALBankFile) + (bankCount > 1 ? (bankCount - 1) * sizeof(ALBank*) : 0);
         auto* bf = (ALBankFile*)alHeapAlloc(heap, 1, (s32)allocSize);
+        if (!bf) return nullptr;
         bf->revision  = readBE16s(ctl + 0);
         bf->bankCount = bankCount;
         for (s16 i = 0; i < bankCount; i++) {
@@ -509,9 +529,9 @@ static ALSeqFile* parseSeqFile(const u8* sbk, size_t sbkSize, ALHeap* heap) {
     sf->revision = readBE16s(sbk + 0);
     sf->seqCount = seqCount;
 
-    // Copy the raw SBK data into heap so sequence pointers remain valid
-    u8* sbkCopy = (u8*)alHeapAlloc(heap, 1, (s32)sbkSize);
-    memcpy(sbkCopy, sbk, sbkSize);
+    // Point sequences straight into the SBK blob: it outlives the audio session
+    // (music_sbk is file-scope) and Remix's 14.7 MB bank does not fit the heap.
+    u8* sbkCopy = const_cast<u8*>(sbk);
 
     for (s16 i = 0; i < seqCount; i++) {
         u32 off = readBE32(sbk + 4 + i * 8);
@@ -593,6 +613,11 @@ extern "C" void portAudioLoadAssets(void)
     {
         BankParser parser(sounds1_ctl.data, sounds1_ctl.size, tbl1, &sSYAudioHeap);
         ALBankFile* bf = parser.parseBankFile();
+        if (!bf || !bf->bankArray[0]) {
+            spdlog::error("audio_bridge: sounds1_ctl bank is outside the {}-byte CTL blob (Remix relocates it); audio disabled",
+                          sounds1_ctl.size);
+            return;
+        }
         sSYAudioSequenceBank2 = bf->bankArray[0];
         spdlog::info("audio_bridge: parsed sounds1_ctl → sSYAudioSequenceBank2 (music): {} instruments, rate={}",
                      sSYAudioSequenceBank2->instCount, sSYAudioSequenceBank2->sampleRate);
@@ -600,6 +625,11 @@ extern "C" void portAudioLoadAssets(void)
     {
         BankParser parser(sounds2_ctl.data, sounds2_ctl.size, tbl2, &sSYAudioHeap);
         ALBankFile* bf = parser.parseBankFile();
+        if (!bf || !bf->bankArray[0]) {
+            spdlog::error("audio_bridge: sounds2_ctl bank is outside the {}-byte CTL blob (Remix relocates it); audio disabled",
+                          sounds2_ctl.size);
+            return;
+        }
         sSYAudioSequenceBank1 = bf->bankArray[0];
         spdlog::info("audio_bridge: parsed sounds2_ctl → sSYAudioSequenceBank1 (SFX): {} instruments, rate={}",
                      sSYAudioSequenceBank1->instCount, sSYAudioSequenceBank1->sampleRate);

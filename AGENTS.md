@@ -1,4 +1,4 @@
-# SSB64 PC Port — Claude Session Context
+# SSB64 PC Port — Agent Context
 
 PC port of Super Smash Bros. 64 built from the complete decompilation at github.com/VetriTheRetri/ssb-decomp-re. Target integration: libultraship (LUS) + Torch asset pipeline.
 
@@ -41,6 +41,22 @@ Known-good check from 2026-06-01: issue #209 and its comments were accessible
 through both the connector and `gh --json`; #209 had no comments at that time.
 
 ---
+
+## Self-contained toolchain — nothing on the system
+
+Every dependency, toolchain and generated tool lives under `.toolchain/` (git-ignored, portable with the repo). Agents MUST NOT:
+
+- run `brew install`, `port install`, `pip install` (system/user site), `npm -g`, `sudo`, or write to `/opt`, `/usr/local`, `~/.cache`, `~/.cmake`, shell profiles;
+- point CMake at Homebrew/MacPorts prefixes. Configure with `-DCMAKE_IGNORE_PREFIX_PATH="/opt/homebrew;/usr/local"` and `-DCMAKE_PREFIX_PATH=$PWD/.toolchain/host/deps`;
+- ask the user to install a package on their machine. If a dependency is missing, add it to a setup script instead.
+
+How to get things:
+
+- Switch (devkitA64, portlibs, cmake, ninja): `scripts/switch/setup-toolchain.sh`, then `source .toolchain/env.sh`.
+- macOS desktop libs (libzip, nlohmann_json, tinyxml2, spdlog; SDL2/GLEW already cached): `scripts/macos/setup-host-deps.sh`. It pins every tarball by sha256 and installs into `.toolchain/host/deps`.
+- Python: `uv` only, venv in `.toolchain/host/venv`.
+
+A new dependency means: pinned URL + sha256 in the setup script, installed under `.toolchain/`, idempotent, no system side effects. Downloads need network, so run them outside the Bash sandbox only for that command.
 
 ## Parallel Sessions — Worktree Workflow
 
