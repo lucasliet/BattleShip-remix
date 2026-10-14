@@ -1,7 +1,7 @@
 # Remix standard items: ports, spawn extension and generator fix (2026-10-14)
 
-Step 3 of the Remix roadmap. Status: 13 of the 19 standard items are ported and compile; one (Cloaking Device) was
-verified in a match; the other twelve, the hooks below and the item switch menu are still open.
+Step 3 of the Remix roadmap. Status: 13 of the 19 standard items are ported, spawn in a match and have their vanilla hooks plus the VS switch menu;
+only the Cloaking Device was verified through pickup and effect.
 
 ## What exists
 
@@ -19,18 +19,25 @@ verified in a match; the other twelve, the hooks below and the item switch menu 
 
 ## Verified
 
-Cloaking Device (kind 45), Mario vs Mario on Dream Land: the item spawns with the swirl, falls, lands on the platform,
-the CPU picks it up and turns translucent. No crash.
+- Cloaking Device (kind 45): spawn, fall, landing, pickup, translucency, and damage immunity in a 4-CPU FFA.
+- All 14 standard kinds (45 to 55, 57, 64, 65) spawn and fall in a VS match under `SSB64_VS_ITEMS=5 SSB64_REMIX_FORCE_ITEM=<kind>`
+  with no abort or assert in `ssb64.log` (the forced-item spawn wait is 60 ticks). Pickup and effect were exercised only
+  for Cloaking Device; the others are spawn-verified.
+- Hooks landed in decomp `5af34d19d` (all `#ifdef REGION_REMIX`, vanilla intact under `#else`): Cloaking immunity and
+  scene-boundary clear (`itRemixClearActiveItems` in `scManagerRunLoop`), Stopwatch hitlag and Speed process hook,
+  Golden Gun shoot path, shared Super/Poison Mushroom state (the Poison pickup SIGBUS is gone), Basketball bounce/FGM/hitlag,
+  Franklin Badge keep-reflect and immunities.
+- VS item switch menu: R pages, L toggle-all, icon strip as a Sprite, save/restore of `gITRemixExtendedToggles`, zeroing in
+  the comp ruleset and Training, netplay (peer exchange, replay metadata, settings hash; old replays are rejected).
 
 ## Open
 
-- Test the other twelve items the same way (`SSB64_REMIX_FORCE_ITEM`), then Training/taunt/match-begin spawns.
-- Vanilla hooks recorded by the workers in `build/remixasm/notes/item_<Name>.md` (not versioned): scene-end clear calls
-  (`itRemix*Clear*`), Cloaking Device damage immunity and shadow hide, Franklin Badge keep/immunity, Golden Gun
-  projectile, Super Mushroom touch continuation, Stopwatch hitlag and Speed check, Basketball bounce/hitlag hooks.
-- Super Mushroom and Poison Mushroom keep separate state; Remix shares `spawning_shrooms`/`player_shrooms`.
-- Item switch menu (pages, L toggle-all, save), container toggles, Pokémon selection, Marina `prevent_item_despawn_`.
-- Hazard items (0x3A to 0x3F) depend on the stage step. `Size`, GFX and Speed subsystems are REMIX-TODO.
+- Golden Gun projectile (patches 1 and 3), Franklin Badge reflect wiring in the Reflect subsystem.
+- Pickup/effect verification of the 13 items other than Cloaking Device; Training item menu/HUD, taunt spawn,
+  match-begin item, Pokemon selection, container toggles, Marina `prevent_item_despawn_`.
+- Hazard items (0x3A to 0x3F) depend on the stage step. `Size`, GFX, CharEnvColor, Reflect and Speed subsystems are
+  REMIX-TODO (map in `docs/remix/implementation_plan.md`).
+- Metal `nextDrawable` SIGSEGV flakes in the headless harness (macOS, not game code); a retry passes.
 
 ## Generator bug: `tools/gen_remix_actions.py` wrote garbage into `ftremixvanillaprocs.c`
 

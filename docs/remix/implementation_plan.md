@@ -69,3 +69,31 @@ código em `RAM - 0x7D800000`, zeros no meio). Assim o `audio_bridge.cpp` contin
 - Dados derivados do ROM nunca vão para arquivos versionados (só para o `.o2r` e `build/`).
 - Dependências só dentro de `.toolchain/` (ver `AGENTS.md`).
 - Build com `-j 4`, caminhos absolutos no `cmake --build`.
+
+## Onda de subsystems (mapa 2026-10-14, pós-etapa de itens)
+
+Ordem por impacto e dependências (detalhes por hook em `gameplay_a_l.md` e
+`gameplay_m_z.md`):
+
+1. **Size** (`Size.asm`, 73 sites) — tabelas por porta + accessores em novo
+   `ftremixsize.c` (padrão `ftremixfields.h`); fases: (a) tabelas + top joint/ECB +
+   câmera, (b) física/pesos, (c) cosméticos gfx. Desbloqueia 6+ consumidores já
+   stubbados com `1.0F` (supermushroom, lightning, boomerang, crashdsp, banjousp,
+   goemonusp). 4 sites `adjust_ecb_display_` + 1 `fix_size_` não mapeados — skip
+   inicial documentado.
+2. **GFX + GFXRoutine** — primeiro o pipeline de dados (`src/gfx/*.bin` via factory
+   do Torch no `lbParticle`), depois as 51 rotinas colanim (ids ≥0x56) em
+   `dGMColScriptsDescs` + 3 hooks triviais + `port_override` em novo `ftremixgfx.c`.
+   GFXRoutine morto sem os dados do GFX.
+3. **CharEnvColor** — 3 tabelas + `ftRemixEnvColorGetOverride(port)` em novo
+   `ftremixenvcolor.c`, 2 hooks nos getters de env color; os 40 display-lists são
+   cirurgia GBI — registrar como desvio (override de material no draw path do port).
+   Pré-requisito do fade/flicker do CloakingDevice.
+4. **Reflect** — nibbles CUSTOM no hitbox de reflect + dispatch em novo
+   `ftremixreflect.c` (Franklin=reflete sem turnaround; Marina/Dedede=absorve).
+   `itRemixFranklinBadgeReflectInitial` já escrito, aguarda wiring. Site
+   0x800E663C não mapeado; hooks de CPU (ftcomputer) ficam para a onda de AI.
+5. **PokemonAnnouncer** — `ftremixannouncer.c` + ~30 inserções mecânicas; validar
+   FGM ids no banco portado antes. Paralelo-safe.
+6. **AI** — maior corpo, menor urgência; depende de infra de toggles (nada portado).
+   Resolver matches duvidosos por endereço RAM contra `vanilla_funcs.txt`.
