@@ -314,3 +314,35 @@ Default values are listed as CE / TE / NE / JP (`OS.TRUE`=1). INT ranges are max
 - `src/Stages.asm`: stage select grid, random roulette
 - `src/Gallery.asm`, `src/CharacterDataScreen.asm`, `src/VsStats.asm`, `src/Credits.asm`, `src/Transitions.asm`, `src/Japan.asm`, `src/Random/Random.asm`, `src/Boot.asm`
 - `src/Global.asm:58-122`: screen IDs
+
+## VS item switch extension (ported 2026-10-14)
+
+Port of `Item.asm extend_item_switch_bitmask_` + `item_switch_cursor_` on the vanilla
+VS Options Item Switch screen (`decomp/src/mn/mnvsmode/mnvsitemswitch.c`, scene 0x0B):
+
+- **Pagination (R)**: page 0 = vanilla 15 rows; page 1 = the 13 Remix standard items.
+  Page flip ejects/rebuilds the grid (vanilla) or the custom strip GObj, clamps the
+  cursor to the page's row count and refreshes the toggle sprites.
+- **Toggle all (L)**: flips the page's first toggle and writes it to every row of the
+  page (15 vanilla / 13 custom), as `handle_r_l_._toggle_items_on_off`.
+- **Custom item storage**: rows 1-13 of page 1 read/write `item_toggles` bits
+  `nITKindCommonEnd+1+n` for n<12 and `gITRemixExtendedToggles` bit n-12 for n==12
+  (`GetItemSettings`/`SetItemSettings`). Any custom on forces the container/rate
+  bits exactly like the vanilla all-on rule. L/R physical buttons freed by trimming
+  L_TRIG/R_TRIG from the two input masks.
+- **Icon strip**: offset 0xBD70 of the decompressed Remix MNVSItemSwitch file is a
+  complete 68-byte `Sprite` (112x165, 3 bitmaps), drawn with the same
+  `lbCommonMakeSObjForGObj` path and position as the vanilla grid. The strip is
+  remix-variant only (us/jp o2r lack it).
+- **Lifecycle**: `itRemixSaveExtendedToggles` (menu exit) / `itRemixRestoreExtendedToggles`
+  (CSS entry, Render.asm `_css`); extended mask zeroed with `item_toggles` in the comp
+  ruleset no-items override, training mode, and reset to default by `lbBackupCorrectErrors`.
+  Vanilla 1P needs no code: gkind rows 0x13..0x1C are zero in the Remix rate table.
+- **Netplay**: `gITRemixExtendedToggles` is serialized next to `item_toggles`
+  (peer exchange + replay metadata + settings hash); replays recorded before the
+  field are rejected by the metadata-size gate.
+
+Verified headless: page flip, L toggle-all (ON→OFF and sprite refresh), return to
+page 0, no rendering anomalies. Known cosmetic gaps: no R/L legend text (Remix draws
+it in `item_switch_setup_`), subtitle on page 1 still shows vanilla row names
+(faithful — Remix does not patch the subtitle either).
