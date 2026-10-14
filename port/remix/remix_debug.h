@@ -26,6 +26,18 @@ int remix_debug_demo_fkind(int slot, int fallback);
  */
 int remix_debug_vs_fkind(int slot);
 
+/**
+ * Returns the SSB64_VS_ITEMS item appearance rate (0 = most frequent) that turns
+ * every item switch on in the SSB64_VS_FKINDS shortcut, or -1 when unset.
+ */
+int remix_debug_vs_item_rate(void);
+
+/**
+ * Returns the SSB64_REMIX_FORCE_ITEM kind that replaces every item the stage
+ * spawner makes, or -1 when unset.
+ */
+int remix_debug_force_item_kind(void);
+
 #ifdef __cplusplus
 }
 #endif

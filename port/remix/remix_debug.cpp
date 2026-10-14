@@ -63,3 +63,21 @@ int remix_debug_vs_fkind(int slot)
 {
     return readSlotFkind("SSB64_VS_FKINDS", slot);
 }
+
+int remix_debug_vs_item_rate(void)
+{
+    const char *text = std::getenv("SSB64_VS_ITEMS");
+    if (text == nullptr || text[0] == '\0') {
+        return -1;
+    }
+    return std::atoi(text);
+}
+
+int remix_debug_force_item_kind(void)
+{
+    const char *text = std::getenv("SSB64_REMIX_FORCE_ITEM");
+    if (text == nullptr || text[0] == '\0') {
+        return -1;
+    }
+    return std::atoi(text);
+}

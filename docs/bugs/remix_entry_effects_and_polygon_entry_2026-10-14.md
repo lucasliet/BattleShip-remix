@@ -58,12 +58,16 @@ Slippy's `wolfen_entry_3` branch only repeats the Fox offsets with his own copy 
 by the fighter's size multiplier; Wolf's Arwing uses the vanilla update) and the `Size` entry-scale hooks (Blue Falcon,
 Kirby star, Yoshi egg).
 
-**Open: Wolf is visible during his entry.** With the Wolfen in place, Wolf stands crouched on the ground the whole time
-the Arwing flies in, while Fox, Falco, Peppy and Slippy are not visible until they land. The status setup is identical
-to Fox's (status 0xDF, motion 198, flags 0x40000008, `bak=0 upd=0x40000000`, hidden part 1 = TransN, `transn` stays 0 in
-both), so the difference is in Wolf's own appear animation (`File.WOLF_APPEAR` 0xC90, `edit_action_parameters(WOLF, 0xDF, ...)`
-swaps only the animation file) or in how the port reads it. Same family as the polygon crouch below; not verified against
-the cartridge.
+**Wolf's entry timing is authored data, not a port bug.** Wolf is visible and crouched while the Wolfen flies in, whereas
+Fox, Falco, Peppy and Slippy are hidden until they land. A joint dump during the appear status (frames 1..105 of the
+animation) shows why: the figatree walk binds every track to the right joint (same null slots as Fox's, the fixed
+`dl == NULL` joints), and Fox hides his body with a scale-0 track on joint 4 until animation frame 81, then drops him
+from y=1198. Wolf's `File.WOLF_APPEAR` (0xC90) is a different animation: joint 4 only rotates, the scale-0 hide is on
+joint 5 and ends at frame ~48, and he lands about 8 frames later. The Wolfen anim joints (`dFTRemixEntryArwingAnims`)
+still follow Fox's timeline (the Arwing passes at frames ~212-216 in both), so Wolf lands at ~206, six frames before
+the Arwing arrives. The `Wolf.asm` comments on `wolfen_entry_2/_3` say the offsets "need updating with new import",
+so the mismatch probably exists in Remix itself. An earlier capture that only sampled from frame 212 on read this as
+Wolf being visible during the whole entry. No port change; compare against a cartridge capture if exact timing matters.
 
 ## 2. Polygon variants spawn into the floor
 
