@@ -46,9 +46,24 @@ it afterwards:
 - when neither exists the effect is skipped with a log line instead of crashing: building a desc from a file
   that lacks the vanilla offsets crashed `gcAddDObj3TransformsKind` (JSamus before the id match).
 
-**Not ported:** Wolf's Arwing (`Wolf.asm` `wolfen_entry*`: flags word 0x070A0000, `Size` update routine, per-fighter
-offsets for Wolf and Slippy), and the `Size` entry-scale hooks (Blue Falcon, Kirby star, Yoshi egg). Wolf draws no
-Arwing and logs it.
+**Wolf's Wolfen** (`Wolf.asm` `wolfen_entry*`): ported. The flags word 0x070A0000 is the vanilla `EFDesc` packed
+(flags 7, dl_link 10), so the override row only changes the file (`file_8`, Special3) and the DObj setup offset (0x2610).
+`efManagerFoxEntryArwingMakeEffect` also reads its wing joint from the Special3 file (0x2E74) and its body joints from
+the Special2 file (0x9E0 right, 0x590 left), so it calls `ftRemixEntryGetArwingAnim` like the Captain car does, and
+`dFTRemixEntryArwingAnims` holds Wolf's values (Special3 0x284C; Special2 0xF74 right, 0xB24 left). Falco, Peppy,
+Slippy and J Fox already drew the Fox Arwing correctly through the id match (checked frame by frame against Fox).
+Slippy's `wolfen_entry_3` branch only repeats the Fox offsets with his own copy of the file, so it has no row.
+
+**Not ported:** the `Size` update routine of Wolf's struct (`Size.arwing.update_routine._update`, it scales the Arwing
+by the fighter's size multiplier; Wolf's Arwing uses the vanilla update) and the `Size` entry-scale hooks (Blue Falcon,
+Kirby star, Yoshi egg).
+
+**Open: Wolf is visible during his entry.** With the Wolfen in place, Wolf stands crouched on the ground the whole time
+the Arwing flies in, while Fox, Falco, Peppy and Slippy are not visible until they land. The status setup is identical
+to Fox's (status 0xDF, motion 198, flags 0x40000008, `bak=0 upd=0x40000000`, hidden part 1 = TransN, `transn` stays 0 in
+both), so the difference is in Wolf's own appear animation (`File.WOLF_APPEAR` 0xC90, `edit_action_parameters(WOLF, 0xDF, ...)`
+swaps only the animation file) or in how the port reads it. Same family as the polygon crouch below; not verified against
+the cartridge.
 
 ## 2. Polygon variants spawn into the floor
 
