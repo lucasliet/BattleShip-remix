@@ -1,0 +1,2 @@
+# P1 walks left off the stage edge (water and blast-zone hazard tests); the match starts at about frame 450
+460 760 0 - -80 0
