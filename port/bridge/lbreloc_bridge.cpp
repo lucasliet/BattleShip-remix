@@ -694,6 +694,8 @@ extern "C" void portRelocLoadFileFromBytes(
 	u16 reloc_intern = reloc_intern_offset;
 	u32 intern_steps = 0;
 
+	portRelocBeginChainWalk(ram_dst, copySize, reloc_intern_offset, reloc_extern_offset);
+
 	while (reloc_intern != 0xFFFF)
 	{
 		/* Containment: a pristine chain only references word offsets inside
@@ -859,6 +861,7 @@ extern "C" void portRelocLoadFileFromBytes(
 		extern_idx++;
 		reloc_extern = next_reloc;
 	}
+	portRelocEndChainWalk();
 
 	if (is_fighter_figatree)
 	{
@@ -1249,6 +1252,15 @@ size_t lbRelocGetAllocSize(u32 *ids, u32 len)
 		len--;
 	}
 	return allocated;
+}
+
+/* Registers memory the port did not load through the reloc loader (the Smash Remix RAM image) as a reloc range, so
+ * display lists in it are widened and their vertices and textures get the same runtime fixups as reloc files. */
+extern "C" void portRelocRegisterExternalRange(void *base, size_t size, const char *label)
+{
+	portRelocEvictFileRangesInRange(base, size);
+	sPortRelocFileRanges.push_back({ reinterpret_cast<uintptr_t>(base), size, /* file_id = */ 0xFFFFFFFFu, label });
+	port_dl_range_register(base, size, label);
 }
 
 bool portRelocFindContainingFile(const void *ptr, uintptr_t *out_base, size_t *out_size)

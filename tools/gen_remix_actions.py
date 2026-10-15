@@ -56,6 +56,8 @@ EXTRA_SYMBOLS = [
     "Stages.stage_table_pages",
     "Stages.random_table",
     "Stages.bg_type",
+    "Item.GoldenGun.projectile_info",
+    "Item.GoldenGun.projectile_info_pointer",
 ]
 EXTRA_SYMBOL_PREFIXES = ["Hazards."]
 CSS_FIGHTER_DIRS = ["Falco", "Ganondorf", "YoungLink", "DrMario", "Wario", "Dedede", "Sonic", "Sheik", "Marina",

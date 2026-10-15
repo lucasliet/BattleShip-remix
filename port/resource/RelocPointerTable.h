@@ -44,6 +44,10 @@ void *portRelocResolvePointerDebug(uint32_t token, const char *file, int line);
  */
 void *portRelocTryResolvePointer(uint32_t token);
 
+/* Host pointer for a raw address owned by the fallback resolver (the Smash Remix RAM image at 0x80400000+), or
+ * NULL. Unlike portRelocTryResolvePointer this never decodes tokens. */
+void *portRelocResolveFallbackAddress(uint32_t value);
+
 /**
  * Resolver consulted when a value does not decode as a token, before it is
  * reported as stale. Returns NULL for values it does not own. Used by Remix,

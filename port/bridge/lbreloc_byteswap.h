@@ -68,6 +68,19 @@ void portEvictStructFixupsInRange(const void *begin, size_t size);
 void portRelocNoteChainSlot(const void *slot);
 
 /**
+ * Record every slot of a file's intern and extern reloc chains before they are
+ * walked. A chain-time texture or vertex fixup (the walk applies them while it
+ * tokenizes slots) stops before the first slot of these chains it would cover,
+ * because a descriptor the walk has not reached yet is still a {next, target}
+ * pair: byte-swapping it derails the rest of the walk (Smash Remix Mementos,
+ * file 2217: a SETTIMG range of 512 words covers the slot of step 167).
+ * portRelocEndChainWalk drops the set once both walks are done.
+ */
+void portRelocBeginChainWalk(void *file_base, size_t file_size,
+                             unsigned short intern_offset, unsigned short extern_offset);
+void portRelocEndChainWalk(void);
+
+/**
  * Undo pass1 BSWAP32 on a raw texture blob so its bytes return to N64
  * BE order.  Use for raw-texel file regions that the Sprite/Bitmap fixup
  * path never reaches and that pass2 can't discover statically (e.g. the

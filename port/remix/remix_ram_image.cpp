@@ -39,6 +39,8 @@ std::shared_ptr<Ship::Blob> loadRamImageBlob()
     return std::dynamic_pointer_cast<Ship::Blob>(ctx->GetResourceManager()->LoadResource(kRamImagePath));
 }
 
+extern "C" void portRelocRegisterExternalRange(void *base, size_t size, const char *label);
+
 void *resolveFallback(uint32_t value)
 {
     return remix_ram_image_resolve(value);
@@ -64,6 +66,26 @@ int remix_ram_image_load(void)
     portRelocSetFallbackResolver(resolveFallback);
     spdlog::info("remix_ram_image: {} bytes mapped at 0x{:08X}", wordCount * sizeof(uint32_t), kRamImageBase);
     return 1;
+}
+
+void *remix_ram_image_make_file(uint32_t start, uint32_t size, void *dst)
+{
+    const uint32_t *src = static_cast<const uint32_t *>(remix_ram_image_resolve(start));
+    uint32_t *words = static_cast<uint32_t *>(dst);
+    const uint32_t wordCount = size / sizeof(uint32_t);
+
+    if ((src == nullptr) || (dst == nullptr) || (remix_ram_image_resolve(start + size - sizeof(uint32_t)) == nullptr)) {
+        spdlog::error("remix_ram_image: region 0x{:08X}+0x{:X} is outside the image", start, size);
+        return nullptr;
+    }
+    for (uint32_t i = 0; i < wordCount; ++i) {
+        const uint32_t value = src[i];
+        const bool isInternal = (value >= start) && (value < (start + size)) && ((value & 3u) == 0);
+
+        words[i] = isInternal ? portRelocRegisterPointer(&words[(value - start) / sizeof(uint32_t)]) : value;
+    }
+    portRelocRegisterExternalRange(dst, wordCount * sizeof(uint32_t), "remix_ram_image_file");
+    return dst;
 }
 
 void *remix_ram_image_resolve(uint32_t ram_addr)

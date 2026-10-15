@@ -647,6 +647,51 @@ extern "C" void portRelocNoteChainSlot(const void *slot)
 	sChainSlotAddrs.insert(reinterpret_cast<uintptr_t>(slot));
 }
 
+/* Slots of the chains of the file being walked right now (see portRelocBeginChainWalk). */
+static std::unordered_set<uintptr_t> sPendingChainSlots;
+
+static void collectChainSlots(void *file_base, size_t file_size, unsigned short offset)
+{
+	size_t steps = 0;
+
+	while (offset != 0xFFFF)
+	{
+		if ((size_t)offset * 4 + 4 > file_size || ++steps > file_size / 4)
+		{
+			return;
+		}
+		uint32_t *slot = (uint32_t *)((uint8_t *)file_base + (size_t)offset * 4);
+		sPendingChainSlots.insert(reinterpret_cast<uintptr_t>(slot));
+		offset = (unsigned short)(*slot >> 16);
+	}
+}
+
+extern "C" void portRelocBeginChainWalk(void *file_base, size_t file_size,
+                                        unsigned short intern_offset, unsigned short extern_offset)
+{
+	sPendingChainSlots.clear();
+	collectChainSlots(file_base, file_size, intern_offset);
+	collectChainSlots(file_base, file_size, extern_offset);
+}
+
+extern "C" void portRelocEndChainWalk(void)
+{
+	sPendingChainSlots.clear();
+}
+
+/* Words of region usable by a chain-time fixup: up to the first chain slot it would cover. */
+static size_t wordsBeforeChainSlot(const uint32_t *region, size_t num_words)
+{
+	for (size_t i = 0; i < num_words; i++)
+	{
+		if (sPendingChainSlots.count(reinterpret_cast<uintptr_t>(&region[i])))
+		{
+			return i;
+		}
+	}
+	return num_words;
+}
+
 static void portRegisterProtectedStructRange(const void *begin, size_t size)
 {
 	if (begin == nullptr || size == 0) return;
@@ -1203,7 +1248,10 @@ static int chain_fixup_settimg(void *file_base, size_t file_size,
 	sStructU16Fixups.insert(fixup_key);
 
 	uint32_t *region = (uint32_t *)((uint8_t *)file_base + target_byte_off);
-	size_t num_words = tex_bytes / 4;
+	size_t num_words = wordsBeforeChainSlot(region, tex_bytes / 4);
+
+	if (num_words == 0) return 0;
+	tex_bytes = (uint32_t)(num_words * 4);
 
 	// All formats need BSWAP32 to restore N64 BE byte order:
 	//  - 4b/8b: per-byte data; Fast3D reads bytes in their original order
@@ -1307,6 +1355,9 @@ static int chain_fixup_vertex(void *file_base, size_t file_size,
 	if ((size_t)target_byte_off + total_bytes > file_size) return 0;
 
 	uint32_t *region = (uint32_t *)((uint8_t *)file_base + target_byte_off);
+
+	num_vtx = (uint32_t)(wordsBeforeChainSlot(region, (size_t)num_vtx * 4) / 4);
+	if (num_vtx == 0) return 0;
 
 	// Content-based sanity check on the FIRST vertex.
 	// Post-pass1 word 0 (high 16 bits) = original BE ob[0] (s16),

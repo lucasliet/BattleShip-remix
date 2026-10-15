@@ -38,6 +38,12 @@ int remix_debug_vs_item_rate(void);
  */
 int remix_debug_force_item_kind(void);
 
+/**
+ * Returns 1 when SSB64_REMIX_FORCE_ITEM_AT_P1 is set: the stage spawner drops the
+ * item on player 1 instead of a random item point, so a pickup test is deterministic.
+ */
+int remix_debug_force_item_at_p1(void);
+
 #ifdef __cplusplus
 }
 #endif

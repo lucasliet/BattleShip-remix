@@ -28,6 +28,14 @@ int remix_ram_image_load(void);
  */
 void *remix_ram_image_resolve(uint32_t ram_addr);
 
+/**
+ * Copies [start, start + size) of the image to dst (a scene-arena buffer of at least size bytes) as a small reloc
+ * file: words that hold an address inside the region become tokens of the copy, and the copy is registered as a
+ * reloc range for this scene, so its display lists are widened and its vertices and textures get the runtime fixups.
+ * Returns dst, or NULL when the region is outside the image.
+ */
+void *remix_ram_image_make_file(uint32_t start, uint32_t size, void *dst);
+
 #ifdef __cplusplus
 }
 #endif

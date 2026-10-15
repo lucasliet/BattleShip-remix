@@ -213,6 +213,11 @@ void *portRelocResolvePointerDebug(uint32_t token, const char *file, int line)
     return sSlots[index].ptr;
 }
 
+void *portRelocResolveFallbackAddress(uint32_t value)
+{
+    return (sFallbackResolver != nullptr) ? sFallbackResolver(value) : nullptr;
+}
+
 void *portRelocTryResolvePointer(uint32_t token)
 {
     uint32_t index = 0;

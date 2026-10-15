@@ -46,3 +46,33 @@ go stale when a decomp file is edited, so the "type" became half of a statement 
 lines did not compile (about 20 errors). It now checks the hinted line against a definition pattern, falls back to
 searching the file for the definition, and stops with an error if none exists. The regenerated file is identical to the
 committed one. The script also gained `EXTRA_SYMBOLS` (`Stages.custom_item_spawn_rate_table`, `Stages.series_logo_table`).
+
+## Item verification (ROADMAP T1.3, 2026-10-14)
+
+Harness: `SSB64_VS_FKINDS=0,8,6` (two CPUs pick items up), `SSB64_VS_ITEMS=5 SSB64_REMIX_FORCE_ITEM=<kind>`, 3000 frames,
+and the new `SSB64_REMIX_ITEM_LOG=1`, which logs `[remix-item] spawn|hold|consume|touch|drop|throw|bullet kind=0x..`.
+`SSB64_REMIX_FORCE_ITEM_AT_P1=1` drops the item on player 1 (a human pickup by input script did not happen: the item is
+still in its appear state when A is pressed).
+
+| Kind | Item | Result |
+|---|---|---|
+| 0x2E | Super Mushroom | touched, fighters grow: the routine now writes `Size.multiplier_table` (`ftRemixSizeSetMultiplier`) |
+| 0x2F | Poison Mushroom | touched, fighters shrink (same fix) |
+| 0x30 | Blue Shell | was invisible: the `ITDesc` had `TraRotRpyR` while the asm word 0x0C is 0 (the spawn adds the red shell XObjs itself), so the transform was doubled; held, thrown, 30% damage |
+| 0x31 | Lightning | consumed; the zap now sets the shrunk size (0.5) and destroys an active mushroom effect; shrink timer resets the size |
+| 0x32 | Deku Nut | held and thrown, hits |
+| 0x33 | Franklin Badge | consumed (reflect wiring is ROADMAP T2.3) |
+| 0x34 | Pitfall | held and thrown, damage |
+| 0x35 | Golden Gun | held, thrown; the golden bullet (patches 1 and 3) fires: `projectile_info` and its display list, image and vertices are copied from the RAM image into the scene arena as a small reloc file (`remix_ram_image_make_file`); visual not yet checked |
+| 0x36 | Dango | consumed, heals |
+| 0x37 | P-Wing | consumed, wings on the fighter |
+| 0x39 | Stopwatch | consumed |
+| 0x40 | Basketball | did not move: the asm `item_info_array` continues into state 0 at 0x14, so the `ITDesc` procs are the MAIN procs (they were NULL); the per-ball state moved from one global to a pool slot per ball. Remaining behavior belongs to Smashketball (ROADMAP T6.1) |
+| 0x41 | Psyduck | n/a: disabled in Remix 2.0.1 (`Toggles.entry_pokemon_psyduck` commented out of `pokemon_table`, `NEW_POKE = 0`); the model is Hitmonlee's placeholder |
+
+Transform words of every item `ITDesc` were compared with the asm word 0x0C (0x1B = `TraRotRpyR`, 0x1C =
+`TraRotRpyRSca`, 0x12 = `Tra`): Blue Shell, P-Wing, Stopwatch and KlapTrap were corrected.
+
+`Interpreter::SegAddr` (libultraship) now also resolves raw addresses owned by the RAM-image fallback
+(`portRelocResolveFallbackAddress`).
+
