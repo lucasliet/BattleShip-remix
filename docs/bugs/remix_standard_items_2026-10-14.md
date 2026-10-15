@@ -36,7 +36,7 @@ only the Cloaking Device was verified through pickup and effect.
 - Pickup/effect verification of the 13 items other than Cloaking Device; Training item menu/HUD, taunt spawn,
   match-begin item, Pokemon selection, container toggles, Marina `prevent_item_despawn_`.
 - Hazard items (0x3A to 0x3F) depend on the stage step. `Size`, GFX, CharEnvColor, Reflect and Speed subsystems are
-  REMIX-TODO (map in `docs/remix/implementation_plan.md`).
+  REMIX-TODO (ROADMAP M2 in `docs/remix/ROADMAP.md`).
 - Metal `nextDrawable` SIGSEGV flakes in the headless harness (macOS, not game code); a retry passes.
 
 ## Generator bug: `tools/gen_remix_actions.py` wrote garbage into `ftremixvanillaprocs.c`
@@ -63,7 +63,7 @@ still in its appear state when A is pressed).
 | 0x32 | Deku Nut | held and thrown, hits |
 | 0x33 | Franklin Badge | consumed (reflect wiring is ROADMAP T2.3) |
 | 0x34 | Pitfall | held and thrown, damage |
-| 0x35 | Golden Gun | held, thrown; the golden bullet (patches 1 and 3) fires: `projectile_info` and its display list, image and vertices are copied from the RAM image into the scene arena as a small reloc file (`remix_ram_image_make_file`); visual not yet checked |
+| 0x35 | Golden Gun | held, thrown; the golden bullet (patches 1 and 3) fires: `projectile_info` and its display list, image and vertices are copied from the RAM image into the scene arena as a small reloc file (`remix_ram_image_make_file`); bullet damage 99 confirmed (`cpu_53`: fighters at 99% and 101%) |
 | 0x36 | Dango | consumed, heals |
 | 0x37 | P-Wing | consumed, wings on the fighter |
 | 0x39 | Stopwatch | consumed |

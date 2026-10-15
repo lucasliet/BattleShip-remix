@@ -129,7 +129,7 @@ your assigned scope to faithful C so the fighter plays its real Remix moveset.
 
 ## Things you cannot do in your file: record them in your notes file
 
-Your notes file is `build/remixasm/notes/<id>_<NAME>[_<MOVE>].md`. Record:
+Your notes file is `docs/remix/notes/<id>_<NAME>[_<MOVE>].md`. Record:
 
 1. **Vanilla patches.** These are `OS.patch_start(rom, ram)` blocks or `j`/`jal`
    hooks into vanilla code that your scope relies on. For each one, give the

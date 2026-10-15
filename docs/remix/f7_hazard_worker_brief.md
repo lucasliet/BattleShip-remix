@@ -53,7 +53,7 @@ ids 0x3A KlapTrap, 0x3B RobotBee, 0x3C Car, 0x3D BulletBill, 0x3E ScuttleMinion,
 `scripts/remix/syntax-check.sh <file>` -> `syntax-check OK` for every file you wrote or edited, after your last edit to it.
 Report (at most 20 lines): files, which `Hazards.*` routines of your range are ported and which are skipped (and why), the
 stage ids they serve (`grremixids.h`), the item descs you exported, REMIX-TODOs, notes path
-`build/remixasm/notes/f7_hazard_<group>.md`, and anything the lead must test (stage id to run with `SSB64_VS_STAGE=<decimal>`).
+`docs/remix/notes/f7_hazard_<group>.md`, and anything the lead must test (stage id to run with `SSB64_VS_STAGE=<decimal>`).
 
 ## Primer: the Remix asm idioms and their port equivalents (added after the first attempt stopped at an inventory)
 

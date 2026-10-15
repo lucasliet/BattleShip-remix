@@ -42,7 +42,7 @@ screenshot is blank. The 15 hazard stages run for 1520 frames without crash.
   (a map pointer token that does not resolve). Dream Greens (149, 0x95): crash in `gcDrawDObjTree` from
   `grDisplayLayer0PriProcDisplay`.
 - **Hazard behavior is not verified in a match**, only load and crash. Several have REMIX-TODOs (details in
-  `build/remixasm/notes/f7_hazard_*.md`, not versioned): Casino knockback hook (0x800E5C40) and bumper display list; the
+  `docs/remix/notes/f7_hazard_*.md`, not versioned): Casino knockback hook (0x800E5C40) and bumper display list; the
   three Rainbow Road vanilla hooks (0x801666A0, 0x80166450, stoplight sounds); Pirate Land cannon model and cannonball
   launch; KlapTrap and Car blast-zone tail (0x8016F8C0) and unnamed ITStruct fields; GB Land random-music toggle; Spawned
   Fear poison and `DOOM_ACID` GFX; Metallic Madness Size state restore.
@@ -52,3 +52,30 @@ screenshot is blank. The 15 hazard stages run for 1520 frames without crash.
   `platform_movement_`, Dream Land wind/downtime.
 - **Stage select polish.** The preview camera framing is off for some custom stages (Mute City is too large); custom
   stages have no emblem; Training mode still indexes vanilla tables (`dMNMapsWallpaperOffsets`).
+
+## Hazard behavior check (ROADMAP T1.4, 2026-10-15)
+
+`hazard_sweep.sh`: Mario idle plus Kirby and Yoshi CPUs, 4000 frames, a shot every 150 frames (sheets in
+`build/agent-shots/vs/hz_<stage>/`). All 15 stages ran without a crash.
+
+| Stage (id) | Hazard seen acting | Not seen |
+|---|---|---|
+| Corneria (70) | Arwing flies past and fires at frames ~3150 to 3450 | none |
+| Pirate Land (158) | cannonballs fly across the bridge, fighters take 5 to 50% | cannon model not wired (see Open) |
+| Rainbow Road (163) | Chain Chomp light beam at ~3300, 18 to 78% damage | the three vanilla hooks |
+| Spawned Fear (195) | Cacodemon at ~3450, damage 7 to 35% | acid poison |
+| Metallic Madness (162) | Robot Bee at ~3450, damage 12 and 13% | laser shrink not seen |
+| Game Boy Land (136) | palette scene change to the cloud scene at ~3450, the stage runs | music not checked |
+| Casino Night (159) | stage renders with the slot sign | stage bumper not seen |
+| Great Bay (54) | stage renders, a bomb hit (31%) | water hazard: nothing fell in (Mario on a rock) |
+| Twilight City (186) | stage renders | water hazard: not triggered |
+| Mad Monster Mansion (64) | stage renders | the taunt sound (audio) |
+| Big Boo's Haunt (192) | stage renders | the laugh is silent (known REMIX-TODO) |
+| Remix RTTF (189) | stage renders with its own background | bumpers |
+| Onett (73) | stage renders | no car in 4000 frames (the asm honks at 2700 to 3600 frames) |
+| Jungle Japes (134) | stage renders, items and barrel | no KlapTrap seen |
+| Toad's Turnpike (166) | not looked at | light cycle |
+
+Next for T1.4: Onett car, Japes KlapTrap, Casino bumper, Great Bay and Twilight water (walk a fighter in; the input script
+`walk_left.txt` only reaches an edge when the fighter starts on the main platform), Turnpike light, RTTF bumpers.
+

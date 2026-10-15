@@ -6,7 +6,7 @@ payload. The payload must be byte-identical to:
 
   audio/<bank>      tools/remix_dump_audio.py (B1_sounds1_ctl, B1_sounds1_tbl, B1_sounds2_ctl,
                     B1_sounds2_tbl, S1_music_sbk, fgm_unk, fgm_tbl, fgm_ucd)
-  remix/fighters    the remix/fighters layout of docs/remix/implementation_plan.md, built here from
+  remix/fighters    the remix/fighters layout of docs/remix/torch_factories.md ("Contrato dos blobs"), built here from
                     the JSON of tools/remix_dump_fighters.py
   particles/<name>  the raw ROM range at offset/size of each SSB64:REMIXBLOB entry in
                     yamls/remix/particles.yml

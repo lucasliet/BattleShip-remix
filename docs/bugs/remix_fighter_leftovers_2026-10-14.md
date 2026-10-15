@@ -19,10 +19,9 @@ previous wave also passes, Metal `nextDrawable` flakes aside).
 - Dragon King Piano and JKirby (14 routines); Roy counter source; Flashbang GFX; Cloud `enable_flash` wiring.
 - Shared vanilla patches: `drain_flash_fix_` (0x8010E9E4), knockback 0x800E44EC, absorb 0x800E33AC, Samus grapple,
   Marina item pull, Dedede jump, Kirby cutter/rock, fireball bounce, bob-omb FGM.
-- Subsystem map and order (Size, GFX/GFXRoutine, CharEnvColor, Reflect, PokemonAnnouncer, AI) in
-  `docs/remix/implementation_plan.md`.
-- Sonic/Tails entry (Tails floats beside Sonic) is tracked in
-  `remix_entry_effects_and_polygon_entry_2026-10-14.md`.
+- Subsystem map and order (Size, GFX/GFXRoutine, CharEnvColor, Reflect, PokemonAnnouncer, AI): ROADMAP M2 and M7 in
+  `docs/remix/ROADMAP.md`.
+- Sonic/Tails entry (Tails floated beside Sonic): fixed, see `remix_entry_effects_and_polygon_entry_2026-10-14.md`.
 
 ## Second wave (same day, built and run)
 

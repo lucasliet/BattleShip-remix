@@ -110,7 +110,7 @@ Item ids follow the `add_item` order:
 ## Rules
 
 - Edit only your own `itremix<name>.c`, `itremix<name>.h` and notes file
-  `build/remixasm/notes/item_<Name>.md`. Do not edit `itremixitems.c`, which is
+  `docs/remix/notes/item_<Name>.md`. Do not edit `itremixitems.c`, which is
   generated, any vanilla file, `itremix.h` or another item.
 - Record vanilla patches the item relies on in the notes, with the exact C, but do
   not apply them. Do the same for shared subsystems (GFX, Size, PokemonAnnouncer),

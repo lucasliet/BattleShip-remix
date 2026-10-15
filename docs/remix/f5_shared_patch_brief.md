@@ -74,7 +74,7 @@ that function.
   `scripts/remix/syntax-check.sh <file>` until `syntax-check OK`. Run it after
   your last edit to each file, since other workers may have edited it.
 - No cmake, no builds, no game runs, no commits.
-- Notes: `build/remixasm/notes/shared_<scope>.md` listing each patch
+- Notes: `docs/remix/notes/shared_<scope>.md` listing each patch
   (address, vanilla function, applied / skipped and why), uncertainties with asm
   line numbers, and every `REMIX-TODO`.
 

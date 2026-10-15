@@ -7,7 +7,7 @@ Read in this order before touching code:
 1. `docs/remix/f5_worker_brief.md` (references, translation rules, LP64 rules, `OS.copy_segment` decoding).
 2. `docs/remix/f5_shared_patch_brief.md` (you apply vanilla patches yourself, guarded by `#ifdef REGION_REMIX`, with helpers in
    a new file you own, declared by appending a block to `decomp/src/ft/ftremix/ftremixhooks.h`).
-3. The notes of your scope in `build/remixasm/notes/` (they list what was skipped and why) and the `REMIX-TODO` comments in
+3. The notes of your scope in `docs/remix/notes/` (they list what was skipped and why) and the `REMIX-TODO` comments in
    the files named by your scope (`grep -rn "REMIX-TODO" <file>`).
 
 State of the port: 78 Remix fighters run, standard items and the VS item switch exist. This wave closes the leftovers.
@@ -29,4 +29,4 @@ Everything is built and tested by the lead, not by you.
 ## Final report (at most 20 lines)
 
 Files written or edited, each patch (asm address, vanilla function, applied or skipped and why), the new `REMIX-TODO`s, the
-notes path `build/remixasm/notes/f7_<scope>.md`, and anything the lead must wire or test.
+notes path `docs/remix/notes/f7_<scope>.md`, and anything the lead must wire or test.

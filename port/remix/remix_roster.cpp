@@ -1,6 +1,6 @@
 /**
  * remix_roster.cpp - loads the Smash Remix fighter blob ("remix/fighters",
- * format in docs/remix/implementation_plan.md) and registers its synth fighters.
+ * format in docs/remix/torch_factories.md, "Contrato dos blobs") and registers its synth fighters.
  *
  * The blob is parsed here into plain values. The FTData itself is built on the
  * decomp side (port_fighter_synth_ft_create in decomp/src/ft/ftport.c), since the
@@ -47,7 +47,7 @@ constexpr uint8_t kVanillaFighterCount = 27;
 constexpr int kFirstRelocatedAttributesFkind = 13;
 constexpr int kLastRelocatedAttributesFkind = 25;
 
-/* Field offsets inside one 0x80-byte record (see implementation_plan.md). */
+/* Field offsets inside one 0x80-byte record (see docs/remix/torch_factories.md). */
 constexpr size_t kOffFileIds = 0x04;
 constexpr size_t kOffFileMainSize = 0x28;
 constexpr size_t kOffOAttributes = 0x2C;

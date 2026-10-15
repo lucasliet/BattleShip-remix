@@ -95,18 +95,10 @@ The CSS can be driven headless: `SSB64_START_SCENE=16`, then `SSB64_INPUT_SCRIPT
 `y=80` for 29 frames and `x=80` for 12 frames to put P1's hand on Mario (the hand moves 4 px per frame in
 320x240 space), `A`, `START`, and `A` on the stage select.
 
-## Sonic/Tails entry: Tails floats beside instead of being carried (open, 2026-10-14)
+## Sonic/Tails entry: Tails floated beside Sonic (fixed, 2026-10-14)
 
-Reported in-match after the Step 2 wave: Sonic's VS entry plays with Tails
-arriving, but Tails floats statically beside Sonic instead of being carried
-in his arms (Remix behavior: `Sonic.asm` entry script parents the Tails
-model to Sonic's carry joint so it bobs with the run animation).
-
-Suspect area: the Sonic entry effect port (fighter entry registry /
-`ftremixentry*` — check whether the Tails DObj is attached to the carry
-joint or spawned as a free effect GObj at an offset). Not fixed in this
-session per user instruction — queued for the next run.
-
-Reference asm: `.toolchain/pkgs/smashremix-src/src/Sonic.asm` (entry /
-Tails carry scope — grep `carry` / `Tails`), port side
-`decomp/src/ft/ftremix/ftremixentry*.c` and the Sonic entry hookup.
+`DKShared.asm barrel_alternate` picks the right or left Tails struct (`sonic_entry_struct_right/left`) by the fighter's
+facing. The port always used the left one, so a right-facing Sonic got the mirrored Tails animation away from his hands.
+`ftRemixEntryMakeDonkeyBarrel` now selects the right row (`0x2A28`/`0x68C8`, effect `nFTRemixEntryEffectDonkeyBarrelRight`)
+when `status_vars.common.entry.lr == +1`; `entry.lr` keeps the facing even though `fp->lr` is cleared. Checked on both
+sides (P1 and P2) every 8 frames: Tails descends holding Sonic.

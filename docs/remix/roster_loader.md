@@ -1,9 +1,9 @@
 # Carregador do roster Remix (`remix/fighters`)
 
-Estado: compila (`ssb64`, REGION_REMIX=1). Não verificado em execução: o `.o2r` atual ainda não contém
-`remix/fighters`, então o carregador loga um aviso e retorna `false`.
+Estado: em uso. O `.o2r` do Remix contém `remix/fighters` e o carregador registra os 68 lutadores sintéticos (78 fkinds
+jogáveis com os vanilla).
 
-Formato do blob e ids: ver `docs/remix/implementation_plan.md`.
+Formato do blob e ids: ver "Contrato dos blobs" em `docs/remix/torch_factories.md`.
 
 ## Arquivos
 

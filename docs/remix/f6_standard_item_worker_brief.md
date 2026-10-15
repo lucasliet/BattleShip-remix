@@ -57,7 +57,7 @@ drops, taunt spawns and the Training menu, so `parent_gobj` is usually NULL and 
   other Remix files that the item calls (`Hazards.asm`, `Item.asm`, `Size.asm`, `GFX.asm`, `FGM.asm`) are read-only
   references.
 - Output: `decomp/src/it/itremix/itremix<lowercasename>.c`, `.h`, and the notes file
-  `build/remixasm/notes/item_<Name>.md`. File name is the item name in lowercase without separators
+  `docs/remix/notes/item_<Name>.md`. File name is the item name in lowercase without separators
   (`itremixsupermushroom.c`, `itremixblueshell.c`).
 - Export `const ITRemixItemDesc dITRemix<Name>ItemDesc` exactly as in the f5 brief. Do not edit `itremixitems.c`, the
   lead regenerates it with `tools/gen_remix_items.py`.

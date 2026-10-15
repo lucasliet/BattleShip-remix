@@ -1,6 +1,6 @@
 # Smash Remix: fábricas do Torch (`SSB64:REMIXFIGHTERS`, `SSB64:REMIXAUDIO`)
 
-Implementa o contrato de `docs/remix/implementation_plan.md` (F1): o Torch gera, a partir de `baserom.remix.z64`,
+Implementa o contrato descrito em "Contrato dos blobs" no fim deste arquivo: o Torch gera, a partir de `baserom.remix.z64`,
 a tabela de lutadores (`remix/fighters`) e os cinco bancos de áudio reconstruídos (`audio/*`). Os dados derivados
 da ROM ficam só no `.o2r` e em `build/`.
 
@@ -90,3 +90,44 @@ Resultado da execução:
   validada (ver `docs/remix/fighter_table_extraction.md`, ressalva 1).
 - **`audio_bridge.cpp`** ainda usa o tamanho vanilla de `BankParser::fits()`. Essa integração é da fase F2 e não foi
   alterada aqui.
+
+## Contrato dos blobs (migrado do antigo `implementation_plan.md`)
+
+
+Todos os inteiros são **little-endian** (o blob é lido por código do port, não pelo jogo N64).
+
+#### `remix/fighters` (recurso BLOB no `.o2r`)
+
+```
+Header (16 B): u32 magic = 'RMXF' (0x46584D52), u32 version = 1, u32 count (= 97), u32 reserved = 0
+Records: count x 0x80 B, na ordem do struct table (índice = id do Remix)
+  +0x00 u32 remix_id
+  +0x04 u32 file_ids[9]        // main, mainmotion, submotion, model, shieldpose, special1..4 (mesma ordem de FTData)
+  +0x28 u32 file_main_size
+  +0x2C u32 o_attributes
+  +0x30 u32 file_anim_size
+  +0x34 u32 mainmotion_count
+  +0x38 u32 mainmotion_off     // offset em bytes a partir do início do blob de FTMotionDesc[]
+  +0x3C u32 menu_count
+  +0x40 u32 menu_off           // idem
+  +0x44.. reservado (zeros) até 0x80
+Depois dos records: arrays FTMotionDesc, 12 B cada: u32 anim_file_id, u32 command_offset, u32 flags
+```
+
+`FTMotionDesc` = `{ anim_file_id, offset, flags }` do decomp (`decomp/src/ft/fttypes.h`); no ROM os três campos são
+big-endian e o Torch converte para little-endian. Origem dos dados: struct table em ROM `0x92610` (97 ponteiros RAM para
+structs de 0x78 B). Tradução RAM→ROM: `RAM - 0x80084800` (dados vanilla), `RAM - 0x7D800000` (segmento expandido
+`0x80400000+`), `RAM - 0x80288A20` (janela de overlay `0x80390000..0x80400000`). Referência: `tools/remix_dump_fighters.py`.
+
+#### `audio/*` (BLOBs, mesmos nomes de hoje)
+
+`audio/B1_sounds1_ctl`, `audio/B1_sounds1_tbl`, `audio/B1_sounds2_ctl`, `audio/B1_sounds2_tbl`, `audio/S1_music_sbk`:
+os arquivos reconstruídos por `tools/remix_dump_audio.py` (ctl = imagem de RAM: blob vanilla no começo, imagem de
+código em `RAM - 0x7D800000`, zeros no meio). Assim o `audio_bridge.cpp` continua lendo os mesmos nomes.
+`fgm_*` e `particles` continuam como segmentos simples do `yamls/remix/audio.yml`.
+
+### Dados vindos do código-fonte do Remix (não do ROM)
+
+`port/remix/remix_roster_data.h`: por lutador, `remix_id`, nome, `parent` (vanilla), `add_actions`, `num_costumes`,
+`variant_type`, `sound_type`. Fonte: `.toolchain/pkgs/smashremix-src/src/Character.asm` (`define_character`),
+`src/costumes/*.asm`. O código-fonte do Remix foi autorizado pelo usuário para uso neste projeto.

@@ -1,23 +1,17 @@
-# Smash Remix: design do CSS no port (fase F3)
+# Smash Remix: referência do CSS (port e Remix)
 
-Data: 2026-10-12. Escopo: somente leitura. Nenhum código foi alterado, nenhum build foi feito, nada foi commitado.
-Único arquivo criado: este documento.
+Documento de referência de como a tela de seleção de personagens funciona no port (decomp `mnplayersvs.c`) e no Remix
+(`CharacterSelect.asm`). Escrito em 2026-10-12, antes da implementação do CSS Remix; as tabelas e os mapas de arquivo
+continuam valendo, mas o estado atual mudou:
 
-Convenções deste documento:
-- `mnplayersvs.c:N` é `decomp/src/mn/mnplayers/mnplayersvs.c`, linha N. Os demais caminhos são relativos à raiz do repositório.
-- `CharacterSelect.asm:N` é `.toolchain/pkgs/smashremix-src/src/CharacterSelect.asm`, linha N.
-- Quando uma afirmação não foi verificada diretamente, ela está marcada como **(não verificado)**.
+- O mapeamento de ids é a identidade (`REMIX_ID_TO_PORT_FKIND(id) = id`), então a colisão de GND (0x1E) com `nFTKindNull` (28) que
+  este texto descreve não existe mais; 27 e 28 ficam sem lutador.
+- O CSS VS já usa os dados do Remix (`tools/gen_remix_css.py` gera `port/remix/remix_css_data.h`; `mnplayersvs.c` tem 15 ramos
+  `REGION_REMIX`). O que falta do CSS (costumes além de 4, variantes, bookend de bônus, 1P/treino/bônus) está no
+  `ROADMAP.md`, M5; este arquivo não guarda plano nem progresso.
 
----
-
-## 0. Resumo executivo
-
-- O CSS VS do port hoje é o **vanilla de 12 retratos** (grade 2×6, 45 px por célula). Não há nenhum caminho Remix no CSS: `mnplayersvs.c` não tem ramo `REGION_REMIX`.
-- O CSS do Remix é uma grade **3×10 de 30 slots**, mais dois bookends (bônus e aleatório). Os retratos vêm do arquivo de reloc **0xA05**, e as imagens dos bookends do arquivo **0xA06**. Os dois arquivos já estão no `.o2r` gerado pelo Torch (`build/BattleShip-Remix.o2r`).
-- Os arquivos de nome (0x11) e de logo/emblema (0x14) são os mesmos ids vanilla, mas o Remix usa **offsets** diferentes nas tabelas dele. Os retratos do Remix não usam o arquivo 0x13 vanilla.
-- Quase todas as tabelas do CSS do port têm 12 entradas indexadas por fkind ou por retrato. Com fkind ≥ 12 elas leem fora do limite, e os sites com guarda (`ARRAY_COUNT`) só aparecem em alguns pontos.
-- **Problema de convenção encontrado:** o port mapeia o id Remix `0x1E` (GND) para fkind **28**, que é exatamente `nFTKindNull` (`ftdef.h:1139`). Como `nFTKindNull` é o sentinela de "slot vazio" e aparece em 130 pontos de `decomp/src`, o GND ficaria invisível para o CSS. Isso precisa de decisão antes da F3.
-- Os nomes VS dos fighters novos **não têm entradas** em `name_texture_table` nem em `series_logo_offset_table` (`CharacterSelect.asm:3561-3565`, `3401-3433`). A fonte desses nomes no Remix precisa ser confirmada (ver seção 4).
+Convenções: `mnplayersvs.c:N` é `decomp/src/mn/mnplayers/mnplayersvs.c`; `CharacterSelect.asm:N` é
+`.toolchain/pkgs/smashremix-src/src/CharacterSelect.asm`. As linhas citadas são do estado de 2026-10-12.
 
 ---
 
@@ -222,103 +216,3 @@ Os **dados de tabela** (`id_table`, `portrait_id_table`, `name_texture_table`, `
   - x < 0 → checa o bookend bônus (`_check_bonus`, `:~625-640`), na faixa `x >= -15` (`BOOKEND_WIDTH`).
   - Coluna = x / 24, linha = y / 24, índice = linha*10 + coluna (`:547-554`); se índice ≥ 30 → NONE.
 - Variante: se o token está parado em y = 85 e o cursor está em estado de aponte (`cursor state == 0`), devolve NONE (`:~575-581`).
-
----
-
-## 3. Plano de implementação (passos ordenados, ≤ 5 arquivos cada)
-
-Premissas: o port é Remix-only (o usuário informou), mas o plano preserva o caminho vanilla quando é barato (`#ifdef REGION_REMIX` ou lookup de tabela). A CMake diz que `REGION_REMIX` "só seleciona a tabela de arquivos e o pipeline de assets" (`CMakeLists.txt:748`), então o `#ifdef` é a forma correta de isolar o layout novo.
-
-### Passo 0: decisão sobre o sentinela (bloqueia F3)
-
-Problema: `nFTKindNull = 28` colide com GND (remix 0x1E → fkind 28).
-
-Opções:
-- **A (recomendada):** manter `nFTKindNull=28` e mapear GND para o próximo fkind livre (95), ajustando `REMIX_ID_TO_PORT_FKIND` (`remix_roster_data.h:31`) e o gerador `tools/gen_remix_roster.py`. Muda o contrato da F2 só para um id. Risco baixo, o registro já redimensiona (`port_fighter_register`).
-- **B:** mover `nFTKindNull` para fora de 27..94 (por exemplo 0xFF). Muda o valor de 130 usos e pode quebrar arrays dimensionados por `nFTKindEnumCount + 1` (`decomp_fkind_audit.md`, entrada 6 e `ftdata.c:129`). Risco maior; exige auditoria antes.
-
-Verificação: teste de unidade que compara `REMIX_ID_TO_PORT_FKIND(id)` para os 68 ids contra o conjunto de fkinds, sem colisão com `nFTKindNull`.
-
-### Passo 1: gerador de dados do CSS (tabelas Remix → C)
-
-- Arquivos (3): `tools/gen_remix_css.py` (novo, lê `CharacterSelect.asm` e `Character.asm`, resolve `series_logo.offset.*`, `portrait_offsets.*`, `name_texture.*`, `Character.id.*`, `+0x10`), `port/remix/remix_css_data.h` (novo, gerado), `port/remix/remix_roster_data.h` (só se a opção A do passo 0 for escolhida).
-- Conteúdo gerado: `remix_css_slot_ids[30]`, `remix_css_bonus_ids[10]`, `remix_css_portrait_offset[97]` (0xA05), `remix_css_name_offset[97]` (0x11), `remix_css_logo_offset[97]` (0x14), `remix_css_variant_ids[97][4]`, e os dois offsets de bookend.
-- Regra: os valores vêm do código-fonte. Nenhum byte da ROM vai para arquivo versionado (`implementation_plan.md`, "Regras").
-- Verificação: rodar o gerador duas vezes e comparar (idempotência); conferir que MARIO=0x1078, CRASH=0x2AE58+0x10, BONUS_BOOKEND=0x3B28, RANDOM_BOOKEND=0x53E8.
-
-### Passo 2: ids de arquivo do Remix para o CSS
-
-- Arquivos (2): `port/remix/remix_css_files.h` (novo: `REMIX_CSS_PORTRAITS_FILE_ID 0xA05`, `REMIX_CSS_IMAGES_FILE_ID 0xA06`), `decomp/src/mn/mnplayers/mnplayersvs.c`.
-- Mudança: em `dMNPlayersVSFileIDs` (`mnplayersvs.c:28-42`), sob `#ifdef REGION_REMIX`, acrescentar os dois ids e manter o índice 5 vanilla para o caminho antigo. `sMNPlayersVSFiles` cresce sozinho (`:134`).
-- Verificação: build de `ssb64`; log de `lbRelocLoadFilesListed` mostra os dois arquivos carregados; `Render`/`sMNPlayersVSFiles[8]` não é nulo.
-
-### Passo 3: geometria da grade 3×10 e hit test (puro, testável)
-
-- Arquivos (4): `port/remix/remix_css_layout.h` e `.cpp` (novos; funções puras `remixCssPortraitX(index)`, `remixCssPortraitY(index)`, `remixCssPortraitAtPoint(x, y)`, com constantes do `CharacterSelect.asm:3570-3590`), `decomp/src/mn/mnplayers/mnplayersvs.c` (chamadas em `mnPlayersVSGetNextPortraitX` `:233`, `mnPlayersVSSetPortraitWallpaperPosition` `:288`, `mnPlayersVSCheckPuckInRange` `:2431`, `mnPlayersVSGetPuckFighterKind` `:3370`), e o arquivo de teste.
-- Regras: y = 44 + linha*24 (`START_Y + START_VISUAL` + linha*`PORTRAIT_HEIGHT`, `:3620-3626`); x via `portrait_x_position` (`:3884-3899`); hit test com y < 72 e x < 240, bookend bônus x ∈ [-15, 0), bookend aleatório x ∈ [240, 255).
-- Verificação: teste de unidade em host para os 30 slots e os bookends (matriz de pontos de borda). Como não sei como `test_remix_blobs.py` é executado, **(não verificado)** qual é o runner de testes C++ do port.
-
-### Passo 4: retrato, nome e logo por tabela (remove os arrays de 12)
-
-- Arquivos (3): `decomp/src/mn/mnplayers/mnplayersvs.c` (`mnPlayersVSMakePortrait` `:468`, `mnPlayersVSMakeNameAndEmblem` `:617`, `mnPlayersVSMakePortraitAll` `:515`, `mnPlayersVSGetFighterKind` `:365`, `mnPlayersVSGetPortrait` `:377`), `port/remix/remix_css_data.h` (passo 1), `port/remix/remix_roster.h` (acessor de id → fkind, se a opção A do passo 0 estiver adotada).
-- Mudança: `mnPlayersVSGetFighterKind(portrait)` vira `remix_css_slot_ids[portrait]` convertido para fkind; `mnPlayersVSGetPortrait(fkind)` vira busca inversa por id. Retrato: `sMNPlayersVSFiles[8]` com `remix_css_portrait_offset[id]`. Nome: `sMNPlayersVSFiles[0]` com `remix_css_name_offset[id]`. Logo: `sMNPlayersVSFiles[2]` com `remix_css_logo_offset[id]`.
-- Atenção: para ids novos, os nomes e logos vêm de tabelas que estão **zeradas** (seção 2.3 e 2.6). Este passo só fica correto depois da seção 4, item 1.
-- Verificação: screenshot do CSS com os 12 vanilla mudando de arte de 0x13 para 0xA05 (comparação visual); log de "offset zero" para qualquer slot.
-
-### Passo 5: sorteio e posição do puck no Remix
-
-- Arquivos (3): `decomp/src/mn/mnplayers/mnplayersvs.c` (`mnPlayersVSRandFighterKind` `:3900`, `mnPlayersVSCenterPuckInPortrait` `:3883`, `mnPlayersVSSpotlightProcUpdate` `:4464`), `port/remix/remix_css_data.h`, `port/remix/remix_css_layout.cpp`.
-- Mudança: o sorteio passa a usar `remix_css_slot_ids` mais os bônus (conforme o toggle), com a mesma exclusão de bloqueado. Puck usa `remixCssPortraitX/Y`. O spotlight usa `port_fighter_css_spotlight_scale` para ids fora de 0..11 (já no código, `:4483`).
-- Verificação: 10 000 sorteios em teste unitário, sem repetir slot dentro da janela de 6 (anti-repetição), sem sorteio de NONE/PLACEHOLDER.
-
-### Passo 6: custo, variante e bookend bônus (depois do VS)
-
-- Costume: estender `mnPlayersVSSelectFighterPuck` (`mnplayersvs.c:194`) para índice > 3 quando `costume_count > 4`. Arquivos: `mnplayersvs.c`, `fighter_registry.h`.
-- Variante: ler `variant_offset` por porta e mapear para id via tabela (`remix_css_variant_ids`). Arquivos: `mnplayersvs.c`, `remix_css_data.h`.
-- Bookend bônus: desenhar o bookend (0xA06, offset 0x3B28) e trocar o índice de `bonus_chars` com Z/R. Arquivos: `mnplayersvs.c`, `remix_css_layout.cpp`.
-- 1P, treino e bônus (`mnplayers1pgame.c`, `mnplayers1ptraining.c`, `mnplayers1pbonus.c`): repetir os passos 2 a 5 em fases separadas, cada uma com um arquivo de layout próprio. Não entram no VS.
-
----
-
-## 4. Riscos e questões em aberto
-
-### 4.1 Top 3 riscos
-
-1. **Colisão de `nFTKindNull` com GND (fkind 28).** Verificado: `ftdef.h:1139` (Null=28), `remix_roster_data.h:31,83` (GND→28), 130 usos de `nFTKindNull` em `decomp/src`. Efeito: o GND some do CSS e de qualquer checagem `!= nFTKindNull`. Mitigação: passo 0.
-2. **Fighters novos sem nomes e logos no VS.** Verificado: `name_texture_table` e `series_logo_offset_table` só têm entradas até 0x1C (`CharacterSelect.asm:3565`, `:3433`), e a busca por patches não encontrou nenhuma extensão. Efeito: texto e logo errados ou lixo (leitura do offset 0 do arquivo). A fonte de nome para VS é **não verificada**; candidatos: os constantes `name_texture.*` com `+0x10` (`:3437-3530`) usados pelo 1P (`SinglePlayerModes.asm:3136-3184`). Mitigação: confirmar no código-imagem ou pelo ROM antes do passo 4.
-3. **Arrays de 12 e carga pesada do lutador completo.** Verificado: `mnplayersvs.c:235,241,290,367,417,472,629,638` sem guarda, `:125` (buffer de 64 com histórico de estouro), `:99` (`u16` para máscara por `1 << fkind`). Efeito: OOB silencioso ou panic "Force Status Buffer is full" ao rodar o CSS com 68 sintéticos. Mitigação: trocar todas as arrays por lookup de tabela ou registro (passos 3 a 5), dimensionar o buffer para o pior caso medido e usar máscara de tamanho adequado.
-
-### 4.2 Demais questões
-
-- **CSS model loading para sintéticos.** O port carrega o lutador completo (`mnplayersvs.c:1893`); o Remix carrega só `main` e `model` (`CharacterSelect.asm:77-113`). Não verifiquei se o registro (F2) já deixa o `FTData` do sintético disponível no CSS sem carga extra. **(não verificado)**.
-- **Costumes (20 fighters com `num_costumes = 0`).** Confirmado na fonte: não há `costumes/<Nome>.asm` para eles. O que o CSS mostra com zero costumes (cor padrão? cicla?) **(não verificado)**. Recomendação: tratar `0` como "uma cor" no CSS, sem cair na tabela de cores do parent.
-- **Crash: divergência entre comentário e fonte.** `fighter_registry.h:169-174` diz `Crash = 6`; a fonte tem `NCrash.asm` com 6 e `CRASH` (0x48) sem arquivo, ou seja, 0. Usar a fonte.
-- **Variantes (polígono/metal/giant).** Os fkinds 13..26 já existem no port com a numeração do Remix. O que falta é o seletor D-pad. Para os novos fighters não há variante definida no Remix (`Character.asm:2524-2563`), então a variante fica restrita aos vanilla.
-- **Bookend bônus.** O "scroll" é índice cíclico por Z/R (`CharacterSelect.asm:2683-2692`), não animação. Risco baixo, mas o bookend precisa do nome do bônus atual, o que depende da questão 4.1 (item 2).
-- **Retratos do 0x13 vs 0xA05.** Os 12 retratos vanilla podem mudar de arte ao trocar de arquivo. Não verifiquei visualmente. Teste de aceitação do passo 4.
-- **Offsets com `+0x10`.** O Remix soma 16 bytes aos offsets dos novos sprites. Não verifiquei se o `lbRelocGetFileData` do port usa a mesma base (o `.o2r` tem 80 bytes de cabeçalho a mais que o descomprimido, como visto na seção 2.5). **(não verificado)**. Teste: ler o sprite de um offset `+0x10` e comparar com o que o Remix mostra.
-- **Bug candidato no z-scale do spotlight.** Nos três ramos do spotlight (`mnplayersvs.c:4484-4490`, `mnplayers1pgame.c:3233-3246`, `mnplayers1ptraining.c:2836-2850`) o `scale.vec.f.y` é atribuído duas vezes e o `.z` nunca. Não sei se o original também faz isso. **(não verificado)**.
-- **Toggle "Random Select" e menus de Remix no port.** Não verifiquei se o port tem os toggles do Remix (`Toggles.asm`); o sorteio do passo 5 depende disso.
-- **Vanilla preservado.** O plano troca arrays por tabelas. Para não perder o caminho vanilla, cada tabela nova é indexada pelo id Remix, e os ids 0..26 coincidem com os fkinds vanilla (seção 2.1). Por isso o caminho vanilla continua válido.
-
----
-
-## 5. O que foi verificado e o que não foi
-
-Verificado diretamente nesta análise:
-- Layout, tabelas e funções do CSS VS do port (seção 1), com linhas citadas.
-- Ids de arquivo (`reloc_data_symbols.us.txt`, `yamls/remix/*.yml`, `RelocFileTable.remix.cpp:2578`) e presença de `file_2565`, `file_2566`, `MNPlayersCommon`, `MNPlayersPortraits`, `FTEmblemSprites` no `.o2r` gerado.
-- Layout, constantes, offsets de retrato, nome e logo do Remix (seções 2.2 a 2.4).
-- Ids e fkinds (seção 2.1), contagem de 20 sintéticos com 0 costumes, e a ausência de variantes para novos ids.
-- Ausência de entradas VS para novos ids em `name_texture_table` e `series_logo_offset_table`.
-
-Não verificado (marcado no texto):
-- Se as artes de retrato do 0x13 e do 0xA05 são iguais.
-- Base dos offsets `+0x10` no `.o2r` e no `lbRelocGetFileData`.
-- Fonte de nomes e logos VS dos fighters novos (pode estar no código-imagem ou na ROM, não nos fontes lidos).
-- Comportamento do CSS com `num_costumes = 0`.
-- Runner de testes C++ do port.
-- Toggles do Remix no port.
-- Se a carga do lutador completo no CSS cabe nos buffers atuais.
-
-Nenhum build foi executado. Nenhum código foi alterado. Nenhum commit foi feito. A instalação de qualquer dependência não ocorreu.

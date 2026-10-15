@@ -1,8 +1,8 @@
 # Smash Remix 2.0.1 no port PC: roadmap definitivo
 
 Este é o **único plano** da implementação do Remix. Quem trabalhar no Remix (agente ou humano) segue este arquivo na
-ordem, sem abrir frentes fora dele. Ele substitui `docs/remix/implementation_plan.md` (histórico) e os planos antigos em
-`~/.claude/plans/`. Widescreen/aspect ratio está **fora do escopo** (o jogo fica em 4:3).
+ordem, sem abrir frentes fora dele. Ele substitui os planos antigos (`docs/remix_port_map_2026-10-12.md`, `docs/remix/implementation_plan.md`, removidos;
+o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claude/plans/`. Widescreen/aspect ratio está **fora do escopo** (o jogo fica em 4:3).
 
 ## Como usar (protocolo de trabalho)
 
@@ -29,16 +29,17 @@ ordem, sem abrir frentes fora dele. Ele substitui `docs/remix/implementation_pla
 - Bytes derivados da ROM nunca em arquivos versionados. Fonte autorizada: `.toolchain/pkgs/smashremix-src`.
 - Sem fallback para o pai nem hack de contenção: o comportamento é o do Remix. Desvio necessário vira doc em `docs/bugs/`.
 - Código em inglês, sem comentários `//` que repetem o código. `#ifdef REGION_REMIX` em arquivo vanilla.
-- Testes: `vs.sh` (`SSB64_VS_FKINDS`, `SSB64_VS_STAGE=<decimal>`, `SSB64_VS_ITEMS`, `SSB64_REMIX_FORCE_ITEM`,
-  `SHOTS=`) e `css.sh` (fluxo CSS) em `/Users/lucas/.claude/jobs/b7b2d850/tmp/`; capturas em `build/agent-shots/vs/`.
+- Referências em comentários: `torch/` e `libultraship/` são repositórios independentes, então seus comentários não citam
+  docs deste repositório (descrevem o formato no próprio código). `decomp/` pode citar `docs/bugs/` e `docs/remix/notes/`
+  (convenção do projeto). Notas de trabalho ficam versionadas em `docs/remix/notes/`, nunca em `build/`.
+- Testes: skill `remix-smoke-tests` (`.claude/skills/remix-smoke-tests/`: `vs.sh`, `special_matrix.sh`, `stage_sweep.sh`,
+  `item_cpu_sweep.sh`, `css.sh`, `sheet.py`, inputs e leitura de resultados); capturas em `build/agent-shots/vs/`.
   Crash `CAMetalLayer nextDrawable` é flake do macOS: repetir antes de investigar.
 
 ## Posição atual
 
-- **Milestone:** M1. **Task:** T1.3 (itens). Feito: todos os 13 itens pegos/usados pelos CPUs com efeito conferido,
-  exceto o Golden Gun, cujo projétil dourado agora dispara (12 tiros, sem crash) mas falta conferir o visual em captura;
-  depois disso, fechar T1.3 e seguir para T1.4.
-- **Último checkpoint:** ver `git log` (checkpoint T1.1-T1.3 de 2026-10-14).
+- **Milestone:** M1. **Task:** T1.4 (comportamento dos hazards portados, um stage por vez).
+- **Último checkpoint:** ver `git log` (checkpoint T1.1-T1.3 e limpeza de docs, 2026-10-15). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~58% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
@@ -58,15 +59,12 @@ ordem, sem abrir frentes fora dele. Ele substitui `docs/remix/implementation_pla
   pendente (`portRelocBeginChainWalk`). **Aceite:** stage 59 roda 1500 frames, sem `chain walk STOPPED` no stdout,
   sweep de stages sem regressão; doc em `docs/bugs/`. *(feito: stage 59 renderiza; sweep 174/175, só o 149 do T1.2; doc `reloc_chain_fixup_overwrites_pending_slot_2026-10-14.md`)*
 - [x] T1.2 Dream Greens (stage 149) crash em `gcDrawDObjTree` (`grDisplayLayer0PriProcDisplay`). **Aceite:** roda 1500 frames. *(feito: `dream_greens_hardcoding_1-4` e `_animation_1-4` em `grpupupu.c`, tabela lida da imagem de RAM; Dream Land vanilla intacto)*
-- [ ] T1.3 *(em andamento: harness `cpusweep.sh` com 3 lutadores e `SSB64_REMIX_ITEM_LOG=1`; ok: Super/Poison Mushroom
-  (Size ligado), Blue Shell (transform corrigido), Lightning (Size e cancelamento do cogumelo ligados), Deku Nut, Franklin,
-  Pitfall, Dango, P-Wing, Stopwatch; Basketball cai e quica (procs do ITDesc e estado por bola), resto vai para o T6.1;
-  Psyduck é conteúdo desativado no Remix 2.0.1 (`pokemon_table` comentada), n/a; Golden Gun: projétil portado, falta captura)*
-  Verificar pickup e efeito dos itens padrão em partida (`SSB64_REMIX_FORCE_ITEM`, CPU ou input script que pega o
-  item): Super Mushroom, Poison Mushroom, Blue Shell, Lightning, Deku Nut, Franklin Badge, Pitfall, Golden Gun (com o
-  projétil, patches 1 e 3), Dango, P-Wing, Stopwatch, Basketball, Psyduck. Cada bug vira correção. **Aceite:** captura
-  do efeito de cada item; tabela no doc `remix_standard_items_2026-10-14.md`.
-- [ ] T1.4 Verificar o comportamento dos 15 hazards portados (Great Bay, Twilight City, MMM, BBH, Corneria, GB Land,
+- [x] T1.3 Verificar pickup e efeito dos itens padrão em partida. *(feito em 2026-10-15 com `item_cpu_sweep.sh`, ver a tabela
+  de `remix_standard_items_2026-10-14.md`: Super/Poison Mushroom (Size ligado), Blue Shell (transform corrigido), Lightning
+  (Size e cancelamento do cogumelo), Deku Nut, Franklin, Pitfall, Dango, P-Wing, Stopwatch, Golden Gun (bala dourada
+  dispara, 12 tiros, dano 99: Mario 99% e Yoshi 101% em `cpu_53`), Basketball (cai e quica; o resto vai para o T6.1);
+  Psyduck é conteúdo desativado no Remix 2.0.1, n/a.)*
+- [ ] T1.4 *(em andamento, 2026-10-15: vistos agindo Corneria, Pirate Land, Rainbow Road, Spawned Fear, Metallic Madness e GB Land; faltam Onett (carro), Japes (KlapTrap), Casino (bumper), água do Great Bay e do Twilight, Turnpike, bumpers do RTTF, som do MMM; tabela em `remix_stages_and_hazards_2026-10-14.md`)* Verificar o comportamento dos 15 hazards portados (Great Bay, Twilight City, MMM, BBH, Corneria, GB Land,
   Pirate Land, Jungle Japes + KlapTrap, Casino Night, Onett + Car, Toad's Turnpike, Rainbow Road, Remix RTTF, Metallic
   Madness + RobotBee, Spawned Fear + Cacodemon): captura no frame em que o hazard age, e fechar os `REMIX-TODO` de cada
   um (lista em `remix_stages_and_hazards_2026-10-14.md`, seção Open). **Aceite:** cada stage com captura do hazard agindo.
@@ -81,21 +79,35 @@ ordem, sem abrir frentes fora dele. Ele substitui `docs/remix/implementation_pla
 
 ## M2. Subsistemas de gameplay (destravam os `REMIX-TODO` dos fighters, itens e stages)
 
-- [ ] T2.1 GFX + GFXRoutine: dados `src/gfx/*` no `.o2r` via Torch e no `lbParticle`, rotinas de colanim com id >= 0x56 em
-  `dGMColScriptsDescs`, hooks de `GFX.asm`/`GFXRoutine.asm`. **Aceite:** efeitos com `REMIX-TODO(GFX)` aparecem (Mewtwo,
+- [ ] T2.1 GFX + GFXRoutine: primeiro o pipeline de dados (`src/gfx/*.bin` no `.o2r` via fábrica do Torch, carregado no
+  `lbParticle`), depois as 51 rotinas de colanim (ids >= 0x56) em `dGMColScriptsDescs`, 3 hooks triviais e um
+  `port_override` em `ftremixgfx.c`; GFXRoutine não funciona sem os dados do GFX. Remove a contenção de
+  `ftParamCheckSetColAnimID` (rejeita ids fora da tabela, `remix_css_and_parent_fallbacks_2026-10-12.md` fix 3). **Aceite:** efeitos com `REMIX-TODO(GFX)` aparecem (Mewtwo,
   Crash, Dedede, Goemon, Sheik, Flashbang, fireball do Dr. Mario).
-- [ ] T2.2 CharEnvColor: tabelas e override de cor por porta (`ftremixenvcolor.c`). **Aceite:** Cloaking Device com fade,
+- [ ] T2.2 CharEnvColor: 3 tabelas e `ftRemixEnvColorGetOverride(port)` em `ftremixenvcolor.c`, 2 hooks nos getters de env
+  color; os 40 display lists do asm viram override de material no draw do port (desvio documentado). **Aceite:** Cloaking Device com fade,
   Dracula/Reapers com a cor do stage.
-- [ ] T2.3 Reflect: nibbles CUSTOM, dispatch (`ftremixreflect.c`), Franklin Badge, absorb de Marina/Dedede.
+- [ ] T2.3 Reflect: nibbles CUSTOM no hitbox de reflect e dispatch em `ftremixreflect.c` (Franklin reflete sem virar,
+  Marina/Dedede absorvem; `itRemixFranklinBadgeReflectInitial` já existe), site 0x800E663C a mapear; hooks de CPU ficam no M7.
   **Aceite:** projétil refletido/absorvido nos três casos.
-- [ ] T2.4 Size fases (b) física/peso e (c) cosméticos; estados GIANT/TINY do Super/Poison Mushroom e do laser do
-  Metallic Madness. **Aceite:** Super Mushroom aumenta o lutador com física coerente e volta ao normal.
-- [ ] T2.5 PokemonAnnouncer (`ftremixannouncer.c`, ~30 inserções). **Aceite:** fala em pelo menos 3 golpes.
+- [ ] T2.4 Size fases (b) física/peso e (c) cosméticos (`Size.asm`, 73 sites; 4 `adjust_ecb_display_` e 1 `fix_size_`
+  ainda sem mapa); estados GIANT/TINY (`Size.match_state_table`) do Super/Poison Mushroom, Lightning e laser do Metallic
+  Madness; hooks de entrada (update do Arwing do Wolf `Size.arwing.update_routine`, Blue Falcon, estrela do Kirby, ovo do Yoshi). **Aceite:** Super Mushroom aumenta o lutador com física coerente e volta ao normal.
+- [ ] T2.5 PokemonAnnouncer (`ftremixannouncer.c`, ~30 inserções mecânicas; conferir os ids de FGM no banco portado antes). **Aceite:** fala em pelo menos 3 golpes.
 - [ ] T2.6 Kirby: `KirbyHats.asm` (magic hat, `restore_magic_hat_`, `clear_magic_hat_charge`) e copy dos poderes Remix.
   **Aceite:** Kirby copia 3 lutadores Remix e usa o NSP com o chapéu certo.
 - [ ] T2.7 Outros sistemas de golpe: `Knockback.asm` (aleatorizador de ângulo), `Hitbox.asm`, `command.asm` restante,
   `CustomGrabAction.asm`, `Surface.asm`, `Blastzone.asm`, `Spawn.asm`, `Camera.asm`, `Damage.asm`, `Poison.asm`.
-- [ ] T2.8 `grep -rn REMIX-TODO decomp/src` sem ocorrências fora de AI e de modos/menus (que têm milestone próprio).
+- [ ] T2.8 Sobras dos fighters e itens: patch do Piano em 0x800E7220 (`extra_part_visibility_`), knockback do beam do Waddle Doo
+  (0x800E44EC), `prevent_item_despawn_` da Marina, `clear_items_in_1p`. O counter do Roy fica fora: o próprio Remix o
+  desativou (comentado em `MarthSpecial.asm`).
+- [ ] T2.9 Remover as contenções restantes dos fighters, trocando pelo comportamento do Remix: fallback de joint de captura
+  (`ftcommoncapturepulled.c`) e `throw_desc` NULL (`ftcommonthrown2.c`), fixes 6 e 7 de
+  `remix_css_and_parent_fallbacks_2026-10-12.md`; o guard de TransN dos polígonos em `ftMainSetStatus`
+  (`remix_entry_effects_and_polygon_entry_2026-10-14.md`, achar a causa na tabela de hidden parts).
+- [ ] T2.10 Percorrer a auditoria `docs/remix/decomp_fkind_audit.md` (inventário dos 124 sítios indexados por fighter): rever as linhas de risco alto (Kirby `copy_id` em
+  `ftcommonspecialair.c`, tabelas do opening room, `vs_records`/`spgame_records` para 97 lutadores) (o doc fica como inventário de referência).
+- [ ] T2.11 `grep -rn REMIX-TODO decomp/src` sem ocorrências fora de AI e de modos/menus (que têm milestone próprio).
 - **CP2**.
 
 ## M3. Áudio
@@ -115,16 +127,29 @@ ordem, sem abrir frentes fora dele. Ele substitui `docs/remix/implementation_pla
   tripping, momentum slide, perfect shield, parry, rage, stale moves, air dodge, ledge jump/trump, jab lock, wall teching,
   footstool, charge smash, combo meter, input display, salty runback, neutral spawns, hazard mode e os demais),
   um arquivo por sistema. **Aceite:** cada toggle muda o comportamento num teste curto.
-- [ ] T4.3 `grRemixHazardsAreOn`/`grRemixMovementIsOn` e o switch de itens lendo os toggles; perfis CE/TE/NE/JP.
+- [ ] T4.3 `grRemixHazardsAreOn`/`grRemixMovementIsOn` e o switch de itens lendo os toggles; perfis CE/TE/NE/JP; toggles de
+  item que faltam: seleção de Pokémon, containers, drop de item ao morrer, música aleatória (`Toggles.entry_random_music`,
+  usado pelo GB Land).
 - **CP4**.
 
 ## M5. CSS, menus e telas
 
-- [ ] T5.1 CSS de 30 slots + bookend de bônus + variantes (polygon, metal, J, E), tabela de figurinos, Random com pool e toggle.
+- [ ] T5.1 CSS VS (`mnplayersvs.c`, referência em `docs/remix/css_reference.md`): a grade 3x10 e os dados do Remix já estão
+  ligados. Falta: costumes com índice > 3 para lutadores com `costume_count` > 4 (`mnPlayersVSSelectFighterPuck`, hoje só 4
+  botões C; polígonos têm 6), seletor de variantes pelo D-pad (`remix_css_variant_ids`: polígono, metal, J, E), bookend de bônus
+  (arquivo 0xA06, offset 0x3B28; Z/R troca o índice de `bonus_chars` com 30 frames de atraso), Random com o pool e o toggle
+  "Random Select" (`recent_randoms_table`, 6 sorteios sem repetir), nomes e logos VS dos lutadores novos (as tabelas
+  `name_texture_table` e `series_logo_offset_table` do Remix só vão até 0x1C; achar a fonte dos nomes), lutador com 0 costumes
+  tratado como uma cor, offsets `+0x10` dos sprites novos conferidos contra `lbRelocGetFileData`, retratos 0x13 contra 0xA05, e
+  o bug candidato do `scale.vec.f.y` repetido (nunca `.z`) nos três ramos do spotlight (`mnplayersvs.c`, `mnplayers1pgame.c`,
+  `mnplayers1ptraining.c`). **Aceite:** capturas do CSS com um lutador de 6 costumes, uma variante e o bookend de bônus.
+- [ ] T5.1b CSS de 1P, treino e bônus (`mnplayers1pgame.c`, `mnplayers1ptraining.c`, `mnplayers1pbonus.c`): repetir o que o VS
+  já tem (grade, retratos, nomes, logos, sorteio), uma tela por vez; hoje usam as tabelas de 12 entradas (a auditoria
+  `decomp_fkind_audit.md` lista os sítios). **Aceite:** cada tela abre com os 78 lutadores, sem leitura fora do limite.
 - [ ] T5.2 Painel por porta do CSS (`css/*.asm`).
 - [ ] T5.3 VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
   créditos estendidos, Character Data dos 97, name tag / player tag, Gallery.
-- [ ] T5.4 Remoção dos hacks de contenção que sobrarem no CSS/menus (lista no doc do CSS).
+- [ ] T5.4 Remoção dos hacks de contenção que sobrarem no CSS/menus (lista em `docs/bugs/remix_css_and_parent_fallbacks_2026-10-12.md`).
 - **CP5**.
 
 ## M6. Modos
@@ -156,7 +181,8 @@ ordem, sem abrir frentes fora dele. Ele substitui `docs/remix/implementation_pla
 ## M10. Switch
 
 - [ ] T10.1 Build `.nro` do `REGION_REMIX` (`scripts/switch/build.sh`), pacote com o `.o2r` do Remix.
-- [ ] T10.2 Validação em hardware pelo usuário (checklist de `docs/switch_port_2026-10-12.md`), RAM com o `.o2r` de 60 MB.
+- [ ] T10.2 Validação em hardware pelo usuário (checklist de `docs/switch_port_2026-10-12.md`), RAM com o `.o2r` de 60 MB
+  (os dados do Remix na ROM somam ~36,6 MB contra ~9,5 MB do vanilla) e armazenamento no SD.
 - **CP10**.
 
 ---

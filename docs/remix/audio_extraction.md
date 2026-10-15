@@ -1,6 +1,6 @@
 # Smash Remix: reconstrução dos bancos de áudio (ctl/tbl/sbk)
 
-Prototipo: `tools/remix_dump_audio.py` (stdlib only, `python3`). Saída padrão: `build/remix-dump/audio/` (git-ignorado). Nenhum dado derivado da ROM foi escrito em caminho rastreado. Não há alteração no port, no `.o2r` nem no CMake.
+Referência do modelo de reconstrução. Implementado no Torch (`SSB64:REMIXAUDIO`, `docs/remix/torch_factories.md`), que gera os mesmos bytes que o protótipo `tools/remix_dump_audio.py` (stdlib only). Saída do protótipo: `build/remix-dump/audio/` (git-ignorado); nenhum dado derivado da ROM vai para caminho rastreado.
 
 Comando:
 
