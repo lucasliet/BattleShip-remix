@@ -38,9 +38,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M2. **Task:** T2.1 (GFX + GFXRoutine); T1.5b (fades Time Twister/Scuttle) fica pendente de M1.
-- **Último checkpoint:** CP1, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~61% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Milestone:** M2. **Task:** T2.6 (Kirby hats), depois T2.9, T2.10 e o grep de TODOs; T2.5 espera o áudio (T3.2), T2.4b o menu (M4); T1.5b (fades Time Twister/Scuttle) fica pendente de M1.
+- **Último checkpoint:** CP2a, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b; M2 em T2.6, restam T2.5 (depois do áudio), T2.7b, T2.9, T2.10, T2.11). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~66% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -105,28 +105,55 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## M2. Subsistemas de gameplay (destravam os `REMIX-TODO` dos fighters, itens e stages)
 
-- [ ] T2.1 GFX + GFXRoutine: primeiro o pipeline de dados (`src/gfx/*.bin` no `.o2r` via fábrica do Torch, carregado no
-  `lbParticle`), depois as 51 rotinas de colanim (ids >= 0x56) em `dGMColScriptsDescs`, 3 hooks triviais e um
-  `port_override` em `ftremixgfx.c`; GFXRoutine não funciona sem os dados do GFX. Remove a contenção de
-  `ftParamCheckSetColAnimID` (rejeita ids fora da tabela, `remix_css_and_parent_fallbacks_2026-10-12.md` fix 3). **Aceite:** efeitos com `REMIX-TODO(GFX)` aparecem (Mewtwo,
-  Crash, Dedede, Goemon, Sheik, Flashbang, fireball do Dr. Mario).
-- [ ] T2.2 CharEnvColor: 3 tabelas e `ftRemixEnvColorGetOverride(port)` em `ftremixenvcolor.c`, 2 hooks nos getters de env
-  color; os 40 display lists do asm viram override de material no draw do port (desvio documentado). **Aceite:** Cloaking Device com fade,
-  Dracula/Reapers com a cor do stage.
-- [ ] T2.3 Reflect: nibbles CUSTOM no hitbox de reflect e dispatch em `ftremixreflect.c` (Franklin reflete sem virar,
-  Marina/Dedede absorvem; `itRemixFranklinBadgeReflectInitial` já existe), site 0x800E663C a mapear; hooks de CPU ficam no M7.
-  **Aceite:** projétil refletido/absorvido nos três casos.
-- [ ] T2.4 Size fases (b) física/peso e (c) cosméticos (`Size.asm`, 73 sites; 4 `adjust_ecb_display_` e 1 `fix_size_`
-  ainda sem mapa); estados GIANT/TINY (`Size.match_state_table`) do Super/Poison Mushroom, Lightning e laser do Metallic
-  Madness; hooks de entrada (update do Arwing do Wolf `Size.arwing.update_routine`, Blue Falcon, estrela do Kirby, ovo do Yoshi). **Aceite:** Super Mushroom aumenta o lutador com física coerente e volta ao normal.
-- [ ] T2.5 PokemonAnnouncer (`ftremixannouncer.c`, ~30 inserções mecânicas; conferir os ids de FGM no banco portado antes). **Aceite:** fala em pelo menos 3 golpes.
-- [ ] T2.6 Kirby: `KirbyHats.asm` (magic hat, `restore_magic_hat_`, `clear_magic_hat_charge`) e copy dos poderes Remix.
-  **Aceite:** Kirby copia 3 lutadores Remix e usa o NSP com o chapéu certo.
-- [ ] T2.7 Outros sistemas de golpe: `Knockback.asm` (aleatorizador de ângulo), `Hitbox.asm`, `command.asm` restante,
-  `CustomGrabAction.asm`, `Surface.asm`, `Blastzone.asm`, `Spawn.asm`, `Camera.asm`, `Damage.asm`, `Poison.asm`.
-- [ ] T2.8 Sobras dos fighters e itens: patch do Piano em 0x800E7220 (`extra_part_visibility_`), knockback do beam do Waddle Doo
-  (0x800E44EC), `prevent_item_despawn_` da Marina, `clear_items_in_1p`. O counter do Roy fica fora: o próprio Remix o
-  desativou (comentado em `MarthSpecial.asm`).
+- [x] T2.1 GFX + GFXRoutine (2026-10-16, `docs/bugs/remix_gfx_and_gfxroutine_2026-10-16.md`): 33 scripts e 9 blocos de textura novos
+  no banco comum de partículas (ids 0x5C-0x7C vistos em tela, 32 de 33; harness `SSB64_REMIX_GFX_TEST`), 50 rotinas de colanim
+  (0x56-0x87) em `dGMColScriptsDescs` com `port_override` (harness `SSB64_REMIX_COLANIM_TEST`), contenção de
+  `ftParamCheckSetColAnimID` removida; Mewtwo, Goemon, Dedede, Sheik, Pwing, Stopwatch, Basketball, Franklin, Flashbang e Deku Nut
+  ligados. Abertos (anotados no doc): câmera do Lightning, spin do Crash, nível de carga do Sheik, clone do efeito de chão 0x64.
+- [x] T2.2 CharEnvColor (2026-10-16): tabelas override/moveset/state em `ftremixenvcolor.c`, lidas no draw do lutador
+  (`ftdisplaymain.c`, depois do evento de SR); Cloaking Device com fade de 32 frames, velocidade e flicker (vistos: Kirby e
+  Yoshi translúcidos no `item_cpu_sweep 45`), Dracula e Reapers escrevem a cor de luz do stage (vistos: 176 rosado, 190
+  vermelho), moveset_table de Sonic Super/Mewtwo/Sheik no USP. Desvio: o asm troca o display list de material para alfa
+  (`custom_display_lists_*`, 40 DLs de ajuste por lutador); o port usa só o alfa do env color, então partes com render mode
+  especial (língua do Yoshi, escudo do GND) podem aparecer sem o ajuste. Reaparece como T2.2b se visto em partida.
+- [x] T2.3 Reflect (2026-10-16, `ftremixreflect.c`): hitbox de reflect CUSTOM (`FTSpecialColl.kind` = id << 16 | 3) com a
+  rotina por id (0 Franklin Badge com o círculo verde no torso, 1 absorção da Marina, 2 absorção do Dedede, que agora também
+  liga `absorb_setup_` no NSP), reflectabilidade forçada de Samus bomb, Thunder, Onix, Blastoise, Koffing, bola do Pirate
+  Land e laser da Bee, absorção de projétil/item (Thunder trail derruba a cabeça), inversão da direção sem olhar o lr. Vistos:
+  os tiros do Fox somem na Marina com o brilho de absorção, e o Dedede reage ao tiro (harness `SSB64_VS_P2_HUMAN=1` com
+  `inputs/reflect_test*.txt`). Os hooks de CPU (`Reflect.AI`) ficam no M7.
+- [x] T2.4 Size fases b e c (2026-10-16, notas `docs/remix/notes/f7_size_b_*.md` e `f7_size_c_*.md`): pesos (8 sites), velocidades
+  de andar/dash/corrida, pulo e jump squat, plataforma de respawn, etiqueta, armadura passiva, tamanho de hitbox e dano,
+  escudo/ovo do Yoshi, ondas de impacto, vento do Kirby, soco do Falcon, bola do Dragon King, projétil do Link, Arwing e
+  animação de entrada do Mario. Visto: Super Mushroom aumenta Mario e Kirby e volta ao normal (`item_cpu_sweep 46`), matriz
+  de 240 runs sem erro depois da onda. Abertos (TODO(Size) no código): sombra do jogador, `kirby_ausp_`, ovo no `lay`,
+  Samus gun blast e USP do Kirby, Pikachu/Ness gfx, 7 efeitos de entrada, itens (nuvem), fator do Pwing no pulo aéreo e smash
+  carregado (`ChargeSmash`). Fontes de estado GIANT/TINY (`match_state_table`, Lightning e laser da Bee) seguem em T2.4b.
+- [ ] T2.4b *(depende do menu Remix, feito no M4)* `Size.match_state_table` (modos GIANT/TINY da partida), restauração dos
+  tamanhos pelo Lightning e pelo laser do Metallic Madness, Poison Mushroom visto em partida. Hoje toda partida é NORMAL, o
+  que bate com o jogo sem o menu. **Aceite:** com o modo GIANT ligado, os lutadores nascem grandes e o Lightning devolve ao
+  tamanho do modo.
+- [ ] T2.5 PokemonAnnouncer (`ftremixannouncer.c`, ~30 inserções mecânicas; os clipes são FGMs do Remix (>= 0x2B7), então **executar depois de T3.2** para poder ouvir/verificar; padrão do jogo: só nos stages Pokémon). **Aceite:** fala em pelo menos 3 golpes.
+- [ ] T2.6 Kirby *(em andamento, 2026-10-16)*: feito `ftremixkirbycopy.c` (tabela `Character.kirby_inhale_struct.table` do
+  Remix no lugar da tabela de 27 linhas do arquivo do Kirby: copy_id, chapéu, escala e dano da estrela de todos os 97 lutadores)
+  e `ftremixkirbyhats.c` (33 chapéus extras de `KirbyHats.extended_special_parts`, arquivos `KIRBY_CUSTOM_HATS` 0xA8D e 0x1533
+  carregados sob demanda). Visto: Kirby com o chapéu certo para 24 lutadores (harness `SSB64_REMIX_KIRBY_COPY_TEST=<fkind>`,
+  `inputs/nsp_kirby.txt`) e NSP copiado rodando para 13 de 16 testados (Falco, GND, Young Link, Wario, Elink, JNess,
+  Lucas, Sonic, Marth e outros). Faltam: crash do NSP copiado de DSamus (34, usa `wpSamusChargeShotMakeWeapon` com os dados
+  do Samus), Roy (74, descritor de status errado) e Dedede (64, animação do Kirby sem figatree); depois `magic_hat_on`,
+  `hat_loss_prevent_`, `kirby_power_loss_prevent_` e o chapéu aleatório/`spawn_with_hat` (menu, M4). **Aceite:** Kirby copia
+  3 lutadores Remix (feito para 13) e o NSP não crasha para nenhum dos 16 testados.
+- [x] T2.7 Outros sistemas de golpe (2026-10-16, workers Haiku, validado pelo lead: build limpo, matriz 240/240, 175 stages,
+  13 itens): Knockback (ângulos aleatórios, throws), Poison (acid do Spawned Fear com DOOM_ACID), Damage (GFX de shadow/stun,
+  rotinas de colanim 7..0xC), Surface (fricção), Blastzone (som do fundo), Camera (tipo MK, zoom do Venom/GB Land), Spawn
+  (respawn fixo de DL beta e Sector Z Remix), CustomGrabAction (Wario/Piano), `command.asm` (create_hitbox_, direção). Notas
+  em `docs/remix/notes/f7_knockback_hitbox.md`, `f7_damage_poison.md`, `f7_surface_blastzone_camera_spawn.md`,
+  `f7_customgrab_command.md`.
+- [ ] T2.7b Lacunas do T2.7 que aparecem em jogo: neutral spawns do VS (`entry_neutral_spawns` liga por padrão), esteiras
+  (conveyors) de Surface, ações STUN/BURY/PLUNGE do Damage, wind push enterrado, exibição de hitbox (`Hitbox.asm`, ~20 patches
+  de display list), blastzone warp, câmera de pausa. **Aceite:** spawns neutros num stage Remix, esteira movendo um lutador.
+- [x] T2.8 Sobras (2026-10-16): Piano `extra_part_visibility_` e Marina `prevent_item_despawn_` aplicados. Ficam: beam do
+  Waddle Doo (0x800E44EC, sem site C equivalente) e `clear_items_in_1p` (o port já limpa os itens a cada cena).
 - [ ] T2.9 Remover as contenções restantes dos fighters, trocando pelo comportamento do Remix: fallback de joint de captura
   (`ftcommoncapturepulled.c`) e `throw_desc` NULL (`ftcommonthrown2.c`), fixes 6 e 7 de
   `remix_css_and_parent_fallbacks_2026-10-12.md`; o guard de TransN dos polígonos em `ftMainSetStatus`
@@ -220,12 +247,12 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 | Área | Peso | Feito |
 |---|---|---|
-| Fighters (roster, specials, projéteis, entradas) | 35% | ~85% |
+| Fighters (roster, specials, projéteis, entradas) | 35% | ~92% |
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~50% |
 | Settings, menus, modos | 20% | ~15% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~61%** |
+| **Total ponderado** | | **~66%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).

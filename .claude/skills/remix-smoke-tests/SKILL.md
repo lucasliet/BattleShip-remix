@@ -16,7 +16,8 @@ Verification by running the real game headless with environment overrides, scree
 2. **Never rebuild while a sweep runs**: the sweep keeps launching `build/BattleShip-Remix`.
 3. Runs share `~/Library/Application Support/BattleShip/ssb64.log`, so run sweeps one at a time (the scripts copy the log
    into the run folder after each run).
-4. Long sweeps (stage sweep about 10 s per stage, item sweep about 40 s per item) go in the background
+4. Prefer `parallel.sh 6 ...` for sweeps (about 6x faster); the serial scripts stay for one-off runs. Never run two sweeps that write the same run name at once.
+5. Long sweeps (stage sweep about 10 s per stage, item sweep about 40 s per item) go in the background
    (`run_in_background`), then wait with Monitor on the `*_DONE` line; do not poll with sleep.
 
 ## Scripts (`.claude/skills/remix-smoke-tests/scripts/`)
@@ -29,6 +30,7 @@ Verification by running the real game headless with environment overrides, scree
 | `hazard_sweep.sh <stage>...` | Three fighters on each stage for 4000 frames, a shot every 150 frames, one 5x5 sheet per stage (`hz_<stage>/sheet.png`). |
 | `item_cpu_sweep.sh [kind]...` | Mario idle + Kirby + Yoshi CPUs, every spawned item forced to `<kind>`, 3000 frames, item event counts. |
 | `stage_select_sweep.sh [gkind...]` | Stage select opened on each of the 85 selectable stages (`SSB64_MAPS_START_GKIND`), screenshot at frame 300 into `ss_<gkind>/`. |
+| `parallel.sh <jobs> matrix\|stages\|items\|hazards <args>` | The sweeps above with several game instances at once (own log and save per run through `SSB64_LOG_PATH` / `SSB64_SAVE_PATH`). 6 jobs ran 6 matrix runs in 19 s, against 19 s per run serially; 8 jobs gave no further gain on 11 cores. Windows still open in front, so keep the machine free. |
 | `css.sh <input> <name> [frames]` | Character select (scene 16) flow driven by an input script. |
 | `sheet.py <name> [--step N] [--max N] [--crop x0,y0,x1,y1]` | Contact sheet `build/agent-shots/vs/<name>/sheet.png` (run with `.toolchain/host/venv/bin/python -I`). |
 
@@ -47,6 +49,8 @@ locked in its jab combo; use the CPU item sweep instead.
 | `SSB64_START_SCENE=22` / `16` | Boot into the VS battle / the VS character select |
 | `SSB64_VS_FKINDS=a,b[,c,d]` | Fighters of the VS shortcut (decimal port fkinds; Remix id = fkind; vanilla 0..26, Remix 0x1D..0x60) |
 | `SSB64_MAPS_START_GKIND=<decimal>` | Stage select opens with the cursor on that stage (use with `css.sh` and `inputs/css_pick_wait.txt`; Training CSS is `SSB64_START_SCENE=18`) |
+| `SSB64_VS_P2_HUMAN=1` | The second VS fighter becomes human, so an input script can drive port 1 (`inputs/reflect_test*.txt`) |
+| `SSB64_REMIX_GFX_TEST=<id>` / `SSB64_REMIX_COLANIM_TEST=<id>` | Spawns the Remix GFX id / applies the Remix GFX routine on the first fighter every 45 frames |
 | `SSB64_VS_STAGE=<decimal>` | Stage id (vanilla 0..0x28, Remix 0x29..0xD7; names in `decomp/src/gr/grremix/grremixids.h`) |
 | `SSB64_VS_ITEMS=<1..5>` | Turns every item switch on with that rate (0 means no items) |
 | `SSB64_REMIX_FORCE_ITEM=<kind>` | Every stage-spawned item becomes `<kind>`, with a 60-tick spawn wait |

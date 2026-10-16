@@ -99,5 +99,11 @@ Fixes made while checking:
    Scuttle Town minions are off in Remix 2.0.1 itself (`b _end` in `scuttle_town_setup_`); the port mirrors that after the
    minion item crashed in `gcSetupCustomDObjsWithMObj` (its file offset 0x40 does not match the standard footer layout).
 
+7. **Peach's Castle II Banzai Bill is a placeholder in Remix 2.0.1 itself.** `banzai_bill_factory_` ends the match path with
+   `b _end` ("prevent spawn crash until the item object works"), so in a real match nothing spawns; only Training reaches the
+   spawn, and there the asm creates `Item.RobotBee.id`, not Bullet Bill. The port keeps the same gate (Training only) and
+   spawns the Bullet Bill item (0x3D) the author intended, since the Robot Bee needs the Metallic Madness file. This is the
+   only deliberate difference from the asm; the Scuttle Town minions are off for the same reason (item 6).
+
 `vs.sh` with a single fkind ignores `SSB64_VS_STAGE` (it boots Dream Land): pass at least two fkinds.
 

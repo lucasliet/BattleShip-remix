@@ -1297,6 +1297,12 @@ int main(int argc, char* argv[]) {
 		} else {
 			logPath = "ssb64.log";  // last-resort cwd fallback
 		}
+		/* SSB64_LOG_PATH: debug/CI override so parallel smoke-test instances each write their own log. */
+		if (const char* override_path = std::getenv("SSB64_LOG_PATH")) {
+			if (override_path[0] != '\0') {
+				logPath = override_path;
+			}
+		}
 		port_log_init(logPath.c_str());
 	}
 	port_log("SSB64: main entered\n");

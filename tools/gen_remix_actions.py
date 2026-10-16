@@ -57,9 +57,11 @@ EXTRA_SYMBOLS = [
     "Stages.random_table",
     "Stages.bg_type",
     "Item.GoldenGun.projectile_info",
+    "Character.kirby_inhale_struct.table",
+    "KirbyHats.extended_special_parts",
     "Item.GoldenGun.projectile_info_pointer",
 ]
-EXTRA_SYMBOL_PREFIXES = ["Hazards."]
+EXTRA_SYMBOL_PREFIXES = ["Hazards.", "GFX.", "GFXRoutine."]
 CSS_FIGHTER_DIRS = ["Falco", "Ganondorf", "YoungLink", "DrMario", "Wario", "Dedede", "Sonic", "Sheik", "Marina",
                     "Goemon", "Crash", "Peach", "Bowser", "Wolf", "Conker", "Mewtwo", "Marth", "Banjo"]
 
