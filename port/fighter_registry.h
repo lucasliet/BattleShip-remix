@@ -83,6 +83,10 @@ typedef struct FighterDescriptor {
     int                          special_descs_count;
     PortFTSpecialEnterFn         special_handler[PORT_FIGHTER_SPECIAL_COUNT];
 
+    /* Kirby copy NSP entry (Remix kirby_ground_nsp / kirby_air_nsp tables),
+     * [ground, air]. NULL = no table entry bound; callers use special_handler. */
+    PortFTSpecialEnterFn         kirby_copy_handler[2];
+
     /* Match entry (status id picked at start of round + per-fkind effect). */
     int                          entry_appear_status[2];   /* [R, L] */
     PortFTEntryMakeEffectFn      entry_make_effect;        /* NULL = no effect */
@@ -242,6 +246,7 @@ struct FTData              *port_fighter_data(int fkind);
 struct FTStatusDesc        *port_fighter_special_descs(int fkind);
 int                         port_fighter_special_descs_count(int fkind);
 PortFTSpecialEnterFn        port_fighter_special_handler(int fkind, int kind);
+PortFTSpecialEnterFn        port_fighter_kirby_copy_handler(int fkind, int is_air);
 int                         port_fighter_entry_appear(int fkind, int entry_id);
 void                        port_fighter_entry_make_effect(int fkind, struct FTStruct *fp);
 struct FTOpeningDesc       *port_fighter_opening_descs(int fkind);

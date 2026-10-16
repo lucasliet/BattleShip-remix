@@ -90,6 +90,12 @@ PortFTSpecialEnterFn port_fighter_special_handler(int fkind, int kind)
     return nullptr;
 }
 
+PortFTSpecialEnterFn port_fighter_kirby_copy_handler(int fkind, int is_air)
+{
+    if (const auto *r = get(fkind)) return r->kirby_copy_handler[is_air != 0 ? 1 : 0];
+    return nullptr;
+}
+
 /* nFTCommonStatusEntryNull is the safe sentinel for "no entry animation"
  * (decomp value: 1). Hard-coded so the header stays decomp-agnostic. */
 static constexpr int PORT_ENTRY_NULL_STATUS = 1;

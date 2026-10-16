@@ -55,7 +55,7 @@ STATUS = {
     "yoshishared.asm": ("fighters", "partial", "ftremixyoshishared.c"),
     "CustomGrabAction.asm": ("fighters", "partial", "ftremixpianoshared.c, fighter_registry custom_capture_*"),
     "DragonKingHUD.asm": ("fighters", "partial", "ftremixdragonkingdrainflash.c"),
-    "KirbyHats.asm": ("fighters", "partial", "ftremixkirbycopy.c, ftremixkirbyhats.c"),
+    "KirbyHats.asm": ("fighters", "partial", "ftremixkirbycopy.c, ftremixkirbyhats.c, ftremixkirbypower.c"),
     "Size.asm": ("fighters", "partial", "ftremixsize*.c (phases a, b, c partial)"),
     "GFX.asm": ("fighters", "ported", "lbremixgfx.c, ftparam.c"),
     "GFXRoutine.asm": ("fighters", "ported", "gmremixcolscripts.c"),

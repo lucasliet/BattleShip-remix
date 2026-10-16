@@ -121,7 +121,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Joypad.asm` | infra | n/a | replaced by the port's controller code |
 | `KingOfTheHill.asm` | menus_modes | todo |  |
 | `Kirby/Kirby.asm` | fighters | ported | decomp/src/ft/ftremix/kirby |
-| `KirbyHats.asm` | fighters | partial | ftremixkirbycopy.c, ftremixkirbyhats.c |
+| `KirbyHats.asm` | fighters | partial | ftremixkirbycopy.c, ftremixkirbyhats.c, ftremixkirbypower.c |
 | `Knockback.asm` | fighters | partial | ftremixknockback.c |
 | `Lanky/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Lanky/Lanky.asm` | fighters | partial | decomp/src/ft/ftremix/lanky |

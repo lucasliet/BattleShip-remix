@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-10-16 | [remix_kirby_copy_actions](remix_kirby_copy_actions_2026-10-16.md) | **FIXED (decomp REGION_REMIX + port)** — Kirby copy abilities ran the copied fighter's own routines; Kirby's Remix action and motion rows were unbound; a vertex fixup rotated a hat display list |
 | 2026-10-16 | [remix_m2_subsystems](remix_m2_subsystems_2026-10-16.md) | **IN PROGRESS** — M2 status: CharEnvColor, Reflect, Size phases b/c, Knockback/Damage/Poison/Surface/Camera/Spawn, Kirby copy table and hats; validated by 240-run matrix, 175 stages, 13 items. Open: 3 Kirby NSP copies, Size and Hitbox display gaps. |
 | 2026-10-16 | [remix_gfx_and_gfxroutine](remix_gfx_and_gfxroutine_2026-10-16.md) | **DONE (T2.1)** — Remix particle scripts/textures (GFX ids 0x5C-0x7C) appended to the common effect bank from the RAM image, 50 colour-animation routines (GFXRoutine ids 0x56-0x87) appended to `dGMColScriptsDescs`, per-port overrides, test harness env vars; open: Lightning camera colour, Crash spin GFX, ground effect clone. |
 | 2026-10-15 | [starmie_no_victim](starmie_no_victim_2026-10-15.md) | **FIXED** — Poké Ball Starmie read an uninitialized `victim_gobj` when no opponent was left (crash on a long 3-fighter Onett run). Initialized to NULL with an owner fallback under `PORT`. |

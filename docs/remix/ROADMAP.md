@@ -38,9 +38,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M2. **Task:** T2.6 (Kirby hats), depois T2.9, T2.10 e o grep de TODOs; T2.5 espera o áudio (T3.2), T2.4b o menu (M4); T1.5b (fades Time Twister/Scuttle) fica pendente de M1.
-- **Último checkpoint:** CP2a, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b; M2 em T2.6, restam T2.5 (depois do áudio), T2.7b, T2.9, T2.10, T2.11). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~66% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Milestone:** M3 (áudio), task T3.1. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
+- **Último checkpoint:** CP2b, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~67% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -134,15 +134,16 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   que bate com o jogo sem o menu. **Aceite:** com o modo GIANT ligado, os lutadores nascem grandes e o Lightning devolve ao
   tamanho do modo.
 - [ ] T2.5 PokemonAnnouncer (`ftremixannouncer.c`, ~30 inserções mecânicas; os clipes são FGMs do Remix (>= 0x2B7), então **executar depois de T3.2** para poder ouvir/verificar; padrão do jogo: só nos stages Pokémon). **Aceite:** fala em pelo menos 3 golpes.
-- [ ] T2.6 Kirby *(em andamento, 2026-10-16)*: feito `ftremixkirbycopy.c` (tabela `Character.kirby_inhale_struct.table` do
-  Remix no lugar da tabela de 27 linhas do arquivo do Kirby: copy_id, chapéu, escala e dano da estrela de todos os 97 lutadores)
-  e `ftremixkirbyhats.c` (33 chapéus extras de `KirbyHats.extended_special_parts`, arquivos `KIRBY_CUSTOM_HATS` 0xA8D e 0x1533
-  carregados sob demanda). Visto: Kirby com o chapéu certo para 24 lutadores (harness `SSB64_REMIX_KIRBY_COPY_TEST=<fkind>`,
-  `inputs/nsp_kirby.txt`) e NSP copiado rodando para 13 de 16 testados (Falco, GND, Young Link, Wario, Elink, JNess,
-  Lucas, Sonic, Marth e outros). Faltam: crash do NSP copiado de DSamus (34, usa `wpSamusChargeShotMakeWeapon` com os dados
-  do Samus), Roy (74, descritor de status errado) e Dedede (64, animação do Kirby sem figatree); depois `magic_hat_on`,
-  `hat_loss_prevent_`, `kirby_power_loss_prevent_` e o chapéu aleatório/`spawn_with_hat` (menu, M4). **Aceite:** Kirby copia
-  3 lutadores Remix (feito para 13) e o NSP não crasha para nenhum dos 16 testados.
+- [x] T2.6 Kirby (2026-10-16, validado pelo lead): `ftremixkirbycopy.c` (tabela `Character.kirby_inhale_struct.table` do Remix
+  no lugar da tabela de 27 linhas: copy_id, chapéu, escala e dano da estrela dos 97 lutadores), `ftremixkirbyhats.c` (33 chapéus
+  extras, arquivos `KIRBY_CUSTOM_HATS` 0xA8D e 0x1533), `ftRemixBindKirbyActions` + `port_fighter_extend_mainmotion` (as 238
+  ações e os motions que o Remix acrescenta ao Kirby), `kirby_copy_handler` (tabelas `kirby_ground_nsp`/`kirby_air_nsp`),
+  `ftRemixPowerData` (arquivos especiais do lutador copiado, 22 pontos de weapon/item) e `ftremixkirbypower.c` (`magic_hat_on`,
+  `taunt_loses_power`, `hat_loss_prevent_`, `kirby_power_loss_prevent_`, `set_absorbed_*`; padrões do jogo sem menu). Corrigido no
+  loader o `chain_fixup_vertex`, que girava a display list do chapéu do Dedede. Doc: `docs/bugs/remix_kirby_copy_actions_2026-10-16.md`.
+  **Aceite:** os 16 NSP copiados do harness (`SSB64_REMIX_KIRBY_COPY_TEST=<fkind>`, copiado na partida com `vs.sh 8,<fkind>`) rodam
+  sem crash; DSamus mostra o tiro escuro, Goemon o chapéu, Dedede o chapéu com o corpo. `spawn_with_hat` (iniciar com chapéu do
+  menu) fica no M4/M5 (CSS e opções).
 - [x] T2.7 Outros sistemas de golpe (2026-10-16, workers Haiku, validado pelo lead: build limpo, matriz 240/240, 175 stages,
   13 itens): Knockback (ângulos aleatórios, throws), Poison (acid do Spawned Fear com DOOM_ACID), Damage (GFX de shadow/stun,
   rotinas de colanim 7..0xC), Surface (fricção), Blastzone (som do fundo), Camera (tipo MK, zoom do Venom/GB Land), Spawn
@@ -154,13 +155,24 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   de display list), blastzone warp, câmera de pausa. **Aceite:** spawns neutros num stage Remix, esteira movendo um lutador.
 - [x] T2.8 Sobras (2026-10-16): Piano `extra_part_visibility_` e Marina `prevent_item_despawn_` aplicados. Ficam: beam do
   Waddle Doo (0x800E44EC, sem site C equivalente) e `clear_items_in_1p` (o port já limpa os itens a cada cena).
-- [ ] T2.9 Remover as contenções restantes dos fighters, trocando pelo comportamento do Remix: fallback de joint de captura
-  (`ftcommoncapturepulled.c`) e `throw_desc` NULL (`ftcommonthrown2.c`), fixes 6 e 7 de
-  `remix_css_and_parent_fallbacks_2026-10-12.md`; o guard de TransN dos polígonos em `ftMainSetStatus`
-  (`remix_entry_effects_and_polygon_entry_2026-10-14.md`, achar a causa na tabela de hidden parts).
-- [ ] T2.10 Percorrer a auditoria `docs/remix/decomp_fkind_audit.md` (inventário dos 124 sítios indexados por fighter): rever as linhas de risco alto (Kirby `copy_id` em
-  `ftcommonspecialair.c`, tabelas do opening room, `vs_records`/`spgame_records` para 97 lutadores) (o doc fica como inventário de referência).
-- [ ] T2.11 `grep -rn REMIX-TODO decomp/src` sem ocorrências fora de AI e de modos/menus (que têm milestone próprio).
+- [x] T2.9 Contenções dos fighters (2026-10-16): o fallback de joint de captura (`ftcommoncapturepulled.c`) e o `throw_desc` NULL
+  (`ftcommonthrown2.c`) ficam como substitutos documentados de comportamento indefinido do próprio Remix: o atributo
+  `joint_itemheavy_id` do Bowser é 31 (herdado do Yoshi, `define_character(BOWSER, YOSHI, ...)`) e o modelo dele não tem o joint 31;
+  na N64 o ponteiro nulo leria a página zero da RDRAM. O mesmo vale para golpes custom sem `SetThrow` (Banjo USP). Não há
+  comportamento do Remix para copiar. O guard de TransN dos polígonos (`ftMainSetStatus`) segue sem causa provada: **T2.9b**
+  (abaixo).
+- [ ] T2.9b Causa do guard de TransN dos polígonos (hipótese: a linha de motion mantém 0x40000000 do Appear do pai mas a animação
+  é a Wait sem trilha de TransN, então o walker do figatree desloca as trilhas por um joint). Verificar contando as palavras do
+  figatree dos polígonos contra a árvore de joints com a flag ligada; se confirmado, o guard vira a regra do Remix.
+- [x] T2.10 Auditoria `docs/remix/decomp_fkind_audit.md` (2026-10-16, escopo ft/ e ef/): Kirby inhale lê `copy[victim_fp->fkind]` (tabela
+  Remix, antes lia a linha do pai) e o mesmo em `efmanager.c` (escala da estrela); a tabela de offsets do Falcon Dive usa
+  `Character.falcon_dive_id.table` (`ftRemixFalconDiveOffsetRow`); `ftcommonspecialair.c` e os loops de `ftmanager.c` já usam o
+  registry; o script de dano arremessado (`p_script[id][fkind]`) indexa a linha do pai, porque o índice acima de 27 cairia na linha do
+  outro script (indefinido no Remix). Os sítios de CSS, save (`vs_records`, `spgame_records`, `fighter_mask` de 16 bits) e opening
+  room ficam em T5.1b e T5.5.
+- [ ] T2.11 `grep -rn REMIX-TODO decomp/src` sem ocorrências fora de AI e de modos/menus (que têm milestone próprio). *Executar depois
+  de T2.4b (15 Size), T2.5 (11 PokemonAnnouncer) e M4 (6 toggles); em 2026-10-16 são 168 linhas, o resto é rastreio fino de hazards e
+  itens (campos de `ITStruct` sem nome, slot de blast zone 0x398, GFX, display) para resolver em lotes de workers por arquivo.*
 - **CP2**.
 
 ## M3. Áudio
@@ -205,6 +217,10 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 - [ ] T5.2 Painel por porta do CSS (`css/*.asm`).
 - [ ] T5.3 VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
   créditos estendidos, Character Data dos 97, name tag / player tag, Gallery.
+- [ ] T5.5 Registros de save para 97 lutadores (`lbtypes.h` `vs_records[12]`, `spgame_records[12]`, `fighter_mask` de 16 bits,
+  `LBBACKUP_MASK_FIGHTER`, `lbbackup.c`, `sc1pmanager.c`, `mnvsrecord.c`, `mnmessage.c` unlock): hoje fkinds acima de 11 leem
+  fora da tabela (a lista está na auditoria `docs/remix/decomp_fkind_audit.md`, linhas SAVE). Precisa de formato de save novo
+  com migração do atual. **Aceite:** terminar uma partida VS e uma 1P com um lutador Remix grava e relê o registro dele.
 - [ ] T5.4 Remoção dos hacks de contenção que sobrarem no CSS/menus (lista em `docs/bugs/remix_css_and_parent_fallbacks_2026-10-12.md`).
 - **CP5**.
 
@@ -247,12 +263,12 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 | Área | Peso | Feito |
 |---|---|---|
-| Fighters (roster, specials, projéteis, entradas) | 35% | ~92% |
+| Fighters (roster, specials, projéteis, entradas) | 35% | ~94% |
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~50% |
 | Settings, menus, modos | 20% | ~15% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~66%** |
+| **Total ponderado** | | **~67%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).

@@ -1378,6 +1378,22 @@ static int chain_fixup_vertex(void *file_base, size_t file_size,
 		if (flag != 0) return 0;
 	}
 
+	// Stop before a display list that follows the vertices. A G_VTX may ask for
+	// more vertices than the array holds, and Smash Remix packs a sync command
+	// (E7 pipe sync, E6 load sync, E8 tile sync, E9 full sync, DF end DL: both
+	// words without argument bits) right after the array. As a vertex that is
+	// (-6400, 0, 0), which passes the checks above and used to get rotated.
+	for (uint32_t i = 1; i < num_vtx; i++)
+	{
+		uint8_t opcode = (uint8_t)(region[i * 4] >> 24);
+		bool is_sync = (opcode == 0xDF) || (opcode >= 0xE6 && opcode <= 0xE9);
+		if (is_sync && (region[i * 4] & 0x00FFFFFF) == 0 && region[i * 4 + 1] == 0)
+		{
+			num_vtx = i;
+			break;
+		}
+	}
+
 	// Per-vertex idempotency (matches portRelocFixupVertexAtRuntime).
 	uintptr_t target_addr = reinterpret_cast<uintptr_t>(file_base) + (uintptr_t)target_byte_off;
 	if (stage_audit_enabled()) {

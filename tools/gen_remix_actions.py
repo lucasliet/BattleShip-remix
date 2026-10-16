@@ -34,8 +34,10 @@ IMAGE_ROM = 0x02C00000
 IMAGE_SIZE = 0x400000
 ID_COUNT = 97
 FIRST_SYNTH_ID = 0x1D
+KIRBY_ID = 0x08
 ACTION_ENTRY_SIZE = 0x14
 SPECIAL_TABLES = ["ground_nsp", "ground_usp", "ground_dsp", "air_nsp", "air_usp", "air_dsp"]
+KIRBY_COPY_TABLES = ["kirby_ground_nsp", "kirby_air_nsp"]
 EXTRA_SYMBOLS = [
     "Stages.custom_item_spawn_rate_table",
     "Stages.series_logo_table",
@@ -58,6 +60,7 @@ EXTRA_SYMBOLS = [
     "Stages.bg_type",
     "Item.GoldenGun.projectile_info",
     "Character.kirby_inhale_struct.table",
+    "Character.falcon_dive_id.table",
     "KirbyHats.extended_special_parts",
     "Item.GoldenGun.projectile_info_pointer",
 ]
@@ -142,7 +145,7 @@ def action_counts(image: RemixImage, symbols: dict) -> dict:
     sorted_addrs = sorted(set(symbols.values()))
     table = symbols["Character.ACTION_ARRAY_TABLE"]
     counts = {}
-    for rid in range(FIRST_SYNTH_ID, ID_COUNT):
+    for rid in [KIRBY_ID, *range(FIRST_SYNTH_ID, ID_COUNT)]:
         array = image.word(table + rid * 4)
         label = by_addr.get(array, "")
         if not label.endswith("_action_array"):
@@ -165,6 +168,11 @@ def referenced_procs(image: RemixImage, symbols: dict, counts: dict) -> dict:
             addr = image.word(symbols[f"Character.{table}.table"] + rid * 4)
             if addr:
                 refs.setdefault(addr, set()).add(rid)
+    for rid in range(ID_COUNT):
+        for table in KIRBY_COPY_TABLES:
+            addr = image.word(symbols[f"Character.{table}.table"] + rid * 4)
+            if addr:
+                refs.setdefault(addr, set()).add(KIRBY_ID)
     return refs
 
 
@@ -174,6 +182,8 @@ def write_layout(symbols: dict, counts: dict) -> None:
              f"#define REMIX_ACTION_ARRAY_TABLE 0x{symbols['Character.ACTION_ARRAY_TABLE']:08X}u",
              f"#define REMIX_ACTION_ENTRY_SIZE 0x{ACTION_ENTRY_SIZE:X}u"]
     for table in SPECIAL_TABLES:
+        lines.append(f"#define REMIX_SPECIAL_TABLE_{table.upper()} 0x{symbols[f'Character.{table}.table']:08X}u")
+    for table in KIRBY_COPY_TABLES:
         lines.append(f"#define REMIX_SPECIAL_TABLE_{table.upper()} 0x{symbols[f'Character.{table}.table']:08X}u")
     lines += ["", f"#define REMIX_ACTION_ID_COUNT {ID_COUNT}", "",
               "/* Entries in each fighter's action array (statuses 0xDC + i); 0 = not a defined fighter. */",

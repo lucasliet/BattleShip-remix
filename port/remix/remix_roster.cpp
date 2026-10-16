@@ -325,6 +325,37 @@ void patchVanillaAttributeOffsets(const std::vector<uint8_t> &bytes)
     }
 }
 
+/* Kirby's copy abilities are extra motions and actions of Kirby's own rows in
+ * Remix: its motion array grows past the vanilla rows and its action array
+ * gains the copy abilities' statuses. */
+bool bindKirbyCopyActions(const std::vector<uint8_t> &bytes)
+{
+    constexpr int kKirbyFkind = 8;
+    const FighterDescriptor *vanilla = port_fighter_descriptor(kKirbyFkind);
+    if (vanilla == nullptr) {
+        spdlog::error("remix_roster: Kirby is not registered");
+        return false;
+    }
+
+    const RemixRecord record = readRecord(bytes, static_cast<size_t>(kKirbyFkind));
+    std::vector<PortSynthMotion> mainmotion;
+    std::vector<PortSynthMotion> submotion;
+    if (!readMotionArrays(bytes, record, mainmotion, submotion)) {
+        return false;
+    }
+    if (port_fighter_extend_mainmotion(kKirbyFkind, static_cast<uint32_t>(ftRemixKirbyVanillaMotionCount()),
+                                       mainmotion.data(), record.mainmotion_count) == 0) {
+        spdlog::error("remix_roster: Kirby has {} Remix motions, expected more than {}", record.mainmotion_count,
+                      ftRemixKirbyVanillaMotionCount());
+        return false;
+    }
+
+    FighterDescriptor kirby = *vanilla;
+    ftRemixBindKirbyActions(&kirby);
+    port_fighter_register(kKirbyFkind, &kirby);
+    return true;
+}
+
 } /* namespace */
 
 bool remix_roster_load()
@@ -351,6 +382,9 @@ bool remix_roster_load()
         registerSynth(*built[i], kFirstSynthRemixId + static_cast<int>(i));
     }
     sSynthFighters = std::move(built);
+    if (!bindKirbyCopyActions(blob->Data)) {
+        return false;
+    }
     spdlog::info("remix_roster: registered {} synth fighters (remix ids 0x{:02X}..0x{:02X})",
                  sSynthFighters.size(), kFirstSynthRemixId, kLastSynthRemixId);
     return true;

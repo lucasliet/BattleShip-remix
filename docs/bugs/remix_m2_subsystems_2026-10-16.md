@@ -8,7 +8,7 @@ Status of ROADMAP M2 at checkpoint CP2a. The GFX and GFXRoutine details are in `
 | T2.2 CharEnvColor | done (display list fixes open) | `ftremixenvcolor.c`, `ftdisplaymain.c`, cloak, Dracula, Reapers |
 | T2.3 Reflect | done (CPU hooks in M7) | `ftremixreflect.c`, hooks in `ftmain.c`, `wpprocess.c`, `itprocess.c`, `wpmain.c`, `itmain.c` |
 | T2.4 Size phases b and c | done, sources by the menu open | `ftremixsize*.c` |
-| T2.6 Kirby | table and hats done, 3 crashing copies open | `ftremixkirbycopy.c`, `ftremixkirbyhats.c` |
+| T2.6 Kirby | done, `spawn_with_hat` in M4/M5 (see `remix_kirby_copy_actions_2026-10-16.md`) | `ftremixkirbycopy.c`, `ftremixkirbyhats.c`, `ftremixkirbypower.c`, `ftremixbind.c` |
 | T2.7 other systems | done, gaps in T2.7b | `ftremixknockback.c`, `ftremixdamage.c`, `ftremixpoison.c`, `grremixsurface.c` ... |
 | T2.8 leftovers | done except two sites | `ftremixleftovers.c` |
 

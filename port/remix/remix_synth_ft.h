@@ -45,6 +45,12 @@ typedef struct PortSynthFtSpec {
  * registered FTData or on allocation failure. */
 struct FTData *port_fighter_synth_ft_create(int parent_fkind, const PortSynthFtSpec *spec);
 
+/* Grows a vanilla fighter's main motion array in place to `count` rows: the
+ * first `vanilla_count` rows stay as they are, the rest come from `rows` (Remix
+ * adds motions to vanilla fighters, e.g. Kirby's copy abilities). Returns 0 when
+ * nothing changed. */
+int port_fighter_extend_mainmotion(int fkind, uint32_t vanilla_count, const PortSynthMotion *rows, uint32_t count);
+
 /* Frees an FTData returned by port_fighter_synth_ft_create. NULL is ignored. */
 void port_fighter_synth_ft_destroy(struct FTData *ft);
 
