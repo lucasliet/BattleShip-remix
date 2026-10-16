@@ -38,6 +38,8 @@ screenshot is blank. The 15 hazard stages run for 1520 frames without crash.
 
 ## Open
 
+(The hazard behavior list below is closed by ROADMAP T1.4, 2026-10-15; the REMIX-TODOs that remain are tracked in T1.4b and in the M2 subsystems.)
+
 - **Crashes.** Goomba Road (59, 0x3B): `PORT_RESOLVE(line_info)` is NULL in `mpCollisionAllocLinesGetCountTotal`
   (a map pointer token that does not resolve). Dream Greens (149, 0x95): crash in `gcDrawDObjTree` from
   `grDisplayLayer0PriProcDisplay`.
@@ -66,16 +68,36 @@ screenshot is blank. The 15 hazard stages run for 1520 frames without crash.
 | Spawned Fear (195) | Cacodemon at ~3450, damage 7 to 35% | acid poison |
 | Metallic Madness (162) | Robot Bee at ~3450, damage 12 and 13% | laser shrink not seen |
 | Game Boy Land (136) | palette scene change to the cloud scene at ~3450, the stage runs | music not checked |
-| Casino Night (159) | stage renders with the slot sign | stage bumper not seen |
-| Great Bay (54) | stage renders, a bomb hit (31%) | water hazard: nothing fell in (Mario on a rock) |
-| Twilight City (186) | stage renders | water hazard: not triggered |
-| Mad Monster Mansion (64) | stage renders | the taunt sound (audio) |
+| Casino Night (159) | round yellow stage bumper at the top of the stage (y 2600), slot sign | bounce not hit by a fighter |
+| Great Bay (54) | `walk_right.txt`/`walk_left.txt`: splash at the water line (log `[remix-stage] water splash`), the fighter sinks slowly, then KO | none |
+| Twilight City (186) | same scripts: splash sparks, slow sink in the water, KO | none |
+| Mad Monster Mansion (64) | stage renders, thank-you routine runs | the taunt sound plays Remix FGM 0x564, so it waits for M3 (audio) |
 | Big Boo's Haunt (192) | stage renders | the laugh is silent (known REMIX-TODO) |
-| Remix RTTF (189) | stage renders with its own background | bumpers |
-| Onett (73) | stage renders | no car in 4000 frames (the asm honks at 2700 to 3600 frames) |
-| Jungle Japes (134) | stage renders, items and barrel | no KlapTrap seen |
-| Toad's Turnpike (166) | not looked at | light cycle |
+| Remix RTTF (189) | 4 bumpers are created at y -2550 to -3700 with their animation tracks (temporary log) | bumpers not seen on screen (the camera never reaches them) |
+| Onett (73) | `car-honk` then `car-drive` in the item log around frame 3150, the yellow taxi crosses the road at frame 3180 | the car hit |
+| Jungle Japes (134) | KlapTrap appears in the cabin window from frame ~596 and snaps its jaw (animation tracks and visibility wired, see fix 2) | hit on a fighter |
+| Toad's Turnpike (166) | start traffic light and GO, trucks, buses and cars cross the road, score popup | none |
 
-Next for T1.4: Onett car, Japes KlapTrap, Casino bumper, Great Bay and Twilight water (walk a fighter in; the input script
-`walk_left.txt` only reaches an edge when the fighter starts on the main platform), Turnpike light, RTTF bumpers.
+Fixes made while checking:
+
+1. **Starmie crash** (`starmie_no_victim_2026-10-15.md`): found in the 5200-frame Onett run.
+2. **KlapTrap** did not show: `itremixklaptrap.c` now hides the item at spawn (GObj camera tag 0), starts the joint track
+   (file + 0x0908) and the material track (file + 0x0E20) at each respawn and shows it when the hitbox arms.
+3. **Hazard intro check** shared as `grRemixHazardsMatchHasStarted()`; Great Bay, Twilight City and Pirate Land water now
+   skip fighters before the match clock starts, as the asm does (Japes uses the same helper).
+
+4. **Hazard item animations** (2026-10-16): the KlapTrap, Robot Bee and Cacodemon did not start their animation tracks.
+   The base of the track offsets is not the stage header but the item pointer at header + 0xE0 minus 0x07E8 (the asm saves
+   it at 0x801313F0): `grRemixHazardsItemFileTop`. KlapTrap swims across the water, the bee flies in from the upper left,
+   the Cacodemon shoots its Thunderballs (its body stays at the screen edge in the camera framing used).
+5. **Pirate Land cannonball** now explodes when its model animation ends (GObj `anim_frame <= 0`), not after 999 frames.
+
+6. **T1.5 wave (2026-10-16).** Haiku workers ported Time Twister, Scuttle Town, ScuttleMinion, BulletBill, Peach Castle II,
+   Peach/Casino bumper hitbox, Bowser's Stadium bombs (needs `BOWSER_BOMB_HEADER`, file 0x9B2, loaded in
+   `grRemixBowserBombsStart` as the RTTF bomb item file), Yoshi's Island clouds and `platform_movement_`, Dream Land wind and
+   downtime, Mushroom Kingdom hardcoding. Notes in `docs/remix/notes/f7_hazard_*.md`. Seen acting: Bowser's Stadium bombs.
+   Scuttle Town minions are off in Remix 2.0.1 itself (`b _end` in `scuttle_town_setup_`); the port mirrors that after the
+   minion item crashed in `gcSetupCustomDObjsWithMObj` (its file offset 0x40 does not match the standard footer layout).
+
+`vs.sh` with a single fkind ignores `SSB64_VS_STAGE` (it boots Dream Land): pass at least two fkinds.
 

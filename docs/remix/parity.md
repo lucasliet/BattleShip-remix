@@ -5,7 +5,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | Área | ported | partial | todo | n/a | progresso |
 |---|---|---|---|---|---|
 | fighters | 74 | 42 | 12 | 0 | 74% |
-| items | 5 | 25 | 3 | 0 | 53% |
+| items | 5 | 27 | 1 | 0 | 56% |
 | stages | 1 | 2 | 4 | 0 | 29% |
 | audio | 0 | 3 | 2 | 0 | 30% |
 | menus_modes | 0 | 2 | 69 | 0 | 1% |
@@ -261,7 +261,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `items/Basketball.asm` | items | partial | decomp/src/it/itremix/itremixbasketball.c |
 | `items/BlueShell.asm` | items | partial | decomp/src/it/itremix/itremixblueshell.c |
 | `items/Boomerang.asm` | items | partial | decomp/src/it/itremix/itremixboomerang.c |
-| `items/BulletBill.asm` | items | todo |  |
+| `items/BulletBill.asm` | items | partial | decomp/src/it/itremix/itremixbulletbill.c |
 | `items/Cacodemon.asm` | items | partial | decomp/src/it/itremix/itremixcacodemon.c |
 | `items/Car.asm` | items | partial | decomp/src/it/itremix/itremixcar.c |
 | `items/ClanBomb.asm` | items | ported | decomp/src/it/itremix/itremixclanbomb.c |
@@ -282,7 +282,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `items/Pokemon/Psyduck.asm` | items | partial | decomp/src/it/itremix/itremixpsyduck.c |
 | `items/Pwing.asm` | items | partial | decomp/src/it/itremix/itremixpwing.c |
 | `items/RobotBee.asm` | items | partial | decomp/src/it/itremix/itremixrobotbee.c |
-| `items/ScuttleMinion.asm` | items | todo |  |
+| `items/ScuttleMinion.asm` | items | partial | decomp/src/it/itremix/itremixscuttleminion.c |
 | `items/Shuriken.asm` | items | ported | decomp/src/it/itremix/itremixshuriken.c |
 | `items/Stopwatch.asm` | items | partial | decomp/src/it/itremix/itremixstopwatch.c |
 | `items/SuperMushroom.asm` | items | partial | decomp/src/it/itremix/itremixsupermushroom.c |

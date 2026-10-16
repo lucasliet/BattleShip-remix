@@ -38,9 +38,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M1. **Task:** T1.4 (comportamento dos hazards portados, um stage por vez).
-- **Último checkpoint:** ver `git log` (checkpoint T1.1-T1.3 e limpeza de docs, 2026-10-15). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~58% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Milestone:** M2. **Task:** T2.1 (GFX + GFXRoutine); T1.5b (fades Time Twister/Scuttle) fica pendente de M1.
+- **Último checkpoint:** CP1, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~61% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -64,18 +64,44 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   (Size e cancelamento do cogumelo), Deku Nut, Franklin, Pitfall, Dango, P-Wing, Stopwatch, Golden Gun (bala dourada
   dispara, 12 tiros, dano 99: Mario 99% e Yoshi 101% em `cpu_53`), Basketball (cai e quica; o resto vai para o T6.1);
   Psyduck é conteúdo desativado no Remix 2.0.1, n/a.)*
-- [ ] T1.4 *(em andamento, 2026-10-15: vistos agindo Corneria, Pirate Land, Rainbow Road, Spawned Fear, Metallic Madness e GB Land; faltam Onett (carro), Japes (KlapTrap), Casino (bumper), água do Great Bay e do Twilight, Turnpike, bumpers do RTTF, som do MMM; tabela em `remix_stages_and_hazards_2026-10-14.md`)* Verificar o comportamento dos 15 hazards portados (Great Bay, Twilight City, MMM, BBH, Corneria, GB Land,
-  Pirate Land, Jungle Japes + KlapTrap, Casino Night, Onett + Car, Toad's Turnpike, Rainbow Road, Remix RTTF, Metallic
-  Madness + RobotBee, Spawned Fear + Cacodemon): captura no frame em que o hazard age, e fechar os `REMIX-TODO` de cada
-  um (lista em `remix_stages_and_hazards_2026-10-14.md`, seção Open). **Aceite:** cada stage com captura do hazard agindo.
-- [ ] T1.5 Hazards restantes: Time Twister, Scuttle Town + ScuttleMinion, Dracula's Castle/Reapers (depois de T2.2),
-  `peach_bumper_hitbox_`, bombas do Bowser's Stadium, nuvens do Yoshi's Island, `platform_movement_`, vento e downtime
-  do Dream Land, `mk_remix_hardcoding_1-4`, `dream_greens_hardcoding_animation_4`, Smashketball (stage). **Aceite:** idem T1.4.
-- [ ] T1.6 Stage select: enquadramento do preview nos stages custom, emblema de série (`series_logo_table`), Training
-  sem tabelas vanilla fora do limite, variantes DL/Omega/Remix (`variant_table`), roulette do Random, layout tournament.
-  **Aceite:** captura do seletor em 3 páginas, uma variante e uma partida em Training num stage custom.
-- [ ] T1.7 Sweep completo: 78 fighters × NSP/DSP/USP, ids de stage 41 a 215, 17 itens. **Aceite:** zero crash fora de flake.
-- **CP1** (checkpoint).
+- [x] T1.4 Comportamento dos 15 hazards portados verificado em partida (2026-10-15): Corneria, Pirate Land, Rainbow Road,
+  Spawned Fear, Metallic Madness, GB Land, Turnpike (semáforo e veículos), Onett (carro buzina em ~3150 e cruza em ~3180),
+  Japes (KlapTrap aparece e anima, corrigido), água do Great Bay e do Twilight (`walk_left/right.txt`), bumper do Casino e
+  bumpers do RTTF (criados). Achados corrigidos: crash do Starmie (`starmie_no_victim_2026-10-15.md`), KlapTrap invisível,
+  checagem de intro compartilhada (`grRemixHazardsMatchHasStarted`). Tabela em `remix_stages_and_hazards_2026-10-14.md`.
+  O som do MMM (FGM 0x564) depende do áudio Remix (M3).
+- [x] T1.4b Fechar os `REMIX-TODO` dos hazards que não dependem de subsistema (`grep -rn REMIX-TODO decomp/src/gr/grremix
+  decomp/src/it/itremix`): animações do Robot Bee e do Cacodemon (mesma técnica do KlapTrap), modelo do canhão e lançamento
+  da bala do Pirate Land, animação e hitbox do Rainbow chomp, bumper do Casino, campos nomeados dos itens Car/KlapTrap.
+  Os que dependem de Size, CharEnvColor, Poison, GFX ou áudio ficam marcados com o subsistema (T2.x/M3) e não contam aqui.
+  **Aceite:** o grep só lista TODOs com tag de subsistema, e cada hazard alterado foi visto agindo de novo.
+  *(feito em 2026-10-16: animações do KlapTrap (nada na janela: ele nada pela água), Robot Bee (entra pelo canto
+  superior esquerdo) e Cacodemon via `grRemixHazardsItemFileTop` (ponteiro do header+0xE0 menos 0x7E8, base das trilhas);
+  bala do canhão explode no fim da animação do GObj; modelo do canhão (`gcAddMObjAll`); chomp do Rainbow Road com modelo e
+  `gcAddAnimAll` (0x8000F8F4 = `gcAddMObjAll`, 0x8000BED8 = `gcAddAnimAll`); DL do bumper do Casino (agora o bumper azul com
+  estrela do Sonic). Sobram só TODOs de campos sem nome do ITStruct/WPStruct (0x158, 0x2D3, 0x33E, 0x1D0...), do tail
+  0x8016F8C0 no blast zone e dos subsistemas (Size, CharEnvColor, Poison, GFX, áudio).)*
+- [x] T1.5 Hazards restantes portados (2026-10-16, workers Haiku; compilam, as partidas rodam sem crash): Time Twister
+  (`grremixtimetwister.c`), Scuttle Town (`grremixscuttle.c`; o asm do Remix 2.0.1 desliga o minion com `b _end`, o port
+  espelha com `GRREMIX_SCUTTLE_MINIONS_ENABLED`), ScuttleMinion e BulletBill (itens 0x3E e 0x3D em `itremixitems.c`), Peach
+  Castle II (Banzai factory), hitbox do bumper (Peach e Casino), bombas do Bowser's Stadium (vistas agindo: bombas e
+  explosões, arquivo `BOWSER_BOMB_HEADER` 0x9B2), nuvens e `platform_movement_` do Yoshi, wind/downtime do Dream Land,
+  `mk_remix_hardcoding_1-8`, Dream Greens anim 4 (já feito em T1.2). Smashketball (stage 90) renderiza; a bola vem do modo
+  (M6). Notas em `docs/remix/notes/f7_hazard_*.md`. Pendências que saíram daqui: T1.5b, `mk_9` (IA, M7), Dracula/Reapers
+  (T2.2), wind/downtime só aparecem com o toggle Whispy (M4).
+- [ ] T1.5b Fades do Time Twister (210) e do Scuttle Town (191): busca da warp ball / paleta no grupo 0x2 (wallpaper), troca
+  do background e do BGM, zoom de câmera (`Camera.zoom_to_max_`); o state machine já está em C e fica parado sem essa busca.
+  **Aceite:** captura da transição de fundo nos dois stages. *(adiado para depois do CP1: precisa entender o wallpaper
+  do stage no port, a troca de imagem de fundo é o que falta; a busca da warp ball já está descrita no `REMIX-TODO(T1.5b)`.)*
+- [x] T1.6 Stage select (2026-10-16): 85 stages em 10 páginas (`stage_table_normal`), previews de todos renderizados com
+  zoom/posição exatos das tabelas do Remix (`SSB64_MAPS_START_GKIND` + `stage_select_sweep.sh`; os modelos grandes vazam do
+  quadro como o Peach's Castle vanilla, não há scissor), Training sem leitura fora das tabelas vanilla
+  (`mnmaps.c`, `gkind < ARRAY_COUNT(dMNMapsTrainingModeWallpaperIDs)`; capturado com Deku Tree em Training). Emblema de série
+  (`series_logo_table`), variantes DL/Omega/Remix (`variant_table`), roulette do Random e layout tournament passam a ser
+  menus e estão em T5.1b (dependem dos sprites de série do CSS).
+- [x] T1.7 Sweep completo: 78 fighters × NSP/DSP/USP, ids de stage 41 a 215, 17 itens. **Aceite:** zero crash fora de flake. *(2026-10-16: stages 41-215 = 175/175 `rc=0` e nenhuma captura em branco; 13 itens padrão sem crash
+  com os eventos esperados; 80 lutadores (0-11 e 29-96) × NSP/DSP/USP = 240 execuções `rc=0` e zero linhas de abort/assert.)*
+- [x] **CP1** (checkpoint, 2026-10-16).
 
 ## M2. Subsistemas de gameplay (destravam os `REMIX-TODO` dos fighters, itens e stages)
 
@@ -146,6 +172,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 - [ ] T5.1b CSS de 1P, treino e bônus (`mnplayers1pgame.c`, `mnplayers1ptraining.c`, `mnplayers1pbonus.c`): repetir o que o VS
   já tem (grade, retratos, nomes, logos, sorteio), uma tela por vez; hoje usam as tabelas de 12 entradas (a auditoria
   `decomp_fkind_audit.md` lista os sítios). **Aceite:** cada tela abre com os 78 lutadores, sem leitura fora do limite.
+- [ ] T5.1c Stage select: emblema de série na moeda de madeira (`series_logo_table` + sprites de série do CSS, hoje em branco
+  para os stages Remix), variantes DL/Omega/Remix (`variant_table`), roulette do Random, layout tournament.
+  **Aceite:** capturas de um stage com emblema, uma variante e a roulette.
 - [ ] T5.2 Painel por porta do CSS (`css/*.asm`).
 - [ ] T5.3 VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
   créditos estendidos, Character Data dos 97, name tag / player tag, Gallery.
@@ -193,10 +222,10 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 |---|---|---|
 | Fighters (roster, specials, projéteis, entradas) | 35% | ~85% |
 | Itens | 10% | ~70% |
-| Stages (loader, seletor, hazards) | 20% | ~65% |
+| Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~50% |
 | Settings, menus, modos | 20% | ~15% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~58%** |
+| **Total ponderado** | | **~61%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).
