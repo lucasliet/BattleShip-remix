@@ -367,6 +367,7 @@
 #define REMIX_SYM_BowserUSP__ledge_grab_patch____skip 0x8054E72Cu
 #define REMIX_SYM_Character__falcon_dive_id__table 0x8049C570u
 #define REMIX_SYM_Character__kirby_inhale_struct__table 0x8049CD30u
+#define REMIX_SYM_Character__winner_bgm__table 0x8049BA80u
 #define REMIX_SYM_Conker__Action__action_string_table 0x80559200u
 #define REMIX_SYM_Conker__Action__string_0x0E3 0x80559108u
 #define REMIX_SYM_Conker__Action__string_0x0E4 0x80559120u

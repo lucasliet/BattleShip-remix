@@ -53,6 +53,8 @@ locked in its jab combo; use the CPU item sweep instead.
 | `SSB64_VS_P2_HUMAN=1` | The second VS fighter becomes human, so an input script can drive port 1 (`inputs/reflect_test*.txt`) |
 | `SSB64_REMIX_GFX_TEST=<id>` / `SSB64_REMIX_COLANIM_TEST=<id>` | Spawns the Remix GFX id / applies the Remix GFX routine on the first fighter every 45 frames |
 | `SSB64_REMIX_KIRBY_COPY_TEST=<fkind>` | Kirby (P1) copies that power at frame ~405 (not earlier: the appear status crashes). Put the copied fighter in the match (`vs.sh 8,<fkind> inputs/nsp_kirby.txt`): the copy's weapon and item files only load for fighters present. |
+| `SSB64_VS_STOCKS=<n>` | The VS shortcut becomes a stock match with n stocks (Royal), so a KO ends it and the results scene runs; with `walk_right.txt` P1 falls off the stage |
+| `SSB64_AUDIO_DUMP_PATH=<file>` / `SSB64_AUDIO_DUMP_SECONDS=<n>` | WAV dump of the first n seconds (default 16, at most 120); `vs.sh` sets the path to `<run>/audio.wav` and `AUDIO_SECONDS` the length. Summarize with `.toolchain/host/venv/bin/python -I scripts/wavstat.py <run>...` |
 | `SSB64_VS_STAGE=<decimal>` | Stage id (vanilla 0..0x28, Remix 0x29..0xD7; names in `decomp/src/gr/grremix/grremixids.h`) |
 | `SSB64_VS_ITEMS=<1..5>` | Turns every item switch on with that rate (0 means no items) |
 | `SSB64_REMIX_FORCE_ITEM=<kind>` | Every stage-spawned item becomes `<kind>`, with a 60-tick spawn wait |

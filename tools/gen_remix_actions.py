@@ -61,6 +61,7 @@ EXTRA_SYMBOLS = [
     "Item.GoldenGun.projectile_info",
     "Character.kirby_inhale_struct.table",
     "Character.falcon_dive_id.table",
+    "Character.winner_bgm.table",
     "KirbyHats.extended_special_parts",
     "Item.GoldenGun.projectile_info_pointer",
 ]

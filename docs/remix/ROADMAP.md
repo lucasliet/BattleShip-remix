@@ -38,7 +38,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M3 (áudio), task T3.1. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
+- **Milestone:** M3 (áudio), task T3.2. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
 - **Último checkpoint:** CP2b, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~67% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
@@ -177,9 +177,19 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## M3. Áudio
 
-- [ ] T3.1 BGM: música do stage (padrão e alternativas), menus, vitória por lutador (`resultsscreen.asm`). **Aceite:**
-  dump WAV (`/tmp/ssb64_dump.wav` é o default do port) com áudio não nulo em 5 stages custom e no resultado.
-- [ ] T3.2 SFX e vozes novos (FGM 0x2B7 a 0x608): golpes, itens e hazards tocam o som certo; voz japonesa e
+- [x] T3.1 BGM (2026-10-16, validado pelo lead): o port já tocava os bancos reconstruídos (375 sequências); faltava o BGM de vitória
+  por lutador (`Character.winner_bgm.table`, `mnremixwinbgm.c`: a entrada é um `add_victory_bgm(bgm)` e o id vem do `ori a1`) e a cena de
+  resultados não carregava os arquivos de lutadores Remix (`mnvsresults.c`). Dump de áudio por run (`SSB64_AUDIO_DUMP_PATH`,
+  `SSB64_AUDIO_DUMP_SECONDS`, `vs.sh` grava `audio.wav`, `scripts/wavstat.py` mede RMS por segundo). **Aceite:** 5 stages Remix
+  (41, 60, 100, 150, 200) com som nos 24 s capturados (RMS 1000..7000, o BGM do stage é o `default_music_track_table` menos 1);
+  vitória: Falco toca 69, DSamus 82, Dedede 210 (as ids de `FALCO_VICTORY`, `DSAMUS_VICTORY`, `DEDEDE_VICTORY`). O BGM dos menus e
+  o volume do BGM dependem dos toggles (M4). A cena de resultados sai branca no atalho `SSB64_VS_STOCKS` (também com lutadores
+  vanilla), então o visual dela é verificado no T5.3.
+- [ ] T3.2 *(em andamento, 2026-10-16)* **Achado:** nenhuma chamada de FGM chega a `func_800269C0_275C0` numa partida do Remix, nem com lutadores vanilla
+  (log opt-in `SSB64_AUDIO_FGM_LOG=1` imprime `[fgm] play id=..`; `syAudioPlayFGM` também não registra o "first"), então os efeitos sonoros
+  estão mudos. O blob `audio/fgm_tbl`/`fgm_ucd` já é autossuficiente (1288 e 1545 entradas, todos os offsets dentro do blob). Investigar o
+  porquê: `syAudioHasSoundPlayers` (`sSYAudioSoundPlayers`) e o caminho que fighters usam para tocar SFX. Depois, o aceite abaixo. 
+  Original: SFX e vozes novos (FGM 0x2B7 a 0x608): golpes, itens e hazards tocam o som certo; voz japonesa e
   `Stereo.asm`. **Aceite:** checagem por log de FGM tocado em 10 golpes de lutadores Remix.
 - [ ] T3.3 Sound test com as 375 faixas.
 - **CP3**.

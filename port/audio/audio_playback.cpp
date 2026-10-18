@@ -85,7 +85,32 @@ extern "C" void portAudioPushSilence(void)
 
 static FILE *sWavFile = nullptr;
 static uint32_t sWavBytesWritten = 0;
-static const uint32_t kWavMaxBytes = 32000u * 2u * 2u * 16u; /* 16 s stereo s16 @ 32 kHz */
+static const uint32_t kWavBytesPerSecond = 32000u * 2u * 2u; /* stereo s16 @ 32 kHz */
+static const uint32_t kWavDefaultSeconds = 16u;
+static const uint32_t kWavLimitSeconds = 120u;
+
+/* SSB64_AUDIO_DUMP_SECONDS (default 16) sets how much PCM is captured. */
+static uint32_t wavMaxBytes(void)
+{
+    static uint32_t sMax = 0;
+    if (sMax == 0) {
+        uint32_t seconds = kWavDefaultSeconds;
+        const char *env = std::getenv("SSB64_AUDIO_DUMP_SECONDS");
+        if (env != nullptr && env[0] != '\0') {
+            long value = std::strtol(env, nullptr, 10);
+            if (value > 0 && value <= (long)kWavLimitSeconds) seconds = (uint32_t)value;
+        }
+        sMax = seconds * kWavBytesPerSecond;
+    }
+    return sMax;
+}
+
+/* SSB64_AUDIO_DUMP_PATH (default /tmp/ssb64_dump.wav): one file per run for parallel batches. */
+static const char *wavPath(void)
+{
+    const char *env = std::getenv("SSB64_AUDIO_DUMP_PATH");
+    return (env != nullptr && env[0] != '\0') ? env : "/tmp/ssb64_dump.wav";
+}
 
 static void wavWriteHeader(FILE *fp, uint32_t dataBytes)
 {
@@ -114,28 +139,27 @@ static void wavWriteHeader(FILE *fp, uint32_t dataBytes)
 
 static void wavMaybeOpen(void)
 {
-    if (sWavFile != nullptr || sWavBytesWritten >= kWavMaxBytes) return;
-    sWavFile = std::fopen("/tmp/ssb64_dump.wav", "wb");
+    if (sWavFile != nullptr || sWavBytesWritten >= wavMaxBytes()) return;
+    sWavFile = std::fopen(wavPath(), "wb");
     if (sWavFile == nullptr) {
         port_log("SSB64 Audio: WAV dump open failed (errno preserved by fopen)\n");
         return;
     }
     /* Placeholder header — finalized when we close. */
     wavWriteHeader(sWavFile, 0);
-    port_log("SSB64 Audio: WAV dump opened /tmp/ssb64_dump.wav (will capture %u bytes ~ 16 s)\n",
-             (unsigned)kWavMaxBytes);
+    port_log("SSB64 Audio: WAV dump opened %s (will capture %u bytes)\n", wavPath(), (unsigned)wavMaxBytes());
 }
 
 static void wavAppend(const void *buf, size_t bytes)
 {
     if (sWavFile == nullptr) return;
-    if (sWavBytesWritten >= kWavMaxBytes) return;
-    if (bytes > kWavMaxBytes - sWavBytesWritten) {
-        bytes = kWavMaxBytes - sWavBytesWritten;
+    if (sWavBytesWritten >= wavMaxBytes()) return;
+    if (bytes > wavMaxBytes() - sWavBytesWritten) {
+        bytes = wavMaxBytes() - sWavBytesWritten;
     }
     std::fwrite(buf, 1, bytes, sWavFile);
     sWavBytesWritten += (uint32_t)bytes;
-    if (sWavBytesWritten >= kWavMaxBytes) {
+    if (sWavBytesWritten >= wavMaxBytes()) {
         /* Finalize: rewrite header with actual data size, then close. */
         std::fseek(sWavFile, 0, SEEK_SET);
         wavWriteHeader(sWavFile, sWavBytesWritten);
