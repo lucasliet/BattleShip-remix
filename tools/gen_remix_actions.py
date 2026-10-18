@@ -62,6 +62,8 @@ EXTRA_SYMBOLS = [
     "Character.kirby_inhale_struct.table",
     "Character.falcon_dive_id.table",
     "Character.winner_bgm.table",
+    "MIDI.extended_music_map_table",
+    "FGM.extended_voice_map_table",
     "KirbyHats.extended_special_parts",
     "Item.GoldenGun.projectile_info_pointer",
 ]

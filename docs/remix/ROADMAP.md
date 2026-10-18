@@ -38,9 +38,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M3 (áudio), task T3.2. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP2b, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~67% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Milestone:** M4 (settings e toggles), task T4.1. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
+- **Último checkpoint:** CP3, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~71% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -185,14 +185,19 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   vitória: Falco toca 69, DSamus 82, Dedede 210 (as ids de `FALCO_VICTORY`, `DSAMUS_VICTORY`, `DEDEDE_VICTORY`). O BGM dos menus e
   o volume do BGM dependem dos toggles (M4). A cena de resultados sai branca no atalho `SSB64_VS_STOCKS` (também com lutadores
   vanilla), então o visual dela é verificado no T5.3.
-- [ ] T3.2 *(em andamento, 2026-10-16)* **Achado:** nenhuma chamada de FGM chega a `func_800269C0_275C0` numa partida do Remix, nem com lutadores vanilla
-  (log opt-in `SSB64_AUDIO_FGM_LOG=1` imprime `[fgm] play id=..`; `syAudioPlayFGM` também não registra o "first"), então os efeitos sonoros
-  estão mudos. O blob `audio/fgm_tbl`/`fgm_ucd` já é autossuficiente (1288 e 1545 entradas, todos os offsets dentro do blob). Investigar o
-  porquê: `syAudioHasSoundPlayers` (`sSYAudioSoundPlayers`) e o caminho que fighters usam para tocar SFX. Depois, o aceite abaixo. 
-  Original: SFX e vozes novos (FGM 0x2B7 a 0x608): golpes, itens e hazards tocam o som certo; voz japonesa e
-  `Stereo.asm`. **Aceite:** checagem por log de FGM tocado em 10 golpes de lutadores Remix.
-- [ ] T3.3 Sound test com as 375 faixas.
-- **CP3**.
+- [x] T3.2 SFX e vozes (2026-10-16, validado pelo lead): os blobs `audio/fgm_tbl` e `fgm_ucd` já são autossuficientes (1288 e 1545 entradas,
+  todos os offsets dentro do blob) e os SFX tocam. Log opt-in `SSB64_AUDIO_FGM_LOG=1` (`[fgm] play id=.. table=..` em
+  `func_800269C0_275C0`, a função que o jogo chama; `func_80026A10_27610` é outra). Centro do pan do hit SFX no Sector Z Remix
+  (`Stereo.asm`, `lbcommon.c`). **Aceite:** matriz de especiais de 10 lutadores (29, 34, 38, 40, 58, 64, 65, 77, 80, 90) toca 25 a 70
+  FGMs cada, 7 deles com ids novos (>= 0x2B7: Falco 720/724, DSamus 1477/1492, 38: 831/832, 58: 844 e 856..858, Dedede 1082..1101, 65:
+  1114..1280) e nenhum fora da tabela (1545); os outros 3 usam só ids vanilla. Fora daqui: voz japonesa e `entry_stereo_fix` são toggles
+  (M4); o caso HRC do Stereo é do T6.2; a fala do MMM (FGM 0x564) só toca no evento do hazard.
+- [x] T3.3 Sound test (2026-10-16, validado pelo lead): `mnsoundtest.c` com 375 músicas e 1094 vozes (vanilla 244 + 850), mapas
+  `MIDI.extended_music_map_table` e `FGM.extended_voice_map_table` lidos da imagem (`mnremixsoundtest.c`), L/R seguram 50 por toque,
+  número com 4 dígitos. Vistos: Music 201 toca o BGM 200, Music 375 (wrap com ←) toca o BGM 374, Voice 101 toca o FGM 424, Voice 1094
+  toca o FGM 1544 (0x608, o último), com som no dump. Scripts `inputs/soundtest_browse.txt` e `soundtest_wrap.txt`
+  (`SSB64_START_SCENE=59`).
+- [x] **CP3** (checkpoint, 2026-10-16).
 
 ## M4. Settings e toggles do Remix
 
@@ -276,9 +281,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 | Fighters (roster, specials, projéteis, entradas) | 35% | ~94% |
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
-| Áudio | 10% | ~50% |
+| Áudio | 10% | ~90% |
 | Settings, menus, modos | 20% | ~15% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~67%** |
+| **Total ponderado** | | **~71%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).

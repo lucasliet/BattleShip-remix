@@ -37,7 +37,7 @@ Verification by running the real game headless with environment overrides, scree
 
 Outputs: `build/agent-shots/vs/<name>/` with `frame_<n>.png`, `stdout.log`, `ssb64.log`, `save.bin`.
 
-Input scripts (`inputs/`): `none.txt` (no input), `nsp_tap.txt`/`dsp_tap.txt`/`usp_tap.txt` (walk right, then the special
+Input scripts (`inputs/`): `soundtest_browse.txt` / `soundtest_wrap.txt` (with `SSB64_START_SCENE=59`, drive the Sound Test), `grab_walk` was dropped (CPUs do not reach grabs reliably), `none.txt` (no input), `nsp_tap.txt`/`dsp_tap.txt`/`usp_tap.txt` (walk right, then the special
 every 150 frames from frame 420), `css_pick_mario.txt` (both ports pick Mario, START at 200, A on the stage select at
 300), `css_page3_stage.txt` (same, then R 15 times to reach page 3 of the stage select and A at 600). Line format:
 `<from> <to> <port> <buttons|-> [stick_x stick_y]`. Do not press A every few frames to pick an item up: the fighter stays
@@ -53,6 +53,7 @@ locked in its jab combo; use the CPU item sweep instead.
 | `SSB64_VS_P2_HUMAN=1` | The second VS fighter becomes human, so an input script can drive port 1 (`inputs/reflect_test*.txt`) |
 | `SSB64_REMIX_GFX_TEST=<id>` / `SSB64_REMIX_COLANIM_TEST=<id>` | Spawns the Remix GFX id / applies the Remix GFX routine on the first fighter every 45 frames |
 | `SSB64_REMIX_KIRBY_COPY_TEST=<fkind>` | Kirby (P1) copies that power at frame ~405 (not earlier: the appear status crashes). Put the copied fighter in the match (`vs.sh 8,<fkind> inputs/nsp_kirby.txt`): the copy's weapon and item files only load for fighters present. |
+| `SSB64_AUDIO_FGM_LOG=1` | Logs `[fgm] play id=<n> table=<count>` for every FGM the game plays (ids >= 695 are Remix sounds); count them per run to prove SFX play |
 | `SSB64_VS_STOCKS=<n>` | The VS shortcut becomes a stock match with n stocks (Royal), so a KO ends it and the results scene runs; with `walk_right.txt` P1 falls off the stage |
 | `SSB64_AUDIO_DUMP_PATH=<file>` / `SSB64_AUDIO_DUMP_SECONDS=<n>` | WAV dump of the first n seconds (default 16, at most 120); `vs.sh` sets the path to `<run>/audio.wav` and `AUDIO_SECONDS` the length. Summarize with `.toolchain/host/venv/bin/python -I scripts/wavstat.py <run>...` |
 | `SSB64_VS_STAGE=<decimal>` | Stage id (vanilla 0..0x28, Remix 0x29..0xD7; names in `decomp/src/gr/grremix/grremixids.h`) |

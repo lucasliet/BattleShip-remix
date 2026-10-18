@@ -1221,6 +1221,7 @@
 #define REMIX_SYM_EbiUSP__ground_initial_ 0x8057B5A0u
 #define REMIX_SYM_EbiUSP__main_ 0x8057B6B0u
 #define REMIX_SYM_EbiUSP__physics_ 0x8057B6ECu
+#define REMIX_SYM_FGM__extended_voice_map_table 0x804422D8u
 #define REMIX_SYM_Falco__Action__action_string_table 0x8054079Cu
 #define REMIX_SYM_Falco__Action__string_0x0E1 0x805406F4u
 #define REMIX_SYM_Falco__Action__string_0x0E2 0x80540700u
@@ -2434,6 +2435,7 @@
 #define REMIX_SYM_LankyUSP__physics_ 0x805896E0u
 #define REMIX_SYM_LankyUSP__turn_main_ 0x805895D0u
 #define REMIX_SYM_LucasNSP__air_move_ 0x80549FA0u
+#define REMIX_SYM_MIDI__extended_music_map_table 0x8040585Cu
 #define REMIX_SYM_Marina__Action__action_string_table 0x8056C238u
 #define REMIX_SYM_Marina__Action__string_0x0100 0x8056C180u
 #define REMIX_SYM_Marina__Action__string_0x0101 0x8056C190u
