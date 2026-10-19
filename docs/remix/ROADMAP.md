@@ -39,7 +39,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 ## Posição atual
 
 - **Milestone:** M4 (settings e toggles) fechado nas tasks T4.1 a T4.3; falta o CP4. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP2c, 2026-10-19 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Último checkpoint:** CP2d, 2026-10-19 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~80% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
@@ -188,6 +188,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   de T2.4b (15 Size), T2.5 (11 PokemonAnnouncer) e M4 (6 toggles); em 2026-10-16 são 168 linhas, o resto é rastreio fino de hazards e
   itens (campos de `ITStruct` sem nome, slot de blast zone 0x398, GFX, display) para resolver em lotes de workers por arquivo.*
 - **CP2**.
+- [x] **CP2d** (checkpoint a pedido, 2026-10-19): nada de código novo desde o CP2c; registrado o achado dos resultados brancos (T5.3) e o estado do CSS (grade 3x10 com os 30 retratos Remix, sem bookends, sem sorteio, costumes de lutador Remix sempre 0 porque `ftport.c` só liga `costume_row` aos vanilla; os dados de costume do Remix estão em `Character.default_costume.table` e `Costumes.select_.num_costumes`, e o ciclo de costume do Remix usa C esquerda/direita para costume e C cima/baixo para o tom).
 - [x] **CP2c** (checkpoint, 2026-10-19): T2.4b, T2.5 e T2.7b fechados (ver acima); T2.9b e T2.11 seguem abertos (T2.11 vira lote de workers no M8, 169 linhas).
 
 ## M3. Áudio
@@ -276,7 +277,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   para os stages Remix), variantes DL/Omega/Remix (`variant_table`), roulette do Random, layout tournament.
   **Aceite:** capturas de um stage com emblema, uma variante e a roulette.
 - [ ] T5.2 Painel por porta do CSS (`css/*.asm`), inclui o menu de tamanho que escreve `ftRemixSizeSetMatchState`.
-- [ ] T5.3 *(inclui o que sobrou do T4.2: 12 ganchos de Menu Music, Music Title, Input Display, Random Select, Full Results, pause 0xE-0x10)* VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
+- [ ] T5.3 *(primeiro item, bloqueia a jogabilidade: a tela de resultados do VS (cena 24) renderiza toda branca depois da transição de foto; 2026-10-19: com Mario e Kirby vanilla o `SSB64_VS_STOCKS=1` + `walk_right.txt` passa pela cena 24 sem erro no log, o trace GBI (`SSB64_GBI_TRACE=1`, frame 990, 1706 comandos) desenha o papel de parede, os nomes e os lutadores, e o branco já aparece atrás da malha da transição; falta isolar qual objeto desenha o branco (suspeitas: emblema da série, tint do papel de parede, fundo da câmera) desligando um de cada vez em `mnVSResultsFuncStart`)* *(inclui o que sobrou do T4.2: 12 ganchos de Menu Music, Music Title, Input Display, Random Select, Full Results, pause 0xE-0x10)* VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
   créditos estendidos, Character Data dos 97, name tag / player tag, Gallery.
 - [ ] T5.5 Registros de save para 97 lutadores (`lbtypes.h` `vs_records[12]`, `spgame_records[12]`, `fighter_mask` de 16 bits,
   `LBBACKUP_MASK_FIGHTER`, `lbbackup.c`, `sc1pmanager.c`, `mnvsrecord.c`, `mnmessage.c` unlock): hoje fkinds acima de 11 leem
