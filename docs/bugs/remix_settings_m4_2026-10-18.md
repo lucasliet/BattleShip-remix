@@ -15,7 +15,7 @@ name in `Toggles.asm` without `entry_`; the VS variant is `Toggles.single_player
 
 ## Gameplay settings (T4.2)
 
-Ported by Haiku workers, one scope each, and validated by the lead: with every setting off the special matrix is unchanged, with
+Ported by Haiku workers in three waves, one scope each, and validated by the lead: with every setting off the special matrix is unchanged, with
 all of them on it runs without errors (6 fighters x NSP, DSP, USP). One setting was also seen acting: Air Dodging shows the new
 escape statuses; Hazard Mode = 3 removes the Pirate Land cannon. Per-setting notes: `docs/remix/notes/f8_*.md`.
 

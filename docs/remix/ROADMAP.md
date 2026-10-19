@@ -39,8 +39,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 ## Posição atual
 
 - **Milestone:** M4 (settings e toggles), task T4.1. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP4a, 2026-10-18 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~74% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Último checkpoint:** CP4b, 2026-10-18 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~77% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -214,11 +214,16 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   e Flash), Move Staling, Jab Locking, Footstool Jumping, Edge C-Jumping, Ledge Trumping, Wall Teching, Spot Dodging, Perfect Shielding,
   Parrying, Rage, Charge Smashes, Game Speed e Single Button Mode (parciais: ligação no Training e no filtro de entrada),
   Hitlag, Japanese Sounds, Shield Stun, Japanese Stun/Sleep, Momentum Slide (Japan.asm; faltam os sons do Link). Notas em
-  `docs/remix/notes/f8_*.md` (cada uma diz o título, os valores e o que ver). **Faltam:** Item Containers, Stopwatch Item, All Items R
-  Drop (`Item.asm`, `items/Stopwatch.asm`), Special Zoom, BlastZone Warp (`Blastzone.asm`), Combo Meter (`ComboMeter.asm`,
-  `Combo.asm`), Hitbox/Hurtbox/Model Display (`Hitbox.asm`), Input Display, Screenshake/Flash Guard/BlastZone GFX
-  (`Accessibility.asm`), Anti-Aliasing, FPS Display, Pause (Hold To Pause), Camera Mode, Neutral Spawns, Salty Runback, Skip Results,
-  Disable HUD, e os que dependem de IA (Improved AI, M7). **Aceite:** cada toggle muda o comportamento num teste curto.
+  `docs/remix/notes/f8_*.md` (cada uma diz o título, os valores e o que ver). **Terceira onda (2026-10-18, portados e validados por build limpo e matriz sem erro, com tudo desligado e tudo ligado):** Item
+  Containers, All Items R Drop, Pokémon picker/vozes e Stopwatch (`Item.asm`), Camera Mode, Cinematic Entry e Disable HUD pausa
+  (`Camera.asm`), Special Zoom, BlastZone Warp e BlastZone GFX, Combo Meter (4 toggles; setup chamado depois do `SetupFiles` do VS e
+  do 1P, o hook original em `syTaskmanLoadScene` abortava por carregar arquivo antes do reloc), Screenshake e Flash Guard, Disable
+  AA e FPS (mapeados ao MSAA e à janela de stats do port), Hold To Pause, BGM Volume, SFX Volume, Play Music, Random Music.
+  **Faltam:** Menu Music e Music Title at Match Start (`BGM.asm`), `Render.*` do HUD (Disable HUD completo, D-pad de HUD), Input Display,
+  Neutral Spawns, Salty Runback, Skip Results, Skip Start Cheer, Default CPU Level, Random Select, Full Results, os que dependem de
+  IA (Improved AI, M7), a ligação do Game Speed no Training e do Single Button Mode no filtro de entrada, e o resto de `Hitbox.asm`
+  (Hitbox/Hurtbox/Model Display).
+  **Aceite:** cada toggle muda o comportamento num teste curto.
   Efeito conferido até aqui: Air Dodging (status de esquiva no ar aparecem).
 - [ ] T4.3 *(parcial: `grRemixHazardsAreOn`/`grRemixMovementIsOn` leem Hazard Mode (Hazard Mode=3 apaga os logs do canhão do Pirate Land), Whispy Mode, Yoshi cloud anims, Random Music do GB Land e o warp do Blastzone já leem o registro)* `grRemixHazardsAreOn`/`grRemixMovementIsOn` e o switch de itens lendo os toggles; perfis CE/TE/NE/JP; toggles de
   item que faltam: seleção de Pokémon, containers, drop de item ao morrer, música aleatória (`Toggles.entry_random_music`,
@@ -297,8 +302,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~30% |
+| Settings, menus, modos | 20% | ~45% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~74%** |
+| **Total ponderado** | | **~77%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).

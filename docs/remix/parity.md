@@ -4,19 +4,19 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 
 | Área | ported | partial | todo | n/a | progresso |
 |---|---|---|---|---|---|
-| fighters | 92 | 52 | 3 | 0 | 80% |
+| fighters | 93 | 54 | 3 | 0 | 80% |
 | items | 6 | 26 | 1 | 0 | 58% |
 | stages | 1 | 6 | 0 | 0 | 57% |
 | audio | 0 | 3 | 2 | 0 | 30% |
-| menus_modes | 0 | 3 | 49 | 0 | 3% |
+| menus_modes | 0 | 6 | 43 | 0 | 6% |
 | ai | 0 | 0 | 32 | 0 | 0% |
 | infra | 1 | 0 | 0 | 10 | 100% |
 
 | Arquivo | Área | Status | Port |
 |---|---|---|---|
-| `AA.asm` | menus_modes | todo |  |
+| `AA.asm` | menus_modes | partial | remix_display_settings.cpp (MSAA) |
 | `AI.asm` | ai | todo | ROADMAP T7.1 |
-| `Accessibility.asm` | menus_modes | todo |  |
+| `Accessibility.asm` | fighters | partial | ifscreenflash.c, efremixscreenshake.c |
 | `Action.asm` | fighters | ported | ftremixvanillaprocs.c, remix_action_layout.h |
 | `AerialAttackFastFall.asm` | menus_modes | todo |  |
 | `AirDodge.asm` | fighters | ported | ftremixairdodge.c |
@@ -39,8 +39,8 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `ChargeSmashAttacks.asm` | fighters | ported | ftremixchargesmash.c |
 | `Cheats.asm` | menus_modes | todo |  |
 | `Color.asm` | infra | n/a | constants |
-| `Combo.asm` | menus_modes | todo |  |
-| `ComboMeter.asm` | menus_modes | todo |  |
+| `Combo.asm` | fighters | ported | ftremixcombo.c |
+| `ComboMeter.asm` | menus_modes | partial | ifremixcombometer.c, ifremixcombohits.c |
 | `Conker/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Conker/Conker.asm` | fighters | ported | decomp/src/ft/ftremix/conker |
 | `Conker/ConkerSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/conker |
@@ -167,7 +167,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `OnHit.asm` | fighters | todo | ROADMAP T2.7 |
 | `PAL.asm` | infra | n/a | N64 TV type |
 | `Parry.asm` | fighters | ported | ftremixparry.c |
-| `Pause.asm` | menus_modes | todo |  |
+| `Pause.asm` | menus_modes | partial | ftremixpause.c (Disable HUD, music, legend open) |
 | `Peach/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Peach/Peach.asm` | fighters | ported | decomp/src/ft/ftremix/peach |
 | `Peach/PeachSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/peach |
@@ -216,7 +216,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Sonic/Sonic.asm` | fighters | ported | decomp/src/ft/ftremix/sonic |
 | `Sonic/SonicSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/sonic |
 | `Spawn.asm` | stages | partial | grremixspawn.c |
-| `SpecialZoom.asm` | menus_modes | todo |  |
+| `SpecialZoom.asm` | fighters | partial | gmremixspecialzoom*.c (stage hide open) |
 | `Speed.asm` | fighters | partial | ftremixspeed.c (training wiring open) |
 | `SpotDodge.asm` | fighters | ported | ftremixspotdodge.c |
 | `Stages.asm` | stages | partial | grremixstage.c, mnmaps.c |

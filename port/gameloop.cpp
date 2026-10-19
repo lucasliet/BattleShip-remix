@@ -26,6 +26,7 @@
 #include "widescreen/widescreen.h"
 #include "port.h"
 #include "port_watchdog.h"
+#include "remix/remix_display_settings.h"
 #include "hooks/Events.h"
 
 #include <libultraship/libultraship.h>
@@ -684,6 +685,9 @@ void PortPushFrame(void)
 {
 	// Process cheats safely before the frame updates
 	lbBackupApplyCheats();
+#ifdef REGION_REMIX
+	remix_display_settings_sync();
+#endif
 
 	/* Capture the wall-clock start of this PortPushFrame for the
 	 * frame-pacing fallback below. */
