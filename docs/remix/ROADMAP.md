@@ -38,9 +38,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M4 (settings e toggles), tasks T4.2 (onda 4 feita) e T4.3. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP4c, 2026-10-19 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~77% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Milestone:** M4 (settings e toggles) fechado nas tasks T4.1 a T4.3; falta o CP4. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
+- **Último checkpoint:** CP4, 2026-10-19 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~79% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -208,7 +208,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   `SSB64_REMIX_TOGGLES="Titulo=valor;..."` e `SSB64_REMIX_PROFILE=0..3`. A interface é a seção **Remix** do menu do port (uma barra
   lateral por grupo, perfis em botões); o botão Settings do Mode Select e o atalho L do CSS/SSS abrem esse menu e ficam no T5.3.
   Desvio: o menu desenhado pelo Remix (`Menu.asm`) não é replicado, o do port tem as mesmas entradas e valores.
-- [ ] T4.2 Toggles de gameplay *(em andamento, 2026-10-18)*: lista de `docs/remix/menus.md` 2.4, um arquivo por sistema, workers Haiku com
+- [x] T4.2 Toggles de gameplay *(fechado 2026-10-19; o que sobrou foi redistribuído abaixo)*: lista de `docs/remix/menus.md` 2.4, um arquivo por sistema, workers Haiku com
   `docs/remix/f8_toggle_worker_brief.md` e validação do lead. **Feitos** (build limpo, matriz 6 lutadores x 3 golpes sem erro com todos
   desligados e todos ligados): Hitstun, DI, Air Dodging (status novos 0x2D/0x3A/0x3B com a opção ligada), Tripping, Z-Cancel (+ Punish
   e Flash), Move Staling, Jab Locking, Footstool Jumping, Edge C-Jumping, Ledge Trumping, Wall Teching, Spot Dodging, Perfect Shielding,
@@ -224,19 +224,24 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   `gSCManagerBattleState->gkind`), Default CPU LVL (V.S.), Skip Results Screen (a partida termina e volta ao CSS), Salty Runback e
   Always Show Full Results (`gmremixgameend.c`), Menu Music no CSS do VS (`gmremixmenumusic.c`), Disable HUD no modo ALL em VS e
   Training (`ifremixhud.c`, HUD sumiu na captura), Model Display e Special Model Display (caixas de hitbox e losangos de ECB vistos
-  em partida, `ftremixhitboxdisplay.c`). **Faltam:** os outros 12 ganchos de Menu Music (precisam do mapa de endereços do build) e
-  Music Title at Match Start, os grupos de pause 0xE a 0x10 do HUD (Render groups), Input Display (item do menu de debug do CSS, vai
-  para o M5), Skip Start Cheer (o decomp não tem a chamada do FGM 0x0272), Advanced Hurtbox Display (o port só desenha um cuboide),
-  Random Select, os que dependem de IA (Improved AI, M7), a ligação do Game Speed no Training e do Single Button Mode no filtro de
-  entrada, o 12 Character Battle do runback e o reset de heap do runback (testar crescimento de memória), e os resultados do Full
-  Results só podem ser vistos depois do T5.3 (a cena de resultados ainda renderiza em branco no atalho de VS).
+  em partida, `ftremixhitboxdisplay.c`). **Quinta onda (2026-10-19):** Single Button Mode (filtro no `ftMainProcessInput` do jogador humano, validado em partida: `=1` ignora o
+  B, `=2` deixa passar) e Game Speed (VS validado com `=5`; no Training o gancho `ftRemixSpeedTrainingRunFrames` entrou em
+  `sc1PTrainingModeUpdateAll`, só build, o teste fica no T6.3). **Redistribuído:** os outros 12 ganchos de Menu Music, Music Title at
+  Match Start, Input Display, Random Select, Full Results (a cena de resultados ainda renderiza em branco no atalho de VS) e os grupos
+  de pause 0xE a 0x10 vão para o T5.3; os hooks de CPU do Single Button Mode e Improved AI para o T7.1; 12 Character Battle do
+  runback e reset de heap do runback para o T6.1; Skip Start Cheer (o decomp não tem a chamada do FGM 0x0272), Advanced Hurtbox
+  Display (o port só desenha um cuboide) e os sons JP do Link para o T8.1.
   **Aceite:** cada toggle muda o comportamento num teste curto.
   Efeito conferido até aqui: Air Dodging (status de esquiva no ar aparecem), Neutral Spawns, Disable HUD ALL, Special Model Display e
-  Skip Results Screen.
-- [ ] T4.3 *(parcial: `grRemixHazardsAreOn`/`grRemixMovementIsOn` leem Hazard Mode (Hazard Mode=3 apaga os logs do canhão do Pirate Land), Whispy Mode, Yoshi cloud anims, Random Music do GB Land e o warp do Blastzone já leem o registro)* `grRemixHazardsAreOn`/`grRemixMovementIsOn` e o switch de itens lendo os toggles; perfis CE/TE/NE/JP; toggles de
-  item que faltam: seleção de Pokémon, containers, drop de item ao morrer, música aleatória (`Toggles.entry_random_music`,
-  usado pelo GB Land).
-- **CP4**.
+  Skip Results Screen, Single Button Mode e Game Speed.
+- [x] T4.3 (2026-10-19, validado pelo lead) `grRemixHazardsAreOn`/`grRemixMovementIsOn` leem Hazard Mode (Hazard Mode=3 apaga os logs do
+  canhão do Pirate Land), Whispy Mode, Yoshi cloud anims, Random Music do GB Land e o warp do Blastzone; o switch de itens lê o
+  registro (`itRemixStandardItemIsOn`/`GetWeight`); containers, All Items R Drop e o seletor de Pokémon já estavam ligados.
+  **Efeito conferido em partida** (Dream Land, Poké Ball forçada, 2400 frames, log `[remix-item]`): com todos os Pokémon desligados
+  menos o Snorlax, os dois sorteios foram Snorlax (0x21); com tudo ligado saíram 0x25 e 0x2A; `Item Containers=1` deixa a máscara em
+  0xFFF8 (caixas, barris e cápsulas fora, ovo mantido fora do Yoshi) e o padrão e `=3` em 0xFFFF. Os perfis CE/TE/NE/JP são dado do
+  registro do T4.1 (`SSB64_REMIX_PROFILE`). O que depende do menu (item switch interativo, Settings) fica no T5.3.
+- [x] **CP4** (checkpoint, 2026-10-19): sweeps de regressão com a build final: 175 de 175 stages com `rc=0` e nenhuma captura em branco, 13 de 13 itens no sweep de CPUs sem abort/assert (12 quedas do compositor do macOS passaram na repetição).
 
 ## M5. CSS, menus e telas
 
@@ -256,7 +261,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   para os stages Remix), variantes DL/Omega/Remix (`variant_table`), roulette do Random, layout tournament.
   **Aceite:** capturas de um stage com emblema, uma variante e a roulette.
 - [ ] T5.2 Painel por porta do CSS (`css/*.asm`).
-- [ ] T5.3 VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
+- [ ] T5.3 *(inclui o que sobrou do T4.2: 12 ganchos de Menu Music, Music Title, Input Display, Random Select, Full Results, pause 0xE-0x10)* VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
   créditos estendidos, Character Data dos 97, name tag / player tag, Gallery.
 - [ ] T5.5 Registros de save para 97 lutadores (`lbtypes.h` `vs_records[12]`, `spgame_records[12]`, `fighter_mask` de 16 bits,
   `LBBACKUP_MASK_FIGHTER`, `lbbackup.c`, `sc1pmanager.c`, `mnvsrecord.c`, `mnmessage.c` unlock): hoje fkinds acima de 11 leem
@@ -267,20 +272,20 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## M6. Modos
 
-- [ ] T6.1 VS: 12-Character Battle, Tag Team, King of the Hill, Smashketball, Tug of War, Stamina, Timed Stock, Teams.
+- [ ] T6.1 *(inclui o runback do 12 Character Battle e o reset de heap do runback)* VS: 12-Character Battle, Tag Team, King of the Hill, Smashketball, Tug of War, Stamina, Timed Stock, Teams.
 - [ ] T6.2 1P: Remix 1P, All-Star, Multiman, Home-Run Contest, BTT/BTP dos lutadores Remix, Practice 1P.
-- [ ] T6.3 Training: extensões de `Training.asm`, menu e HUD de itens, spawn por taunt e item no início da partida.
+- [ ] T6.3 Training *(testar Game Speed no Training, gancho já ligado)*: extensões de `Training.asm`, menu e HUD de itens, spawn por taunt e item no início da partida.
 - **CP6**.
 
 ## M7. IA
 
-- [ ] T7.1 `AI.asm` (70 hooks), toggle Improved AI, os `cpu_*` marcados `REMIX-TODO(AI)` nos fighters,
+- [ ] T7.1 `AI.asm` (70 hooks), toggle Improved AI, hooks de CPU do Single Button Mode, os `cpu_*` marcados `REMIX-TODO(AI)` nos fighters,
   `VanillaLv10Attacks.asm`. **Aceite:** CPU nível 9 usa especiais e recupera com 10 lutadores Remix.
 - **CP7**.
 
 ## M8. Restante da paridade
 
-- [ ] T8.1 Todas as linhas `todo`/`partial` de `docs/remix/parity.md` que não couberam acima (Pause, Japan, Accessibility,
+- [ ] T8.1 *(inclui Skip Start Cheer, Advanced Hurtbox Display e os sons JP do Link)* Todas as linhas `todo`/`partial` de `docs/remix/parity.md` que não couberam acima (Pause, Japan, Accessibility,
   Cheats, SwordTrail, Skeleton, SingleButtonMode, SpecialZoom, VsDemo e outros).
 - **CP8**.
 
@@ -310,8 +315,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~50% |
+| Settings, menus, modos | 20% | ~55% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~78%** |
+| **Total ponderado** | | **~79%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).

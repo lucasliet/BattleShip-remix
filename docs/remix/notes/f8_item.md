@@ -80,3 +80,7 @@ itpippi, ithitokage, itfushigibana, itglucky).
 - With all Pokemon and Mew off, the spawn is a Poke Ball (kind 0x13). Play-test it.
 - Mew is rolled without the newcomers unlock check of vanilla, as the asm does.
 - CMake needs a reconfigure (GLOB_RECURSE) before the new files are compiled.
+
+## Verification log (2026-10-19)
+
+`SSB64_REMIX_ITEM_LOG=1` now also prints `monster kind=0x..` (Pokemon picker spawn) and `containers_mask kind=0x..` (mask written by `itRemixContainersApplyToggle`). Poke Ball forced with `SSB64_FORCE_ITEM_KIND=19`: only Snorlax ON gave 0x21 twice; all ON gave 0x25 and 0x2A. `Item Containers=1` gave mask 0xFFF8 on Dream Land, DEFAULT and `=3` gave 0xFFFF.

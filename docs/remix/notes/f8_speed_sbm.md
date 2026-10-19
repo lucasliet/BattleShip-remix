@@ -15,7 +15,7 @@ Toggles (Toggles.asm, read directly by the asm, so `gmRemixToggle`, not `gmRemix
 |---|---|---|---|
 | process_update_ (Stopwatch, not the Game Speed setting) | 0x8000A518 | gcRunGObjProcess (sys/objman.c) | Already applied by the Stopwatch worker (objman.c, REGION_REMIX block). Not touched here. |
 | handle_rate_ | 0x8011427C | ifCommonBattleGoUpdateInterface (if/ifcommon.c), the final gcRunAll call | Applied: `ftRemixSpeedRunFrames()` under REGION_REMIX. |
-| handle_rate_training | none (called by Training.asm:1276) | Training owner | Ported as `ftRemixSpeedTrainingRunFrames`, NOT wired. See below. |
+| handle_rate_training | none (called by Training.asm:1276) | Training owner | Ported as `ftRemixSpeedTrainingRunFrames` and wired in `sc1PTrainingModeUpdateAll` (2026-10-19, build only, `training_speed_is_default` is the Training speed menu option being Full). Remix's own Training freeze (D-pad up/right) is not ported. |
 | additional_advance (read by css/PoisonDmg.asm:84) | none | PoisonDmg owner | Getter `ftRemixSpeedIsAdditionalAdvance()` exported, NOT wired. |
 
 Port: `decomp/src/ft/ftremix/ftremixspeed.c`. The frame count per game frame (waiting_timer shared by both variants):
@@ -38,7 +38,7 @@ stores FALSE on that path). So the training's own frame also reads TRUE, and Poi
 
 | Patch | RAM | Vanilla function | Status |
 |---|---|---|---|
-| single_button_mode (_check_toggle to _return) | jumped to from css/DpadControl.asm:449 | css DpadControl (DpadControl owner) | Filter ported: `ftRemixSingleButtonModeFilter(held, pressed, gate)`. NOT wired. |
+| single_button_mode (_check_toggle to _return) | jumped to from css/DpadControl.asm:449 | css DpadControl (DpadControl owner) | Filter ported and wired (2026-10-19): `ftMainProcessInput` filters the held buttons of a human fighter with `FTREMIX_SBM_GATE_OPEN`, before the R expansion. Checked in a VS match: `Single Button Mode=1` ignores B, `=2` fires it. |
 | handle_cpu_inputs_ A (`_a_b`) | 0xAC73C -> 0x80131CFC | not resolved | REMIX-TODO(AI). Helper `ftRemixSingleButtonCpuAOrBPress` ready. |
 | handle_cpu_inputs_ B (`_a_b`) | 0xAC764 -> 0x80131D24 | not resolved | REMIX-TODO(AI). Same helper. |
 | handle_cpu_inputs_ Z (`_z_l`) | 0xAC784 -> 0x80131D44 | not resolved | REMIX-TODO(AI). Helper `ftRemixSingleButtonCpuZOrLPress`. |
