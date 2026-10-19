@@ -4,7 +4,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 
 | Área | ported | partial | todo | n/a | progresso |
 |---|---|---|---|---|---|
-| fighters | 93 | 54 | 3 | 0 | 80% |
+| fighters | 102 | 45 | 3 | 0 | 83% |
 | items | 6 | 26 | 1 | 0 | 58% |
 | stages | 1 | 6 | 0 | 0 | 57% |
 | audio | 0 | 3 | 2 | 0 | 30% |
@@ -28,8 +28,8 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Bonus.asm` | menus_modes | todo |  |
 | `Boot.asm` | infra | n/a | N64 boot |
 | `Bowser/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
-| `Bowser/BowserSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/bowser |
-| `Bowser/bowser.asm` | fighters | partial | decomp/src/ft/ftremix/bowser |
+| `Bowser/BowserSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/bowser |
+| `Bowser/bowser.asm` | fighters | ported | decomp/src/ft/ftremix/bowser |
 | `Camera.asm` | stages | partial | grremixcamera.c |
 | `CharEnvColor.asm` | fighters | partial | ftremixenvcolor.c (display list fixes open) |
 | `Character.asm` | fighters | ported | port/remix/remix_roster.cpp, ftremix* |
@@ -137,13 +137,13 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Marina/Marina.asm` | fighters | partial | decomp/src/ft/ftremix/marina |
 | `Marina/MarinaSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/marina |
 | `Marth/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
-| `Marth/Marth.asm` | fighters | partial | decomp/src/ft/ftremix/marth |
-| `Marth/MarthSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/marth |
+| `Marth/Marth.asm` | fighters | ported | decomp/src/ft/ftremix/marth |
+| `Marth/MarthSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/marth |
 | `Menu.asm` | menus_modes | todo |  |
 | `MetalMario/MetalMario.asm` | fighters | ported | data-only clone (roster) |
 | `Mewtwo/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
-| `Mewtwo/Mewtwo.asm` | fighters | partial | decomp/src/ft/ftremix/mewtwo |
-| `Mewtwo/MewtwoSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/mewtwo |
+| `Mewtwo/Mewtwo.asm` | fighters | ported | decomp/src/ft/ftremix/mewtwo |
+| `Mewtwo/MewtwoSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/mewtwo |
 | `NBanjo/NBanjo.asm` | fighters | ported | data-only clone (roster) |
 | `NBowser/nbowser.asm` | fighters | ported | data-only clone (roster) |
 | `NConker/NConker.asm` | fighters | ported | data-only clone (roster) |
@@ -193,7 +193,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `SFXReplace.asm` | audio | todo | ROADMAP T3.2 |
 | `SRAM.asm` | menus_modes | todo | ROADMAP T4.1 |
 | `SSonic/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
-| `SSonic/SSonic.asm` | fighters | partial | decomp/src/ft/ftremix/ssonic |
+| `SSonic/SSonic.asm` | fighters | ported | decomp/src/ft/ftremix/ssonic |
 | `Sandbag/Sandbag.asm` | fighters | ported | data-only clone (roster) |
 | `Settings.asm` | menus_modes | todo |  |
 | `Sheik/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
@@ -247,8 +247,8 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Wario/WarioSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/wario |
 | `Widescreen.asm` | infra | n/a | out of scope (4:3) |
 | `Wolf/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
-| `Wolf/Wolf.asm` | fighters | partial | decomp/src/ft/ftremix/wolf |
-| `Wolf/WolfSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/wolf |
+| `Wolf/Wolf.asm` | fighters | ported | decomp/src/ft/ftremix/wolf |
+| `Wolf/WolfSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/wolf |
 | `YoungLink/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `YoungLink/YoungLink.asm` | fighters | partial | decomp/src/ft/ftremix/younglink |
 | `YoungLink/YoungLinkSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/younglink |

@@ -40,9 +40,12 @@ Bugs corrigidos e decisões ficam em [`../bugs/README.md`](../bugs/README.md) (a
 | [`f6_standard_item_worker_brief.md`](f6_standard_item_worker_brief.md) | Item padrão do Remix |
 | [`f7_leftover_worker_brief.md`](f7_leftover_worker_brief.md) | Um grupo de `REMIX-TODO` |
 | [`f7_hazard_worker_brief.md`](f7_hazard_worker_brief.md) | Hazard de um stage, com o primer de idiomas do asm e seus equivalentes no port |
+| [`f8_toggle_worker_brief.md`](f8_toggle_worker_brief.md) | Um toggle de gameplay (API `gmRemixToggle`, notas, como o lead testa) |
+| [`f9_announcer_worker_brief.md`](f9_announcer_worker_brief.md) | PokemonAnnouncer: o núcleo e os grupos de ganchos |
+| [`f9_damage_worker_brief.md`](f9_damage_worker_brief.md) | Ações de dano do `Damage.asm`: stun/flashbang e bury/plunge |
 
 Os briefs mandam gravar as notas do trabalho em [`notes/`](notes/): uma por lutador/golpe (`<id>_<NOME>[_<MOVE>].md`), item
-(`item_<Nome>.md`), patch compartilhado (`shared_*.md`) e tarefa (`f7_*.md`). São os desvios, as incertezas e os
+(`item_<Nome>.md`), patch compartilhado (`shared_*.md`) e tarefa (`f7_*.md`, `f8_*.md`, `f9_*.md`). São os desvios, as incertezas e os
 `REMIX-TODO` de cada porte; o código do decomp as cita.
 
 ## Regras desta pasta

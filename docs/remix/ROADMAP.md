@@ -39,8 +39,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 ## Posição atual
 
 - **Milestone:** M4 (settings e toggles) fechado nas tasks T4.1 a T4.3; falta o CP4. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP4, 2026-10-19 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~79% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Último checkpoint:** CP2c, 2026-10-19 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~80% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -129,11 +129,22 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   de 240 runs sem erro depois da onda. Abertos (TODO(Size) no código): sombra do jogador, `kirby_ausp_`, ovo no `lay`,
   Samus gun blast e USP do Kirby, Pikachu/Ness gfx, 7 efeitos de entrada, itens (nuvem), fator do Pwing no pulo aéreo e smash
   carregado (`ChargeSmash`). Fontes de estado GIANT/TINY (`match_state_table`, Lightning e laser da Bee) seguem em T2.4b.
-- [ ] T2.4b *(depende do menu Remix, feito no M4)* `Size.match_state_table` (modos GIANT/TINY da partida), restauração dos
-  tamanhos pelo Lightning e pelo laser do Metallic Madness, Poison Mushroom visto em partida. Hoje toda partida é NORMAL, o
-  que bate com o jogo sem o menu. **Aceite:** com o modo GIANT ligado, os lutadores nascem grandes e o Lightning devolve ao
-  tamanho do modo.
-- [ ] T2.5 PokemonAnnouncer (`ftremixannouncer.c`, ~30 inserções mecânicas; os clipes são FGMs do Remix (>= 0x2B7), então **executar depois de T3.2** para poder ouvir/verificar; padrão do jogo: só nos stages Pokémon). **Aceite:** fala em pelo menos 3 golpes.
+- [x] T2.4b (2026-10-19, validado pelo lead) Estado de tamanho da partida (`Size.match_state_table`): `ftRemixSizeGetMatchState`/
+  `SetMatchState` em `ftremixsize.c`, o multiplicador inicial do lutador vem do estado (GIANT 2.25, TINY 0.5; fora das telas How to
+  Play e Auto-Demo), e o Lightning, o laser do Metallic Madness e o Super/Poison Mushroom restauram para o tamanho do modo. Enquanto
+  o menu de tamanho do CSS não existe (T5.2), `SSB64_REMIX_SIZE_STATE="g,t,n,n"` escolhe o estado por porta. Visto em partida:
+  Mario gigante e Kirby pequeno nascem no tamanho do modo, o Lightning encolhe o Mario gigante, Super Mushroom e Lightning rodam
+  3000 frames sem erro. A volta do Lightning ao tamanho do modo só foi lida no código (o item forçado reaparece a cada 60 ticks e a
+  contagem de 600 nunca zera no teste).
+- [x] T2.5 PokemonAnnouncer (2026-10-19, validado pelo lead): núcleo `if/ifremixannouncer.c` (tabelas, seleção NAME/KO/GENERAL/STANDARD,
+  timers, abertura, 1 minuto, sono, "There goes the battle" e TIME UP) e `ifremixhitannouncer.c` (hit e throw por faixa de
+  knockback e dano), ligado no setup do VS e do 1P; ganchos em Crash, Mewtwo, Sonic, Wolf, Marth, Pikachu, Samus, Jigglypuff, Fire
+  Flower/Charizard, Pokémon, KO, recuperação, taunt, clang, stun e times. Com `Pokemon Announcer=1` (todas as stages) o log de FGM
+  mostra clipes do anunciador (ids 0x45B..) em Mario, Samus, Pikachu, Jigglypuff, Crash, Peppy e Kirby: 15 de 15 testes de golpe
+  tocaram pelo menos um, sem erro; com o toggle padrão, Dream Land não toca nenhum. **Falta:** Captain falcon punch (o site está
+  num `.asm` compartilhado sem equivalente em C), Seismic Toss de Bowser/Giga Bowser (o caminho `kirby_fthrow_1_fix` deles não está
+  portado), o histórico de burrow por porta (`BurrowAgain` nunca toca) e o som de fallback que o asm toca quando a seleção falha.
+  Quem decide se o som é natural é a escuta do usuário (T9.1b).
 - [x] T2.6 Kirby (2026-10-16, validado pelo lead): `ftremixkirbycopy.c` (tabela `Character.kirby_inhale_struct.table` do Remix
   no lugar da tabela de 27 linhas: copy_id, chapéu, escala e dano da estrela dos 97 lutadores), `ftremixkirbyhats.c` (33 chapéus
   extras, arquivos `KIRBY_CUSTOM_HATS` 0xA8D e 0x1533), `ftRemixBindKirbyActions` + `port_fighter_extend_mainmotion` (as 238
@@ -150,9 +161,12 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   (respawn fixo de DL beta e Sector Z Remix), CustomGrabAction (Wario/Piano), `command.asm` (create_hitbox_, direção). Notas
   em `docs/remix/notes/f7_knockback_hitbox.md`, `f7_damage_poison.md`, `f7_surface_blastzone_camera_spawn.md`,
   `f7_customgrab_command.md`.
-- [ ] T2.7b Lacunas do T2.7 que aparecem em jogo: neutral spawns do VS (`entry_neutral_spawns` liga por padrão), esteiras
-  (conveyors) de Surface, ações STUN/BURY/PLUNGE do Damage, wind push enterrado, exibição de hitbox (`Hitbox.asm`, ~20 patches
-  de display list), blastzone warp, câmera de pausa. **Aceite:** spawns neutros num stage Remix, esteira movendo um lutador.
+- [x] T2.7b (2026-10-19) Neutral spawns (CP4c), blastzone warp e câmera de pausa (M4), exibição de hitbox (CP4c) e agora: esteiras de
+  Surface para lutadores e itens (`grRemixSurfaceConveyorPush`, ganchos em `ftMainProcPhysicsMap` e `itProcessProcItemMain`), ações
+  STUN/DEKU_STUN/FLASHBANG (`ftremixdamagestun.c`) e BURY/PLUNGE (`ftremixbury.c`) com o `wind push` enterrado. Build limpo e
+  matrizes sem erro; o flashbang do Peppy apareceu em partida (explosão e tintura do lutador). **Sem efeito visto:** a esteira
+  (nenhuma linha com material 0x1F..0x22 foi alcançada em RTTF ou Time Twister) e o bury/plunge (nenhuma fonte de dano BURY no
+  teste), os dois entram na lista do T9.1.
 - [x] T2.8 Sobras (2026-10-16): Piano `extra_part_visibility_` e Marina `prevent_item_despawn_` aplicados. Ficam: beam do
   Waddle Doo (0x800E44EC, sem site C equivalente) e `clear_items_in_1p` (o port já limpa os itens a cada cena).
 - [x] T2.9 Contenções dos fighters (2026-10-16): o fallback de joint de captura (`ftcommoncapturepulled.c`) e o `throw_desc` NULL
@@ -174,6 +188,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   de T2.4b (15 Size), T2.5 (11 PokemonAnnouncer) e M4 (6 toggles); em 2026-10-16 são 168 linhas, o resto é rastreio fino de hazards e
   itens (campos de `ITStruct` sem nome, slot de blast zone 0x398, GFX, display) para resolver em lotes de workers por arquivo.*
 - **CP2**.
+- [x] **CP2c** (checkpoint, 2026-10-19): T2.4b, T2.5 e T2.7b fechados (ver acima); T2.9b e T2.11 seguem abertos (T2.11 vira lote de workers no M8, 169 linhas).
 
 ## M3. Áudio
 
@@ -260,7 +275,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 - [ ] T5.1c Stage select: emblema de série na moeda de madeira (`series_logo_table` + sprites de série do CSS, hoje em branco
   para os stages Remix), variantes DL/Omega/Remix (`variant_table`), roulette do Random, layout tournament.
   **Aceite:** capturas de um stage com emblema, uma variante e a roulette.
-- [ ] T5.2 Painel por porta do CSS (`css/*.asm`).
+- [ ] T5.2 Painel por porta do CSS (`css/*.asm`), inclui o menu de tamanho que escreve `ftRemixSizeSetMatchState`.
 - [ ] T5.3 *(inclui o que sobrou do T4.2: 12 ganchos de Menu Music, Music Title, Input Display, Random Select, Full Results, pause 0xE-0x10)* VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
   créditos estendidos, Character Data dos 97, name tag / player tag, Gallery.
 - [ ] T5.5 Registros de save para 97 lutadores (`lbtypes.h` `vs_records[12]`, `spgame_records[12]`, `fighter_mask` de 16 bits,
@@ -291,7 +306,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## M9. Verificação final no desktop
 
-- [ ] T9.1 Sweep completo (roster × specials, stages, itens) e partidas reais via CSS: 4 jogadores, cada modo, Training.
+- [ ] T9.1 Sweep completo (roster × specials, stages, itens) e partidas reais via CSS: 4 jogadores, cada modo, Training. Conferir também o que ficou sem efeito visto: esteira de Surface, bury/plunge, Game Speed no Training, volta do Lightning ao tamanho do modo, Full Results e Salty Runback.
 - [ ] T9.1b Passagem de escuta pelo usuário (o lead não ouve): alguns stages, uma música de vitória, o Sound Test, SFX de golpes de
   lutadores Remix e os gráficos de menu do Remix; os `audio.wav` de cada run ficam em `build/agent-shots/vs/<run>/`.
 - [ ] T9.2 Vanilla (`REGION_US`) sem regressão: build e partida.
@@ -311,12 +326,12 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 | Área | Peso | Feito |
 |---|---|---|
-| Fighters (roster, specials, projéteis, entradas) | 35% | ~94% |
+| Fighters (roster, specials, projéteis, entradas) | 35% | ~96% |
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~90% |
 | Settings, menus, modos | 20% | ~55% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~79%** |
+| **Total ponderado** | | **~80%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).
