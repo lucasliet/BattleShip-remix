@@ -38,8 +38,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M4 (settings e toggles), task T4.1. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP4b, 2026-10-18 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Milestone:** M4 (settings e toggles), tasks T4.2 (onda 4 feita) e T4.3. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
+- **Último checkpoint:** CP4c, 2026-10-19 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~77% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
@@ -219,12 +219,20 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   (`Camera.asm`), Special Zoom, BlastZone Warp e BlastZone GFX, Combo Meter (4 toggles; setup chamado depois do `SetupFiles` do VS e
   do 1P, o hook original em `syTaskmanLoadScene` abortava por carregar arquivo antes do reloc), Screenshake e Flash Guard, Disable
   AA e FPS (mapeados ao MSAA e à janela de stats do port), Hold To Pause, BGM Volume, SFX Volume, Play Music, Random Music.
-  **Faltam:** Menu Music e Music Title at Match Start (`BGM.asm`), `Render.*` do HUD (Disable HUD completo, D-pad de HUD), Input Display,
-  Neutral Spawns, Salty Runback, Skip Results, Skip Start Cheer, Default CPU Level, Random Select, Full Results, os que dependem de
-  IA (Improved AI, M7), a ligação do Game Speed no Training e do Single Button Mode no filtro de entrada, e o resto de `Hitbox.asm`
-  (Hitbox/Hurtbox/Model Display).
+  **Quarta onda (2026-10-19, build limpo, matriz 6 lutadores x 3 golpes sem erro com tudo desligado e com os toggles novos ligados):**
+  Neutral Spawns (tabela por stage; o primeiro teste mostrou o cano flutuando por ler o stage do CSS e não o da partida, corrigido para
+  `gSCManagerBattleState->gkind`), Default CPU LVL (V.S.), Skip Results Screen (a partida termina e volta ao CSS), Salty Runback e
+  Always Show Full Results (`gmremixgameend.c`), Menu Music no CSS do VS (`gmremixmenumusic.c`), Disable HUD no modo ALL em VS e
+  Training (`ifremixhud.c`, HUD sumiu na captura), Model Display e Special Model Display (caixas de hitbox e losangos de ECB vistos
+  em partida, `ftremixhitboxdisplay.c`). **Faltam:** os outros 12 ganchos de Menu Music (precisam do mapa de endereços do build) e
+  Music Title at Match Start, os grupos de pause 0xE a 0x10 do HUD (Render groups), Input Display (item do menu de debug do CSS, vai
+  para o M5), Skip Start Cheer (o decomp não tem a chamada do FGM 0x0272), Advanced Hurtbox Display (o port só desenha um cuboide),
+  Random Select, os que dependem de IA (Improved AI, M7), a ligação do Game Speed no Training e do Single Button Mode no filtro de
+  entrada, o 12 Character Battle do runback e o reset de heap do runback (testar crescimento de memória), e os resultados do Full
+  Results só podem ser vistos depois do T5.3 (a cena de resultados ainda renderiza em branco no atalho de VS).
   **Aceite:** cada toggle muda o comportamento num teste curto.
-  Efeito conferido até aqui: Air Dodging (status de esquiva no ar aparecem).
+  Efeito conferido até aqui: Air Dodging (status de esquiva no ar aparecem), Neutral Spawns, Disable HUD ALL, Special Model Display e
+  Skip Results Screen.
 - [ ] T4.3 *(parcial: `grRemixHazardsAreOn`/`grRemixMovementIsOn` leem Hazard Mode (Hazard Mode=3 apaga os logs do canhão do Pirate Land), Whispy Mode, Yoshi cloud anims, Random Music do GB Land e o warp do Blastzone já leem o registro)* `grRemixHazardsAreOn`/`grRemixMovementIsOn` e o switch de itens lendo os toggles; perfis CE/TE/NE/JP; toggles de
   item que faltam: seleção de Pokémon, containers, drop de item ao morrer, música aleatória (`Toggles.entry_random_music`,
   usado pelo GB Land).
@@ -302,8 +310,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~45% |
+| Settings, menus, modos | 20% | ~50% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~77%** |
+| **Total ponderado** | | **~78%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).
