@@ -5,6 +5,7 @@
 //   https://github.com/HarbourMasters/Shipwright
 // Licensed under the MIT License; see LICENSE at repository root.
 
+#include "remix/remix_toggles.h"
 #include "PortMenu.h"
 
 #include "Compat.h"
@@ -1360,6 +1361,61 @@ void PortMenu::AddMenuSettings() {
         .Options(WindowButtonOptions().Tooltip("Toggles the graphics debugger window."));
 }
 
+#ifdef REGION_REMIX
+void PortMenu::AddMenuRemix() {
+    const auto &toggles = remix_toggles::All();
+    if (toggles.empty()) {
+        return;
+    }
+    AddMenuEntry("Remix", CVAR_SETTING("Menu.RemixSidebarSection"));
+
+    static const char *const kProfileNames[REMIX_TOGGLE_PROFILE_COUNT] = { "Community", "Tournament", "Netplay",
+                                                                           "Japanese" };
+    for (int group = 0; group < remix_toggles::GroupCount; group++) {
+        const std::string sidebar = remix_toggles::GroupName(static_cast<remix_toggles::Group>(group));
+        AddSidebarEntry("Remix", sidebar, 2);
+        WidgetPath path = { "Remix", sidebar, SECTION_COLUMN_1 };
+
+        if (group == remix_toggles::Remix) {
+            AddWidget(path, "Profiles", WIDGET_SEPARATOR_TEXT);
+            for (int profile = 0; profile < REMIX_TOGGLE_PROFILE_COUNT; profile++) {
+                AddWidget(path, std::string("Load ") + kProfileNames[profile] + " profile", WIDGET_BUTTON)
+                    .RaceDisable(false)
+                    .Callback([profile](WidgetInfo &) { remix_toggles_load_profile(profile); })
+                    .Options(ButtonOptions().Tooltip("Sets every Remix setting to this profile's defaults."));
+            }
+        }
+        AddWidget(path, sidebar, WIDGET_SEPARATOR_TEXT);
+
+        int shown = 0;
+        for (const auto &toggle : toggles) {
+            if ((toggle.group != group) || toggle.hasAction) {
+                continue;
+            }
+            path.column = (shown++ % 2 == 0) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
+            if (toggle.isBool) {
+                AddWidget(path, toggle.title, WIDGET_CVAR_CHECKBOX)
+                    .CVar(toggle.cvar.c_str())
+                    .RaceDisable(false)
+                    .Options(CheckboxOptions().DefaultValue(toggle.defaults[0] != 0));
+            } else if (!toggle.strings.empty()) {
+                AddWidget(path, toggle.title, WIDGET_CVAR_COMBOBOX)
+                    .CVar(toggle.cvar.c_str())
+                    .RaceDisable(false)
+                    .Options(ComboboxOptions()
+                                 .ComboMap(remix_toggles::ComboMap(toggle))
+                                 .DefaultIndex(static_cast<uint32_t>(toggle.defaults[0])));
+            } else {
+                AddWidget(path, toggle.title, WIDGET_CVAR_SLIDER_INT)
+                    .CVar(toggle.cvar.c_str())
+                    .RaceDisable(false)
+                    .Options(IntSliderOptions().Min(toggle.min).Max(toggle.max).DefaultValue(toggle.defaults[0]));
+            }
+        }
+    }
+}
+#endif
+
 void PortMenu::AddMenuAssets() {
     AddMenuEntry("Assets", CVAR_SETTING("Menu.AssetsSidebarSection"));
 
@@ -1784,6 +1840,9 @@ void PortMenu::AddMenuAbout() {
 
 void PortMenu::AddMenuElements() {
     AddMenuSettings();
+#ifdef REGION_REMIX
+    AddMenuRemix();
+#endif
     AddMenuAssets();
 #ifndef DISABLE_SCRIPTING
     AddMenuMods();

@@ -21,6 +21,12 @@
   results scene. The results scene itself renders white in that shortcut, with vanilla fighters too (checked with `res_0`), so its
   visuals belong to ROADMAP T5.3.
 
+## Limits of the checks
+
+The dumps prove that sound is produced and that the requested ids are right, not that it sounds right (instruments, tempo,
+crackle). Clipping was counted in four dumps: 3, 17, 0 and 0 samples at full scale out of 1.5 million, all at the opening burst
+of a match, so there is no sustained distortion. A listening pass by the user is part of ROADMAP M9.
+
 ## Harness
 
 `SSB64_AUDIO_DUMP_PATH`, `SSB64_AUDIO_DUMP_SECONDS`, `SSB64_AUDIO_FGM_LOG=1`, `SSB64_VS_STOCKS`; `vs.sh` writes `<run>/audio.wav`;

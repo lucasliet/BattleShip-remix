@@ -67,7 +67,7 @@ EXTRA_SYMBOLS = [
     "KirbyHats.extended_special_parts",
     "Item.GoldenGun.projectile_info_pointer",
 ]
-EXTRA_SYMBOL_PREFIXES = ["Hazards.", "GFX.", "GFXRoutine."]
+EXTRA_SYMBOL_PREFIXES = ["Hazards.", "GFX.", "GFXRoutine.", "Toggles.entry_", "Toggles.head_", "Toggles.profile_defaults_"]
 CSS_FIGHTER_DIRS = ["Falco", "Ganondorf", "YoungLink", "DrMario", "Wario", "Dedede", "Sonic", "Sheik", "Marina",
                     "Goemon", "Crash", "Peach", "Bowser", "Wolf", "Conker", "Mewtwo", "Marth", "Banjo"]
 

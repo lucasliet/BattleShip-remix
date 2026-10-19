@@ -39,8 +39,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 ## Posição atual
 
 - **Milestone:** M4 (settings e toggles), task T4.1. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP3, 2026-10-16 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~71% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Último checkpoint:** CP4a, 2026-10-18 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~74% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -201,13 +201,26 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## M4. Settings e toggles do Remix
 
-- [ ] T4.1 Framework de menu do Remix (`Menu.asm`, `Toggles.asm`, `Settings.asm`) em C, botão Settings no Mode Select,
-  atalho L no CSS/SSS, armazenamento persistente (equivalente ao `SRAM.asm` no save do port).
-- [ ] T4.2 Toggles de gameplay da lista de `docs/remix/menus.md` 2.4 (hitstun, hitlag, DI, shield stun, Z-cancel,
-  tripping, momentum slide, perfect shield, parry, rage, stale moves, air dodge, ledge jump/trump, jab lock, wall teching,
-  footstool, charge smash, combo meter, input display, salty runback, neutral spawns, hazard mode e os demais),
-  um arquivo por sistema. **Aceite:** cada toggle muda o comportamento num teste curto.
-- [ ] T4.3 `grRemixHazardsAreOn`/`grRemixMovementIsOn` e o switch de itens lendo os toggles; perfis CE/TE/NE/JP; toggles de
+- [x] T4.1 Framework dos settings (2026-10-18, validado pelo lead): o registro vem da imagem do Remix (`remix_toggles.cpp`): 531 toggles
+  (nós `Menu.entry` das cinco listas, título, faixa, tabela de strings) com os quatro perfis (CE/TE/NE/JP) de
+  `Toggles.profile_defaults_*`, ordem conferida contra os arrays (531 de 531 iguais). Valor em CVar `gRemix.Toggle.<n>` (persistente),
+  leitura `gmRemixToggle(<nome>)` e `gmRemixToggleVS(<nome>)` (guarda de 1P/Bonus, `gmremixtoggle.h`), override por execução
+  `SSB64_REMIX_TOGGLES="Titulo=valor;..."` e `SSB64_REMIX_PROFILE=0..3`. A interface é a seção **Remix** do menu do port (uma barra
+  lateral por grupo, perfis em botões); o botão Settings do Mode Select e o atalho L do CSS/SSS abrem esse menu e ficam no T5.3.
+  Desvio: o menu desenhado pelo Remix (`Menu.asm`) não é replicado, o do port tem as mesmas entradas e valores.
+- [ ] T4.2 Toggles de gameplay *(em andamento, 2026-10-18)*: lista de `docs/remix/menus.md` 2.4, um arquivo por sistema, workers Haiku com
+  `docs/remix/f8_toggle_worker_brief.md` e validação do lead. **Feitos** (build limpo, matriz 6 lutadores x 3 golpes sem erro com todos
+  desligados e todos ligados): Hitstun, DI, Air Dodging (status novos 0x2D/0x3A/0x3B com a opção ligada), Tripping, Z-Cancel (+ Punish
+  e Flash), Move Staling, Jab Locking, Footstool Jumping, Edge C-Jumping, Ledge Trumping, Wall Teching, Spot Dodging, Perfect Shielding,
+  Parrying, Rage, Charge Smashes, Game Speed e Single Button Mode (parciais: ligação no Training e no filtro de entrada),
+  Hitlag, Japanese Sounds, Shield Stun, Japanese Stun/Sleep, Momentum Slide (Japan.asm; faltam os sons do Link). Notas em
+  `docs/remix/notes/f8_*.md` (cada uma diz o título, os valores e o que ver). **Faltam:** Item Containers, Stopwatch Item, All Items R
+  Drop (`Item.asm`, `items/Stopwatch.asm`), Special Zoom, BlastZone Warp (`Blastzone.asm`), Combo Meter (`ComboMeter.asm`,
+  `Combo.asm`), Hitbox/Hurtbox/Model Display (`Hitbox.asm`), Input Display, Screenshake/Flash Guard/BlastZone GFX
+  (`Accessibility.asm`), Anti-Aliasing, FPS Display, Pause (Hold To Pause), Camera Mode, Neutral Spawns, Salty Runback, Skip Results,
+  Disable HUD, e os que dependem de IA (Improved AI, M7). **Aceite:** cada toggle muda o comportamento num teste curto.
+  Efeito conferido até aqui: Air Dodging (status de esquiva no ar aparecem).
+- [ ] T4.3 *(parcial: `grRemixHazardsAreOn`/`grRemixMovementIsOn` leem Hazard Mode (Hazard Mode=3 apaga os logs do canhão do Pirate Land), Whispy Mode, Yoshi cloud anims, Random Music do GB Land e o warp do Blastzone já leem o registro)* `grRemixHazardsAreOn`/`grRemixMovementIsOn` e o switch de itens lendo os toggles; perfis CE/TE/NE/JP; toggles de
   item que faltam: seleção de Pokémon, containers, drop de item ao morrer, música aleatória (`Toggles.entry_random_music`,
   usado pelo GB Land).
 - **CP4**.
@@ -261,6 +274,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 ## M9. Verificação final no desktop
 
 - [ ] T9.1 Sweep completo (roster × specials, stages, itens) e partidas reais via CSS: 4 jogadores, cada modo, Training.
+- [ ] T9.1b Passagem de escuta pelo usuário (o lead não ouve): alguns stages, uma música de vitória, o Sound Test, SFX de golpes de
+  lutadores Remix e os gráficos de menu do Remix; os `audio.wav` de cada run ficam em `build/agent-shots/vs/<run>/`.
 - [ ] T9.2 Vanilla (`REGION_US`) sem regressão: build e partida.
 - [ ] T9.3 Relatório ao usuário em português: Remix jogável, desvios documentados.
 - **CP9**.
@@ -282,8 +297,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~15% |
+| Settings, menus, modos | 20% | ~30% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~71%** |
+| **Total ponderado** | | **~74%** |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).

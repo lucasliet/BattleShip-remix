@@ -4,11 +4,11 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 
 | Área | ported | partial | todo | n/a | progresso |
 |---|---|---|---|---|---|
-| fighters | 79 | 46 | 3 | 0 | 80% |
+| fighters | 92 | 52 | 3 | 0 | 80% |
 | items | 6 | 26 | 1 | 0 | 58% |
 | stages | 1 | 6 | 0 | 0 | 57% |
 | audio | 0 | 3 | 2 | 0 | 30% |
-| menus_modes | 0 | 2 | 69 | 0 | 1% |
+| menus_modes | 0 | 3 | 49 | 0 | 3% |
 | ai | 0 | 0 | 32 | 0 | 0% |
 | infra | 1 | 0 | 0 | 10 | 100% |
 
@@ -19,7 +19,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Accessibility.asm` | menus_modes | todo |  |
 | `Action.asm` | fighters | ported | ftremixvanillaprocs.c, remix_action_layout.h |
 | `AerialAttackFastFall.asm` | menus_modes | todo |  |
-| `AirDodge.asm` | menus_modes | todo |  |
+| `AirDodge.asm` | fighters | ported | ftremixairdodge.c |
 | `BGM.asm` | audio | partial | grRemixGetStageBGM |
 | `Banjo/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Banjo/Banjo.asm` | fighters | partial | decomp/src/ft/ftremix/banjo |
@@ -36,7 +36,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `CharacterDataScreen.asm` | menus_modes | todo |  |
 | `CharacterSelect.asm` | menus_modes | partial | CSS port (port/css_*, mnplayers*) |
 | `CharacterSelectDebugMenu.asm` | menus_modes | todo |  |
-| `ChargeSmashAttacks.asm` | menus_modes | todo |  |
+| `ChargeSmashAttacks.asm` | fighters | ported | ftremixchargesmash.c |
 | `Cheats.asm` | menus_modes | todo |  |
 | `Color.asm` | infra | n/a | constants |
 | `Combo.asm` | menus_modes | todo |  |
@@ -51,7 +51,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Crash.asm` | menus_modes | todo |  |
 | `Credits.asm` | menus_modes | todo |  |
 | `CustomGrabAction.asm` | fighters | partial | ftremixpianoshared.c, fighter_registry custom_capture_* |
-| `DI.asm` | menus_modes | todo |  |
+| `DI.asm` | fighters | ported | ftremixdi.c |
 | `DKMode.asm` | menus_modes | todo |  |
 | `DSamus/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `DSamus/DSamus.asm` | fighters | ported | decomp/src/ft/ftremix/dsamus |
@@ -82,7 +82,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Falco/Falco.asm` | fighters | ported | decomp/src/ft/ftremix/falco |
 | `Falco/Phantasm.asm` | fighters | ported | decomp/src/ft/ftremix/falco |
 | `File.asm` | infra | ported | Torch yamls/remix, RelocFactory |
-| `FootStool.asm` | menus_modes | todo |  |
+| `FootStool.asm` | fighters | ported | ftremixfootstool.c |
 | `GBowser/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `GBowser/gbowser.asm` | fighters | ported | data-only clone (roster) |
 | `GFX.asm` | fighters | ported | lbremixgfx.c, ftparam.c |
@@ -99,7 +99,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Handicap.asm` | menus_modes | todo |  |
 | `Hazards.asm` | stages | partial | grremixhazards_*.c, grremixgating.c |
 | `Hitbox.asm` | fighters | partial | ftremixhitbox.c (display open) |
-| `Hitstun.asm` | menus_modes | todo |  |
+| `Hitstun.asm` | fighters | ported | ftparam.c |
 | `InputDelay.asm` | menus_modes | todo |  |
 | `InputDisplay.asm` | menus_modes | todo |  |
 | `Item.asm` | items | partial | itremixspawn.c, itmanager.c, mnvsitemswitch.c |
@@ -116,8 +116,8 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `JPuff/JPuff.asm` | fighters | ported | data-only clone (roster) |
 | `JSamus/JSamus.asm` | fighters | ported | data-only clone (roster) |
 | `JYoshi/JYoshi.asm` | fighters | ported | data-only clone (roster) |
-| `JabLock.asm` | menus_modes | todo |  |
-| `Japan.asm` | menus_modes | todo |  |
+| `JabLock.asm` | fighters | ported | ftremixjablock.c |
+| `Japan.asm` | fighters | partial | ftremixhitlag.c, shieldstun, jstunsleep, japanesesounds |
 | `Joypad.asm` | infra | n/a | replaced by the port's controller code |
 | `KingOfTheHill.asm` | menus_modes | todo |  |
 | `Kirby/Kirby.asm` | fighters | ported | decomp/src/ft/ftremix/kirby |
@@ -126,8 +126,8 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Lanky/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Lanky/Lanky.asm` | fighters | partial | decomp/src/ft/ftremix/lanky |
 | `Lanky/LankySpecial.asm` | fighters | partial | decomp/src/ft/ftremix/lanky |
-| `LedgeJump.asm` | menus_modes | todo |  |
-| `LedgeTrump.asm` | menus_modes | todo |  |
+| `LedgeJump.asm` | fighters | ported | ftremixledgejump.c |
+| `LedgeTrump.asm` | fighters | partial | ftremixledgetrump.c |
 | `Lucas/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Lucas/Lucas.asm` | fighters | ported | decomp/src/ft/ftremix/lucas |
 | `Lucas/LucasSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/lucas |
@@ -166,7 +166,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `NYoungLink/NYoungLink.asm` | fighters | ported | data-only clone (roster) |
 | `OnHit.asm` | fighters | todo | ROADMAP T2.7 |
 | `PAL.asm` | infra | n/a | N64 TV type |
-| `Parry.asm` | menus_modes | todo |  |
+| `Parry.asm` | fighters | ported | ftremixparry.c |
 | `Pause.asm` | menus_modes | todo |  |
 | `Peach/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Peach/Peach.asm` | fighters | ported | decomp/src/ft/ftremix/peach |
@@ -174,7 +174,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Peppy/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Peppy/Peppy.asm` | fighters | ported | decomp/src/ft/ftremix/peppy |
 | `Peppy/PeppySpecial.asm` | fighters | ported | decomp/src/ft/ftremix/peppy |
-| `PerfectShield.asm` | menus_modes | todo |  |
+| `PerfectShield.asm` | fighters | ported | ftremixperfectshield.c |
 | `Piano/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Piano/Piano.asm` | fighters | ported | decomp/src/ft/ftremix/piano |
 | `Piano/PianoSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/piano |
@@ -184,7 +184,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Practice.asm` | menus_modes | todo |  |
 | `Practice_1P.asm` | menus_modes | todo |  |
 | `Projectile.asm` | fighters | ported | decomp/src/wp/*remix* |
-| `Rage.asm` | menus_modes | todo |  |
+| `Rage.asm` | fighters | ported | ftremixrage.c |
 | `Reflect.asm` | fighters | partial | ftremixreflect.c (CPU hooks in M7) |
 | `Render.asm` | infra | n/a | replaced by the port's GObj/SObj calls |
 | `Roy/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
@@ -200,7 +200,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Sheik/Sheik.asm` | fighters | partial | decomp/src/ft/ftremix/sheik |
 | `Sheik/SheikSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/sheik |
 | `Shield.asm` | menus_modes | todo |  |
-| `SingleButtonMode.asm` | menus_modes | todo |  |
+| `SingleButtonMode.asm` | fighters | partial | ftremixsinglebutton.c (entry wiring open) |
 | `SinglePlayer.asm` | menus_modes | todo |  |
 | `SinglePlayerEnemy.asm` | menus_modes | todo |  |
 | `SinglePlayerMenus.asm` | menus_modes | todo |  |
@@ -217,10 +217,10 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Sonic/SonicSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/sonic |
 | `Spawn.asm` | stages | partial | grremixspawn.c |
 | `SpecialZoom.asm` | menus_modes | todo |  |
-| `Speed.asm` | menus_modes | todo |  |
-| `SpotDodge.asm` | menus_modes | todo |  |
+| `Speed.asm` | fighters | partial | ftremixspeed.c (training wiring open) |
+| `SpotDodge.asm` | fighters | ported | ftremixspotdodge.c |
 | `Stages.asm` | stages | partial | grremixstage.c, mnmaps.c |
-| `StaleMoves.asm` | menus_modes | todo |  |
+| `StaleMoves.asm` | fighters | ported | ftremixstalemoves.c |
 | `Stamina.asm` | menus_modes | todo |  |
 | `Stereo.asm` | audio | todo | ROADMAP T3.2 |
 | `StockMode.asm` | menus_modes | todo |  |
@@ -230,17 +230,17 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `TagTeam.asm` | menus_modes | todo |  |
 | `Teams.asm` | menus_modes | todo |  |
 | `TimedStock.asm` | menus_modes | todo |  |
-| `Toggles.asm` | menus_modes | todo |  |
+| `Toggles.asm` | menus_modes | partial | remix_toggles.cpp, PortMenu.cpp (Remix section) |
 | `Training.asm` | menus_modes | todo |  |
 | `Transitions.asm` | menus_modes | todo |  |
-| `Tripping.asm` | menus_modes | todo |  |
+| `Tripping.asm` | fighters | ported | ftremixtripping.c |
 | `TugOfWar.asm` | menus_modes | todo |  |
 | `TwelveCharBattle.asm` | menus_modes | todo |  |
 | `VanillaLv10Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `VsDemo.asm` | menus_modes | todo |  |
 | `VsRemixMenu.asm` | menus_modes | todo |  |
 | `VsStats.asm` | menus_modes | todo |  |
-| `WallTeching.asm` | menus_modes | todo |  |
+| `WallTeching.asm` | fighters | partial | ftremixwalltech.c |
 | `Walljump.asm` | menus_modes | todo |  |
 | `Wario/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `Wario/Wario.asm` | fighters | ported | decomp/src/ft/ftremix/wario |
@@ -252,7 +252,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `YoungLink/AI/Attacks.asm` | ai | todo | ROADMAP T7.1 |
 | `YoungLink/YoungLink.asm` | fighters | partial | decomp/src/ft/ftremix/younglink |
 | `YoungLink/YoungLinkSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/younglink |
-| `ZCancel.asm` | menus_modes | todo |  |
+| `ZCancel.asm` | fighters | partial | ftremixzcancel.c |
 | `captainshared.asm` | fighters | partial | ftremixdkcaptainshared.c, ftremixentry.c |
 | `command.asm` | fighters | partial | ftremixcommand.c |
 | `dkshared.asm` | fighters | partial | ftremixdkcaptainshared.c, ftremixentry.c |

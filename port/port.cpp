@@ -55,6 +55,7 @@
 #include "port_input_script.h"
 #include "fighter_registry.h"
 #include "remix/remix_roster.h"
+#include "remix/remix_toggles.h"
 #include "remix/remix_ram_image.h"
 #include "focus.h"
 #include "remix/remix_command_hooks.h"
@@ -1183,6 +1184,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	/* Before the roster: synth motion rows are mapped into the image when built. */
 	remix_ram_image_load();
 	remix_roster_load();
+	remix_toggles_init();
 #endif
 
 #ifndef DISABLE_SCRIPTING
