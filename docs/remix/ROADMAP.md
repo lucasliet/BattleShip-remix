@@ -38,9 +38,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M4 (settings e toggles) fechado nas tasks T4.1 a T4.3; falta o CP4. M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.4b (menu, M4), T2.5 (depois do T3.2), T2.7b, T2.9b e o T2.11, que só fecha depois de T2.4b e T2.5 porque a maior parte dos `REMIX-TODO` restantes é Size, PokemonAnnouncer e toggles. T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP2d, 2026-10-19 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~80% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Milestone:** M5 em andamento: T5.1 (CSS VS) e T5.1c (stage select) com a maior parte feita, T5.1b e T5.5 fechados; faltam T5.2 (painel por porta, pesquisa pronta em `docs/remix/notes/f10_css_port_panel.md`), T5.3 (menus), T5.4 e o CP5. M4 fechado (CP4). M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.9b e o T2.11 (os `REMIX-TODO` restantes). T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
+- **Último checkpoint:** CP5a, 2026-10-20 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~82% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -262,28 +262,55 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 ## M5. CSS, menus e telas
 
 - [ ] T5.1 CSS VS (`mnplayersvs.c`, referência em `docs/remix/css_reference.md`): a grade 3x10 e os dados do Remix já estão
-  ligados. Falta: costumes com índice > 3 para lutadores com `costume_count` > 4 (`mnPlayersVSSelectFighterPuck`, hoje só 4
-  botões C; polígonos têm 6), seletor de variantes pelo D-pad (`remix_css_variant_ids`: polígono, metal, J, E), bookend de bônus
-  (arquivo 0xA06, offset 0x3B28; Z/R troca o índice de `bonus_chars` com 30 frames de atraso), Random com o pool e o toggle
-  "Random Select" (`recent_randoms_table`, 6 sorteios sem repetir), nomes e logos VS dos lutadores novos (as tabelas
-  `name_texture_table` e `series_logo_offset_table` do Remix só vão até 0x1C; achar a fonte dos nomes), lutador com 0 costumes
-  tratado como uma cor, offsets `+0x10` dos sprites novos conferidos contra `lbRelocGetFileData`, retratos 0x13 contra 0xA05, e
-  o bug candidato do `scale.vec.f.y` repetido (nunca `.z`) nos três ramos do spotlight (`mnplayersvs.c`, `mnplayers1pgame.c`,
-  `mnplayers1ptraining.c`). **Aceite:** capturas do CSS com um lutador de 6 costumes, uma variante e o bookend de bônus.
-- [ ] T5.1b CSS de 1P, treino e bônus (`mnplayers1pgame.c`, `mnplayers1ptraining.c`, `mnplayers1pbonus.c`): repetir o que o VS
-  já tem (grade, retratos, nomes, logos, sorteio), uma tela por vez; hoje usam as tabelas de 12 entradas (a auditoria
-  `decomp_fkind_audit.md` lista os sítios). **Aceite:** cada tela abre com os 78 lutadores, sem leitura fora do limite.
-- [ ] T5.1c Stage select: emblema de série na moeda de madeira (`series_logo_table` + sprites de série do CSS, hoje em branco
-  para os stages Remix), variantes DL/Omega/Remix (`variant_table`), roulette do Random, layout tournament.
-  **Aceite:** capturas de um stage com emblema, uma variante e a roulette.
-- [ ] T5.2 Painel por porta do CSS (`css/*.asm`), inclui o menu de tamanho que escreve `ftRemixSizeSetMatchState`.
-- [ ] T5.3 *(primeiro item, bloqueia a jogabilidade: a tela de resultados do VS (cena 24) renderiza toda branca depois da transição de foto; 2026-10-19: com Mario e Kirby vanilla o `SSB64_VS_STOCKS=1` + `walk_right.txt` passa pela cena 24 sem erro no log, o trace GBI (`SSB64_GBI_TRACE=1`, frame 990, 1706 comandos) desenha o papel de parede, os nomes e os lutadores, e o branco já aparece atrás da malha da transição; falta isolar qual objeto desenha o branco (suspeitas: emblema da série, tint do papel de parede, fundo da câmera) desligando um de cada vez em `mnVSResultsFuncStart`)* *(inclui o que sobrou do T4.2: 12 ganchos de Menu Music, Music Title, Input Display, Random Select, Full Results, pause 0xE-0x10)* VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
+  ligados. **Feito em 2026-10-20** (`docs/remix/notes/f10_css_costumes_variants.md`): costumes e sombras no estilo 19XX (C
+  direita/esquerda trocam o costume até `num_costumes`, C cima/baixo a sombra 0..2, sem bloqueio de cor repetida), tabela
+  `default_costume` lida da imagem para os 97 lutadores, variantes pelo D-pad (cima especial, baixo polígono, esquerda J,
+  direita E; verificado com o Mario: Metal, Polygon, J), toggle "Random Select" no sorteio do CPU (só código), variante
+  centrada no retrato do lutador base, e a correção do crash de `grRemixCameraAdjustZoomRange` na CSS. Falta: costumes extras
+  além de `num_costumes` (tabelas de partes de `costumes/*.asm` e `check_for_custom_costume_`), C no team battle, ícones do
+  D-pad e bandeiras J/E das variantes, bookend de bônus (arquivo 0xA06, offset 0x3B28; Z/R troca o índice de `bonus_chars` com 30
+  frames de atraso), botão L de sorteio e lista `recent_randoms_table` (6 sorteios sem repetir), logos VS dos lutadores novos
+  (as tabelas `name_texture_table` e `series_logo_offset_table` do Remix só vão até 0x1C; achar a fonte dos logos; os nomes já
+  aparecem), lutador com 0 costumes tratado como uma cor, offsets `+0x10` dos sprites novos conferidos contra
+  `lbRelocGetFileData`, retratos 0x13 contra 0xA05, e o bug candidato do `scale.vec.f.y` repetido (nunca `.z`) nos três ramos do
+  spotlight (`mnplayersvs.c`, `mnplayers1pgame.c`, `mnplayers1ptraining.c`). **Aceite:** capturas do CSS com um lutador de 6
+  costumes (feito: Falco), uma variante (feito) e o bookend de bônus.
+- [x] T5.1b CSS de 1P, treino e bônus (`mnplayers1pgame.c`, `mnplayers1ptraining.c`, `mnplayers1pbonus.c`): 2026-10-20, três
+  workers Haiku (`docs/remix/f10_css_worker_brief.md`, notas `notes/f10_css_*.md`), grade compartilhada em
+  `mnplayers/mnremixcss.c`. Verificado pelo lead: as quatro telas (treino, 1P, bônus 1 e 2) abrem com os 30 retratos, o
+  1P com Sheik cicla costume e sombra, o puck do CP no treino cai na célula certa. Sobra: o shade fica numa `static` por tela
+  (o struct de slot está em `mntypes.h`), sorteio L e música de menu só no VS, `ftManagerSetupFilesAllKind` dos Remix no
+  FuncStart do 1P (a lista dos 12 vanilla continua), e o teste em partida de 1P/treino/bônus com lutador Remix fica nos
+  M6.
+- [ ] T5.1c Stage select: **feito em 2026-10-20**: emblema de série na moeda de madeira (`mnmaps/mnremixemblem.c`, lê
+  `Stages.series_logo_table` e `CharacterSelect.series_logo.table` da imagem; verificado em Mute City, Spiral Mountain e Final
+  Destination), variantes por C-baixo (`mnmaps/mnremixstagevariant.c`, lê `Stages.variant_table`; verificado em Meta Crystal:
+  DL, Remix e Metal Cavern, volta ao padrão; nome, emblema, preview e a seleção final usam a variante, a memória do cursor
+  guarda o stage base). Falta: texto do tipo de variante sob o preview (`layout`), roulette do RANDOM (C-baixo sobre RANDOM,
+  `random_stage_roulette`), layout tournament (toggle `sss_layout`, `tournament_hazard_mode_table`).
+  **Aceite:** capturas de um stage com emblema (feito), uma variante (feito) e a roulette.
+- [ ] T5.2 Painel por porta do CSS (`css/*.asm`), inclui o menu de tamanho que escreve `ftRemixSizeSetMatchState`. Pesquisa
+  pronta (2026-10-20): `docs/remix/notes/f10_css_port_panel.md` descreve as 20 opções (faixa, padrão, onde a partida lê,
+  complexidade): triviais Damage e TauntButton; só UI PlayerTag e InputDisplay; com gancho de lutador Shield, Visibility,
+  Skeleton, ModelDisplay, Size, Knockback, PoisonDmg, KirbyHat, Handicap, StartWith, TauntItem; camada de entrada/regra
+  InputDelay, DpadControl, DpadFunctions, StockMode, Practice_1P. Decisão de desenho (como no T4.2, o menu desenhado pelo Remix
+  não é replicado): os valores por porta ficam num registro do port com a interface no menu do port (seção Remix, uma tabela
+  por porta), e os ganchos de partida leem o registro.
+- [ ] T5.3 *(primeiro item FEITO em 2026-10-20: a tela de resultados toda branca era bug do backend Metal, sem `SetColorWriteMask`; o limpa-Z da câmera da transição (imagem de cor redirecionada para o Z) pintava a cor de preenchimento por cima da cena; corrigido em `libultraship` `gfx_metal.cpp/.h` com variante de pipeline sem escrita de cor; verificado com Mario×Kirby e Peppy×Crash; `docs/bugs/metal_redirect_z_color_write_2026-10-20.md`)* *(inclui o que sobrou do T4.2: 12 ganchos de Menu Music, Music Title, Input Display, Random Select, Full Results, pause 0xE-0x10)* VS menu com a página Remix Modes, Mode Select, transições, resultados (logos, vitórias, estatísticas de VS),
   créditos estendidos, Character Data dos 97, name tag / player tag, Gallery.
-- [ ] T5.5 Registros de save para 97 lutadores (`lbtypes.h` `vs_records[12]`, `spgame_records[12]`, `fighter_mask` de 16 bits,
-  `LBBACKUP_MASK_FIGHTER`, `lbbackup.c`, `sc1pmanager.c`, `mnvsrecord.c`, `mnmessage.c` unlock): hoje fkinds acima de 11 leem
-  fora da tabela (a lista está na auditoria `docs/remix/decomp_fkind_audit.md`, linhas SAVE). Precisa de formato de save novo
-  com migração do atual. **Aceite:** terminar uma partida VS e uma 1P com um lutador Remix grava e relê o registro dele.
+- [x] T5.5 Registros de save para 97 lutadores: 2026-10-20, `GMCOMMON_FIGHTERS_SAVE_NUM` (97 sob Remix) dimensiona
+  `vs_records`, `spgame_records` e as matrizes de KO/partidas em `lbtypes.h`; as guardas de registro (`sc1pmanager.c`,
+  `sc1pbonusstage.c`, `mnvsresults.c` por `ARRAY_COUNT`) seguem o tamanho novo; as máscaras de 16 bits (`fighter_mask`,
+  desbloqueio) continuam só para os 12 vanilla; `lbBackupInitRemixDefaults` copia o padrão da linha 0 (melhor tempo de bônus de
+  60 min) para as linhas 12..96. O save do Remix passa de 8 KB para 123 KB (duas cópias); um save antigo falha o checksum e
+  recomeça. Verificado: duas partidas VS Peppy×Crash seguidas gravam e relêem o registro (`games_played` 2 nos dois). A 1P com
+  lutador Remix e as telas de recorde/Character Data de 97 ficam no M6/T5.3.
 - [ ] T5.4 Remoção dos hacks de contenção que sobrarem no CSS/menus (lista em `docs/bugs/remix_css_and_parent_fallbacks_2026-10-12.md`).
+- [x] **CP5a** (checkpoint a pedido, 2026-10-20): resultados do VS deixam de ser brancos (backend Metal), CSS VS com costumes,
+  sombras, variantes, L aleatório e Random Select, CSS de 1P/treino/bônus com a grade Remix, stage select com emblemas e variantes,
+  save de 97 lutadores, crash da CSS corrigido (`remix_css_camera_zoom_null_battle_state_2026-10-20.md`,
+  `metal_redirect_z_color_write_2026-10-20.md`). Verificado pelo lead em jogo (capturas em `build/agent-shots/vs/`). Commits:
+  `libultraship` (Metal), `decomp` e repositório principal.
 - **CP5**.
 
 ## M6. Modos

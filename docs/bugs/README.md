@@ -6,6 +6,8 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-10-20 | [remix_css_camera_zoom_null_battle_state](remix_css_camera_zoom_null_battle_state_2026-10-20.md) | **FIXED (decomp)** — Making any fighter model on the character select crashed: `grRemixCameraAdjustZoomRange` read `gSCManagerBattleState->gkind` (NULL on the CSS) before checking the scene |
+| 2026-10-20 | [metal_redirect_z_color_write](metal_redirect_z_color_write_2026-10-20.md) | **FIXED (libultraship Metal backend)** — The VS results screen rendered all cream on macOS: the transition camera's end-of-pass depth clear (colour image redirected to the Z buffer) wrote its fill colour to the framebuffer because the Metal backend had no `SetColorWriteMask`; added a no-colour pipeline variant built on demand |
 | 2026-10-18 | [remix_settings_m4](remix_settings_m4_2026-10-18.md) | **IN PROGRESS (M4)** — Remix settings registry from the image (531 toggles, 4 profiles), port menu section, 22 gameplay settings ported |
 | 2026-10-16 | [remix_audio_m3](remix_audio_m3_2026-10-16.md) | **DONE (M3)** — Remix audio: stage and victory BGM, new FGM ids play, sound test with 375 songs and 1094 voices; the two FGM play functions of `n_env.c` |
 | 2026-10-16 | [remix_kirby_copy_actions](remix_kirby_copy_actions_2026-10-16.md) | **FIXED (decomp REGION_REMIX + port)** — Kirby copy abilities ran the copied fighter's own routines; Kirby's Remix action and motion rows were unbound; a vertex fixup rotated a hat display list |

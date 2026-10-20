@@ -39,6 +39,12 @@ ACTION_ENTRY_SIZE = 0x14
 SPECIAL_TABLES = ["ground_nsp", "ground_usp", "ground_dsp", "air_nsp", "air_usp", "air_dsp"]
 KIRBY_COPY_TABLES = ["kirby_ground_nsp", "kirby_air_nsp"]
 EXTRA_SYMBOLS = [
+    "Character.default_costume.table",
+    "Character.variants.table",
+    "Stages.variant_table",
+    "CharacterSelect.series_logo.table",
+    "Costumes.select_.num_costumes",
+    "Costumes.extra_costumes_table",
     "Stages.custom_item_spawn_rate_table",
     "Stages.series_logo_table",
     "Stages.stage_file_table",

@@ -43,6 +43,7 @@ Bugs corrigidos e decisões ficam em [`../bugs/README.md`](../bugs/README.md) (a
 | [`f8_toggle_worker_brief.md`](f8_toggle_worker_brief.md) | Um toggle de gameplay (API `gmRemixToggle`, notas, como o lead testa) |
 | [`f9_announcer_worker_brief.md`](f9_announcer_worker_brief.md) | PokemonAnnouncer: o núcleo e os grupos de ganchos |
 | [`f9_damage_worker_brief.md`](f9_damage_worker_brief.md) | Ações de dano do `Damage.asm`: stun/flashbang e bury/plunge |
+| [`f10_css_worker_brief.md`](f10_css_worker_brief.md) | Grade Remix de 30 retratos em uma tela de CSS (1P, treino, bônus), copiando o padrão do VS |
 
 Os briefs mandam gravar as notas do trabalho em [`notes/`](notes/): uma por lutador/golpe (`<id>_<NOME>[_<MOVE>].md`), item
 (`item_<Nome>.md`), patch compartilhado (`shared_*.md`) e tarefa (`f7_*.md`, `f8_*.md`, `f9_*.md`). São os desvios, as incertezas e os
