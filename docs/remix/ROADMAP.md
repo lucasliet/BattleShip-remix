@@ -38,8 +38,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M5 fechado (CP5, sobras no T8.2). Próximo: M6 (modos). M4 fechado (CP4). M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.9b e o T2.11 (os `REMIX-TODO` restantes). T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP5, 2026-10-22 (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima; M5 fechado, sobras no T8.2). Índice dos docs: `docs/remix/README.md`.
+- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: pesquisa dos oito relatórios pronta (CP6a), próxima task T6.0 (base comum dos modos). M4 fechado (CP4). M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.9b e o T2.11 (os `REMIX-TODO` restantes). T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
+- **Último checkpoint:** CP6a, 2026-10-22 (pesquisa dos modos; antes CP5) (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima; M5 fechado, sobras no T8.2). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~86% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
@@ -349,9 +349,33 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## M6. Modos
 
-- [ ] T6.1 *(inclui o runback do 12 Character Battle e o reset de heap do runback)* VS: 12-Character Battle, Tag Team, King of the Hill, Smashketball, Tug of War, Stamina, Timed Stock, Teams.
-- [ ] T6.2 1P: Remix 1P, All-Star, Multiman, Home-Run Contest, BTT/BTP dos lutadores Remix, Practice 1P.
-- [ ] T6.3 Training *(testar Game Speed no Training, gancho já ligado)*: extensões de `Training.asm`, menu e HUD de itens, spawn por taunt e item no início da partida.
+Pesquisa feita em 2026-10-22 (workers Haiku, `docs/remix/f11_mode_research_brief.md`): um relatório por modo em
+`docs/remix/notes/f11_mode_<nome>.md` com fluxo, ganchos (asm contra função do decomp), estado, lógica de partida, HUD, dependências,
+plano de port em passos e riscos. Cada task abaixo executa o plano do seu relatório, passo a passo (um worker por passo, o lead
+compila e confere em tela). Os relatórios dizem `no match found` onde o decomp não tem a função; nenhum endereço de ROM foi verificado.
+O modo escolhido na página Remix Modes do menu VS chega em `gMNVSModeRemixMode` (`mn/mnvsmode/mnremixvsmode.h`).
+
+- [ ] T6.0 Base comum dos modos: ler `gMNVSModeRemixMode` na montagem da partida (`scvsbattle.c`, `mnplayersvs.c`), pontuação por modo e
+  Timed Stock (`TimedStock.asm`: `game_mode` 1 tempo, 3 stock, 5 stamina, `score_fix_`, `prevent_sudden_death_`), tabelas de StockMode
+  (`initial_stock_count_table`) e a decisão do HUD de texto (API de texto posicionado no overlay do port, `port/remix/remix_overlay`,
+  para placares e contadores que o Remix desenha com fonte própria). Plano: passos comuns dos relatórios Stamina, Tug of War, KotH e
+  Tag Team (os passos "1 e 2 compartilhados"). **Aceite:** um VS com o modo escolhido na página Remix Modes chega à partida com o modo
+  gravado, e Timed Stock e a pontuação de tempo batem com o asm numa partida curta.
+- [ ] T6.1a Stamina (`f11_mode_stamina.md`, 17 passos, inclui Timed Stock e as mudanças de Teams): HP no lugar do dano, barra, KO por HP.
+- [ ] T6.1b Tug of War (`f11_mode_tugofwar.md`, 9 passos): bugs prováveis do asm na quebra de escudo e no crédito de time (conferir antes de copiar).
+- [ ] T6.1c King of the Hill (`f11_mode_koth.md`, 15 passos): colina, pontos por tempo, equipes (verificar o ganho dobrado no hill).
+- [ ] T6.1d Tag Team (`f11_mode_tagteam.md`, 15 passos): decidir o valor 3 de `game_mode` antes; suspeita de bloqueio do START em
+  `prevent_start_with_empty_slots_`.
+- [ ] T6.1e Smashketball (`f11_mode_smashketball.md`, 15 passos): placar (decidir sprites ou overlay), bola, gols; a IA da bola fica no T7.1;
+  suspeita de constante errada em `ai_ball_attack_range`.
+- [ ] T6.1f 12-Character Battle (`f11_mode_twelvecb.md`, 16 passos): CSS próprio, runback e reset de heap do runback (T4.2/T6.1).
+- [ ] T6.2 1P (`f11_mode_singleplayer.md`, 19 passos): Remix 1P, All-Star, Multiman e Cruel Multiman, Home-Run Contest, BTT/BTP dos lutadores
+  Remix, Practice 1P (L reinicia a fase), 1P com lutador Remix (entra aqui o que ficou sem ver no T5.1b); riscos: `multiman_ko_count_stop`,
+  loop do `_assign_stage` do All-Star, unidade do HRC.
+- [ ] T6.3 Training (`f11_mode_training.md`, 14 passos; não existe save state no Remix): menu Z, D-pad (congelar, avançar, trocar modelo, reset),
+  shield break, OOS, DI practice, spam, spawn custom, música, fundo; opções de CPU dependem do M7; conferir Game Speed no Training e o
+  `gITRemixExtendedToggles` zerado em `sc1ptrainingmode.c:700`.
+- [x] **CP6a** (checkpoint a pedido, 2026-10-22): sem código novo desde o CP5; oito relatórios de pesquisa dos modos e a lista de tasks do M6 reescrita a partir deles.
 - **CP6**.
 
 ## M7. IA

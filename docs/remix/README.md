@@ -46,9 +46,10 @@ Bugs corrigidos e decisões ficam em [`../bugs/README.md`](../bugs/README.md) (a
 | [`f10_css_worker_brief.md`](f10_css_worker_brief.md) | Grade Remix de 30 retratos em uma tela de CSS (1P, treino, bônus), copiando o padrão do VS |
 | [`f10_panel_worker_brief.md`](f10_panel_worker_brief.md) | Uma opção do painel por porta do CSS (`gmRemixPanel`, registro `port/remix/remix_player_panel.*`) |
 | [`f10_menu_worker_brief.md`](f10_menu_worker_brief.md) | Um menu ou tela do Remix (botão, página, tela de dados) no código dos menus vanilla |
+| [`f11_mode_research_brief.md`](f11_mode_research_brief.md) | Pesquisa de um modo de jogo do Remix: relatório com fluxo, ganchos, estado, HUD e plano de port em passos |
 
 Os briefs mandam gravar as notas do trabalho em [`notes/`](notes/): uma por lutador/golpe (`<id>_<NOME>[_<MOVE>].md`), item
-(`item_<Nome>.md`), patch compartilhado (`shared_*.md`) e tarefa (`f7_*.md`, `f8_*.md`, `f9_*.md`, `f10_*.md`). São os desvios, as incertezas e os
+(`item_<Nome>.md`), patch compartilhado (`shared_*.md`) e tarefa (`f7_*.md`, `f8_*.md`, `f9_*.md`, `f10_*.md`, `f11_mode_*.md`). São os desvios, as incertezas e os
 `REMIX-TODO` de cada porte; o código do decomp as cita.
 
 ## Regras desta pasta
