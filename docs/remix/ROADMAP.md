@@ -38,8 +38,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: pesquisa dos oito relatórios pronta (CP6a), próxima task T6.0 (base comum dos modos). M4 fechado (CP4). M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.9b e o T2.11 (os `REMIX-TODO` restantes). T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
-- **Último checkpoint:** CP6a, 2026-10-22 (pesquisa dos modos; antes CP5) (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima; M5 fechado, sobras no T8.2). Índice dos docs: `docs/remix/README.md`.
+- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: pesquisa dos oito relatórios pronta (CP6a), T6.0 (base comum) feito; T6.1a (Stamina) em andamento (código dos passos P1-P9, P11-P15 portado, fim de partida P10 aberto), T6.1b e T6.1c com os primeiros passos; próxima ação: achar por que a partida Stamina não termina com um lutador só (P10), depois validar P7-P9 e o menu em tela. M4 fechado (CP4). M2 fechado (CP2b) exceto o que depende de milestones posteriores: T2.9b e o T2.11 (os `REMIX-TODO` restantes). T1.5b (fades Time Twister/Scuttle) segue pendente de M1.
+- **Último checkpoint:** CP6b, 2026-10-23 (T6.0 e primeiros passos dos modos; antes CP6a) (ver `git log`; M1 fechado exceto T1.5b; M2 fechado exceto os itens acima; M5 fechado, sobras no T8.2). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~86% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
@@ -355,15 +355,20 @@ plano de port em passos e riscos. Cada task abaixo executa o plano do seu relat�
 compila e confere em tela). Os relatórios dizem `no match found` onde o decomp não tem a função; nenhum endereço de ROM foi verificado.
 O modo escolhido na página Remix Modes do menu VS chega em `gMNVSModeRemixMode` (`mn/mnvsmode/mnremixvsmode.h`).
 
-- [ ] T6.0 Base comum dos modos: ler `gMNVSModeRemixMode` na montagem da partida (`scvsbattle.c`, `mnplayersvs.c`), pontuação por modo e
-  Timed Stock (`TimedStock.asm`: `game_mode` 1 tempo, 3 stock, 5 stamina, `score_fix_`, `prevent_sudden_death_`), tabelas de StockMode
-  (`initial_stock_count_table`) e a decisão do HUD de texto (API de texto posicionado no overlay do port, `port/remix/remix_overlay`,
-  para placares e contadores que o Remix desenha com fonte própria). Plano: passos comuns dos relatórios Stamina, Tug of War, KotH e
-  Tag Team (os passos "1 e 2 compartilhados"). **Aceite:** um VS com o modo escolhido na página Remix Modes chega à partida com o modo
-  gravado, e Timed Stock e a pontuação de tempo batem com o asm numa partida curta.
+- [x] T6.0 Base comum dos modos (feito 2026-10-23, referência em [`modes_base.md`](modes_base.md)): `gm/gmremixmode.c/.h` (`gmRemixModeGet`
+  lê `gMNVSModeRemixMode` ou `SSB64_REMIX_MODE`, log `remix mode:` na partida), Timed Stock (regra Stock grava tempo|stock = 3, resultados
+  e `score_fix_` em `mnVSResultsInitRankings`/`GetPointsDirect`, sem morte súbita, ícones de stock) e `port/remix/remix_hud_text`
+  (texto posicionado em coordenadas N64 por ImGui, decisão do HUD de texto). **Visto:** partida de 1 minuto, 3 stocks, 3 lutadores:
+  timer 01:00, TIME UP, resultados ordenados pelo score de stock menos dano (Yoshi com 15% em 2o); `SSB64_REMIX_MODE=koth` aparece
+  no log; rótulo de teste do HUD centrado na tela. As tabelas de StockMode já existiam (`gmRemixStockModeCount`).
 - [ ] T6.1a Stamina (`f11_mode_stamina.md`, 17 passos, inclui Timed Stock e as mudanças de Teams): HP no lugar do dano, barra, KO por HP.
-- [ ] T6.1b Tug of War (`f11_mode_tugofwar.md`, 9 passos): bugs prováveis do asm na quebra de escudo e no crédito de time (conferir antes de copiar).
-- [ ] T6.1c King of the Hill (`f11_mode_koth.md`, 15 passos): colina, pontos por tempo, equipes (verificar o ganho dobrado no hill).
+  Estado (CP6b): P1-P5 feitos pelo lead (`gm/gmremixstamina.*`, regra Stamina, 1 stock, Timed Stock em `gmremixmode`); P6 knockback 20%, P7 dano/KO, P8 ação de KO,
+  P9 morte única/respawn, P11 escudo/ledge/down/egg/armor, P12 veneno/zoom, P13 HUD e P14/P15 menu (Rule com Stamina, HP, CSS) portados por workers, relatórios
+  em `notes/f12_stamina_port.md`. **Visto em partida** (`SSB64_VS_STAMINA=<hp>`, 3 lutadores): HUD mostra o HP restante com escurecimento, um stock por lutador,
+  com HP 8 Mario e Yoshi saem do HUD e Yoshi fica caído. **Aberto:** P10 (a partida continua com um lutador só: o worker não achou a causa lendo o código, falta
+  log em `ftRemixStaminaKO` e `ifCommonBattleUpdateScoreStocks`), P16 Teams, P17 Giga Bowser (T6.2); menu P14/15, P8, P9, P11, P12 sem conferência em tela.
+- [ ] T6.1b Tug of War (`f11_mode_tugofwar.md`, 9 passos): bugs prováveis do asm na quebra de escudo e no crédito de time (conferir antes de copiar). Feitos P1 e P3 (`gm/gmremixtugofwar.*`, rastreio do último atacante, R1 e R2 corrigidos, sem conferência em tela); P2 coberto pelo ciclo de CSS de `gmremixmode`; faltam P4 crédito/revive em `ftcommondead.c`, P5-P9.
+- [ ] T6.1c King of the Hill (`f11_mode_koth.md`, 15 passos): colina, pontos por tempo, equipes (verificar o ganho dobrado no hill). Feitos passos 1, 2 e 12 pelo ciclo de CSS e Timed Stock da base, e o 3 (seletor de meta de KOTH e Smashketball, `mn/mnplayers/mnremixgoalpicker.*`, sem conferência em tela).
 - [ ] T6.1d Tag Team (`f11_mode_tagteam.md`, 15 passos): decidir o valor 3 de `game_mode` antes; suspeita de bloqueio do START em
   `prevent_start_with_empty_slots_`.
 - [ ] T6.1e Smashketball (`f11_mode_smashketball.md`, 15 passos): placar (decidir sprites ou overlay), bola, gols; a IA da bola fica no T7.1;
@@ -375,6 +380,7 @@ O modo escolhido na página Remix Modes do menu VS chega em `gMNVSModeRemixMode`
 - [ ] T6.3 Training (`f11_mode_training.md`, 14 passos; não existe save state no Remix): menu Z, D-pad (congelar, avançar, trocar modelo, reset),
   shield break, OOS, DI practice, spam, spawn custom, música, fundo; opções de CPU dependem do M7; conferir Game Speed no Training e o
   `gITRemixExtendedToggles` zerado em `sc1ptrainingmode.c:700`.
+- [x] **CP6b** (checkpoint a pedido, 2026-10-23): T6.0 fechado (base dos modos, Timed Stock, texto do HUD, ciclo de CSS por modo `gmRemixModeBeforeCSS/LeaveCSS/StartMatch` com perfil por modo, `SSB64_REMIX_MODE`, `SSB64_VS_STAMINA`, `SSB64_VS_TIME`), Stamina portada exceto P10/P16/P17, primeiros passos de Tug of War e KOTH. O build compila; só T6.0 e o HUD do Stamina foram vistos em partida.
 - [x] **CP6a** (checkpoint a pedido, 2026-10-22): sem código novo desde o CP5; oito relatórios de pesquisa dos modos e a lista de tasks do M6 reescrita a partir deles.
 - **CP6**.
 

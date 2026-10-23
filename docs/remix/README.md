@@ -18,6 +18,7 @@ Bugs corrigidos e decisões ficam em [`../bugs/README.md`](../bugs/README.md) (a
 | [`audio.md`](audio.md) | Sistema de áudio expandido: bancos ctl/tbl, sequências, SFX/FGM, layout em ROM, lista de BGMs |
 | [`file_table_and_loader.md`](file_table_and_loader.md) | Tabela de arquivos (ids `File.asm`) e carregador do Remix |
 | [`css_reference.md`](css_reference.md) | CSS: como o do port funciona e os dados do CSS do Remix (grade 3x10, tabelas, offsets) |
+| [`modes_base.md`](modes_base.md) | Base comum dos modos de M6: modo da partida, Timed Stock e texto posicionado do HUD |
 | [`decomp_fkind_audit.md`](decomp_fkind_audit.md) | Inventário dos sítios do decomp indexados pela contagem de lutadores (124 entradas, risco por sítio) |
 
 ## Pipeline de dados (Torch e port)
@@ -38,6 +39,7 @@ Bugs corrigidos e decisões ficam em [`../bugs/README.md`](../bugs/README.md) (a
 | [`f5_item_worker_brief.md`](f5_item_worker_brief.md) | Item de lutador (interface, layout de arquivos, relatório) |
 | [`f5_shared_patch_brief.md`](f5_shared_patch_brief.md) | Patches de `*shared.asm` em funções vanilla |
 | [`f6_standard_item_worker_brief.md`](f6_standard_item_worker_brief.md) | Item padrão do Remix |
+| [`f12_mode_worker_brief.md`](f12_mode_worker_brief.md) | Um passo do port de um modo Remix (M6: Stamina, Tug of War, KOTH, Tag Team, Smashketball, 12CB, 1P, Training) |
 | [`f7_leftover_worker_brief.md`](f7_leftover_worker_brief.md) | Um grupo de `REMIX-TODO` |
 | [`f7_hazard_worker_brief.md`](f7_hazard_worker_brief.md) | Hazard de um stage, com o primer de idiomas do asm e seus equivalentes no port |
 | [`f8_toggle_worker_brief.md`](f8_toggle_worker_brief.md) | Um toggle de gameplay (API `gmRemixToggle`, notas, como o lead testa) |

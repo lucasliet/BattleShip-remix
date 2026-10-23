@@ -56,6 +56,7 @@
 #include "fighter_registry.h"
 #include "remix/remix_roster.h"
 #include "remix/remix_player_panel.h"
+#include "remix/remix_hud_text.h"
 #include "remix/remix_input_display.h"
 #include "remix/remix_toggles.h"
 #include "remix/remix_ram_image.h"
@@ -922,6 +923,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 			gui->SetMenu(std::make_shared<ssb64::PortMenu>());
 #ifdef REGION_REMIX
 			gui->AddGuiWindow(remix_input_display_make_window());
+			gui->AddGuiWindow(remix_hud_text_make_window());
 #endif
 			port_log("SSB64: Port menu attached\n");
 		}
