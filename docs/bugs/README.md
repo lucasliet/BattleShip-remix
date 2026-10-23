@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-10-22 | [remix_menu_null_state_and_demo_fkind](remix_menu_null_state_and_demo_fkind_2026-10-22.md) | Character Data status buffer overflow, NULL battle state in the Remix panel guard, Auto-Demo reading the `nFTKindNull` file table |
 | 2026-10-20 | [remix_css_camera_zoom_null_battle_state](remix_css_camera_zoom_null_battle_state_2026-10-20.md) | **FIXED (decomp)** — Making any fighter model on the character select crashed: `grRemixCameraAdjustZoomRange` read `gSCManagerBattleState->gkind` (NULL on the CSS) before checking the scene |
 | 2026-10-20 | [metal_redirect_z_color_write](metal_redirect_z_color_write_2026-10-20.md) | **FIXED (libultraship Metal backend)** — The VS results screen rendered all cream on macOS: the transition camera's end-of-pass depth clear (colour image redirected to the Z buffer) wrote its fill colour to the framebuffer because the Metal backend had no `SetColorWriteMask`; added a no-colour pipeline variant built on demand |
 | 2026-10-18 | [remix_settings_m4](remix_settings_m4_2026-10-18.md) | **IN PROGRESS (M4)** — Remix settings registry from the image (531 toggles, 4 profiles), port menu section, 22 gameplay settings ported |

@@ -66,3 +66,11 @@ Frames use the `SSB64_MAX_FRAMES` numbering. The CSS cursor moves `stick / 20` p
 - Synth fighters run parent status routines: anything those routines read from the parent's files,
   joints, or per-move script state (throw desc, hidden joints) must exist for the synth too.
 - File-type detection by reloc path fails for Remix-added files; mark them by id.
+
+## Follow-up 2026-10-22 (ROADMAP T5.4)
+
+- Fix 3 is no longer containment: the Remix GFX routines are loaded (`[remix-gfx] ... routines loaded`) and the bound in
+  `ftParamCheckSetColAnimID` is a plain guard.
+- Fixes 6 and 7 stay as guards but log once per run when they fire (`ftCommonCapturePulledRotateScale`,
+  `ftCommonThrownGetThrowDesc`). A matrix of Bowser, Banjo, Crash, Goemon, Captain Falcon, Dedede and Kirby (NSP/DSP/USP) did
+  not fire either; the T9.1 sweeps look for the two log lines.

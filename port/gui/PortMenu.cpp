@@ -5,6 +5,7 @@
 //   https://github.com/HarbourMasters/Shipwright
 // Licensed under the MIT License; see LICENSE at repository root.
 
+#include "remix/remix_player_panel.h"
 #include "remix/remix_toggles.h"
 #include "PortMenu.h"
 
@@ -1411,6 +1412,39 @@ void PortMenu::AddMenuRemix() {
                     .RaceDisable(false)
                     .Options(IntSliderOptions().Min(toggle.min).Max(toggle.max).DefaultValue(toggle.defaults[0]));
             }
+        }
+    }
+    AddMenuRemixPlayerPanel();
+}
+
+void PortMenu::AddMenuRemixPlayerPanel() {
+    for (int port = 0; port < REMIX_PANEL_PORTS; port++) {
+        const std::string sidebar = "Player Panel P" + std::to_string(port + 1);
+        AddSidebarEntry("Remix", sidebar, 2);
+        WidgetPath path = { "Remix", sidebar, SECTION_COLUMN_1 };
+        AddWidget(path, sidebar, WIDGET_SEPARATOR_TEXT);
+        AddWidget(path, "Reset every port to the defaults", WIDGET_BUTTON)
+            .RaceDisable(false)
+            .Callback([](WidgetInfo &) { remix_panel_reset(); })
+            .Options(ButtonOptions().Tooltip("Sets the Remix CSS panel options of the four ports to their defaults."));
+
+        int shown = 0;
+        for (const auto &option : remix_panel::All()) {
+            path.column = (shown++ % 2 == 0) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
+            const std::string cvar = remix_panel::CVarName(option, port);
+            if (!option.strings.empty()) {
+                AddWidget(path, option.title, WIDGET_CVAR_COMBOBOX)
+                    .CVar(cvar.c_str())
+                    .RaceDisable(false)
+                    .Options(ComboboxOptions()
+                                 .ComboMap(remix_panel::ComboMap(option))
+                                 .DefaultIndex(static_cast<uint32_t>(option.fallback)));
+                continue;
+            }
+            AddWidget(path, option.title, WIDGET_CVAR_SLIDER_INT)
+                .CVar(cvar.c_str())
+                .RaceDisable(false)
+                .Options(IntSliderOptions().Min(option.min).Max(option.max).DefaultValue(option.fallback));
         }
     }
 }

@@ -55,6 +55,8 @@
 #include "port_input_script.h"
 #include "fighter_registry.h"
 #include "remix/remix_roster.h"
+#include "remix/remix_player_panel.h"
+#include "remix/remix_input_display.h"
 #include "remix/remix_toggles.h"
 #include "remix/remix_ram_image.h"
 #include "focus.h"
@@ -918,6 +920,9 @@ static int PortInitImpl(int argc, char* argv[]) {
 		if (auto gui = window->GetGui()) {
 			port_log("SSB64: attaching Port menu ...\n");
 			gui->SetMenu(std::make_shared<ssb64::PortMenu>());
+#ifdef REGION_REMIX
+			gui->AddGuiWindow(remix_input_display_make_window());
+#endif
 			port_log("SSB64: Port menu attached\n");
 		}
 
@@ -1185,6 +1190,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	remix_ram_image_load();
 	remix_roster_load();
 	remix_toggles_init();
+	remix_panel_init();
 #endif
 
 #ifndef DISABLE_SCRIPTING
