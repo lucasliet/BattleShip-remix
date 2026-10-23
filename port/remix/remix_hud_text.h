@@ -17,6 +17,7 @@ extern "C" {
 #endif
 
 #define REMIX_HUD_TEXT_SLOTS 32
+#define REMIX_HUD_BAR_SLOTS 16
 #define REMIX_HUD_TEXT_LENGTH 48
 
 /**
@@ -30,6 +31,20 @@ extern "C" {
  * @param height Height of the text in N64 screen units (the 240-unit screen height scales it).
  */
 void remix_hud_text_put(int slot, const char *text, float x, float y, uint32_t rgba, float height);
+
+/**
+ * Sets or refreshes one progress bar (the Remix mode meters: King of the Hill, Tug of War). Same life as a label.
+ *
+ * @param slot Bar index (0..REMIX_HUD_BAR_SLOTS-1).
+ * @param x Left edge in N64 screen units.
+ * @param y Top edge in N64 screen units.
+ * @param width Width of the whole bar in N64 screen units.
+ * @param height Height of the bar in N64 screen units.
+ * @param fraction Filled part of the bar, 0.0 to 1.0.
+ * @param rgba Colour of the filled part as 0xRRGGBBAA.
+ * @param flash White flash over the whole bar, 0.0 (none) to 1.0.
+ */
+void remix_hud_bar_put(int slot, float x, float y, float width, float height, float fraction, uint32_t rgba, float flash);
 
 /** Hides one label right away. */
 void remix_hud_text_hide(int slot);

@@ -34,7 +34,20 @@ struct HudLabel {
     float height = 12.0f;
 };
 
+struct HudBar {
+    bool active = false;
+    int lastFrame = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    float fraction = 0.0f;
+    uint32_t rgba = 0xFFFFFFFF;
+    float flash = 0.0f;
+};
+
 std::array<HudLabel, REMIX_HUD_TEXT_SLOTS> sLabels;
+std::array<HudBar, REMIX_HUD_BAR_SLOTS> sBars;
 int sCurrentFrame = 0;
 
 /** Largest 4:3 rectangle centred in the viewport work area: the game image. */
@@ -62,6 +75,32 @@ void DrawLabel(ImDrawList *drawList, ImVec2 origin, float scale, const HudLabel 
     drawList->AddText(ImGui::GetFont(), fontSize, position, ColorOf(label.rgba), label.text);
 }
 
+void DrawBar(ImDrawList *drawList, ImVec2 origin, float scale, const HudBar &bar) {
+    const ImVec2 min(origin.x + bar.x * scale, origin.y + bar.y * scale);
+    const ImVec2 max(min.x + bar.width * scale, min.y + bar.height * scale);
+    const ImVec2 fillMax(min.x + bar.width * scale * std::clamp(bar.fraction, 0.0f, 1.0f), max.y);
+
+    drawList->AddRectFilled(min, max, IM_COL32(0, 0, 0, 160));
+    drawList->AddRectFilled(min, fillMax, ColorOf(bar.rgba));
+    if (bar.flash > 0.0f) {
+        drawList->AddRectFilled(min, max, IM_COL32(255, 255, 255, static_cast<int>(255.0f * std::clamp(bar.flash, 0.0f, 1.0f))));
+    }
+    drawList->AddRect(min, max, IM_COL32(255, 255, 255, 220));
+}
+
+void DrawHudBars(ImDrawList *drawList, ImVec2 origin, float scale) {
+    for (HudBar &bar : sBars) {
+        if (!bar.active) {
+            continue;
+        }
+        if (sCurrentFrame - bar.lastFrame > kLabelLifeFrames) {
+            bar.active = false;
+            continue;
+        }
+        DrawBar(drawList, origin, scale, bar);
+    }
+}
+
 void DrawHudLabels() {
     const ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImDrawList *drawList = ImGui::GetForegroundDrawList();
@@ -70,6 +109,7 @@ void DrawHudLabels() {
 
     sCurrentFrame = ImGui::GetFrameCount();
     GameRect(viewport, &origin, &scale);
+    DrawHudBars(drawList, origin, scale);
     for (HudLabel &label : sLabels) {
         if (!label.active) {
             continue;
@@ -120,6 +160,23 @@ extern "C" void remix_hud_text_put(int slot, const char *text, float x, float y,
     label.lastFrame = sCurrentFrame;
 }
 
+extern "C" void remix_hud_bar_put(int slot, float x, float y, float width, float height, float fraction, uint32_t rgba,
+                                  float flash) {
+    if (slot < 0 || slot >= REMIX_HUD_BAR_SLOTS) {
+        return;
+    }
+    HudBar &bar = sBars[slot];
+    bar.x = x;
+    bar.y = y;
+    bar.width = width;
+    bar.height = height;
+    bar.fraction = fraction;
+    bar.rgba = rgba;
+    bar.flash = flash;
+    bar.active = true;
+    bar.lastFrame = sCurrentFrame;
+}
+
 extern "C" void remix_hud_text_hide(int slot) {
     if (slot < 0 || slot >= REMIX_HUD_TEXT_SLOTS) {
         return;
@@ -130,6 +187,9 @@ extern "C" void remix_hud_text_hide(int slot) {
 extern "C" void remix_hud_text_clear(void) {
     for (HudLabel &label : sLabels) {
         label.active = false;
+    }
+    for (HudBar &bar : sBars) {
+        bar.active = false;
     }
 }
 
