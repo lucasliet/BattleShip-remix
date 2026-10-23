@@ -5,6 +5,7 @@
 //   https://github.com/HarbourMasters/Shipwright
 // Licensed under the MIT License; see LICENSE at repository root.
 
+#include "remix/remix_modes.h"
 #include "remix/remix_player_panel.h"
 #include "remix/remix_toggles.h"
 #include "PortMenu.h"
@@ -1415,6 +1416,20 @@ void PortMenu::AddMenuRemix() {
         }
     }
     AddMenuRemixPlayerPanel();
+    AddMenuRemixModes();
+}
+
+void PortMenu::AddMenuRemixModes() {
+    AddSidebarEntry("Remix", "Modes", 1);
+    WidgetPath path = { "Remix", "Modes", SECTION_COLUMN_1 };
+    AddWidget(path, "Smashketball", WIDGET_SEPARATOR_TEXT);
+    AddWidget(path, "Smashketball type", WIDGET_CVAR_COMBOBOX)
+        .CVar(REMIX_MODES_CVAR_SMASHKETBALL_TYPE)
+        .RaceDisable(false)
+        .Options(ComboboxOptions()
+                     .ComboMap({ { 0, "Basketball" }, { 1, "Soccer" } })
+                     .DefaultIndex(0)
+                     .Tooltip("Basketball plays on the Smashketball stage, Soccer on the Soccer stage."));
 }
 
 void PortMenu::AddMenuRemixPlayerPanel() {

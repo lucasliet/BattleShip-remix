@@ -36,6 +36,7 @@ class PortMenu : public Ship::Menu {
 #ifdef REGION_REMIX
     void AddMenuRemix();
     void AddMenuRemixPlayerPanel();
+    void AddMenuRemixModes();
 #endif
 #ifndef DISABLE_SCRIPTING
     void AddMenuMods();
