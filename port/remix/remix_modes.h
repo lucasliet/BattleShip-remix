@@ -8,6 +8,8 @@
 
 #define REMIX_MODES_CVAR_SMASHKETBALL_TYPE "gRemix.Modes.SmashketballType"
 
+#define REMIX_MODES_TAGTEAM_SLOTS 6
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,8 +17,25 @@ extern "C" {
 /** Smashketball type: 0 basketball (Smashketball stage), 1 soccer (Soccer stage). */
 int remix_modes_smashketball_type(void);
 
+/**
+ * Tag Team queue of `port` (0..3): the fighter of slot `slot` (1..5, slot 0 is the character picked in the CSS) as a Remix
+ * fighter id, or -1 when the slot is Random.
+ */
+int remix_modes_tagteam_slot(int port, int slot);
+
 #ifdef __cplusplus
 }
+
+#include <cstdint>
+#include <map>
+#include <string>
+#include <vector>
+
+/** CVar names of the Tag Team queue slots 1..5 of the four ports, in port order. */
+std::vector<std::string> remix_modes_tagteam_cvars();
+
+/** Combo entries of a Tag Team slot: 0 Random, then the fighters of the Remix CSS in grid order. */
+std::map<int32_t, const char *> remix_modes_tagteam_fighters();
 #endif
 
 #endif /* PORT_REMIX_REMIX_MODES_H */

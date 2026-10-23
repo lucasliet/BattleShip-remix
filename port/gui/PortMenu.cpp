@@ -1430,6 +1430,20 @@ void PortMenu::AddMenuRemixModes() {
                      .ComboMap({ { 0, "Basketball" }, { 1, "Soccer" } })
                      .DefaultIndex(0)
                      .Tooltip("Basketball plays on the Smashketball stage, Soccer on the Soccer stage."));
+
+    AddSidebarEntry("Remix", "Tag Team", 2);
+    WidgetPath tagPath = { "Remix", "Tag Team", SECTION_COLUMN_1 };
+    AddWidget(tagPath, "Tag Team queue", WIDGET_SEPARATOR_TEXT);
+    const std::vector<std::string> tagCVars = remix_modes_tagteam_cvars();
+    for (size_t i = 0; i < tagCVars.size(); i++) {
+        const int port = static_cast<int>(i) / (REMIX_MODES_TAGTEAM_SLOTS - 1);
+        const int slot = static_cast<int>(i) % (REMIX_MODES_TAGTEAM_SLOTS - 1) + 2;
+        tagPath.column = (port % 2 == 0) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
+        AddWidget(tagPath, "P" + std::to_string(port + 1) + " fighter " + std::to_string(slot), WIDGET_CVAR_COMBOBOX)
+            .CVar(tagCVars[i].c_str())
+            .RaceDisable(false)
+            .Options(ComboboxOptions().ComboMap(remix_modes_tagteam_fighters()).DefaultIndex(0));
+    }
 }
 
 void PortMenu::AddMenuRemixPlayerPanel() {
