@@ -44,6 +44,19 @@ int remix_debug_force_item_kind(void);
  */
 int remix_debug_force_item_at_p1(void);
 
+/**
+ * Returns the integer value of the environment variable `name`, or `fallback` when it is unset or empty. The smoke tests
+ * use it for the mode shortcuts (SSB64_VS_STOCKS, SSB64_VS_TIME, SSB64_VS_STAMINA, SSB64_KOTH_GOAL, SSB64_KOTH_LINE,
+ * SSB64_SMASH_GOAL, SSB64_SMASH_BALL_X).
+ */
+int remix_debug_env_int(const char *name, int fallback);
+
+/**
+ * Returns the text of the environment variable `name`, or NULL when it is unset or empty (SSB64_REMIX_MODE,
+ * SSB64_SMASH_TYPE). The pointer stays valid for the life of the process.
+ */
+const char *remix_debug_env_text(const char *name);
+
 #ifdef __cplusplus
 }
 #endif

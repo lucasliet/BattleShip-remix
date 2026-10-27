@@ -87,3 +87,15 @@ int remix_debug_force_item_at_p1(void)
     const char *text = std::getenv("SSB64_REMIX_FORCE_ITEM_AT_P1");
     return (text != nullptr && text[0] != '\0' && text[0] != '0') ? 1 : 0;
 }
+
+const char *remix_debug_env_text(const char *name)
+{
+    const char *text = std::getenv(name);
+    return (text != nullptr && text[0] != '\0') ? text : nullptr;
+}
+
+int remix_debug_env_int(const char *name, int fallback)
+{
+    const char *text = remix_debug_env_text(name);
+    return (text != nullptr) ? std::atoi(text) : fallback;
+}
