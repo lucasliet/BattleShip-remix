@@ -72,6 +72,15 @@ EXTRA_SYMBOLS = [
     "FGM.extended_voice_map_table",
     "KirbyHats.extended_special_parts",
     "Item.GoldenGun.projectile_info_pointer",
+    "SinglePlayerModes.MATCH_SETTINGS_PART1",
+    "SinglePlayerModes.MATCH_SETTINGS_PART2",
+    "SinglePlayerModes.match_pool",
+    "SinglePlayerModes.duo_pool",
+    "SinglePlayerModes.match_slots",
+    "SinglePlayerModes.title_slots",
+    "SinglePlayerModes.title_card_1_struct",
+    "SinglePlayerModes.progress_icon_struct",
+    "SinglePlayerModes.remix_kirby_pool",
 ]
 EXTRA_SYMBOL_PREFIXES = ["Hazards.", "GFX.", "GFXRoutine.", "Toggles.entry_", "Toggles.head_", "Toggles.profile_defaults_"]
 CSS_FIGHTER_DIRS = ["Falco", "Ganondorf", "YoungLink", "DrMario", "Wario", "Dedede", "Sonic", "Sheik", "Marina",

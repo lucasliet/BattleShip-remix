@@ -88,6 +88,23 @@ void *remix_ram_image_make_file(uint32_t start, uint32_t size, void *dst)
     return dst;
 }
 
+uint32_t remix_ram_image_read_word(uint32_t ram_addr)
+{
+    const uint32_t *word = static_cast<const uint32_t *>(remix_ram_image_resolve(ram_addr & ~3u));
+
+    return (word != nullptr) ? *word : 0u;
+}
+
+uint32_t remix_ram_image_read_half(uint32_t ram_addr)
+{
+    return (remix_ram_image_read_word(ram_addr) >> ((2u - (ram_addr & 2u)) * 8u)) & 0xFFFFu;
+}
+
+uint32_t remix_ram_image_read_byte(uint32_t ram_addr)
+{
+    return (remix_ram_image_read_word(ram_addr) >> ((3u - (ram_addr & 3u)) * 8u)) & 0xFFu;
+}
+
 void *remix_ram_image_resolve(uint32_t ram_addr)
 {
     if (ram_addr < kRamImageBase) {

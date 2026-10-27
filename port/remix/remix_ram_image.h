@@ -29,6 +29,14 @@ int remix_ram_image_load(void);
 void *remix_ram_image_resolve(uint32_t ram_addr);
 
 /**
+ * Reads big-endian data of the image as the N64 would: a word (4-aligned), a halfword (2-aligned) or a byte. Each returns 0 when
+ * the address is outside the image or the image is not loaded.
+ */
+uint32_t remix_ram_image_read_word(uint32_t ram_addr);
+uint32_t remix_ram_image_read_half(uint32_t ram_addr);
+uint32_t remix_ram_image_read_byte(uint32_t ram_addr);
+
+/**
  * Copies [start, start + size) of the image to dst (a scene-arena buffer of at least size bytes) as a small reloc
  * file: words that hold an address inside the region become tokens of the copy, and the copy is registered as a
  * reloc range for this scene, so its display lists are widened and its vertices and textures get the runtime fixups.
