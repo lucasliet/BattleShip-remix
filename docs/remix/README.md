@@ -19,6 +19,7 @@ Bugs corrigidos e decisões ficam em [`../bugs/README.md`](../bugs/README.md) (a
 | [`file_table_and_loader.md`](file_table_and_loader.md) | Tabela de arquivos (ids `File.asm`) e carregador do Remix |
 | [`css_reference.md`](css_reference.md) | CSS: como o do port funciona e os dados do CSS do Remix (grade 3x10, tabelas, offsets) |
 | [`modes_base.md`](modes_base.md) | Base comum dos modos de M6: modo da partida, Timed Stock e texto posicionado do HUD |
+| `../../tests/remix/` | Testes de unidade headless das regras dos modos (12CB, nomes dos modos 1P): `cmake --build build --target run_remix_mode_tests` |
 | [`decomp_fkind_audit.md`](decomp_fkind_audit.md) | Inventário dos sítios do decomp indexados pela contagem de lutadores (124 entradas, risco por sítio) |
 
 ## Pipeline de dados (Torch e port)

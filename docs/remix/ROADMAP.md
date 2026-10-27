@@ -39,8 +39,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 ## Posição atual
 
 - **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: T6.0 feito; Stamina (T6.1a), Tug of War (T6.1b), KOTH (T6.1c), Tag Team (T6.1d) e Smashketball (T6.1e) jogáveis em partida com sobras listadas em cada task; T6.D1 e T6.D2 (passe de limpeza) feitas; 12-Character Battle (T6.1f) jogável na partida, no CSS e nos resultados com sobras listadas na task (CSS de 24 retratos, portas 3 e 4, reset de pausa, jogos seguidos); próxima task T6.2 (1P), depois T6.3 (Training), e as sobras do M6; antes do CP6 ficam T6.D3 a T6.D6 (testes de unidade, arquivos grandes, revisão dos workers, Tag Team). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
-- **Último checkpoint:** CP6c, 2026-10-23 (modos de M6; antes CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~86% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Último checkpoint:** CP6d, 2026-10-27 (passe de limpeza, testes de unidade, 12CB, menu 1P; antes CP6c, CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~82% (corrigida no CP6d, ver a tabela no fim deste arquivo) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
@@ -402,6 +402,7 @@ O modo escolhido na página Remix Modes do menu VS chega em `gMNVSModeRemixMode`
   que repetem código, `REMIX-TODO` sem dono; correções com build e partida do modo. **Aceite:** achados corrigidos ou registrados como `REMIX-TODO(<modo>)`.
 - [ ] T6.D6 Ícones de stock do Tag Team por personagem da fila e roubo de stock em times (`REMIX-TODO(tagteam-icons)`, `REMIX-TODO(tagteam-steal)`),
   hoje divergentes do Remix.
+- [x] **CP6d** (checkpoint a pedido, 2026-10-27): passe de limpeza (T6.D1 atalhos de teste em `remix_debug_env_*`, T6.D2 `gmremixmode.c` dividido em três), infraestrutura de testes de unidade (`tests/remix`, alvo `run_remix_mode_tests`, 57 checagens: regras do 12CB e nomes dos modos 1P), 12-Character Battle jogável (pool de stocks, KO, sem salty runback, texto do CSS e dos resultados, bloqueio de START no CSS; sobras: CSS de 24 retratos e conjuntos, portas 3 e 4, reset de pausa, jogos seguidos), T6.2 P1 (modo 1P e `SSB64_REMIX_1P_MODE`) e P2 (páginas do menu 1P, vistas em tela). Novas tasks abertas: T6.D3 a T6.D6. Correção da estimativa: a soma da tabela estava errada (35×0,96 + 10×0,70 + 20×0,80 + 10×0,90 + 20×0,80 = 81,6, não 87,6); o total honesto do CP6c já era ~82%, não 88%. Estimativa ~82%. Não conferido em tela: bloqueio de START do 12CB, linha "Best" do 12CB, modos 1P além do menu.
 - [x] **CP6c** (checkpoint a pedido, 2026-10-23): Stamina com fim de partida validado (P10 era o atalho de teste sem `team`), Tug of War (crédito de KO, revive, placar), King of the Hill (colina, rei, meta, faixa e medidores, respawn), Smashketball (bola, cestas, placar nativo, morte súbita, spawns, tipo), Tag Team (fila pelo menu do port, troca de lutador). Infra nova: `gmremixmode` (ciclo de CSS por modo), `remix_hud_text` (texto e barras ImGui), `remix_modes` (opções de modo no menu do port). Atalhos de teste: `SSB64_REMIX_MODE`, `SSB64_VS_STAMINA`, `SSB64_VS_TIME`, `SSB64_KOTH_LINE/GOAL`, `SSB64_SMASH_TYPE/GOAL/BALL_X`. Estimativa ~88%.
 - [x] **CP6b** (checkpoint a pedido, 2026-10-23): T6.0 fechado (base dos modos, Timed Stock, texto do HUD, ciclo de CSS por modo `gmRemixModeBeforeCSS/LeaveCSS/StartMatch` com perfil por modo, `SSB64_REMIX_MODE`, `SSB64_VS_STAMINA`, `SSB64_VS_TIME`), Stamina portada exceto P10/P16/P17, primeiros passos de Tug of War e KOTH. O build compila; só T6.0 e o HUD do Stamina foram vistos em partida.
 - [x] **CP6a** (checkpoint a pedido, 2026-10-22): sem código novo desde o CP5; oito relatórios de pesquisa dos modos e a lista de tasks do M6 reescrita a partir deles.
@@ -453,8 +454,8 @@ O modo escolhido na página Remix Modes do menu VS chega em `gMNVSModeRemixMode`
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~80% |
+| Settings, menus, modos | 20% | ~82% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~88%** (35×0,96 + 10×0,70 + 20×0,80 + 10×0,90 + 20×0,80 = 87,6) |
+| **Total ponderado** | | **~82%** (35×0,96 + 10×0,70 + 20×0,80 + 10×0,90 + 20×0,82 = 82,0; corrigido no CP6d, a soma anterior de 87,6 estava errada) |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).
