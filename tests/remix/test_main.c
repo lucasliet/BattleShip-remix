@@ -11,6 +11,7 @@ extern void remixTestTwelveCBRules(void);
 extern void remixTest1PModeNames(void);
 extern void remixTest1PModeRules(void);
 extern void remixTest1PHrcRules(void);
+extern void remixTest1PHrcSigns(void);
 
 int main(void)
 {
@@ -18,6 +19,7 @@ int main(void)
     remixTest1PModeNames();
     remixTest1PModeRules();
     remixTest1PHrcRules();
+    remixTest1PHrcSigns();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;
