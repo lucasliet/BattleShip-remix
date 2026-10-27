@@ -38,7 +38,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: T6.0 feito; Stamina (T6.1a), Tug of War (T6.1b), KOTH (T6.1c), Tag Team (T6.1d) e Smashketball (T6.1e) jogáveis em partida com sobras listadas em cada task; T6.D1 e T6.D2 (passe de limpeza) feitas; próxima task T6.1f (12-Character Battle), depois T6.2 (1P) e T6.3 (Training), e as sobras do M6; antes do CP6 ficam T6.D3 a T6.D6 (testes de unidade, arquivos grandes, revisão dos workers, Tag Team). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
+- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: T6.0 feito; Stamina (T6.1a), Tug of War (T6.1b), KOTH (T6.1c), Tag Team (T6.1d) e Smashketball (T6.1e) jogáveis em partida com sobras listadas em cada task; T6.D1 e T6.D2 (passe de limpeza) feitas; 12-Character Battle (T6.1f) jogável na partida, no CSS e nos resultados com sobras listadas na task (CSS de 24 retratos, portas 3 e 4, reset de pausa, jogos seguidos); próxima task T6.2 (1P), depois T6.3 (Training), e as sobras do M6; antes do CP6 ficam T6.D3 a T6.D6 (testes de unidade, arquivos grandes, revisão dos workers, Tag Team). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
 - **Último checkpoint:** CP6c, 2026-10-23 (modos de M6; antes CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~86% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
