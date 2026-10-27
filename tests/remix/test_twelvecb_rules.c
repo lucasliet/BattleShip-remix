@@ -159,6 +159,16 @@ static void testDefeatedPortraitIsNotReusedWithZeroStocks(void)
     CHECK_EQ(4, gmRemixTwelveCBGetPortraitStocks(&state, 1));
 }
 
+static void testPortraitFollowsTheCharacterSet(void)
+{
+    CHECK_EQ(0, gmRemixTwelveCBPortraitOf(0));
+    CHECK_EQ(11, gmRemixTwelveCBPortraitOf(11));
+    CHECK_EQ(12, gmRemixTwelveCBPortraitOf(12));
+    CHECK_EQ(13, gmRemixTwelveCBPortraitOf(25));
+    CHECK_EQ(GMREMIX_TWELVECB_PORTRAITS - 1, gmRemixTwelveCBPortraitOf(GMREMIX_TWELVECB_PORTRAITS - 1 - 12 + 12 * 4));
+    CHECK_TRUE(gmRemixTwelveCBPortraitOf(-5) < GMREMIX_TWELVECB_PORTRAITS);
+}
+
 static void testBestCharacterTakesTheMostStocksAndBreaksTiesByFewerLost(void)
 {
     GMRemixTwelveCBState state;
@@ -225,6 +235,7 @@ void remixTestTwelveCBRules(void)
     RUN_TEST(testWinnerKeepsTheStocksOfThePreviousGame);
     RUN_TEST(testLastStockLeftFallsBackToThePortraitStocks);
     RUN_TEST(testDefeatedPortraitIsNotReusedWithZeroStocks);
+    RUN_TEST(testPortraitFollowsTheCharacterSet);
     RUN_TEST(testBestCharacterTakesTheMostStocksAndBreaksTiesByFewerLost);
     RUN_TEST(testBestCharacterIsUnsetBeforeTheBattleStarts);
     RUN_TEST(testGameRecordsStopAtTheLimitInsteadOfOverrunning);
