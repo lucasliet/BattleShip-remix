@@ -76,6 +76,12 @@ static void testResetClearsTheKosAndThePlayerKo(void)
     CHECK_EQ(1, counter.kos);
 }
 
+static void testOnlyTheResetButtonRestartsTheRun(void)
+{
+    CHECK_EQ(1, sc1PRemixMultimanRestartsRun(1));
+    CHECK_EQ(0, sc1PRemixMultimanRestartsRun(0));
+}
+
 void remixTest1PModeRules(void)
 {
     printf("1p mode rules\n");
@@ -86,4 +92,5 @@ void remixTest1PModeRules(void)
     RUN_TEST(testHandicapsFollowTheAsmKnockbackRatios);
     RUN_TEST(testKosCountUntilThePlayerIsKod);
     RUN_TEST(testResetClearsTheKosAndThePlayerKo);
+    RUN_TEST(testOnlyTheResetButtonRestartsTheRun);
 }
