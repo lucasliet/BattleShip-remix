@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-10-27 | [remix_1p_size_override_cp6f](remix_1p_size_override_cp6f_2026-10-27.md) | Checkpoint CP6f — tamanho Giant/Tiny das CPUs do Remix 1P era sobrescrito pelo painel do CSS |
 | 2026-10-27 | [remix_1p_hrc_and_path_cp6e](remix_1p_hrc_and_path_cp6e_2026-10-27.md) | Checkpoint CP6e — Home-Run Contest finished (timer, signs, clouds, record in the save) and Remix 1P random path (R1/R2): deviations and facts not obvious from the code |
 | 2026-10-22 | [remix_menu_null_state_and_demo_fkind](remix_menu_null_state_and_demo_fkind_2026-10-22.md) | Character Data status buffer overflow, NULL battle state in the Remix panel guard, Auto-Demo reading the `nFTKindNull` file table |
 | 2026-10-20 | [remix_css_camera_zoom_null_battle_state](remix_css_camera_zoom_null_battle_state_2026-10-20.md) | **FIXED (decomp)** — Making any fighter model on the character select crashed: `grRemixCameraAdjustZoomRange` read `gSCManagerBattleState->gkind` (NULL on the CSS) before checking the scene |
