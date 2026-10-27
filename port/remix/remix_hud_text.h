@@ -33,6 +33,18 @@ extern "C" {
 void remix_hud_text_put(int slot, const char *text, float x, float y, uint32_t rgba, float height);
 
 /**
+ * Same as remix_hud_text_put with a printf style format (the text is cut at REMIX_HUD_TEXT_LENGTH - 1 characters).
+ *
+ * @param slot Label index (0..REMIX_HUD_TEXT_SLOTS-1); the caller owns its slots.
+ * @param x Horizontal centre of the text in N64 screen units.
+ * @param y Vertical centre of the text in N64 screen units.
+ * @param rgba Colour as 0xRRGGBBAA.
+ * @param height Height of the text in N64 screen units.
+ * @param format printf format string.
+ */
+void remix_hud_text_putf(int slot, float x, float y, uint32_t rgba, float height, const char *format, ...);
+
+/**
  * Sets or refreshes one progress bar (the Remix mode meters: King of the Hill, Tug of War). Same life as a label.
  *
  * @param slot Bar index (0..REMIX_HUD_BAR_SLOTS-1).

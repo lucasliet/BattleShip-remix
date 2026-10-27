@@ -17,6 +17,9 @@ extern "C" {
 /** Smashketball type: 0 basketball (Smashketball stage), 1 soccer (Soccer stage). */
 int remix_modes_smashketball_type(void);
 
+/** Name of a Remix fighter id as the roster spells it (MARIO, CAPTAIN), or NULL when the id has no roster entry. */
+const char *remix_modes_fighter_name(int fkind);
+
 /**
  * Tag Team queue of `port` (0..3): the fighter of slot `slot` (1..5, slot 0 is the character picked in the CSS) as a Remix
  * fighter id, or -1 when the slot is Random.

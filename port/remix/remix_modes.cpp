@@ -31,15 +31,21 @@ std::vector<std::string> remix_modes_tagteam_cvars() {
     return names;
 }
 
+extern "C" const char *remix_modes_fighter_name(int fkind) {
+    for (const RemixRosterEntry &entry : kRemixRoster) {
+        if (entry.remix_id == fkind) {
+            return entry.name;
+        }
+    }
+    return nullptr;
+}
+
 std::map<int32_t, const char *> remix_modes_tagteam_fighters() {
     std::map<int32_t, const char *> fighters = { { 0, "Random" } };
     for (int i = 0; i < REMIX_CSS_NUM_SLOTS; i++) {
-        const uint8_t id = kRemixCssSlotIds[i];
-        for (const RemixRosterEntry &entry : kRemixRoster) {
-            if (entry.remix_id == id) {
-                fighters[i + 1] = entry.name;
-                break;
-            }
+        const char *name = remix_modes_fighter_name(kRemixCssSlotIds[i]);
+        if (name != nullptr) {
+            fighters[i + 1] = name;
         }
     }
     return fighters;

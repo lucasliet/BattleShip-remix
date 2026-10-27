@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <array>
 #include <cfloat>
+#include <cstdarg>
+#include <cstdio>
 #include <cstring>
 
 namespace {
@@ -158,6 +160,16 @@ extern "C" void remix_hud_text_put(int slot, const char *text, float x, float y,
     label.height = height;
     label.active = true;
     label.lastFrame = sCurrentFrame;
+}
+
+extern "C" void remix_hud_text_putf(int slot, float x, float y, uint32_t rgba, float height, const char *format, ...) {
+    char text[REMIX_HUD_TEXT_LENGTH];
+    va_list arguments;
+
+    va_start(arguments, format);
+    std::vsnprintf(text, sizeof(text), format, arguments);
+    va_end(arguments);
+    remix_hud_text_put(slot, text, x, y, rgba, height);
 }
 
 extern "C" void remix_hud_bar_put(int slot, float x, float y, float width, float height, float fraction, uint32_t rgba,
