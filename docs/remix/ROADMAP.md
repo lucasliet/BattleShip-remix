@@ -376,6 +376,7 @@ O modo escolhido na página Remix Modes do menu VS chega em `gMNVSModeRemixMode`
 - [ ] T6.2 1P (`f11_mode_singleplayer.md`, 19 passos): Remix 1P, All-Star, Multiman e Cruel Multiman, Home-Run Contest, BTT/BTP dos lutadores
   Remix, Practice 1P (L reinicia a fase), 1P com lutador Remix (entra aqui o que ficou sem ver no T5.1b); riscos: `multiman_ko_count_stop`,
   loop do `_assign_stage` do All-Star, unidade do HRC.
+  Estado (2026-10-27): P1 feito: `sc/sc1pmode/sc1premixmode.*` (ids do asm, `gSC1PRemixMode`, `sc1PRemixModeGet/Is`, override de teste `SSB64_REMIX_1P_MODE=standard|bonus3|multiman|cruel|remix1p|allstar|hrc`) e `sc1premixmodename.*` com a suíte `tests/remix/test_1p_mode_names.c`; nenhum comportamento mudou ainda. Próximo: P2 (página Remix Modes do menu 1P), depois a ordem do plano.
 - [ ] T6.3 Training (`f11_mode_training.md`, 14 passos; não existe save state no Remix): menu Z, D-pad (congelar, avançar, trocar modelo, reset),
   shield break, OOS, DI practice, spam, spawn custom, música, fundo; opções de CPU dependem do M7; conferir Game Speed no Training e o
   `gITRemixExtendedToggles` zerado em `sc1ptrainingmode.c:700`.
