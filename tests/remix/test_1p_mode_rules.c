@@ -33,10 +33,57 @@ static void testSeedAdvanceIsOneToSixtyFourByFrameCount(void)
     CHECK_EQ(64, (int)sc1PRemixModeSeedAdvanceCount(0xFFFFFFFF));
 }
 
+static void testHordeModesAreMultimanAndCruelOnly(void)
+{
+    CHECK_TRUE(sc1PRemixModeIsMultiman(SC1PREMIX_MODE_MULTIMAN));
+    CHECK_TRUE(sc1PRemixModeIsMultiman(SC1PREMIX_MODE_CRUEL));
+    CHECK_EQ(0, sc1PRemixModeIsMultiman(SC1PREMIX_MODE_BONUS3));
+    CHECK_EQ(0, sc1PRemixModeIsMultiman(SC1PREMIX_MODE_HRC));
+    CHECK_EQ(0, sc1PRemixModeIsMultiman(SC1PREMIX_MODE_STANDARD));
+}
+
+static void testHandicapsFollowTheAsmKnockbackRatios(void)
+{
+    CHECK_EQ(0x15, sc1PRemixModeEnemyHandicap(SC1PREMIX_MODE_MULTIMAN));
+    CHECK_EQ(0x18, sc1PRemixModeEnemyHandicap(SC1PREMIX_MODE_CRUEL));
+    CHECK_EQ(0, sc1PRemixModeEnemyHandicap(SC1PREMIX_MODE_STANDARD));
+    CHECK_EQ(0x16, sc1PRemixModeHumanHandicap(SC1PREMIX_MODE_CRUEL));
+    CHECK_EQ(0, sc1PRemixModeHumanHandicap(SC1PREMIX_MODE_MULTIMAN));
+}
+
+static void testKosCountUntilThePlayerIsKod(void)
+{
+    SC1PRemixMultimanKos counter;
+
+    sc1PRemixMultimanKosReset(&counter);
+    sc1PRemixMultimanKosAddEnemy(&counter);
+    sc1PRemixMultimanKosAddEnemy(&counter);
+    CHECK_EQ(2, counter.kos);
+
+    sc1PRemixMultimanKosSetPlayerKo(&counter);
+    sc1PRemixMultimanKosAddEnemy(&counter);
+    CHECK_EQ(2, counter.kos);
+}
+
+static void testResetClearsTheKosAndThePlayerKo(void)
+{
+    SC1PRemixMultimanKos counter = { 7, 1 };
+
+    sc1PRemixMultimanKosReset(&counter);
+    CHECK_EQ(0, counter.kos);
+    CHECK_EQ(0, counter.is_player_ko);
+    sc1PRemixMultimanKosAddEnemy(&counter);
+    CHECK_EQ(1, counter.kos);
+}
+
 void remixTest1PModeRules(void)
 {
     printf("1p mode rules\n");
     RUN_TEST(testBonusModesLeaveTheBonusCSSFor1P);
     RUN_TEST(testOtherModesKeepTheirOwnFlow);
     RUN_TEST(testSeedAdvanceIsOneToSixtyFourByFrameCount);
+    RUN_TEST(testHordeModesAreMultimanAndCruelOnly);
+    RUN_TEST(testHandicapsFollowTheAsmKnockbackRatios);
+    RUN_TEST(testKosCountUntilThePlayerIsKod);
+    RUN_TEST(testResetClearsTheKosAndThePlayerKo);
 }
