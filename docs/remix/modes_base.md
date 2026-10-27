@@ -8,6 +8,7 @@ Referência do que os modos de M6 reaproveitam. Plano e progresso ficam no [`ROA
   código de partida e de resultados lê `gmRemixModeGet()` / `gmRemixModeIs()` (`decomp/src/gm/gmremixmode.h`).
 - `SSB64_REMIX_MODE=default|12cb|tagteam|koth|smashketball|tugofwar` força o modo da execução inteira (testes sem o menu).
 - `scVSBattleStartBattle` grava uma linha `remix mode: mode=N rules=N time_limit=N stocks=N team=N` no log no início de cada partida.
+- Arquivos: `gmremixmode.c` (modo da partida, `SSB64_REMIX_MODE`), `gmremixmodecss.c` (perfis e ciclo de CSS por modo), `gmremixtimedstock.c` (Timed Stock); a API fica em `gmremixmode.h`. Os atalhos de teste dos modos (`SSB64_*`) são lidos por `remix_debug_env_int` / `remix_debug_env_text` (`port/remix/remix_debug.h`), nunca por `getenv` direto.
 - `gmRemixModeSceneClear()` (chamado em `scManagerRunLoop` a cada troca de cena) apaga os rótulos de HUD.
 
 ## Timed Stock (`TimedStock.asm`)

@@ -38,7 +38,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: T6.0 feito; Stamina (T6.1a), Tug of War (T6.1b), KOTH (T6.1c), Tag Team (T6.1d) e Smashketball (T6.1e) jogáveis em partida com sobras listadas em cada task; próxima task T6.1f (12-Character Battle), depois T6.2 (1P) e T6.3 (Training), e as sobras do M6. M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
+- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: T6.0 feito; Stamina (T6.1a), Tug of War (T6.1b), KOTH (T6.1c), Tag Team (T6.1d) e Smashketball (T6.1e) jogáveis em partida com sobras listadas em cada task; T6.D1 e T6.D2 (passe de limpeza) feitas; próxima task T6.1f (12-Character Battle), depois T6.2 (1P) e T6.3 (Training), e as sobras do M6; antes do CP6 ficam T6.D3 a T6.D6 (testes de unidade, arquivos grandes, revisão dos workers, Tag Team). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
 - **Último checkpoint:** CP6c, 2026-10-23 (modos de M6; antes CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~86% (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
@@ -378,10 +378,32 @@ O modo escolhido na página Remix Modes do menu VS chega em `gMNVSModeRemixMode`
 - [ ] T6.3 Training (`f11_mode_training.md`, 14 passos; não existe save state no Remix): menu Z, D-pad (congelar, avançar, trocar modelo, reset),
   shield break, OOS, DI practice, spam, spawn custom, música, fundo; opções de CPU dependem do M7; conferir Game Speed no Training e o
   `gITRemixExtendedToggles` zerado em `sc1ptrainingmode.c:700`.
+- [x] T6.D1 Atalhos de teste dos modos num só módulo (feito 2026-10-27, débito apontado na autoavaliação do CP6c): `remix_debug_env_int` e
+  `remix_debug_env_text` em `port/remix/remix_debug.*` substituem os `getenv`/`atoi` soltos e os `extern` em linha de `gmremixmode`,
+  `gmremixkoth`, `gmremixsmashketball` e dos atalhos `SSB64_VS_STOCKS/TIME/STAMINA` de `scmanager.c` (os `getenv` anteriores ao M6 ficam).
+  **Visto:** build limpo; KOTH (`SSB64_KOTH_GOAL`, `SSB64_KOTH_LINE`) e Smashketball (`SSB64_SMASH_TYPE`, `SSB64_SMASH_GOAL`) em partida. Commit `57ecf6a`.
+- [x] T6.D2 `gm/gmremixmode.c` (335 linhas, três papéis) dividido (feito 2026-10-27): `gmremixmode.c` (modo da partida, 89 linhas),
+  `gmremixmodecss.c` (perfis e ciclo de CSS por modo, 204) e `gmremixtimedstock.c` (regras de Timed Stock, 69); a API de `gmremixmode.h` não mudou.
+  **Visto:** build limpo e partida Tug of War com Timed Stock (`rules=3`). Commit `aa4441b`.
+- [ ] T6.D3 Testes de unidade das regras puras dos modos (regra do projeto: todo comportamento novo tem teste; hoje só há validação em partida).
+  Executável headless de um comando (alvo CMake `remix_mode_tests`, sem ROM nem janela), cobrindo: Timed Stock (`gmRemixTimedStockScore`
+  com e sem Tug of War, `UsesTimeScore`, `IsTimeUp` com tempo infinito, `AllowsSuddenDeath`), ciclo de CSS (`BeforeCSS`/`LeaveCSS`/`StartMatch`:
+  perfil forçado, stocks/meta/times guardados por modo, restauro do vanilla), pontuação e vitória do KOTH (rei com buffer, contagem por time
+  uma vez por quadro, meta), crédito de KO e revive do Tug of War, fila e troca do Tag Team (`remix_modes_tagteam_fighters`, Random sem repetir),
+  placar e meta do Smashketball, Stamina (HP, KO, morte única). Se a regra depende de estado do jogo, extrair a parte pura para função
+  que recebe os dados por parâmetro, sem mudar o comportamento. Um teste novo a cada modo que entrar daqui em diante (T6.1f, T6.2, T6.3).
+  **Aceite:** o alvo roda e passa; documentado em `docs/remix/README.md` e no AGENTS do projeto.
+- [ ] T6.D4 Arquivos de modo acima de 300 linhas (regra de arquivos pequenos): `gmremixkoth.c` (425) e `gmremixsmashketball.c` (410) divididos por
+  responsabilidade (estado e pontuação, colina/bola, fim de partida), como já foi feito com `kothhill/draw/hud` e `smashketballboard`.
+  **Aceite:** build e a mesma partida de validação do modo.
+- [ ] T6.D5 Revisão linha a linha do código portado pelos workers (Stamina P6 a P15, Tug of War P1/P3): duplicação, funções longas, comentários
+  que repetem código, `REMIX-TODO` sem dono; correções com build e partida do modo. **Aceite:** achados corrigidos ou registrados como `REMIX-TODO(<modo>)`.
+- [ ] T6.D6 Ícones de stock do Tag Team por personagem da fila e roubo de stock em times (`REMIX-TODO(tagteam-icons)`, `REMIX-TODO(tagteam-steal)`),
+  hoje divergentes do Remix.
 - [x] **CP6c** (checkpoint a pedido, 2026-10-23): Stamina com fim de partida validado (P10 era o atalho de teste sem `team`), Tug of War (crédito de KO, revive, placar), King of the Hill (colina, rei, meta, faixa e medidores, respawn), Smashketball (bola, cestas, placar nativo, morte súbita, spawns, tipo), Tag Team (fila pelo menu do port, troca de lutador). Infra nova: `gmremixmode` (ciclo de CSS por modo), `remix_hud_text` (texto e barras ImGui), `remix_modes` (opções de modo no menu do port). Atalhos de teste: `SSB64_REMIX_MODE`, `SSB64_VS_STAMINA`, `SSB64_VS_TIME`, `SSB64_KOTH_LINE/GOAL`, `SSB64_SMASH_TYPE/GOAL/BALL_X`. Estimativa ~88%.
 - [x] **CP6b** (checkpoint a pedido, 2026-10-23): T6.0 fechado (base dos modos, Timed Stock, texto do HUD, ciclo de CSS por modo `gmRemixModeBeforeCSS/LeaveCSS/StartMatch` com perfil por modo, `SSB64_REMIX_MODE`, `SSB64_VS_STAMINA`, `SSB64_VS_TIME`), Stamina portada exceto P10/P16/P17, primeiros passos de Tug of War e KOTH. O build compila; só T6.0 e o HUD do Stamina foram vistos em partida.
 - [x] **CP6a** (checkpoint a pedido, 2026-10-22): sem código novo desde o CP5; oito relatórios de pesquisa dos modos e a lista de tasks do M6 reescrita a partir deles.
-- **CP6**.
+- **CP6** (fecha com T6.D3 a T6.D6 feitas; elas valem como parte do M6, não são opcionais).
 
 ## M7. IA
 
