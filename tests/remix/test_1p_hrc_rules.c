@@ -188,6 +188,27 @@ static void testCloudsJumpBackWhenTheyScrollPastTheThreshold(void)
     CHECK_EQ(-8, (int)sc1PRemixHrcCloudStep(-342.0F, -1.0F));
 }
 
+static void testTheFirstDistanceIsSavedQuietly(void)
+{
+    CHECK_EQ(SC1PREMIX_HRC_RECORD_FIRST, sc1PRemixHrcRecordVerdict(0, 2308));
+}
+
+static void testAZeroDistanceNeverMakesARecord(void)
+{
+    CHECK_EQ(SC1PREMIX_HRC_RECORD_KEEP, sc1PRemixHrcRecordVerdict(0, 0));
+}
+
+static void testALongerDistanceBeatsTheRecord(void)
+{
+    CHECK_EQ(SC1PREMIX_HRC_RECORD_BEATEN, sc1PRemixHrcRecordVerdict(2308, 2309));
+}
+
+static void testAnEqualOrShorterDistanceKeepsTheRecord(void)
+{
+    CHECK_EQ(SC1PREMIX_HRC_RECORD_KEEP, sc1PRemixHrcRecordVerdict(2308, 2308));
+    CHECK_EQ(SC1PREMIX_HRC_RECORD_KEEP, sc1PRemixHrcRecordVerdict(2308, 100));
+}
+
 void remixTest1PHrcRules(void)
 {
     printf("1p hrc rules\n");
@@ -206,6 +227,10 @@ void remixTest1PHrcRules(void)
     RUN_TEST(testCounterStaysInTheCornerWhileTheAttemptIsOn);
     RUN_TEST(testCounterEndsCenteredAndTwiceAsTallAtComplete);
     RUN_TEST(testCounterClampsTheTicsToTheEndTimer);
+    RUN_TEST(testTheFirstDistanceIsSavedQuietly);
+    RUN_TEST(testAZeroDistanceNeverMakesARecord);
+    RUN_TEST(testALongerDistanceBeatsTheRecord);
+    RUN_TEST(testAnEqualOrShorterDistanceKeepsTheRecord);
     RUN_TEST(testCloudsStandStillBeforeTheStartLine);
     RUN_TEST(testCloudsScrollAgainstTheSandbagPastTheStartLine);
     RUN_TEST(testCloudsKeepScrollingBetweenTheLimits);
