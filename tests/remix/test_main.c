@@ -9,11 +9,13 @@ int gRemixTestChecks = 0;
 
 extern void remixTestTwelveCBRules(void);
 extern void remixTest1PModeNames(void);
+extern void remixTest1PModeRules(void);
 
 int main(void)
 {
     remixTestTwelveCBRules();
     remixTest1PModeNames();
+    remixTest1PModeRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;
