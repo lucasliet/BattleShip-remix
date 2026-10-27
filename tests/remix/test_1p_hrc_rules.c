@@ -138,6 +138,36 @@ static void testTimeUpWithTheHumanStuckInAHoldEndsAtOnce(void)
     CHECK_EQ(SC1PREMIX_HRC_VERDICT_KEEP_GOING, sc1PRemixHrcAttemptVerdict(&attempt));
 }
 
+static void testCounterStaysInTheCornerWhileTheAttemptIsOn(void)
+{
+    SC1PRemixHrcCounterLayout layout;
+
+    sc1PRemixHrcCounterAt(0, &layout);
+    CHECK_EQ(246, (int)layout.x);
+    CHECK_EQ(44, (int)layout.y);
+    CHECK_EQ(16, (int)layout.height);
+}
+
+static void testCounterEndsCenteredAndTwiceAsTallAtComplete(void)
+{
+    SC1PRemixHrcCounterLayout layout;
+
+    sc1PRemixHrcCounterAt(45, &layout);
+    CHECK_EQ(160, (int)layout.x);
+    CHECK_EQ(66, (int)layout.y);
+    CHECK_EQ(32, (int)layout.height);
+}
+
+static void testCounterClampsTheTicsToTheEndTimer(void)
+{
+    SC1PRemixHrcCounterLayout layout;
+
+    sc1PRemixHrcCounterAt(-5, &layout);
+    CHECK_EQ(246, (int)layout.x);
+    sc1PRemixHrcCounterAt(900, &layout);
+    CHECK_EQ(32, (int)layout.height);
+}
+
 void remixTest1PHrcRules(void)
 {
     printf("1p hrc rules\n");
@@ -153,4 +183,7 @@ void remixTest1PHrcRules(void)
     RUN_TEST(testASlidingSandbagCutsTheInputsButGoesOn);
     RUN_TEST(testTimeUpBeforeTheLineWaitsForTheHumanToRest);
     RUN_TEST(testTimeUpWithTheHumanStuckInAHoldEndsAtOnce);
+    RUN_TEST(testCounterStaysInTheCornerWhileTheAttemptIsOn);
+    RUN_TEST(testCounterEndsCenteredAndTwiceAsTallAtComplete);
+    RUN_TEST(testCounterClampsTheTicsToTheEndTimer);
 }
