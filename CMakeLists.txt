@@ -1562,3 +1562,8 @@ endif()
 if (NOT DISABLE_SCRIPTING)
     include(ModO2R)
 endif()
+
+################################################################################
+# Headless unit tests of the Remix mode rules (tests/remix): cmake --build <build> --target run_remix_mode_tests
+################################################################################
+add_subdirectory(tests/remix)
