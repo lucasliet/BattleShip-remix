@@ -168,6 +168,26 @@ static void testCounterClampsTheTicsToTheEndTimer(void)
     CHECK_EQ(32, (int)layout.height);
 }
 
+static void testCloudsStandStillBeforeTheStartLine(void)
+{
+    CHECK_EQ(0, (int)sc1PRemixHrcCloudSpeed(500.0F, 0));
+}
+
+static void testCloudsScrollAgainstTheSandbagPastTheStartLine(void)
+{
+    CHECK_EQ(-5, (int)sc1PRemixHrcCloudSpeed(5000.0F, 1));
+}
+
+static void testCloudsKeepScrollingBetweenTheLimits(void)
+{
+    CHECK_EQ(-101, (int)sc1PRemixHrcCloudStep(-100.0F, -1.0F));
+}
+
+static void testCloudsJumpBackWhenTheyScrollPastTheThreshold(void)
+{
+    CHECK_EQ(-8, (int)sc1PRemixHrcCloudStep(-342.0F, -1.0F));
+}
+
 void remixTest1PHrcRules(void)
 {
     printf("1p hrc rules\n");
@@ -186,4 +206,8 @@ void remixTest1PHrcRules(void)
     RUN_TEST(testCounterStaysInTheCornerWhileTheAttemptIsOn);
     RUN_TEST(testCounterEndsCenteredAndTwiceAsTallAtComplete);
     RUN_TEST(testCounterClampsTheTicsToTheEndTimer);
+    RUN_TEST(testCloudsStandStillBeforeTheStartLine);
+    RUN_TEST(testCloudsScrollAgainstTheSandbagPastTheStartLine);
+    RUN_TEST(testCloudsKeepScrollingBetweenTheLimits);
+    RUN_TEST(testCloudsJumpBackWhenTheyScrollPastTheThreshold);
 }
