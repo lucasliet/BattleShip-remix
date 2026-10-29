@@ -462,6 +462,18 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 
 - [ ] T7.1 `AI.asm` (70 hooks), toggle Improved AI, hooks de CPU do Single Button Mode, os `cpu_*` marcados `REMIX-TODO(AI)` nos fighters,
   `VanillaLv10Attacks.asm`. **Aceite:** CPU nível 9 usa especiais e recupera com 10 lutadores Remix.
+  **Pesquisa feita (2026-10-29):** `docs/remix/notes/f13_ai_*.md` (inventário dos 70 patches em três partes, tabelas de ataque, outros ganchos) e brief
+  `docs/remix/f13_ai_worker_brief.md`. Achado central: os 30 lutadores Remix usam a lista de ataques do pai (`remix_roster.cpp:303` copia o descritor e
+  ninguém atribui `computer_attack_list`), então as tabelas `*/AI/Attacks.asm` nunca são lidas; as entradas têm o mesmo formato do vanilla (28 bytes, sem
+  ponteiros) e estão na imagem (`Character.ai_behaviour.table`, RAM `0x8049A320`, `lv10_ai_behaviour.table` em `0x8049D9C4`). Nenhum `ai_*_routine` do
+  registro é preenchido; só `cpu_pull_out_bombs_` e `custom_recovery_logic` existem. Divisão em fatias (cada uma com arquivos próprios
+  `ft/ftremix/ftremixai*.c`, hooks pequenos em `ftcomputer.c`):
+  - [ ] T7.1a tabelas de ataque da imagem + nível 10 (`ftRemixAiGetAttackList`, símbolos novos no gerador).
+  - [ ] T7.1b scripts de entrada customizados (ids >= 0x31, `AI.command_table`) e comandos estendidos (patches 18 a 22 da parte A, `ROUTINE`/`CUSTOM_COMMANDS`).
+  - [ ] T7.1c rotinas por lutador: `PREVENT_ATTACK`, peso de ataque, `LONG_RANGE`, `AERIAL_CHASE` (parte A 23 a 25, parte B, parte C 4).
+  - [ ] T7.1d correções de combate e recuperação (parte A 2 a 17: evade, recuperação, alvo, tech, z-cancel, carga, projéteis, USP).
+  - [ ] T7.1e IA de nível 10 (parte B: 18 patches) e DI, `cpu_post_process`, roll spam, clamp do nível 9 (parte C).
+  - [ ] T7.1f CSS com nível de CPU até 10 (setas e dígitos, parte C 12 a 16) e Default CPU LVL, Single Button Mode da CPU.
 - **CP7**.
 
 ## M8. Restante da paridade
