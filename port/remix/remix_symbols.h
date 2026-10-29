@@ -2,6 +2,7 @@
  * Remix RAM addresses of the routines and data the C ports reference. */
 #pragma once
 
+#define REMIX_SYM_AI__command_table 0x805192D0u
 #define REMIX_SYM_Banjo__ATTACK_AIR_B 0x8057A2ACu
 #define REMIX_SYM_Banjo__ATTACK_AIR_D 0x8057A3B4u
 #define REMIX_SYM_Banjo__ATTACK_AIR_F 0x8057A1ECu
@@ -365,9 +366,15 @@
 #define REMIX_SYM_BowserUSP__ledge_grab_patch____bowser 0x8054E724u
 #define REMIX_SYM_BowserUSP__ledge_grab_patch____return 0x8015EC6Cu
 #define REMIX_SYM_BowserUSP__ledge_grab_patch____skip 0x8054E72Cu
+#define REMIX_SYM_Character__ai_aerial_chase__table 0x8049A640u
+#define REMIX_SYM_Character__ai_behaviour__table 0x8049A320u
+#define REMIX_SYM_Character__ai_long_range__table 0x8049A7D0u
+#define REMIX_SYM_Character__cpu_post_process__table 0x8049D6BCu
 #define REMIX_SYM_Character__default_costume__table 0x8049AAF0u
 #define REMIX_SYM_Character__falcon_dive_id__table 0x8049C570u
 #define REMIX_SYM_Character__kirby_inhale_struct__table 0x8049CD30u
+#define REMIX_SYM_Character__lv10_ai_behaviour__table 0x8049D9C4u
+#define REMIX_SYM_Character__recovery_logic__table 0x8049D538u
 #define REMIX_SYM_Character__singleplayer_vs_preview__table 0x8049BC10u
 #define REMIX_SYM_Character__variants__table 0x8049C9A0u
 #define REMIX_SYM_Character__winner_bgm__table 0x8049BA80u
