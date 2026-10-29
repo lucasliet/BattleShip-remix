@@ -81,6 +81,10 @@ EXTRA_SYMBOLS = [
     "SinglePlayerModes.title_card_1_struct",
     "SinglePlayerModes.progress_icon_struct",
     "SinglePlayerModes.remix_kirby_pool",
+    "SinglePlayer.name_texture_table",
+    "SinglePlayer.name_delay_table",
+    "Character.singleplayer_vs_preview.table",
+    "CharacterSelect.fgm_table",
 ]
 EXTRA_SYMBOL_PREFIXES = ["Hazards.", "GFX.", "GFXRoutine.", "Toggles.entry_", "Toggles.head_", "Toggles.profile_defaults_"]
 CSS_FIGHTER_DIRS = ["Falco", "Ganondorf", "YoungLink", "DrMario", "Wario", "Dedede", "Sonic", "Sheik", "Marina",
