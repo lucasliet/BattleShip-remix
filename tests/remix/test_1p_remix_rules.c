@@ -129,6 +129,79 @@ static void testSonicFightsInGreenHillTwiceAsOftenAsCasino(void)
     CHECK_EQ(SC1PREMIX_1P_SONIC_STAGE_GHZ, sc1PRemix1PPickSonicStage(scriptedRandom));
 }
 
+static int lastRandom(int range)
+{
+    return range - 1;
+}
+
+static void fillStageOptions(int options[SC1PREMIX_ALLSTAR_FIGHTER_COUNT][3], int shared)
+{
+    int i;
+
+    for (i = 0; i < SC1PREMIX_ALLSTAR_FIGHTER_COUNT; i++)
+    {
+        options[i][0] = shared ? 1 : (i * 3) + 1;
+        options[i][1] = shared ? 1 : (i * 3) + 2;
+        options[i][2] = shared ? 1 : (i * 3) + 3;
+    }
+}
+
+static void testTheAllstarRunHasEveryFighterOnce(void)
+{
+    int options[SC1PREMIX_ALLSTAR_FIGHTER_COUNT][3];
+    int is_stage_used[128] = { 0 };
+    int order[SC1PREMIX_ALLSTAR_FIGHTER_COUNT];
+    int stages[SC1PREMIX_ALLSTAR_FIGHTER_COUNT];
+    int seen[SC1PREMIX_ALLSTAR_FIGHTER_COUNT] = { 0 };
+    int i;
+
+    fillStageOptions(options, 0);
+    sc1PRemixAllstarPickOrder(lastRandom, options, 128, is_stage_used, order, stages);
+
+    for (i = 0; i < SC1PREMIX_ALLSTAR_FIGHTER_COUNT; i++)
+    {
+        CHECK_EQ(0, seen[order[i]]);
+        seen[order[i]] = 1;
+    }
+}
+
+static void testTheAllstarRunUsesEachStageOnceWhenStagesAreFree(void)
+{
+    int options[SC1PREMIX_ALLSTAR_FIGHTER_COUNT][3];
+    int is_stage_used[128] = { 0 };
+    int order[SC1PREMIX_ALLSTAR_FIGHTER_COUNT];
+    int stages[SC1PREMIX_ALLSTAR_FIGHTER_COUNT];
+    int seen[128] = { 0 };
+    int i;
+
+    fillStageOptions(options, 0);
+    sc1PRemixAllstarPickOrder(firstRandom, options, 128, is_stage_used, order, stages);
+
+    for (i = 0; i < SC1PREMIX_ALLSTAR_FIGHTER_COUNT; i++)
+    {
+        CHECK_EQ(0, seen[stages[i]]);
+        seen[stages[i]] = 1;
+    }
+}
+
+static void testTheAllstarRunFinishesWhenEveryFighterSharesOneStage(void)
+{
+    int options[SC1PREMIX_ALLSTAR_FIGHTER_COUNT][3];
+    int is_stage_used[128] = { 0 };
+    int order[SC1PREMIX_ALLSTAR_FIGHTER_COUNT];
+    int stages[SC1PREMIX_ALLSTAR_FIGHTER_COUNT];
+    int i;
+
+    fillStageOptions(options, 1);
+    sc1PRemixAllstarPickOrder(firstRandom, options, 128, is_stage_used, order, stages);
+
+    CHECK_EQ(1, stages[0]);
+    for (i = 1; i < SC1PREMIX_ALLSTAR_FIGHTER_COUNT; i++)
+    {
+        CHECK_EQ(1, stages[i]);
+    }
+}
+
 void remixTest1PRemixRules(void)
 {
     printf("1p remix rules\n");
@@ -141,4 +214,7 @@ void remixTest1PRemixRules(void)
     RUN_TEST(testDistinctPicksNeverRepeat);
     RUN_TEST(testTheBossIsOneOfThree);
     RUN_TEST(testSonicFightsInGreenHillTwiceAsOftenAsCasino);
+    RUN_TEST(testTheAllstarRunHasEveryFighterOnce);
+    RUN_TEST(testTheAllstarRunUsesEachStageOnceWhenStagesAreFree);
+    RUN_TEST(testTheAllstarRunFinishesWhenEveryFighterSharesOneStage);
 }

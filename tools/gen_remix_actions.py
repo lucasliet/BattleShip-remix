@@ -81,6 +81,8 @@ EXTRA_SYMBOLS = [
     "SinglePlayerModes.title_card_1_struct",
     "SinglePlayerModes.progress_icon_struct",
     "SinglePlayerModes.remix_kirby_pool",
+    "SinglePlayerModes.ALLSTAR_MATCH_SETTINGS_PART1",
+    "SinglePlayerModes.ALLSTAR_MATCH_SETTINGS_PART2",
     "SinglePlayer.name_texture_table",
     "SinglePlayer.name_delay_table",
     "Character.singleplayer_vs_preview.table",
