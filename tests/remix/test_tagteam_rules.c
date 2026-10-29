@@ -28,6 +28,23 @@ static void testTheSlotIsClampedToZeroWhenStocksLeftAreMore(void)
     CHECK_EQ(0, gmRemixTagTeamRulesGetSlot(2, 5, QUEUE_MAX));
 }
 
+static void testTheRightmostIconIsTheCurrentFighter(void)
+{
+    CHECK_EQ(1, gmRemixTagTeamRulesIconSlot(1, 3, 2, QUEUE_MAX));
+}
+
+static void testTheLeftmostIconIsTheLastCharacterOfTheQueue(void)
+{
+    CHECK_EQ(3, gmRemixTagTeamRulesIconSlot(1, 3, 0, QUEUE_MAX));
+    CHECK_EQ(2, gmRemixTagTeamRulesIconSlot(1, 3, 1, QUEUE_MAX));
+}
+
+static void testAnIconSlotIsClampedToTheQueue(void)
+{
+    CHECK_EQ(QUEUE_MAX - 1, gmRemixTagTeamRulesIconSlot(4, 6, 0, QUEUE_MAX));
+    CHECK_EQ(0, gmRemixTagTeamRulesIconSlot(0, 1, 3, QUEUE_MAX));
+}
+
 static void testASwapIsNeededOnlyForAnotherFighter(void)
 {
     CHECK_EQ(0, gmRemixTagTeamRulesNeedsSwap(0x1F, 0x1F));
@@ -58,6 +75,9 @@ void remixTestTagTeamRules(void)
     RUN_TEST(testTheSlotIsTheStocksSetMinusTheStocksLeft);
     RUN_TEST(testTheSlotIsClampedToTheLastQueueSlot);
     RUN_TEST(testTheSlotIsClampedToZeroWhenStocksLeftAreMore);
+    RUN_TEST(testTheRightmostIconIsTheCurrentFighter);
+    RUN_TEST(testTheLeftmostIconIsTheLastCharacterOfTheQueue);
+    RUN_TEST(testAnIconSlotIsClampedToTheQueue);
     RUN_TEST(testASwapIsNeededOnlyForAnotherFighter);
     RUN_TEST(testTheRandomListHasThirtyFighters);
     RUN_TEST(testTheRandomIndexPicksTheFighterOfTheList);
