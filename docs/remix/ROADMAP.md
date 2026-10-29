@@ -420,7 +420,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
   placar e meta do Smashketball, Stamina (HP, KO, morte única). Se a regra depende de estado do jogo, extrair a parte pura para função
   que recebe os dados por parâmetro, sem mudar o comportamento. Um teste novo a cada modo que entrar daqui em diante (T6.1f, T6.2, T6.3).
   **Aceite:** o alvo roda e passa; documentado em `docs/remix/README.md` e no AGENTS do projeto.
-- [ ] T6.D4 Arquivos de modo acima de 300 linhas (regra de arquivos pequenos): `gmremixkoth.c` (425) e `gmremixsmashketball.c` (410) divididos por
+- [x] T6.D4 (feito 2026-10-29: `gmremixkoth.c` 422 para 284 linhas com `gmremixkothking.c` (rei e pontuação) e `gmremixkothstate.h`; `gmremixsmashketball.c` 407 para 275 com `gmremixsmashketballscore.c` (times, cestas, efeitos) e `gmremixsmashketballstate.h`; vistos: KOTH com "Mario wins" nos resultados e Smashketball com `score home 1 away 0`) Arquivos de modo acima de 300 linhas (regra de arquivos pequenos): `gmremixkoth.c` (425) e `gmremixsmashketball.c` (410) divididos por
   responsabilidade (estado e pontuação, colina/bola, fim de partida), como já foi feito com `kothhill/draw/hud` e `smashketballboard`.
   **Aceite:** build e a mesma partida de validação do modo.
 - [ ] T6.D5 Revisão linha a linha do código portado pelos workers (Stamina P6 a P15, Tug of War P1/P3): duplicação, funções longas, comentários
