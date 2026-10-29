@@ -38,8 +38,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) em andamento: T6.0 feito; Stamina (T6.1a), Tug of War (T6.1b), KOTH (T6.1c), Tag Team (T6.1d) e Smashketball (T6.1e) jogáveis em partida com sobras listadas em cada task; T6.D1 e T6.D2 (passe de limpeza) feitas; 12-Character Battle (T6.1f) jogável na partida, no CSS e nos resultados com sobras listadas na task (CSS de 24 retratos, portas 3 e 4, reset de pausa, jogos seguidos); T6.2 (1P) com Multi-Man e HRC jogáveis e o caminho aleatório do Remix 1P (R1/R2) montado, próximas etapas R3 a R5 e A1 (All-Star), depois T6.3 (Training), e as sobras do M6; antes do CP6 ficam T6.D3 a T6.D6 (testes de unidade, arquivos grandes, revisão dos workers, Tag Team). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
-- **Último checkpoint:** CP6f, 2026-10-27 (tamanho gigante/tiny das CPUs do Remix 1P visto em partida; antes CP6e, CP6d, CP6c, CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
+- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2): todos os modos jogáveis em partida, T6.D1 a T6.D6 feitas, o próximo é o M7 (IA). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
+- **Último checkpoint:** CP6, 2026-10-29 (M6 fechado: testes de unidade, revisão, Tag Team com ícones e roubo; antes CP6f, CP6e, CP6d, CP6c, CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~83% (corrigida no CP6e; ver a tabela no fim deste arquivo) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
@@ -451,7 +451,12 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 - [x] **CP6c** (checkpoint a pedido, 2026-10-23): Stamina com fim de partida validado (P10 era o atalho de teste sem `team`), Tug of War (crédito de KO, revive, placar), King of the Hill (colina, rei, meta, faixa e medidores, respawn), Smashketball (bola, cestas, placar nativo, morte súbita, spawns, tipo), Tag Team (fila pelo menu do port, troca de lutador). Infra nova: `gmremixmode` (ciclo de CSS por modo), `remix_hud_text` (texto e barras ImGui), `remix_modes` (opções de modo no menu do port). Atalhos de teste: `SSB64_REMIX_MODE`, `SSB64_VS_STAMINA`, `SSB64_VS_TIME`, `SSB64_KOTH_LINE/GOAL`, `SSB64_SMASH_TYPE/GOAL/BALL_X`. Estimativa ~88%.
 - [x] **CP6b** (checkpoint a pedido, 2026-10-23): T6.0 fechado (base dos modos, Timed Stock, texto do HUD, ciclo de CSS por modo `gmRemixModeBeforeCSS/LeaveCSS/StartMatch` com perfil por modo, `SSB64_REMIX_MODE`, `SSB64_VS_STAMINA`, `SSB64_VS_TIME`), Stamina portada exceto P10/P16/P17, primeiros passos de Tug of War e KOTH. O build compila; só T6.0 e o HUD do Stamina foram vistos em partida.
 - [x] **CP6a** (checkpoint a pedido, 2026-10-22): sem código novo desde o CP5; oito relatórios de pesquisa dos modos e a lista de tasks do M6 reescrita a partir deles.
-- **CP6** (fecha com T6.D3 a T6.D6 feitas; elas valem como parte do M6, não são opcionais).
+- [x] **CP6** (checkpoint, 2026-10-29, M6 fechado; fechou com T6.D3 a T6.D6 feitas, e as sobras de cada modo foram para o T8.2): T6.D3 (testes de unidade de
+  Timed Stock, KOTH, Tug of War, Tag Team, Smashketball e Stamina, 382 checagens, mutação verificada em cada suíte), T6.D4 (arquivos de modo divididos), T6.D5
+  (revisão do código dos workers, achados corrigidos ou registrados), T6.D6 (ícones por personagem da fila e roubo de stock no Tag Team). Também fechados neste
+  segmento: Remix 1P R3 a R5 e All-Star A1a a A1e, recorde de KO do Multi-Man, legenda do retry, Training passos 3 a 7. Método: workers Haiku extraíram as regras e
+  auditaram o código, e eu conferi cada diff, o asm das divergências, o build e as partidas. Bugs: `docs/bugs/remix_tagteam_icons_and_link_boomerang_2026-10-29.md`.
+  Estimativa ~83%. Não visto em partida: o fim de fase do Giga Bowser, os recordes do Bonus 2 e o menu Z do Training.
 
 ## M7. IA
 
@@ -470,6 +475,12 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
   Practice_1P L-retry, nomes das tags, Start With no Treino, Poison Heal e trava de stamina), **telas** (página de estatísticas do VS
   com texto, linhas de modo nos resultados, logos de transição, glifos e speed assist dos créditos, botão Gallery e 28 entradas,
   emblema e golpes dos 18 extras do Character Data, legends da pausa, RANDOM ALL, Random Select do CPU, legenda do item switch).
+  **Sobras do M6 (movidas no CP6, 2026-10-29):** **12CB** (CSS de 24 retratos, portas 3 e 4, reset de pausa, jogos seguidos), **Tag Team** (título e
+  anúncio do CSS, variantes e Sonic classic na fila e por slot, personagens já na fila de outra porta, heap com troca repetida, deslocamento do Stock Mode
+  LAST), **Tug of War e Stamina** (os `REMIX-TODO(stamina)` do T6.D5), **1P** (recordes e título do CSS do Bonus 2, lutador aleatório no CSS do
+  Bonus 2, Bonus 3, fim da fase do Giga Bowser com mais de 180 de dano, card único do Remix Team, tamanho do card do Piano, textura do Metal Mario Bros,
+  retratos e ícones do Rest do All-Star, ícones de série do final, `costume_fix`, `match_begin_flag`, `pause_exit`, final próprio do All-Star) e
+  **Training** (menu Z personalizado passos 10 a 13, nome do item na mão passo 8, guardas de um só lutador passo 14, opções de CPU dependem do M7).
   Cada item com captura ou riscado com motivo.
 - **CP8**.
 
@@ -499,8 +510,8 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 | Itens | 10% | ~70% |
 | Stages (loader, seletor, hazards) | 20% | ~80% |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~82% |
+| Settings, menus, modos | 20% | ~86% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~82%** (35×0,96 + 10×0,70 + 20×0,80 + 10×0,90 + 20×0,82 = 82,0; corrigido no CP6d, a soma anterior de 87,6 estava errada) |
+| **Total ponderado** | | **~83%** (35×0,96 + 10×0,70 + 20×0,80 + 10×0,90 + 20×0,86 = 82,8; CP6: modos jogáveis e testados, a IA do M7 e as sobras do T8.2 seguem abertas) |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).
