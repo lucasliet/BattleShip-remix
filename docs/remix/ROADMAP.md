@@ -468,10 +468,10 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
   ponteiros) e estão na imagem (`Character.ai_behaviour.table`, RAM `0x8049A320`, `lv10_ai_behaviour.table` em `0x8049D9C4`). Nenhum `ai_*_routine` do
   registro é preenchido; só `cpu_pull_out_bombs_` e `custom_recovery_logic` existem. Divisão em fatias (cada uma com arquivos próprios
   `ft/ftremix/ftremixai*.c`, hooks pequenos em `ftcomputer.c`):
-  - [ ] T7.1a tabelas de ataque da imagem + nível 10 (`ftRemixAiGetAttackList`, símbolos novos no gerador).
-  - [ ] T7.1b scripts de entrada customizados (ids >= 0x31, `AI.command_table`) e comandos estendidos (patches 18 a 22 da parte A, `ROUTINE`/`CUSTOM_COMMANDS`).
-  - [ ] T7.1c rotinas por lutador: `PREVENT_ATTACK`, peso de ataque, `LONG_RANGE`, `AERIAL_CHASE` (parte A 23 a 25, parte B, parte C 4).
-  - [ ] T7.1d correções de combate e recuperação (parte A 2 a 17: evade, recuperação, alvo, tech, z-cancel, carga, projéteis, USP).
+  - [x] T7.1a (feito 2026-10-29, visto) tabelas de ataque da imagem + nível 10 (`ftremixaitables.*`, `ftRemixAiGetAttackList`; log `ftRemix AI: fkind N normal table ... built`, Marth 25 entradas, Crash 26, Sonic 20, Kirby lv10 25, nenhuma descartada).
+  - [x] T7.1b (feito 2026-10-29, visto) scripts de entrada customizados (ids >= 0x31 lidos da imagem por `AI.command_table`, `ftremixaicommands.*`) e comandos estendidos (0xFE, stick X 0x81 a 0x84); log `Remix AI input 0x.. routine at ... loaded`. Desvio: TURNAROUND_WAIT espera Turn ou TurnRun (o `beql` do asm anulava o TurnRun); a jump table de 0x8018BB7C virou `switch` em C.
+  - [ ] T7.1c rotinas por lutador: `PREVENT_ATTACK`, peso de ataque, `LONG_RANGE`, `AERIAL_CHASE` (parte A 23 a 25, parte B, parte C 4). **Feito (visto, vetos no log):** 9 rotinas PREVENT (Falco/Fox/Slippy, Bowser, Giga Bowser, Wolf/Dedede, Sonic/DSamus, Wario, Marina, Conker) em `ftremixaiprevent.*`. **Falta:** CRASH (precisa do halfword 0x00F6 da superfície), PUFF_DSP, LONG_RANGE e AERIAL_CHASE (não há C vanilla que leia as tabelas, precisa de gancho novo), pesos (P4, P7), e as rotinas MARIO/YOSHI_FALCON/KIRBY (vanilla, sem fonte).
+  - [ ] T7.1d correções de combate e recuperação (parte A 2 a 17: evade, recuperação, alvo, tech, z-cancel, carga, projéteis, USP). **Feito:** P03 evade, P04 recovery_fix, P10 carga menos frequente, P15 projéteis ignorados (`ftremixaicombat.*`, `ftremixairecovery.*`). **Falta:** P02, P05 (só a regra pura), P06, P08, P09, P11 a P14, P16, P17.
   - [ ] T7.1e IA de nível 10 (parte B: 18 patches) e DI, `cpu_post_process`, roll spam, clamp do nível 9 (parte C).
   - [ ] T7.1f CSS com nível de CPU até 10 (setas e dígitos, parte C 12 a 16) e Default CPU LVL, Single Button Mode da CPU.
 - **CP7**.

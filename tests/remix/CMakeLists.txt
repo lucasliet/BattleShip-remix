@@ -15,6 +15,10 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_tagteam_rules.c
     test_smashketball_rules.c
     test_stamina_rules.c
+    test_ai_tables_rules.c
+    test_ai_commands_rules.c
+    test_ai_prevent_rules.c
+    test_ai_combat_rules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c
@@ -28,6 +32,11 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtagteamrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixsmashketballrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixstaminarules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaitablesrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaicommandsrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipreventrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaicombatrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoveryrules.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)
 target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src)

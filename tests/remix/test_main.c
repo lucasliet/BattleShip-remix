@@ -20,6 +20,10 @@ extern void remixTestTugOfWarRules(void);
 extern void remixTestTagTeamRules(void);
 extern void remixTestSmashketballRules(void);
 extern void remixTestStaminaRules(void);
+extern void remixTestAiTablesRules(void);
+extern void remixTestAiCommandsRules(void);
+extern void remixTestAiPreventRules(void);
+extern void remixTestAiCombatRules(void);
 
 int main(void)
 {
@@ -36,6 +40,10 @@ int main(void)
     remixTestTagTeamRules();
     remixTestSmashketballRules();
     remixTestStaminaRules();
+    remixTestAiTablesRules();
+    remixTestAiCommandsRules();
+    remixTestAiPreventRules();
+    remixTestAiCombatRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;
