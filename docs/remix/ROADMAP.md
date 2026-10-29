@@ -412,7 +412,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 - [x] T6.D2 `gm/gmremixmode.c` (335 linhas, três papéis) dividido (feito 2026-10-27): `gmremixmode.c` (modo da partida, 89 linhas),
   `gmremixmodecss.c` (perfis e ciclo de CSS por modo, 204) e `gmremixtimedstock.c` (regras de Timed Stock, 69); a API de `gmremixmode.h` não mudou.
   **Visto:** build limpo e partida Tug of War com Timed Stock (`rules=3`). Commit `aa4441b`.
-- [ ] T6.D3 (infraestrutura pronta em 2026-10-27: `tests/remix/`, alvo `run_remix_mode_tests`, suíte do 12CB; faltam as suítes dos outros modos) Testes de unidade das regras puras dos modos (regra do projeto: todo comportamento novo tem teste; hoje só há validação em partida).
+- [ ] T6.D3 (infraestrutura pronta em 2026-10-27: `tests/remix/`, alvo `run_remix_mode_tests`, suíte do 12CB; **2026-10-29:** suítes do Timed Stock (`gmremixtimedstockrules.*`, pontuação de stocks e do Tug of War, tempo esgotado) e do rei do KOTH (`gmremixkothrules.*`, candidato, disputa, buffer; mutação verificada), 302 checagens; faltam as suítes do Tug of War (crédito de KO e revive), da fila do Tag Team, da pontuação do Smashketball e do Stamina) Testes de unidade das regras puras dos modos (regra do projeto: todo comportamento novo tem teste; hoje só há validação em partida).
   Executável headless de um comando (alvo CMake `remix_mode_tests`, sem ROM nem janela), cobrindo: Timed Stock (`gmRemixTimedStockScore`
   com e sem Tug of War, `UsesTimeScore`, `IsTimeUp` com tempo infinito, `AllowsSuddenDeath`), ciclo de CSS (`BeforeCSS`/`LeaveCSS`/`StartMatch`:
   perfil forçado, stocks/meta/times guardados por modo, restauro do vanilla), pontuação e vitória do KOTH (rei com buffer, contagem por time

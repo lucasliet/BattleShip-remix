@@ -9,6 +9,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_1p_hrc_signs.c
     test_1p_hrc_travel.c
     test_1p_remix_rules.c
+    test_timedstock_rules.c
+    test_koth_rules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c
@@ -16,6 +18,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhrcsignrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhrctravelrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premix1prules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtimedstockrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixkothrules.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)
 target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src)
