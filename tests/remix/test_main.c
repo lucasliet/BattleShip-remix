@@ -16,6 +16,7 @@ extern void remixTest1PHrcTravel(void);
 extern void remixTest1PRemixRules(void);
 extern void remixTestTimedStockRules(void);
 extern void remixTestKothRules(void);
+extern void remixTestTugOfWarRules(void);
 
 int main(void)
 {
@@ -28,6 +29,7 @@ int main(void)
     remixTest1PRemixRules();
     remixTestTimedStockRules();
     remixTestKothRules();
+    remixTestTugOfWarRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;
