@@ -16,6 +16,13 @@ static void testTotalHPIsTheHPMinusOne(void)
     CHECK_EQ(998, gmRemixStaminaRulesTotalHP(999));
 }
 
+static void testMaxHPIsTheTotalHPPlusOne(void)
+{
+    CHECK_EQ(STAMINA_DEFAULT_HP, gmRemixStaminaRulesMaxHP(STAMINA_DEFAULT_TOTAL_HP));
+    CHECK_EQ(1, gmRemixStaminaRulesMaxHP(0));
+    CHECK_EQ(999, gmRemixStaminaRulesMaxHP(998));
+}
+
 static void testPercentEqualToTotalHPIsNotOver(void)
 {
     CHECK_EQ(0, gmRemixStaminaRulesIsOverTotal(STAMINA_DEFAULT_TOTAL_HP, STAMINA_DEFAULT_TOTAL_HP));
@@ -56,6 +63,7 @@ void remixTestStaminaRules(void)
 {
     printf("stamina rules\n");
     RUN_TEST(testTotalHPIsTheHPMinusOne);
+    RUN_TEST(testMaxHPIsTheTotalHPPlusOne);
     RUN_TEST(testPercentEqualToTotalHPIsNotOver);
     RUN_TEST(testPercentAboveTotalHPIsOver);
     RUN_TEST(testPercentBelowTotalHPIsNotOver);

@@ -423,8 +423,19 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 - [x] T6.D4 (feito 2026-10-29: `gmremixkoth.c` 422 para 284 linhas com `gmremixkothking.c` (rei e pontuação) e `gmremixkothstate.h`; `gmremixsmashketball.c` 407 para 275 com `gmremixsmashketballscore.c` (times, cestas, efeitos) e `gmremixsmashketballstate.h`; vistos: KOTH com "Mario wins" nos resultados e Smashketball com `score home 1 away 0`) Arquivos de modo acima de 300 linhas (regra de arquivos pequenos): `gmremixkoth.c` (425) e `gmremixsmashketball.c` (410) divididos por
   responsabilidade (estado e pontuação, colina/bola, fim de partida), como já foi feito com `kothhill/draw/hud` e `smashketballboard`.
   **Aceite:** build e a mesma partida de validação do modo.
-- [ ] T6.D5 Revisão linha a linha do código portado pelos workers (Stamina P6 a P15, Tug of War P1/P3): duplicação, funções longas, comentários
+- [x] T6.D5 (**feito 2026-10-29**) Revisão linha a linha do código portado pelos workers (Stamina P6 a P15, Tug of War P1/P3): duplicação, funções longas, comentários
   que repetem código, `REMIX-TODO` sem dono; correções com build e partida do modo. **Aceite:** achados corrigidos ou registrados como `REMIX-TODO(<modo>)`.
+  Revisão por worker Haiku (18 achados) e verificação das divergências contra o asm por outro, conferidas por mim. **Corrigido:** faixa de cliff do
+  Stamina parava um status depois do asm (0x063 em vez de 0x062); revive do Tug of War só de -1 para 0 como no asm (o -2 do roubo em times não revive mais,
+  teste novo); `gmRemixTugOfWarRulesIsValidPort` e `NO_PORT` sem duplicata; `gmRemixStaminaRulesMaxHP`; `ftRemixStaminaStatusInRange` em
+  `ftremixhooks.h`; ids de status locais do `ftremixstaminaguard.c` trocados pelos enums quando o valor é igual; sprite da regra extraído em
+  `mnRemixVSStaminaMakeRuleValue`; renomes `data` -> `player_data`. **Refutado após conferir o asm:** soma do knockback fixo em 20 (o patch de throw
+  substitui a soma), dano armazenado no KO (TOTAL+1 como no asm), stock 0x14/0x2B (mesmo campo) e a grade de HP (o asm soma 9 e o menu original soma 1, são
+  10 por passo, padrão 200 = TOTAL_HP 199 + 1). **Desvio documentado:** teto de 127 stocks no Tug of War (o asm dá a volta em -128). **Registrado, não feito**
+  (`REMIX-TODO(stamina)`): gravação extra de `players[].stock_count = -1` em `ftremixstaminadead.c:59` que o asm não faz (conferir se o `--` da morte já
+  deixa em -1), `ftRemixStaminaStoredDamage` e `ftRemixStaminaRebirthSleeps` com efeito colateral que o nome não diz, `gmRemixTugOfWarSetupFighters` que
+  coleta e grava, escrita direta em `sIFCommonBattlePlace` pelo Tug of War (acoplamento gm -> if), o `last_hit` do Tug of War indexado pela porta da
+  vítima e não pelo time do KOer como no asm (`TugOfWar.asm:302`, desvio intencional ainda sem doc em `docs/bugs/`).
 - [x] T6.D6 (**feito 2026-10-29**) Ícones de stock do Tag Team por personagem da fila e roubo de stock em times. `gm/gmremixtagteamicons.*` lê só o
   arquivo principal de cada personagem da fila (cópia privada, a troca carrega os arquivos como antes) e o HUD (`ifCommonPlayerStockMultiProcDisplay`) lista a
   fila ao contrário, com o personagem atual à direita (`gmRemixTagTeamRulesIconSlot`, testada, 378 checagens); o roubo (`gmRemixTagTeamStealStock`, gancho em

@@ -43,6 +43,11 @@ static void testOnlyAnEliminatedFighterRevives(void)
     CHECK_EQ(0, gmRemixTugOfWarShouldRevive(2));
 }
 
+static void testAFighterWaitingForAStockStealDoesNotRevive(void)
+{
+    CHECK_EQ(0, gmRemixTugOfWarShouldRevive(-2));
+}
+
 void remixTestTugOfWarRules(void)
 {
     printf("tug of war rules\n");
@@ -52,4 +57,5 @@ void remixTestTugOfWarRules(void)
     RUN_TEST(testNobodyToCreditStaysNobody);
     RUN_TEST(testPortsOutsideZeroToThreeAreNotPorts);
     RUN_TEST(testOnlyAnEliminatedFighterRevives);
+    RUN_TEST(testAFighterWaitingForAStockStealDoesNotRevive);
 }
