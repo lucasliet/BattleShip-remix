@@ -39,7 +39,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 ## Posição atual
 
 - **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2). M7 (IA) fechado (CP7, sobras no T8.2): a CPU usa as tabelas de ataque do Remix, recupera e joga nos níveis 9 e 10. O próximo é o M8 (restante da paridade, T2.11 e T8). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
-- **Último checkpoint:** CP7, 2026-10-29 (M7 fechado: IA do Remix em três ondas; antes CP6, CP6f, CP6e, CP6d, CP6c, CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
+- **Último checkpoint:** CP7a, 2026-10-29 (a pedido, sem código novo; antes CP7, M7 fechado: IA do Remix em três ondas; CP6, CP6f, CP6e, CP6d, CP6c, CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~83% (corrigida no CP6e; ver a tabela no fim deste arquivo) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
@@ -477,6 +477,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
   **Verificado em partida (nível 9 e 10, 16 rodadas de 4 lutadores, 22 tabelas Remix montadas sem descarte, scripts customizados 0x31 a 0x57 disparando, vetos em 6 lutadores, nenhum crash). Recuperação (nível 9, 10 partidas de 4 lutadores, 3 stocks, log temporário já removido): 231 episódios, 181 voltaram ao chão sem perder stock, 41 perderam stock e o resto não terminou, com sucessos para todos os lutadores Remix testados; bug achado no caminho e corrigido: `docs/bugs/remix_routine_gobjs_on_effect_link_2026-10-29.md`.** Ids dos scripts customizados conferidos contra `AI.command_table` (três workers erraram a contagem; o mapa certo sai de `remix.z64` + `remix.sym`). **Ainda não visto:** a aceitação "recupera" (precisa de partida com CPU fora do palco) e o efeito de cada hook fino.
   - [ ] T7.1f CSS com nível de CPU até 10 (setas e dígitos, parte C 12 a 16) e Default CPU LVL, Single Button Mode da CPU.
 - [x] **CP7** (checkpoint, 2026-10-29, M7 fechado; sobras no T8.2): três ondas de workers Haiku (inventário em cinco notas `f13_ai_*.md`, depois 14 fatias com arquivos próprios `ft/ftremix/ftremixai*.c` e ganchos pequenos em `ftcomputer.c`), cada diff revisado por mim, 693 checagens de unidade (`tests/remix`, 15 suítes de IA), build e partidas. Visto: as tabelas de ataque dos 30 lutadores Remix lidas da imagem (antes usavam a lista do pai), scripts customizados 0x31 a 0x57, vetos, recuperação (181 de 222 episódios, nível 9) e partidas nível 9 e 10 sem crash. Bug achado e corrigido: rotinas de item na lista de efeitos (`docs/bugs/remix_routine_gobjs_on_effect_link_2026-10-29.md`). Estimativa ~83%.
+- [x] **CP7a** (checkpoint a pedido, 2026-10-29): nenhum código novo desde o CP7; árvore limpa (outer `d24c912`, decomp `b28a6d712`), 693 checagens de unidade sem falha, sem trailers nos commits. Próximo: M8 (T2.11, T8.1, depois T8.2 com as sobras de M5, M6 e M7). Estimativa ~83%.
 
 ## M8. Restante da paridade
 
