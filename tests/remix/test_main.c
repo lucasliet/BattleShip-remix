@@ -25,6 +25,8 @@ extern void remixTestAiCommandsRules(void);
 extern void remixTestAiPreventRules(void);
 extern void remixTestAiCombatRules(void);
 extern void remixTestAiCloudRules(void);
+extern void remixTestAiWeightRules(void);
+extern void remixTestAiCpuLevelRules(void);
 extern void remixTestAiLevelRules(void);
 extern void remixTestAiLongRangeRules(void);
 extern void remixTestAiLv10Rules(void);
@@ -54,6 +56,8 @@ int main(void)
     remixTestAiPreventRules();
     remixTestAiCombatRules();
     remixTestAiCloudRules();
+    remixTestAiWeightRules();
+    remixTestAiCpuLevelRules();
     remixTestAiLevelRules();
     remixTestAiLongRangeRules();
     remixTestAiLv10Rules();

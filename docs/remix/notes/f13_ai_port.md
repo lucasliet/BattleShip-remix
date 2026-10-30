@@ -489,3 +489,174 @@ Como ver na partida (CPU nível 9 salvo indicado, com "Improved AI" ligado):
 - P11: CPU DK (JDK) e Samus, DSamus, ESamus, JSamus, Mewtwo carregam NSP como o vanilla.
 - P12: CPU DSamus, Sheik ou Mewtwo segurando NSP carregado: solta a carga com Z.
 - P13: CPU Samus não dispara NSP contra Fox, Falco, Wolf, Slippy, Marina, Piano ou JFox; contra Ness, Lucas e JNess só se a CPU não for Sheik.
+
+## Slice D3
+
+Scope: AI.asm P05 fix_target_pos_x (A4b leftover), P06 Banjo flight (A4b leftover), P10 _improve_recovery_drift (B2 leftover).
+Result: P05 ported. P06 Banjo and P10 NOT ported (REMIX-TODO(AI)), vanilla path kept for both.
+
+Files edited:
+- `decomp/src/ft/ftremix/ftremixairecovery.c`: includes `mp/mpdef.h`, `mp/map.h`; new `ftRemixAiRecoveryClampWalkTargetX(FTStruct *fp)`.
+- `decomp/src/ft/ftremix/ftremixairecovery.h`: declaration of the above.
+- `decomp/src/ft/ftcomputer.c`: P05 hook in `ftComputerFollowObjectiveWalk` (~line 5445), first branch, after the `ftcom_flags_0x4A_b1` floor-edge clamp and before `ftComputerSetCommandImmediate(fp, nFTComputerInputMoveAuto)`. Under `PORT && REGION_REMIX`.
+
+P05 (asm 0xAFDBC / 0x8013537C -> ftComputerFollowObjectiveWalk, 0x80134E98+0x4E4):
+- Bounds source: `gMPCollisionGroundData->map_bound_left` and `map_bound_right` (s16). Offset check: PORT `MPGroundData` layout places `map_bound_right` at 0x78 and `map_bound_left` at 0x7A, which is the asm `lh 0x78/0x7A`. Ground data pointer = word at 0x80131300 (consistent with grremixhazards_onett.c and grremixmetallic.c notes). Not verified in a running match.
+- Clamp: `ftRemixAiRecoveryClampTargetX` (existing rule, covered by tests/remix/test_ai_combat_rules.c), padding 200.0F, left bound first.
+- Gate: `gmRemixToggle(improved_ai)` only, no level gate, no Remix 1P (as the asm reads `Toggles.entry_improved_ai`).
+- Deviation: the asm `lh` is a signed halfword, same as the s16 field. No other deviation.
+- Not verified: that the stage's ground data pointer always equals the asm word at 0x80131300 at the time the walk runs.
+
+Field offsets: the PORT FTStruct layout does NOT match the N64 asm offsets (`status_id` is 0x2C in the port, asm uses 0x24; `level` is 0x1B, asm uses 0x13). Raw asm offsets must be mapped by named field, never copied. Measured with `_Static_assert` probes on the decomp headers (scratchpad, not committed).
+
+P06 Banjo flight (asm 0xB298C / 0x80137F4C, the `_banjo_flight` block):
+- Not ported. Button write target is `fp->input.cp.button_inputs` (the B mask, 0x4000). Port offset measured: 0x1E2 (not 0x1BE, not 0x1C6).
+- Frame: asm `lw 0x1C(a0)` compared to integer 21. No named integer frame field found in FTStruct; `fighter_gobj->anim_frame` is a float and its owner is unconfirmed. Porting on a guessed frame would press B at the wrong frame. REMIX-TODO(AI) with the frame field name needed.
+- Command 0x09 (PRESS B) only when `coll_data.floor_line_id == -1`.
+
+P10 _improve_recovery_drift (asm 0xAFE40 / 0x80135400, body 4343-4791):
+- Not ported. Read so far (lines 4337-4440): gate (lv10, FallSpecial action, all jumps used, behavior == Recover 0x4 at ftcom+0, `floor_line_id` == -1 with LEDGE_PADDING 300.0 and gMapEdgeBounds 0x80131308). `_improved_logic` then calls `_find_closest_ledge` (left, then right) which returns the ledge position in a stack slot (`v0` points to sp+0x28) and stores it into `0x1CC+0x4C/0x50`. Not ported: the ledge search, the stack-slot hand-off, the f20 register (`_check_ground_below`) and the `0x44(sp)` caller slot are unresolved, so a partial hook would change lv10 recovery.
+
+REMIX-TODO(AI) left: P06 Banjo (frame field and button offset), P10 (ledge search and handoffs, lines 4337-4791).
+
+EXTRA_SYMBOLS: none.
+
+How to see P05 in a match: CPU level any, improved AI toggle ON, a fighter off the stage edge; the recovery walk target should stop 200 units inside the blastzone-side ground bounds (no walk toward the blast line). Use `SSB64_VS_CPU_LEVEL=10` with the vs.sh shortcut and a stage with a short left/right map bound to see the clamp.
+
+## Slice D4
+
+Escopo: seletor de nivel CPU do VS CSS ate 10 (P12, P13, P14, P15, P16 de `f13_ai_patches_c.md`) e os dois consumidores
+de CPU de configuracao (Default CPU LVL, Single Button Mode). Mapeamento do overlay confirmado por leitura: o trecho
+0x80135848-0x80136FF0 e `mnplayersvs.c` (`mnPlayersVSCheckHandicapArrowInRangeAll`, `mnPlayersVSArrowThreadUpdate`,
+`mnPlayersVSMakeHandicapLevelValue`), a leitura do asm confirma os mesmos digitos e limites.
+
+Arquivos criados:
+- `decomp/src/mn/mnplayers/mnremixcpulevelrules.{c,h}`: regras puras (`mnRemixCpuLevelCanRaise`,
+  `mnRemixCpuLevelNeedsTens`, `mnRemixCpuLevelUnitsDigit`), so int.
+- `decomp/src/mn/mnplayers/mnremixcpulevel.{c,h}`: CSS (`mnRemixVSCanRaiseArrowValue`, `mnRemixVSIsArrowRightLimit`,
+  `mnRemixVSIsCPULevelTens`, `mnRemixVSMakeCPULevelTens`).
+- `tests/remix/test_ai_cpulevel_rules.c` (entry `remixTestAiCpuLevelRules`). Registro em `tests/remix/CMakeLists.txt` e
+  `test_main.c` pendente para o lead. Rodado no host com `cc -DPORT -DREGION_REMIX`: 8 checks, 0 falhas.
+
+Arquivos editados:
+- `decomp/src/mn/mnplayers/mnplayersvs.c`: include de `mnremixcpulevel.h`; quatro hooks, cada um em bloco
+  `#if defined(PORT) && defined(REGION_REMIX)` com `#else` vanilla:
+  - P12/P14 (limite da seta direita) em `mnPlayersVSCheckHandicapArrowInRangeAll` (antes `*value < 9`).
+  - P13/P14 (visibilidade da seta direita) em `mnPlayersVSArrowThreadUpdate` (antes `value == 9`).
+  - P15/P16 (digitos "10") em `mnPlayersVSMakeHandicapLevelValue`, antes do desenho do digito unico.
+- `decomp/src/ft/ftcomputer.c`: include de `gm/gmremixtoggle.h` no bloco REGION_REMIX existente; em
+  `ftComputerUpdateInputs`, os quatro casos de press (`FTCOMPUTER_COMMAND_BUTTON_A_PRESS`, `B_PRESS`, `Z_PRESS`,
+  `L_PRESS`) passam por `ftRemixSingleButtonCpuAOrBPress` / `ftRemixSingleButtonCpuZOrLPress` com
+  `gmRemixToggle(single_button_mode)`. Resolve a nota "not resolved" de `f8_speed_sbm.md` para os quatro patches
+  `handle_cpu_inputs_` (AI.asm/SingleButtonMode.asm 0xAC73C, 0xAC764, 0xAC784, 0xAC7A4 = os casos de press acima).
+
+Syntax check: `scripts/remix/syntax-check.sh` OK em `mnremixcpulevel.c`, `mnremixcpulevelrules.c`, `mnplayersvs.c`
+e `ftcomputer.c`. Nenhum build do jogo feito (regra do brief).
+
+Desvios do asm:
+- O asm nao da volta (wrap): o seletor satura em 10 e em 1. Nao foram criadas funcoes next/previous; a seta esquerda
+  continua a vanilla (`*value > 1`), que ja satura em 1.
+- Digitos "10": o asm desenha o "1" e o "0" com sprites do arquivo 0 (offset `0xC4A4`) e o footer `t9`. A port usa os
+  sprites `llMNCommonDigit1Sprite` / `llMNCommonDigit0Sprite` do mesmo `sMNPlayersVSFiles[1]` do digito vanilla, com
+  posicoes x = player*69+67 e +75 e y = 200, como o asm (`0 = 1.x + 8.0`).
+- P13 (redirect da seta esquerda, 0x80136AC4) nao foi portado como `b`: a funcao C atualiza a visibilidade no mesmo
+  lugar, sem redirect.
+- Human handicap: mantido o limite vanilla 9. O asm estende para 40 (P12/P14 ramo HMN, icones P15 para >= 10). Nao
+  portado: `REMIX-TODO(AI)` em `mnremixcpulevel.c` (`MNREMIX_VS_HANDICAP_VANILLA_MAX`).
+
+REMIX-TODO(AI) restantes:
+- Default CPU LVL, refresh no A (`set_cpu_level`, Toggles.asm:1740). E um callback de entrada do menu de toggles
+  (`entry_default_cpu_level`, Toggles.asm:2403), chamado pelo despacho do menu em asm. A port nao tem despacho C desse
+  menu, entao nao ha ponto de hook. Efeito: trocar o toggle no menu so vale no proximo boot
+  (`gmRemixDefaultCPULevelSetup`, `gmremixspawnsetup.c`).
+- Handicap humano ate 40 (acima).
+
+Interacao com a port: o enhancement `CpuLevel9` (`mnplayersvs.c`, perto de `port_enhancement_cpu_level_9()`) forca o
+nivel 9 e sobrescreve o 10 quando ligado. Nao foi alterado.
+
+Nenhum `EXTRA_SYMBOLS` novo: os sprites usados ja existem (`llMNCommonDigit0Sprite`, `llMNCommonDigit1Sprite`), e os
+helpers de SBM ja estavam declarados em `ftremixhooks.h`.
+
+Como ver no jogo (a cargo do lead, nao rodado aqui):
+- Build: `cmake --build build --target BattleShip-Remix -j 4`, depois `.claude/skills/remix-smoke-tests/scripts/css.sh
+  <input> <nome>` (sobe direto no VS CSS, cena 16). Falta um script de input que leve o cursor ao painel CPU e aperte a
+  seta direita 10 vezes; os `css_*.txt` existentes nao fazem isso.
+- Checagem: com o painel CPU em 10, o digito "10" aparece, a seta direita some; ao iniciar a partida, `fp->level` do CPU
+  deve ser 10 (o valor vai por `gSCManagerTransferBattleState.players[].level`, `mnplayersvs.c` ~5233).
+- Single Button Mode: com o toggle em 1 (A), os CPUs enviam so A; com 3 (R) enviam A+Z.
+
+## Slice D1
+
+Escopo: P8/P9 `stop_roll_spam_` (AI.asm 6039-6307) e P11 `cpu_di_` (AI.asm 6533-6812). Resultado: P8/P9 portado (parcial, ver desvios); P11 NÃO portado (REMIX-TODO(AI)).
+
+Arquivos editados (decomp):
+- `ft/ftremix/ftremixairollrules.{c,h}`: constantes de `stop_roll_spam_` e regras puras `ftRemixAiRollSpamApplies`, `ResetsStick`, `IsAdvantageAction`, `AdvantageCommand`, `NeutralCommand`.
+- `ft/ftremix/ftremixairoll.{c,h}`: `ftRemixAiStopRollSpam(fp, roll_command)` (sb32, TRUE = comando emitido, FALSE = skip). Helpers estáticos: comando, sorteio, alvo. Marcador REMIX-TODO atualizado. TSDoc de `ftRemixAiDownCommand` corrigido: SHIELD_DROP é 0x3C (não 0x37).
+- `ft/ftcomputer.c`: hook no fim de `func_ovl3_80138EE4` (bloco de roll `nFTComputerInputEscapeL/R`, por volta da linha 7438), dentro de `#if defined(PORT) && defined(REGION_REMIX)`; o `#else` é o bloco vanilla intacto. Ponto de hook confirmado pela ordem de endereços: 0x80138EE4 < 0x80139294 < 0x801392C8. Marcador REMIX-TODO(AI) para P11 acima de `ftComputerProcessObjective` (0x8013A38C).
+- `tests/remix/test_ai_roll_rules.c`: +17 checagens de P8/P9 (total do arquivo: 33, 0 falhas standalone).
+
+Hook P8/P9 (AI.asm -> decomp):
+- 0x80139294 / 0x801392A4 (`stop_roll_spam_`) -> `func_ovl3_80138EE4`, roll L/R. Gate: Giga Bowser (REMIX_ID_GBOWSER) em qualquer nível, ou nível bruto >= 10. Abaixo disso: roll vanilla.
+- Ação do CPU > TurnRun (0x13, comparação com sinal): RESET_STICK (0x00).
+- Alvo com ação de vantagem (0x25 a 0x37, 0x43, 0x44, 0xA4 Stun, 0xA5 Sleep): sorteio de 16; 0 = SHORT_HOP_IN_PLACE (0x33), 1 = SHORT_HOP_TOWARDS (0x31), resto = skip.
+- Sem vantagem (ou sem alvo): sorteio de 16; 0 = roll vanilla, 1 = 0x33, 2 = 0x31, 3 = SHORT_HOP_AWAY (0x32), 4 e 5 = PIVOT_AWAY (0x37), resto = skip.
+- RNG: uma chamada `syUtilsRandIntRange(16)` por ramo que sorteia; o asm faz uma chamada `get_random_int_(16)` no mesmo ponto.
+
+Desvios e decisões (lead confirmar):
+1. Ramos por personagem NÃO portados. A tabela `Character.close_quarter_combat.table` (Character.asm 2912) tem todas as entradas = `stop_roll_spam_._continue`, e as entradas por personagem (AI.asm 6309-6360) estão comentadas. Nenhum outro código grava a tabela. Logo Ness, Yoshi, Lucas, Fox/Falco/Wolf/Slippy, Kirby e Puff são inalcançáveis nesta build. Portar isso seria código morto. Se o lead quiser reativar os patches, é preciso porter esses ramos (uns 150 linhas de asm) e decidir o mapeamento de endereços de rótulo para handlers em C.
+2. Ids customizados: a ordem vem de `add_cpu_input_routine` (AI.asm 1603-1913), que bate com as âncoras do brief (SHIELD_DROP 0x3C, CLIFF_LET_GO 0x40, NULL 0x4C). Os comentários `// 0x34`, `// 0x35`, `// 0x37` do asm para NESS_DJC_NAIR, MULTI_SHINE e SHIELD_DROP estão defasados em relação a essa ordem (NESS_DJC_NAIR fica em 0x38, MULTI_SHINE 0x3A). Os comentários são suspeitos; o valor usado aqui vem da ordem.
+3. Valores de ação: numéricos, do `Action.asm`. O decomp não tem nome para Stun (0xA4) e Sleep (0xA5); `nFTCommonStatusSleep` é outro valor (índice 4). Idle (0x0A) e TurnRun (0x13) batem com a ordem do enum, então `fp->status_id` é tratado como o id de ação do asm. Não confirmado em jogo.
+4. Nível: o gate usa o nível bruto (`fp->level >= 10`), como o asm (`slti 10`), não o nível clampado de P17-P25.
+
+EXTRA_SYMBOLS: nenhum para P8/P9.
+
+P11 `cpu_di_` (não portado, REMIX-TODO(AI) em `ftComputerProcessObjective`). Hook localizado (0x8013A3C8, jal para cpu_di_, retorno em 0x8013A49C). Bloqueios:
+- Símbolos ausentes em `port/remix/remix_symbols.h`: `Training.entry_di_first_hit`, `entry_di_type`, `entry_di_strength`, `entry_di_direction` (+0x4), `SinglePlayerModes.singleplayer_mode_flag`, `Global.match_info`, `Global.current_screen` (conferir no decomp, pode existir como global C).
+- `smash_di_table` e `slide_di_table` guardam endereços de rotinas DI_* (AI.asm 2074-2137), cujos ids de input não estão mapeados em C.
+- `cpu_di_parameters` é estado persistente da RAM do jogo (4 portas x 4 campos). Precisa de estado de porta em C, não de leitura da imagem.
+- Decisão pendente R11a (lv10 ignora o toggle "Improved AI") e R11c (estado sobrevive entre partidas).
+
+Como ver na partida (o lead roda):
+- P8/P9: CPU lv10 (`SSB64_VS_CPU_LEVEL=10`, vs.sh) e Giga Bowser em lv9. Perto do oponente, em vez de só rolar, deve aparecer parada de analógico (RESET_STICK), short hop in place/towards/away e pivot. Lv9 sem Giga Bowser: rolagem vanilla.
+- P11: não se aplica (não portado). Depois que o porte existir: `SSB64_REMIX_TOGGLES="Improved AI=1"` em lv9, e lv10 via `SSB64_VS_CPU_LEVEL=10`; DI depois de hit.
+
+## Slice D2
+
+Scope: P4 `weight_attack_options` (AI.asm 5485-5938, 0x80133784) and P7 `no_attack_when_all_odds_eq_zero` (AI.asm 6015-6034, 0x80133FC4). P5 and P6 were already ported in C1 (`ftRemixAiSkipRepeatedInputCheck`, `ftRemixAiInputRepeatLimitHit`), and the `_custom_weight_table` dispatch was already in the port (`port_fighter_ai_attack_weight_routine`, accumulate loop).
+
+Arquivos criados:
+- `decomp/src/ft/ftremix/ftremixaiweightrules.{c,h}`: regras puras (int/float). Landing, hitstun left after tech landing, combo, combo roll, not-combo threshold, slow move kind and chance, grab vs shield, trunc. Constants from Action.asm and the input ids (28, DASH_GRAB 0x45).
+- `decomp/src/ft/ftremix/ftremixaiweight.{c,h}`: wrappers over FTStruct. `ftRemixAiWeightAttackOptionsApplies(fp)` (level == 10) and `ftRemixAiWeightAttackOption(this_fp, target_fp, comattack)`.
+- `tests/remix/test_ai_weight_rules.c`: entry `remixTestAiWeightRules`, 45 checks, 0 failures standalone (`cc -std=c99 -DPORT=1 -DREGION_REMIX=1`). The lead registers it in tests/remix/CMakeLists.txt and test_main.c.
+
+Arquivo editado: `decomp/src/ft/ftcomputer.c`
+- Include `ft/ftremix/ftremixaiweight.h` in the REMIX block (line 22).
+- Hook in `ftComputerCheckDetectTarget` (~4356), in the gather loop right after `input_kinds[attack_count] = comattack->input_kind;`. Level 10 sets `detect_ranges_x[attack_count++] = ftRemixAiWeightAttackOption(...)` and `continue`s, which skips the vanilla range switch (the asm jump to +0xB4C with `addiu s1,1`). Other levels run the vanilla code unchanged. Syntax-check OK.
+
+Hook map (asm patch -> decomp):
+- P4 -> gather loop, after the input store (ftcomputer.c ~4356). Stages in asm order: own landing (`_check_landing`), combo or not-combo with the opponent landing (`_check_combo`), slow moves (`_less_odds_slow_moves`), grab vs shield (`_check_shield`). The asm's `_custom_weight_table` call is NOT repeated: the existing accumulate-loop dispatch applies it once for level 10 as well.
+- P7 -> no hook. The asm forces v0 = FALSE at +0x1108 (the function exit reached when no candidate is picked). The port already returns FALSE on that fall-through (ftcomputer.c, end of ftComputerCheckDetectTarget, `#ifdef PORT return FALSE`). Equivalent for all levels, so P7 is covered without new code.
+
+Field mapping (N64 offset -> port field), by FTStruct layout count and cross-checks:
+- 0x13 level, 0x24 status_id, 0x2C percent_damage, 0xEC coll_data.floor_line_id, 0xF0 coll_data.floor_dist, 0x14C ga (nMPKineticsGround = 0, so the check runs when airborne), 0x18C bit 0 is_hitstun.
+- 0xB18 status_vars.common.damage.hitstun_tics (cross-checked in ftremixcombo.c).
+- 0xB34 via `ftRemixFighterFloat(fp, 0x0B34)` (shieldstun frames, float). Mapped by the union rule of ftremixfields.h. VERIFY in match.
+- 0x40 read as `target_fp->hitlag_tics` (see deviation 1).
+
+Deviations and assumptions (the lead decides, all marked in the code or here):
+1. D2-1 (asm bug suspected): the asm comment calls the combo read at 0x40 "opponent's hitstun timer", but by FTStruct layout 0x40 is hitlag_tics. The port reads hitlag_tics literally (the Remix build does this). The landing read at 0xB18 is hitstun_tics. If the intent was hitstun, the fix is `target_fp->status_vars.common.damage.hitstun_tics` in ftRemixAiWeightComboCommitChance. REMIX-TODO(AI) comment in ftremixaiweight.c.
+2. D2-2 order: the asm applies `_custom_weight_table` in P4, before the accumulate loop's `*= 0.25F` repeat factor and the count bonus. The port applies the existing custom dispatch in the accumulate loop, after the 0.25 factor. Same result when the custom routine is linear in the chance (the Crash/Dedede routines are). Confirm.
+3. D2-3 no-target branch: the asm `beqz t4, _b_b4c` (no opponent struct) is not ported. `target_fp` is dereferenced at the top of ftComputerCheckDetectTarget, so the branch cannot be reached.
+4. D2-4 asm comments inverted: `_check_landing` says "if grounded, skip" but `beqz` on ga skips when ga == 0. The port follows the branch (checks run when airborne). Same for the fall cap comment (cap applies when vel <= max_fall, the code is correct).
+5. D2-5 RNG order kept: combo roll only when span >= 2; not-combo always draws one float before the threshold, even for start frames < 15.
+6. D2-6 landing discard does not short-circuit the later stages (as in the asm). The later stages run on a zero chance and consume their random numbers.
+
+EXTRA_SYMBOLS: none (no REMIX_SYM_ used).
+
+REMIX-TODO(AI) left: none inside P4 and P7 beyond deviation 1 (the field choice for 0x40).
+
+How to see it in a match:
+- CPU level 10 (the hook is level 10 only, no fighter gate). With a CPU at level 10 near a target in hitstun, combo moves are picked more often (chance x1000). Near a shielding target, grabs (input 28 and DASH_GRAB) are picked much more often (x1000).
+- Target falling in a tech action (0x33-0x39) above a floor: the CPU stops picking combo moves that land after the target does.
+- Slow moves (start frame >= 15) against a target at low percent in neutral are picked less often than at level 9.
+- No port_log line is added for this hook (no per-frame log, to avoid flooding). To confirm, watch the CPU's input choice at level 10 against a Shield or stunned target.

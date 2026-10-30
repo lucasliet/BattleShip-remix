@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-10-29 | [remix_routine_gobjs_on_effect_link](remix_routine_gobjs_on_effect_link_2026-10-29.md) | Cloaking Device and Super Mushroom routine GObjs lived on the effect link, so a shield release read an FTStruct as an EFStruct and crashed |
 | 2026-10-29 | [remix_tagteam_icons_and_link_boomerang](remix_tagteam_icons_and_link_boomerang_2026-10-29.md) | Tag Team: queue stock icons needed the stock sprite fixup, and a Remix Link variant on a recycled FTStruct crashed on a stale boomerang pointer |
 | 2026-10-27 | [remix_1p_size_override_cp6f](remix_1p_size_override_cp6f_2026-10-27.md) | Checkpoint CP6f — tamanho Giant/Tiny das CPUs do Remix 1P era sobrescrito pelo painel do CSS |
 | 2026-10-27 | [remix_1p_hrc_and_path_cp6e](remix_1p_hrc_and_path_cp6e_2026-10-27.md) | Checkpoint CP6e — Home-Run Contest finished (timer, signs, clouds, record in the save) and Remix 1P random path (R1/R2): deviations and facts not obvious from the code |

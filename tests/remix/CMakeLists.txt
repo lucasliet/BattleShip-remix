@@ -20,6 +20,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_ai_prevent_rules.c
     test_ai_combat_rules.c
     test_ai_cloud_rules.c
+    test_ai_weight_rules.c
+    test_ai_cpulevel_rules.c
     test_ai_level_rules.c
     test_ai_longrange_rules.c
     test_ai_lv10_rules.c
@@ -47,6 +49,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaicombatrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoveryrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaicloudrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaiweightrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcpulevelrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixailevelrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixailongrangerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixailv10rules.c
