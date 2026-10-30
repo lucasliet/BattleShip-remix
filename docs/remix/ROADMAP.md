@@ -38,8 +38,8 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2): todos os modos jogáveis em partida, T6.D1 a T6.D6 feitas, o próximo é o M7 (IA). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
-- **Último checkpoint:** CP6, 2026-10-29 (M6 fechado: testes de unidade, revisão, Tag Team com ícones e roubo; antes CP6f, CP6e, CP6d, CP6c, CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
+- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2). M7 (IA) fechado (CP7, sobras no T8.2): a CPU usa as tabelas de ataque do Remix, recupera e joga nos níveis 9 e 10. O próximo é o M8 (restante da paridade, T2.11 e T8). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
+- **Último checkpoint:** CP7, 2026-10-29 (M7 fechado: IA do Remix em três ondas; antes CP6, CP6f, CP6e, CP6d, CP6c, CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~83% (corrigida no CP6e; ver a tabela no fim deste arquivo) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
@@ -460,7 +460,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 
 ## M7. IA
 
-- [ ] T7.1 `AI.asm` (70 hooks), toggle Improved AI, hooks de CPU do Single Button Mode, os `cpu_*` marcados `REMIX-TODO(AI)` nos fighters,
+- [x] T7.1 (**feito 2026-10-29, aceite visto; sobras no T8.2**) `AI.asm` (70 hooks), toggle Improved AI, hooks de CPU do Single Button Mode, os `cpu_*` marcados `REMIX-TODO(AI)` nos fighters,
   `VanillaLv10Attacks.asm`. **Aceite:** CPU nível 9 usa especiais e recupera com 10 lutadores Remix.
   **Pesquisa feita (2026-10-29):** `docs/remix/notes/f13_ai_*.md` (inventário dos 70 patches em três partes, tabelas de ataque, outros ganchos) e brief
   `docs/remix/f13_ai_worker_brief.md`. Achado central: os 30 lutadores Remix usam a lista de ataques do pai (`remix_roster.cpp:303` copia o descritor e
@@ -476,7 +476,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
   - [x] T7.1f (feito 2026-10-29, build; não visto na CSS) CSS com nível de CPU até 10 (`mn/mnplayers/mnremixcpulevel.*`, ganchos em `mnplayersvs.c`, regra pura testada) e os quatro ganchos de CPU do Single Button Mode (`ftComputerUpdateInputs`). **Falta:** o refresh de Default CPU LVL a cada A (o port não tem despacho C para o menu de toggles, só vale no próximo boot), o limite de handicap Remix de 40 e um input de teste que leve o cursor ao painel da CPU. O `CpuLevel9` do menu do port ainda força o nível 9 e vence o 10.
   **Verificado em partida (nível 9 e 10, 16 rodadas de 4 lutadores, 22 tabelas Remix montadas sem descarte, scripts customizados 0x31 a 0x57 disparando, vetos em 6 lutadores, nenhum crash). Recuperação (nível 9, 10 partidas de 4 lutadores, 3 stocks, log temporário já removido): 231 episódios, 181 voltaram ao chão sem perder stock, 41 perderam stock e o resto não terminou, com sucessos para todos os lutadores Remix testados; bug achado no caminho e corrigido: `docs/bugs/remix_routine_gobjs_on_effect_link_2026-10-29.md`.** Ids dos scripts customizados conferidos contra `AI.command_table` (três workers erraram a contagem; o mapa certo sai de `remix.z64` + `remix.sym`). **Ainda não visto:** a aceitação "recupera" (precisa de partida com CPU fora do palco) e o efeito de cada hook fino.
   - [ ] T7.1f CSS com nível de CPU até 10 (setas e dígitos, parte C 12 a 16) e Default CPU LVL, Single Button Mode da CPU.
-- **CP7**.
+- [x] **CP7** (checkpoint, 2026-10-29, M7 fechado; sobras no T8.2): três ondas de workers Haiku (inventário em cinco notas `f13_ai_*.md`, depois 14 fatias com arquivos próprios `ft/ftremix/ftremixai*.c` e ganchos pequenos em `ftcomputer.c`), cada diff revisado por mim, 693 checagens de unidade (`tests/remix`, 15 suítes de IA), build e partidas. Visto: as tabelas de ataque dos 30 lutadores Remix lidas da imagem (antes usavam a lista do pai), scripts customizados 0x31 a 0x57, vetos, recuperação (181 de 222 episódios, nível 9) e partidas nível 9 e 10 sem crash. Bug achado e corrigido: rotinas de item na lista de efeitos (`docs/bugs/remix_routine_gobjs_on_effect_link_2026-10-29.md`). Estimativa ~83%.
 
 ## M8. Restante da paridade
 
@@ -489,6 +489,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
   Practice_1P L-retry, nomes das tags, Start With no Treino, Poison Heal e trava de stamina), **telas** (página de estatísticas do VS
   com texto, linhas de modo nos resultados, logos de transição, glifos e speed assist dos créditos, botão Gallery e 28 entradas,
   emblema e golpes dos 18 extras do Character Data, legends da pausa, RANDOM ALL, Random Select do CPU, legenda do item switch).
+  **Sobras do M7 (movidas no CP7, 2026-10-29), todas `REMIX-TODO(AI)`:** `cpu_di_` (faltam símbolos de Training/Global e o estado de combo por porta), `_improve_recovery_drift` do nível 10 (450 linhas de asm com handoffs de pilha), tabela por lutador de `cpu_post_process` (Sheik teleporte e outros ~20 grupos), `auto_jab_grab_`, `weight_attack_options` já no nível 10 mas não nos outros níveis se o asm o aplicar, AERIAL_CHASE (o decomp não tem o ramo), PUFF_DSP, rotinas PREVENT vanilla (MARIO, YOSHI_FALCON, KIRBY, precisam da ROM), P06 do Banjo e P14 (hat do Kirby), P11 Sheik/Peppy/Bowser/GBowser, o corte do `count` do hitlag contra hitstun em `weight_attack_options`, o refresh de Default CPU LVL a cada A, o handicap Remix de 40, o `CpuLevel9` do menu do port que vence o nível 10, ver na CSS o seletor até 10 (input de teste novo) e as 30 rotinas `cpu_*` dos arquivos de lutador listadas em `docs/remix/notes/f13_ai_other_hooks.md` (só `cpu_pull_out_bombs_` existe).
   **Sobras do M6 (movidas no CP6, 2026-10-29):** **12CB** (CSS de 24 retratos, portas 3 e 4, reset de pausa, jogos seguidos), **Tag Team** (título e
   anúncio do CSS, variantes e Sonic classic na fila e por slot, personagens já na fila de outra porta, heap com troca repetida, deslocamento do Stock Mode
   LAST), **Tug of War e Stamina** (os `REMIX-TODO(stamina)` do T6.D5), **1P** (recordes e título do CSS do Bonus 2, lutador aleatório no CSS do
