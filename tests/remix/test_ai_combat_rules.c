@@ -108,6 +108,41 @@ static void testTargetNearRightEdgeIsClampedToPaddedRight(void)
     CHECK_TRUE(ftRemixAiRecoveryClampTargetX(900.0F, -1000.0F, 1000.0F) == 800.0F);
 }
 
+static void testWolfUspActionAimsRecoveryUp(void)
+{
+    CHECK_TRUE(ftRemixAiRecoveryIsWolfUspAction(0xE4));
+}
+
+static void testWolfIdleActionKeepsRecoveryTarget(void)
+{
+    CHECK_EQ(0, ftRemixAiRecoveryIsWolfUspAction(0xE5));
+}
+
+static void testNspChargeActionMatchesItsCharge(void)
+{
+    CHECK_TRUE(ftRemixAiRecoveryIsNspChargeAction(0xEE, 0xEE));
+}
+
+static void testNegativeChargeActionNeverMatches(void)
+{
+    CHECK_EQ(0, ftRemixAiRecoveryIsNspChargeAction(-1, -1));
+}
+
+static void testPikachuVanillaInClassicMode(void)
+{
+    CHECK_TRUE(ftRemixAiRecoveryKeepsPikachuVanilla(1, 1));
+}
+
+static void testPikachuVanillaWhenImprovedAiOff(void)
+{
+    CHECK_TRUE(ftRemixAiRecoveryKeepsPikachuVanilla(0, 0));
+}
+
+static void testPikachuRemixDispatchWhenImprovedAiOn(void)
+{
+    CHECK_EQ(0, ftRemixAiRecoveryKeepsPikachuVanilla(0, 1));
+}
+
 void remixTestAiCombatRules(void)
 {
     printf("ai combat rules\n");
@@ -131,4 +166,11 @@ void remixTestAiCombatRules(void)
     RUN_TEST(testTargetInsideBlastzoneIsKept);
     RUN_TEST(testTargetNearLeftEdgeIsClampedToPaddedLeft);
     RUN_TEST(testTargetNearRightEdgeIsClampedToPaddedRight);
+    RUN_TEST(testWolfUspActionAimsRecoveryUp);
+    RUN_TEST(testWolfIdleActionKeepsRecoveryTarget);
+    RUN_TEST(testNspChargeActionMatchesItsCharge);
+    RUN_TEST(testNegativeChargeActionNeverMatches);
+    RUN_TEST(testPikachuVanillaInClassicMode);
+    RUN_TEST(testPikachuVanillaWhenImprovedAiOff);
+    RUN_TEST(testPikachuRemixDispatchWhenImprovedAiOn);
 }

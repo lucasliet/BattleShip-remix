@@ -67,6 +67,7 @@ EXTRA_SYMBOLS = [
     "Item.GoldenGun.projectile_info",
     "Character.kirby_inhale_struct.table",
     "Character.ai_behaviour.table",
+    "Character.nsp_shoot_custom_move.table",
     "Character.lv10_ai_behaviour.table",
     "Character.recovery_logic.table",
     "Character.ai_aerial_chase.table",

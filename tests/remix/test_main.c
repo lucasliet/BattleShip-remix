@@ -24,6 +24,15 @@ extern void remixTestAiTablesRules(void);
 extern void remixTestAiCommandsRules(void);
 extern void remixTestAiPreventRules(void);
 extern void remixTestAiCombatRules(void);
+extern void remixTestAiCloudRules(void);
+extern void remixTestAiLevelRules(void);
+extern void remixTestAiLongRangeRules(void);
+extern void remixTestAiLv10Rules(void);
+extern void remixTestAiMovementRules(void);
+extern void remixTestAiPredictionRules(void);
+extern void remixTestAiRollRules(void);
+extern void remixTestAiSpecialsRules(void);
+extern void remixTestAiTeachingRules(void);
 
 int main(void)
 {
@@ -44,6 +53,15 @@ int main(void)
     remixTestAiCommandsRules();
     remixTestAiPreventRules();
     remixTestAiCombatRules();
+    remixTestAiCloudRules();
+    remixTestAiLevelRules();
+    remixTestAiLongRangeRules();
+    remixTestAiLv10Rules();
+    remixTestAiMovementRules();
+    remixTestAiPredictionRules();
+    remixTestAiRollRules();
+    remixTestAiSpecialsRules();
+    remixTestAiTeachingRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;

@@ -19,6 +19,15 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_ai_commands_rules.c
     test_ai_prevent_rules.c
     test_ai_combat_rules.c
+    test_ai_cloud_rules.c
+    test_ai_level_rules.c
+    test_ai_longrange_rules.c
+    test_ai_lv10_rules.c
+    test_ai_movement_rules.c
+    test_ai_prediction_rules.c
+    test_ai_roll_rules.c
+    test_ai_specials_rules.c
+    test_ai_teaching_rules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c
@@ -37,6 +46,15 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipreventrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaicombatrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoveryrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaicloudrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixailevelrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixailongrangerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixailv10rules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaimovementrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipredictionrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairollrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaispecialsrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaiteachingrules.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)
 target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src)

@@ -57,6 +57,14 @@ static void testConkerGrenadeRuleIgnoresOtherInputs(void)
     CHECK_EQ(0, ftRemixAiPreventRulesConkerGrenadeVeto(FTREMIX_AI_PREVENT_INPUT_NSPG, 1));
 }
 
+static void testCrashVetoesDspAndUspOnlyOnASoftPlatform(void)
+{
+    CHECK_TRUE(ftRemixAiPreventRulesCrashSoftPlatformVeto(FTREMIX_AI_PREVENT_INPUT_DSPG, 1));
+    CHECK_TRUE(ftRemixAiPreventRulesCrashSoftPlatformVeto(FTREMIX_AI_PREVENT_INPUT_USPG, 1));
+    CHECK_EQ(0, ftRemixAiPreventRulesCrashSoftPlatformVeto(FTREMIX_AI_PREVENT_INPUT_DSPG, 0));
+    CHECK_EQ(0, ftRemixAiPreventRulesCrashSoftPlatformVeto(FTREMIX_AI_PREVENT_INPUT_NSPG, 1));
+}
+
 void remixTestAiPreventRules(void)
 {
     printf("ai prevent rules\n");
@@ -68,4 +76,5 @@ void remixTestAiPreventRules(void)
     RUN_TEST(testFoxUspIsVetoedAtLevelTenOnly);
     RUN_TEST(testConkerGrenadeVetoesOnlyWhileAGrenadeIsOut);
     RUN_TEST(testConkerGrenadeRuleIgnoresOtherInputs);
+    RUN_TEST(testCrashVetoesDspAndUspOnlyOnASoftPlatform);
 }

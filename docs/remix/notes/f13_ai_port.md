@@ -194,3 +194,298 @@ Desvios e verificacoes pendentes:
 Como ver na partida: o primeiro veto de cada fkind escreve no port_log `ftRemixAiPreventAttack: fkind 0x.. level .. vetoed input 0x.. (first veto of this fkind)`. Para testar: CPU nivel 9 com Falco, Conker, Marina ou Sonic contra qualquer personagem, e procurar a linha no log.
 
 EXTRA_SYMBOLS: nenhum simbolo REMIX_SYM novo.
+
+## Slice C1
+
+Scope: patches of `f13_ai_patches_c.md`: P3, P5, P6, P10, P17 to P25 (clamps). P8/P9 and P11 are NOT ported (see TODO).
+
+Files created:
+- `decomp/src/ft/ftremix/ftremixailevel.{c,h}`: `ftRemixAiClampedLevel`, `ftRemixAiWalkStopThreshold`, `ftRemixAiNearCollisionScale` (fighter wrappers).
+- `decomp/src/ft/ftremix/ftremixailevelrules.{c,h}`: pure rules (int/float): clamp to 9, walk-stop threshold `max(0, 18 - 2*level)`, collision base 0.875 at level 10.
+- `decomp/src/ft/ftremix/ftremixairoll.{c,h}`: `ftRemixAiCanJumpWhileFalling` (P3), `ftRemixAiSkipRepeatedInputCheck` (P5), `ftRemixAiInputRepeatLimitHit` (P6), `ftRemixAiDownCommand` (P10).
+- `decomp/src/ft/ftremix/ftremixairollrules.{c,h}`: pure rules for level 10, aerial-jump proc, idle shield drop.
+- `tests/remix/test_ai_level_rules.c` (entry `remixTestAiLevelRules`, 8 checks, pass standalone) and `tests/remix/test_ai_roll_rules.c` (entry `remixTestAiRollRules`, 9 checks, pass standalone). Lead registers both in `tests/remix/CMakeLists.txt` and `test_main.c`.
+
+Files edited: `decomp/src/ft/ftcomputer.c`
+- Includes `ftremixailevel.h` and `ftremixairoll.h` in the REMIX block.
+- Macros after the includes: `FTCOMPUTER_LEVEL_CLAMPED(fp)`, `FTCOMPUTER_WALK_STOP_WAIT(fp)`, `FTCOMPUTER_COLL_SIZE_BASE(fp)`. Vanilla expansions are `((fp)->level)`, `((-(fp)->level * 2) + 18)` and `1.0F`, so the vanilla code is unchanged after preprocessing.
+
+Hooks (AI.asm patch -> decomp function, line range; comments are the anchors):
+- P17 `clamp_level_9_1` -> `ftComputerSetCommandWaitShort` (0x80132564), ground input_wait line.
+- P19 `clamp_level_9_3` -> same function, aerial input_wait line (0x80132664). Both lines clamped.
+- P21 `clamp_level_9_5` -> `ftComputerSetCommandWaitLong` (0x80132778), both lines.
+- P22 `clamp_level_9_6` -> same function (0x80132884).
+- P18 `clamp_level_9_2` -> `func_ovl3_8013837C` (0x8013837C), `fighter_follow_wait` line. MEDIUM: the only level read in that function.
+- P20 `clamp_level_9_4` -> `func_ovl3_80138AA8` (0x80138AA8), `unk_ftcom_0x35` line (the `MAX - level` product). MEDIUM: only the product goes negative at level 10; the `(level - 1) / 9` ratio is left unclamped.
+- P23 `clamp_level_9_7` -> `ftComputerCheckDetectTarget` (0x80132EC8), `damage_coll_size_mul` line: level clamp and base 0.875 at level 10, 1.0 otherwise. MEDIUM: the asm point is not mapped by a label.
+- P24 `clamp_level_9_8` -> `ftComputerGetObjectiveStatus` (0x80136D0C), CliffWait `(MAX - level) * 15` line. MEDIUM. The bc1fl `sll v1,v1,1` is the vanilla `action_wait *= 2` before it, kept as is. The downwait line `* 25` (not in any patch) is NOT clamped.
+- P25 `clamp_level_9_9` -> `func_ovl3_8013877C` (0x8013877C), walk_stop_wait comparison. Exact asm match (`8013877C+250`).
+- P3 `fix_multi_doublejump_usage` -> `ftComputerFollowObjectiveWalk` (0x80134E98), the last term of the `jumps_used < jumps_max` status list: `ftRemixAiCanJumpWhileFalling(fp)` = status FallSpecial OR (level 10 AND `proc_update == ftCommonJumpAerialProcUpdate`).
+- P5 `skip_repeated_input_check` -> `ftComputerCheckDetectTarget`, first `switch (input_kinds[i])` (the range adjustment on `*_button_*_count`): skipped at level 10 with `if (!ftRemixAiSkipRepeatedInputCheck(this_fp))`. The switch default is `break`, so this matches the asm jump to the default case.
+- P6 `skip_repeated_input_skip` -> same function, `if (com->input_repeat_count >= 4)`: `ftRemixAiInputRepeatLimitHit(this_fp, com)`. At level 10 it returns FALSE and resets the counter (the asm `sb r0, 0x37`).
+- P10 `shield_drop_` -> `ftComputerFollowObjectiveWalk`, platform drop branch (`MAP_VERTEX_COLL_PASS`, asm 0x80135B3C): `ftRemixAiDownCommand(fp)`. Level 10 and status `nFTCommonStatusWait` send the custom SHIELD_DROP (0x37); others send `nFTComputerInputStickND1MoveAutoSmashLw` (= AI.asm STICK_DOWN 0x27, checked against the enum order).
+
+Deviations and assumptions:
+1. Brief parenthetical "with level 10 allowed they must see 10" conflicts with the asm and the notes: the Remix patches CLAMP level 10 to 9 in these reads (`slti 10` / `lli 9`). `MAX - level` would be -1 at level 10 and produce negative waits. I ported the asm (clamp), not "see 10". Confirm with the lead.
+2. P24 `FTCOMPUTER_LEVEL_MAX` stays for the downwait line (unpatched), so at level 10 that line still reads -1.
+3. P10 "Idle" = `status_id == nFTCommonStatusWait` (AI.asm `Action.Idle` at +0x24 assumed to be the status id). Not verified in game.
+4. P6 side effect: the predicate also resets `input_repeat_count` at level 10 (asm store). Name and TSDoc say so.
+5. P3 `ftCommonJumpAerialProcUpdate` is compared directly (decomp function, not a REMIX symbol).
+6. Asm suspected bug B1 (P5, double `sll t5`) does not apply to C.
+
+EXTRA_SYMBOLS: none.
+
+REMIX-TODO(AI) left in this slice:
+- P8/P9 `stop_roll_spam_` (`func_ovl3_80138EE4`, AI.asm 6039-6307): per-character close-quarter branches, RNG order and the `Character.close_quarter_combat.table` jump table. Not ported (about 230 asm lines, needs its own slice). The header of `ftremixairoll.c` carries the marker.
+- P11 `cpu_di_` (`ftComputerProcessObjective`, AI.asm 6533-6812): combo memory, training DI menu, DI tables, Improved AI toggle gate, Remix 1P flag. Not ported. No `ftremixaidi.*` or `test_ai_di_rules.c` created.
+- Not in this slice: P1, P2, P4, P7 (A-slices), P12-P16 (CSS).
+
+How to see it in a match (`SSB64_VS_CPU_LEVEL` with the vs.sh shortcut, CPU level 9 vs 10):
+- Clamps (P17-P22, P25, P18, P20, P23, P24): CPU level 10 must not produce negative waits. At level 10 the CPU's input waits stay >= 1 frame. Level 9 is unchanged. P25: a CPU at level 10 on the ground walking near the stop line gets threshold 0.
+- P3: level 10 CPU falling below the ledge with aerial jumps left should jump again without waiting in Fall.
+- P5/P6: level 10 CPU repeating the same attack many times should not stop after four in a row; level 9 still does.
+- P10: level 10 Idle CPU on a soft platform sends the SHIELD_DROP routine; level 9 sends the vanilla drop. Log the routine id if needed.
+
+## Slice A3b
+
+Arquivos criados:
+- `decomp/src/ft/ftremix/ftremixailongrangerules.{c,h}`: regras puras (ints) do LONG_RANGE: usa tabela, polígono, rotina -> tipo, comando customizado.
+- `decomp/src/ft/ftremix/ftremixailongrange.{c,h}`: `ftRemixAiLongRangeSwitchKind(fkind)` (lê `Character.ai_long_range.table` pela imagem), `ftRemixAiLongRangeCommand(fp, default)` (lê `Character.nsp_shoot_custom_move.table`) e `ftRemixAiLongRangeSetCommand(fp, is_delay)`.
+- `tests/remix/test_ai_longrange_rules.c`: entrada `remixTestAiLongRangeRules` (CMakeLists e test_main.c com o lead).
+
+Arquivos editados:
+- `decomp/src/ft/ftremix/ftremixaipreventrules.{c,h}`: regra `ftRemixAiPreventRulesCrashSoftPlatformVeto`.
+- `decomp/src/ft/ftremix/ftremixaiprevent.c`: `case REMIX_ID_CRASH` e `ftRemixAiPreventCrashSoftPlatform`. REMIX-TODO do Crash removido.
+- `tests/remix/test_ai_prevent_rules.c`: teste do Crash (registrado no `remixTestAiPreventRules`).
+- `decomp/src/ft/ftcomputer.c`: include de `ftremixailongrange.h` (linha 23); hook antes do `switch (fkind)` de `func_ovl3_80138AA8` (~7169); e a escolha do comando final (~7227) substituída por `ftRemixAiLongRangeSetCommand` sob `PORT && REGION_REMIX` (o `#else` é o bloco vanilla intacto).
+- `tools/gen_remix_actions.py`: `EXTRA_SYMBOLS` ganhou `Character.nsp_shoot_custom_move.table`.
+
+Rodado standalone (`cc -DPORT=1 -DREGION_REMIX=1` com um main temporário que define `gRemixTestChecks`/`gRemixTestFailures`): long range e prevent, 45 checks, 0 falhas. Syntax-check OK em `ftremixailongrangerules.c`, `ftremixaiprevent.c`, `ftremixaipreventrules.c` e `ftcomputer.c`. `ftremixailongrange.c` falha só por `REMIX_SYM_Character__nsp_shoot_custom_move__table` (indefinido até o lead regenerar `port/remix/remix_symbols.h`).
+
+Hooks portados:
+- P24 (AI.asm 2543-2565, 0x80138CB8) -> `func_ovl3_80138AA8` (ftcomputer.c). Polígono -> NONE. Para fighters da tabela, a rotina lida de `Character.ai_long_range.table` vira o case do switch: NSP_SHOOT -> `nFTKindMario` (mesmo corpo de NSP), PHYSICAL_SHOOT -> `nFTKindLink` (boomerang e depois NSP), NONE ou desconhecido -> sem case (`FTREMIX_AI_LONG_RANGE_NO_CASE`, retorna FALSE). Fighters vanilla (0x00-0x0D e 0x1A-0x1D) mantêm o switch vanilla.
+- P25 (AI.asm 2567-2615, 0x80138EA0) -> mesmo fim da função: `ftRemixAiLongRangeSetCommand` troca o comando de `WaitLong` pelo `Character.nsp_shoot_custom_move.table[fp->fkind]` quando não é 0. O default é AutoX B (is_delay FALSE) ou Tilt AutoX (is_delay TRUE), como no vanilla.
+- Crash PREVENT (Crash/Crash.asm:716, AI.asm 3034-3056): DSPG e USPG vetados com plataforma soft. Campo: `fp->coll_data.floor_flags & MAP_VERTEX_COLL_PASS` (0x4000).
+
+Desvios do asm (decisão do lead):
+- D1 Polígono: o asm usa faixas `id < FALCO` (0x1D) e `id >= NUM_CHARACTERS - NUM_POLYGONS`. Com o roster (97 ids, 0x00-0x60, 32 polígonos), a faixa `NUM_CH - NUM_POLY` começa em 0x41 e inclui 0x41-0x4C (Goemon, Peppy, Slippy, Banjo, MLuigi, Ebi, DragonKing, Crash, Peach, Roy, DrL, Lanky), que não são polígonos. A faixa `< FALCO` também inclui 0x1A-0x1C (GDonkey, Random, None). Porte usa a variante POLYGON do roster: 0x0E-0x19 e 0x4D-0x60. Efeito: Lanky, Banjo, Crash, Peach etc. usam a tabela (Lanky/Banjo NSP_SHOOT); o asm mandaria NONE. VERIFY `NUM_POLYGONS` no build.
+- D2 `at` do vanilla: o asm depende do flag `at` do OG line 1 (não visível). Assumi o comentário do Remix, "at = 0 if character ID is >= POLY MARIO" (0x0E), ou seja, ids < 0x0E seguem o vanilla. Consistente com D1.
+- D3 Crash: o offset N64 0x00F6 é inferido como o halfword baixo de `floor_flags` (word em 0x00F4). Não conferi no layout N64 do FTStruct. VERIFY.
+- D4 P25 é aplicado a todos os fighters (leitura da tabela sem gate, como no asm). Entradas vanilla devem ser 0; só Dedede, YLink e Peach registram custom move no Attacks.asm.
+- D5 Gating: as notas (f13_ai_patches_c.md, linha 34) dizem que os hooks P23-P25 exigem CPU nível 10. O asm de P24/P25 não testa nível: o hook roda em qualquer nível para fighters da tabela. Confirmar na partida.
+
+Não portado (REMIX-TODO(AI)):
+- P23 AERIAL_CHASE.extend_polygon_check_ (0x80133880): o decomp não tem ramo de chase aéreo (`grep chase` em ftcomputer.c sem resultado). A escolha NORMAL/CHASE vanilla não existe em C. Sem ponto de hook.
+- P4 weight_attack_options (AI.asm 5485-5938, 0x80133784): não portado. Motivos: ~450 linhas de asm; campos sem nome (+0x13 level, +0x40, +0xB18, +0x18C, +0xB34, +0x10C); a tabela de chances é compartilhada com P5-P7, que não estão portados; R4a/R4b/R4c abertos em f13_ai_patches_c.md. Porte parcial quebraria o contrato da tabela de chances.
+- P7 no_attack_when_all_odds_eq_zero (AI.asm 6015-6034, 0x80133FC4): depende de P4 (zeragem de chances). A semântica do retorno vanilla em +0x1108 não foi confirmada (R7). O decomp tem o análogo `input_repeat_count >= 4` (ftcomputer.c, ftComputerCheckDetectTarget), mas não o hook.
+
+EXTRA_SYMBOLS (o lead regenera `port/remix/remix_symbols.h`):
+- `Character.nsp_shoot_custom_move.table` (já adicionado em `tools/gen_remix_actions.py`).
+- `Character.ai_long_range.table` já existe como `REMIX_SYM_Character__ai_long_range__table`.
+
+Registro para o lead: `remixTestAiLongRangeRules` em tests/remix/CMakeLists.txt e test_main.c.
+
+Como ver na partida (CPU nível 9, sem gate de nível no código):
+- Long range NSP (AutoX B à distância): Lanky, Mewtwo, Conker, Dedede, Banjo (tabela NSP_SHOOT). Sem NSP à distância: Falco, Wario, Sonic, Crash (NONE). Vanilla Mario, Fox, Samus, Luigi, Pikachu, Metal Mario: inalterados.
+- Custom move: Dedede, YLink, Peach trocam o comando do NSP à distância pela entrada da tabela. Confirmar o comando no `port_log` ou no input do CPU.
+- Crash (0x48): DSP ou USP do CPU em plataforma soft (stage com plataforma que atravessa) é vetado. Log: `ftRemixAiPreventAttack: fkind 0x48 level 9 vetoed input 0x1B (first veto of this fkind)`.
+- Tabela desconhecida (valor fora de 0x80138D24/0x80138CD4/0x80138ECC): `ftRemixAiLongRangeSwitchKind: fkind 0x.. has long range routine 0x..`, uma vez por fkind.
+
+## Slice A4b
+
+Scope: AI.asm P02, P05, P06, P16, P17 (the patches A4 left). P01, P07 (already ported), P08 to P15 and P18 to P25 not touched.
+
+Files created (decomp submodule, `decomp/src/ft/ftremix/`):
+- `ftremixaisize.{c,h}`: `ftRemixAiSizeDetectScale` (P02).
+- `ftremixaicloud.{c,h}`: `ftRemixAiUspIsFoxFamily`, `ftRemixAiUspIsCloudAction` (P16), `ftRemixAiCloudRecoveryInput` (P17).
+- `ftremixaicloudrules.{c,h}`: pure Magic Cloud action rules and the high-byte button write.
+
+Files edited:
+- `ftremixairecovery.{c,h}`: classic-mode helper extracted (P04 unchanged in behaviour); P06 hooks `ftRemixAiRecoveryVanillaPikachuApplies`, `ftRemixAiRecoveryWolfTarget`, `ftRemixAiRecoverySpecialCase`.
+- `ftremixairecoveryrules.{c,h}`: `ftRemixAiRecoveryIsWolfUspAction`, `ftRemixAiRecoveryIsNspChargeAction`, `ftRemixAiRecoveryKeepsPikachuVanilla`.
+- `decomp/src/ft/ftcomputer.c`: includes for `ftremixaisize.h` and `ftremixaicloud.h`; hooks listed below.
+- `tests/remix/test_ai_cloud_rules.c` (new, entry `remixTestAiCloudRules`, 9 checks), `tests/remix/test_ai_combat_rules.c` (+7 recovery checks, 27 total). Lead registers the new file in tests/remix/CMakeLists.txt and test_main.c.
+
+Hooks (asm patch -> decomp function, line in ftcomputer.c):
+- P02 size_multiplier_check_ -> ftComputerCheckDetectTarget (~4154): the four detect ranges of each attack are multiplied by `ftRemixAiSizeDetectScale` (table value of the player for non-giant fighters, 1.0F for giant DK) before the vanilla giant DK 1.4F block. Multiplying by 1.0F is exact, so the non-scaled case is unchanged.
+- P16 usp_check_ -> ftComputerUpdateInputs air branch (~3617, ~3632): the `fkind != Fox` clause is replaced by the Fox family (Fox, JFox, Peppy, Falco); the `dist_y < 0` zeroing is skipped for Goemon/Ebisumaru cloud actions (asm jumps past the zeroing block).
+- P17 recovery_stick_y_fix -> ftComputerUpdateInputs after the command loop (~3729), inside the `input_wait == 0` block.
+- P06 fix_remix_recovery -> ftComputerFollowObjectiveRecover (~6741, ~6761): Pikachu vanilla block gated by the classic/toggle rule; Wolf USP target; NSP charge cancel (Sheik, DSamus, Peppy, Mewtwo) returns before the walk and the custom recovery.
+
+Deviations and inferences (medium confidence, check in match):
+- P16 Goemon/Ebisumaru jump target (vanilla 0x801321A4) is inferred from the structure: the instruction after the vanilla zeroing block. No vanilla disassembly was available in this session (no ROM), so this is not verified byte by byte.
+- P16 Peppy: the asm comment says "Goemon usp action check" but the code branches to the Fox path. The port follows the code.
+- P16 and P17 disagree on Magic Cloud Jump (0xE1): P16 includes it for Goemon, P17 does not (asm). Kept as in the asm, both lists are in ftremixaicloudrules.c.
+- P17 runs once per frame after the command loop. The asm runs at every return to 0x8013253C (after each command). Final stick and button state is the same when it is idempotent, which it is; it is skipped on COMMAND_END (the asm does not reach 0x8013253C there either).
+- P17 byte writes (`sb` into the button halfword high byte) are emulated with `ftRemixAiCloudReplaceButtonHighByte`, which clears the other high-byte buttons as the asm does.
+- Fighter field offsets from the asm (not checked with a layout dump, FTStruct did not dump): status_id = action 0x24, `input.cp.button_inputs` = 0x1C6, `input.cp.stick_range.y` = 0x1C9, `coll_data.floor_line_id` = 0xEC (-1 = no floor line above), `computer.target_pos` = 0x1CC+0x60 (x) and +0x64 (y).
+- P06 special cases: the asm jumps to 0x80137FBC+4 for the NSP cancel, taken as "skip walk and custom recovery" (0x80137FBC is the walk call that P07 replaces).
+- P06 command 0x09 is `nFTComputerInputStickSmashAutoXButtonB` (the NSP towards the target), not a plain "PRESS B" as the asm comment says. Only relevant for Banjo, which is not ported.
+
+REMIX-TODO(AI) left:
+- P05 fix_target_pos_x: rule `ftRemixAiRecoveryClampTargetX` exists. Hook point: ftComputerFollowObjectiveWalk, first branch, right after the `ftcom_flags_0x4A_b1` floor-edge clamp and before the final `ftComputerSetCommandImmediate(fp, nFTComputerInputMoveAuto)`. Not placed: the blastzone bounds (asm reads halfwords at +0x78 right and +0x7A left from the pointer at 0x80131300, the ground header) have no named field in the decomp or the port.
+- P06 Banjo flight (action 0xEF, frame 21, B press into the halfword at +0x1BE, then command 0x09 when floor_line_id is -1): the field names for +0x1BE and the frame at +0x1C are not confirmed.
+- P02 for the Remix 1P automatic improved AI is not involved (no toggle read in P02).
+
+EXTRA_SYMBOLS: none (no new REMIX_SYM_ used).
+
+How to see it in a match (CPU level 9 unless noted):
+- P02: give the CPU a Super Mushroom (size multiplier > 1.0). Its attacks should be picked from a larger detect range than vanilla; a Giant DK CPU is unchanged.
+- P16: CPU Goemon in Magic Cloud over the stage. The stick should stay up (no zeroing) while the cloud is active. CPU Fox, Falco, JFox or Peppy should take the Fox USP branch.
+- P17: CPU Goemon or Ebisumaru recovering with the Magic Cloud should always hold the stick up. Ebisumaru presses A (nair) once above a ledge or floor line; Goemon presses Z.
+- P06: CPU Sheik, DSamus, Peppy or Mewtwo in their NSP charge while recovering should press Z (cancel the charge). CPU Wolf in his USP should aim straight up. With "Improved AI" on, CPU Pikachu family should use the Remix recovery; with it off or in 1P/RTTF, the vanilla Pikachu recovery.
+
+## Slice B1
+
+Escopo: AI.asm lv10 P02 a P09 (patches_b). P01 fica com A1.
+
+Arquivos criados:
+- `decomp/src/ft/ftremix/ftremixailv10.{c,h}`: hooks P03, P04, P05, P07, P08/P09.
+- `decomp/src/ft/ftremix/ftremixailv10rules.{c,h}`: regras puras (ints), constantes de rotina e de input.
+- `decomp/src/ft/ftremix/ftremixaipostprocess.{c,h}`: P06 (sub-comportamentos genericos).
+- `tests/remix/test_ai_lv10_rules.c`: entrada `remixTestAiLv10Rules`, 13 checks. Rodado standalone com `PORT=1 REGION_REMIX=1`: 13 checks, 0 falhas. Falta registrar no `tests/remix/CMakeLists.txt` e em `test_main.c` (o lead).
+
+Arquivos editados:
+- `decomp/src/ft/ftcomputer.c`: includes (REGION_REMIX); `ftComputerGetInputScript` deixou de ser `static` (P06 precisa comparar `p_command`); hooks:
+  - P03 `ftComputerCheckEvadeDistance` (0x80132BC8): o primeiro operando do teste de star vira `ftRemixAiEvadeCountsEnemyInvulnerable`.
+  - P08/P09 `ftComputerCheckSetTargetEdgeRight` (0x80134000) e `Left` (0x80134368): `vel_air.y >= 0` ganha `&& ftRemixAiSkipsUpwardDriftTarget(fp) == FALSE`.
+  - P04 `ftComputerGetObjectiveStatus` (0x80136D0C), ramo CliffWait final `else`: `ftRemixAiCliffGetupCommand`.
+  - P05 mesmo função, caso de taunt (`nFTComputerInputStickNButtonL`): pulado para lv10.
+  - P07 `ftComputerProcessTrait` (0x8013A63C): `switch (ftRemixAiTraitRoll(fp))`.
+  - P06 `ftComputerProcessAll` (0x8013A834): `ftRemixAiPostProcess(fp)` logo depois de `ftComputerProcessObjective`, dentro do bloco `input_wait == 0`. O asm substitui a chamada `jal 0x8013A38C`, que é `ftComputerProcessObjective`, não `UpdateInputs`.
+- `decomp/src/ft/ftcomputer.h`: prototipo de `ftComputerGetInputScript`.
+- `decomp/src/ft/ftcommon/ftcommoncatch1.c`: so comentario REMIX-TODO(AI) para P02.
+
+Patch a patch:
+- P02 auto_jab_grab_ (0x80149E7C, `ftCommonCatchCheckInterruptAttack11`): REMIX-TODO(AI). O asm faz verificacao de poligono (0x80149E84) antes do grab e esse codigo vanilla nao esta no decomp nem no asm Remix. Hook nao ligado.
+- P03 check_invulnerable_: feito. Inimigo conta como Starman se tem star ou (lv10 e `invincible_tics != 0`). Assumido: o teste de distancia 1500 continua valendo para respawn (o asm pula para 0x80132C90, que presumo ser esse teste).
+- P04 extend_cliff_attack_: feito, com desvio. O asm faz `get_random_int_(2)` seguido de `srl 1`, o que sempre da 0, entao lv10 sempre usa CLIFF_LET_GO. Portei o comportamento literal do asm. A intencao (50/50 entre normal e salto) nao esta clara no codigo, entao nao corrigi.
+- P05 taunt_replace_: feito. lv10 nunca envia o taunt. O ramo USP de Ness/Lucas e codigo morto (o `b _no_input` anterior retorna antes) e nao foi portado.
+- P06 cpu_post_process: parcial. Portados os sub-comportamentos genericos: START mash para morto (gateado por `improved_ai`, sem gate de nivel), cancelamento de dash attack (sem gate de nivel), jump-cancel de USMASH/USP correndo/dashando (lv10), USP para USP_TOWARDS (lv10). REMIX-TODO(AI) para a tabela `Character.cpu_post_process` por lutador. Lutadores com entrada: Falco, Fox/JFox (foxshared), Captain Falcon/JFalcon (captainshared), Link/JLink/ELink/YLink (linkshared), DK/JDK (dkshared), Bowser, GBowser, Wario, Marth, Dedede, Wolf, Ganondorf, Mewtwo, Roy, Marina, Sheik (teleport), DragonKing, Jigglypuff/JPuff/EPuff/Kirby/JKirby, Pikachu/EPika/JPika, Yoshi/JYoshi.
+- P07 force_objective_attack: feito. lv10 forca comportamento 0 e nao chama o RNG.
+- P08/P09 _fix_weird_air_drift_right/left: feito, com inferencia. Assumi que o bloco pulado pelo asm (0x80134000+0x98) e o `if (vel_air.y >= 0)` que seta o alvo para si mesmo +-500 em X. Confirmar no jogo.
+
+Ids de rotina customizada (0x31 + indice de add_cpu_input_routine em AI.asm 1603-1913): CLIFF_LET_GO 0x41, DASH_ATTACK 0x48, USP_TOWARDS 0x49, JUMPCANCEL_UPSMASH 0x4B, JUMPCANCEL_USP 0x4C, NULL 0x4D. Divergencia: a nota A2/A3 diz SMASH_DSP=0x41, mas a contagem aqui da CLIFF_LET_GO=0x41 (17o add) e SMASH_DSP=0x42. Lead: conferir antes de fechar.
+
+EXTRA_SYMBOLS: nenhum. Usa `REMIX_SYM_Toggles__entry_improved_ai` (ja existe) via `gmRemixToggle(improved_ai)`.
+
+REMIX-TODO(AI) deixados: P02 (poligono); P06 por lutador (tabela cpu_post_process); lv10 CliffWait com srl (intencao, nao corrigida).
+
+Como ver na partida (SSB64_VS_CPU_LEVEL=10 no vs.sh):
+- P03: CPU lv10 perto de inimigo recem-respawnado (invencivel por ~20 tics), deve fugir dele.
+- P04: CPU lv10 na borda: sempre tenta CLIFF_LET_GO (salto para fora), nunca o getup normal.
+- P05: CPU lv10 nunca faz taunt (ex.: Ness, Lucas).
+- P06: CPU lv10 correndo/dashando com USMASH ou USP: deve sair em jump-cancel; com improved_ai ligado, CPU morto deve apertar START (Start na tela de respawn).
+- P07: CPU lv10 nao muda de comportamento (fica sempre em atacar).
+- P08/P09: CPU lv10 subindo no ar nao deve ir para o alvo deslocado ao lado; deve buscar a borda.
+
+## Slice B2
+
+Scope: AI.asm P10 to P18 (part B, lv10 movement and attack range), P18 equal to c.P2. Vanilla addresses were checked with the
+US ROM (`baserom.us.z64`, ROM = RAM - 0x800855C0 in this overlay) and rabbitizer, not only with the patch comments.
+
+Files created:
+- `decomp/src/ft/ftremix/ftremixaimovementrules.{c,h}`: pure rules (int/float): fastfall gate, shorthop input, neutral jump roll, X and Y clamp, offstage gate.
+- `decomp/src/ft/ftremix/ftremixaipredictionrules.{c,h}`: pure rules: attack view base, running candidate filter, my X with friction, delta X, falling Y.
+- `decomp/src/ft/ftremix/ftremixaimovement.{c,h}`: game side of P11, P12, P13, P14, P15.
+- `decomp/src/ft/ftremix/ftremixaiprediction.{c,h}`: game side of P16, P17, P18.
+- `tests/remix/test_ai_movement_rules.c` (entry `remixTestAiMovementRules`) and `tests/remix/test_ai_prediction_rules.c` (entry `remixTestAiPredictionRules`).
+  The lead registers both in `tests/remix/CMakeLists.txt` and `test_main.c`. Standalone run with `-DPORT=1 -DREGION_REMIX=1`: 42 checks, 0 failures.
+
+Files edited: `decomp/src/ft/ftcomputer.c` (all under `PORT && REGION_REMIX`, vanilla path unchanged when compiled out):
+- includes of `ftremixaimovement.h` and `ftremixaiprediction.h` after `ftremixailongrange.h`.
+- P12 `ftComputerCheckFindTarget` (0x8013295C): `ftRemixAiMovementTargetsOffstage(this_fp) ||` as the first operand of the on-stage/cliff group (~line 3821).
+- P13 same function, store of the nearest target (0x80132AE4 store): `ftRemixAiMovementClampTarget(this_fp, &com->target_pos)` (~line 3853).
+- P11 `ftComputerFollowObjectiveWalk` (0x80134E98, "Fast fall?" block, asm 0x80135704): the WaitShort(0x27) is taken only when `ftRemixAiMovementFastfallPermitted(fp)` (~line 5367). When denied the function continues to the switch, as the asm `_skip_fastfall` does.
+- P14 same function, grounded branch `target_line_id != floor_line_id` / `y < target_pos.y` (asm 0x80135B18): the command passes through `ftRemixAiMovementShorthopInput` (~line 5494).
+- P15 same function, grounded branch `dash_predict <= distance` and not below the target (asm 0x80135ABC): `ftRemixAiMovementNeutralInput(fp)` (~line 5480).
+- P16 `ftComputerFollowObjectiveAttack` (0x801392C8), first state (asm 0x80139374 `lwc1 f4,0x68(v1)`, `add.s f16,f8,f10`): base from `ftRemixAiPredictionAttackViewBase` (~line 7451).
+- P17 same function, second state (asm 0x801398A0): same change (~line 7587). Site choice by address order, medium confidence.
+- P18 `ftComputerCheckDetectTarget` (0x80132EC8): candidate filter `else if (!ftRemixAiPredictionCandidateAllowed(...)) continue;` (~line 4119); after the vanilla predict_pos_x/y chain, `ftRemixAiPredictAttackPosition(...)` overrides the two outputs for level 10 (~line 4157).
+
+Patch status:
+- P10 `_improve_recovery_drift` (asm 4343-4791 with helpers 4063-4329): NOT PORTED. REMIX-TODO(AI). Reason: about 450 asm lines of ledge search over `gMapLineTypeGroups`, stack-slot hand-offs (`0x44(sp)`, `_find_closest_ledge` returns a stack address), and the f20 callee-saved register. A partial hook would change lv10 behaviour, so nothing is applied. Needs its own pass with the map line API.
+- P11 prevent_fastfall: ported. Level 10 clears the flag, denies on used jumps, offstage opponent (target floor_line_id -1) or floor_dist >= -2000.
+- P12 detect_offstage_opponents: ported as "skip the on-stage/cliff group for level 10". Deviation: the asm jumps to 0x8013295C+0x15C (0x80132AB8), which is the delay slot of the distance `bc1f`, so it skips the distance computation and would store a stale f12 (distance) and the stale `f24`. The port keeps the distance computation.
+- P13 clamp_target_pos_to_stage: ported with two corrections (deviations 1-2 below). Y clamp as written.
+- P14 shorthop_followup_attack: ported. Gap = target_pos.y + target physics.vel_air.y - CPU Y. Thresholds 300/600/900 (inclusive), above 900 keeps the vanilla command 4.
+- P15 jump_in_neutral: ported with the port RNG (`syUtilsRandIntRange(200)`, called once per frame for level 10 in this state, as the asm does).
+- P16 and P17 extend_attack_check_range(_2): ported, base 2000 at level 10, 1200 otherwise.
+- P18 fix_movement_prediction (= c.P2): ported. Running filter, my X with ground friction, target X, delta X, falling Y for both bodies. Deviations 3-4 below.
+
+Deviations and asm bugs (decide in review):
+1. P13 bounds: the asm reads `0x28(s3)` and `0x2C(s3)` as "left/right ledge". With `s3 = gMPCollisionBounds` (MPAllBounds: start, stop, current, diff, 16 bytes each, MPBounds = top, bottom, right, left), `current` starts at 0x20, so 0x28 = current.right and 0x2C = current.left. The port uses current.left and current.right with the intent of the comments.
+2. P13 sense: `bc1fl` after `c.le.s` clamps when the target is INSIDE (the mov.s runs when the condition is true). The port clamps only beyond the edges (target < left - 300, target > right + 300), as the comment "if not offstage, skip" says. Behaviour with 300 padding outward, as the asm padding sign.
+3. P18 X: the asm does not multiply the predicted X by `this_fp->lr`, but the vanilla line does (4099) and the detect boxes are flipped by lr. The port keeps `* lr`. Check a left-facing CPU in game.
+4. P18 friction: the asm masks the ground word with 0xFFFF00FF and uses it as a table index with no bound. The port uses `grRemixSurfaceFriction(floor_flags & MAP_VERTEX_MAT_MASK) * attr->traction`, the same expression as ftphysics.c:177. Target air Y speed is read from `physics.vel_air.y` (asm offset 0x4C, assumed).
+5. P14: `f6` (my Y) comes from the joint translate (the asm expects the caller to set it).
+6. P12 and P13 read the CPU level from `this_fp->level` (asm 0x13(s1)); equal.
+
+ID note (conflict for the lead, not edited here): AI.asm has 28 `add_cpu_input_routine` calls (lines 1603 to 1913), ids = 0x31 + order. Order gives SHORT_HOP_TOWARDS 0x31, SHORT_HOP_IN_PLACE 0x33, FULL_C_JUMP_TOWARDS 0x34, SHIELD_DROP 0x3C, CLIFF_LET_GO 0x40, SMASH_DSP 0x41 (agrees with the A3 notes), DASH_ATTACK 0x47, USP_TOWARDS 0x48, NULL 0x4C.
+`decomp/src/ft/ftremix/ftremixailv10rules.h` has DASH_ATTACK 0x48 and CLIFF_LET_GO 0x41, and `ftremixairollrules.h` has SHIELD_DROP 0x37. Those look off by one or more. The new code uses its own constants (`FTREMIX_AI_MOVEMENT_INPUT_*`, `FTREMIX_AI_PREDICTION_INPUT_DASH_ATTACK 0x47`) and the lead should verify with the built routine table.
+
+EXTRA_SYMBOLS: none. Input ids are the same as the custom routine ids of A2 (`ftComputerGetInputScript`).
+
+How to see it in a match (CPU level 10: `SSB64_VS_CPU_LEVEL=10` with the vs.sh shortcut, use any two fighters with the vs.sh shortcut; the fighter ids were not checked in this slice):
+- P11: CPU falling below the stage with all jumps used should not fastfall; falling far above ground should.
+- P12/P13: CPU should go after an opponent knocked offstage and stop short of the blastzone (edge - 300 at most).
+- P14: CPU below a target that floats above should short hop more often.
+- P15: about 1% short hop, 0.5% in place, 1% full C jump while walking to a target (grep the log if added).
+- P16/P17: CPU attacks targets up to 2000 units away.
+- P18: CPU running (Dash) only picks grab, upsmash, up special ground, neutral special ground and dash attack.
+
+REMIX-TODO(AI): P10 (recovery drift). P12 and P13 are approximations as described in deviations 1-2; the P12 aerial exclusion of the asm is not reproduced (the decomp has no aerial test in this function).
+
+
+## Slice A4c
+
+Escopo: P08a/P08b (random_teching_), P09 (z_cancel_), P11 (improve_remix_specials), P12 (improve_remix_charged_NSP_1), P13 (improve_remix_charged_NSP_2). P14 ficou REMIX-TODO(AI). P01-P07, P10, P15 e P16 ou acima não tocados.
+
+Achados de mapeamento (confirmados no decomp):
+- 0x80140980 = `ftCommonDamageAirCommonProcMap`+0x44 e 0x801435F4 = `ftCommonDamageFallProcMap`+0x44 (docs/remix/gameplay_a_l.md:91-92). Os dois sites são a cadeia de tech mais o bounce: `tech_roll_og_` = `ftCommonPassiveStandCheckInterruptDamage`, `tech_in_place_og_` = `ftCommonPassiveCheckInterruptDamage`, `tech_fail_` (0x80144498) = `ftCommonDownBounceSetStatus`.
+- Como `tech_fail_` é o bounce, o hook substitui a cadeia inteira e o bounce; após sucesso o caminho sai sem bounce (a `bnezl ... _end` do original). Não há bug de sobreposição.
+- O ZCancel.asm `_cpu_z_cancel` consome o `at` do AI; o consumidor é `ftRemixZCancelResult` (ftremixzcancel.c).
+- P11 e P12 são extensões do switch vanilla: os ids Remix entram por rótulos `case` (DK, Samus) ou por `default`, sem perder os casos vanilla.
+
+Arquivos criados (decomp/src/ft/ftremix/):
+- `ftremixaiteching.{c,h}`: `ftRemixAiTechIsHandled(GObj*)` e `ftRemixAiShouldZCancel(FTStruct*)`.
+- `ftremixaiteachingrules.{c,h}`: regras puras (rolls 30/30/30 e 0-99, Single Button Mode, gates do z-cancel 95%).
+- `ftremixaispecials.{c,h}`: `ftRemixAiSpecialsCancelChargeWithZ(FTStruct*)` e `ftRemixAiSamusNspIsBlocked(FTStruct*, FTStruct*)`.
+- `ftremixaispecialsrules.{c,h}`: listas de ações de cancelamento por fighter e regra de bloqueio do oponente.
+- `tests/remix/test_ai_teaching_rules.c` (entrada `remixTestAiTeachingRules`) e `tests/remix/test_ai_specials_rules.c` (entrada `remixTestAiSpecialsRules`). Rodados standalone: 47 checks, 0 falhas.
+
+Arquivos editados:
+- `ft/ftcommon/ftcommondamage.c`: include e P08a. A cadeia de tech em ftCommonDamageAirCommonProcMap virou `ftRemixAiTechIsHandled(...) == FALSE`.
+- `ft/ftcommon/ftcommondamagefall.c`: include e P08b. O `else if` de ftCommonDamageFallProcMap usa o mesmo hook.
+- `ft/ftremix/ftremixzcancel.c`: include e, no topo de `ftRemixZCancelResult`, a rolagem do CPU (P09). Sucesso do AI vira SUCCESS, ou GLIDE se a opção for Glide.
+- `ft/ftcomputer.c`: include de `ftremixaispecials.h`; P11 (JDK no case DK de ftComputerCheckTryChargeSpecialN; MTWO, DSAMUS, ESAMUS, JSAMUS no case Samus) e REMIX-TODO(AI) do Sheik/Peppy/Bowser; P12 (JDK no case DK de ftComputerCheckTryCancelSpecialN e `default` com `ftRemixAiSpecialsCancelChargeWithZ`); P13 (em func_ovl3_80138AA8 o teste Ness/Fox vira `ftRemixAiSamusNspIsBlocked`).
+
+Hooks e mapeamento asm -> decomp:
+- P08a -> ftCommonDamageAirCommonProcMap (ftcommondamage.c, comentário 0x8014093C). P08b -> ftCommonDamageFallProcMap (ftcommondamagefall.c, comentário 0x801435B0).
+- P09 -> ftRemixZCancelResult (ftremixzcancel.c), chamado por ftRemixZCancelAttackAirLanding a partir de ftCommonAttackAirProcMap (comentário 0x80150A08).
+- P11 -> ftComputerCheckTryChargeSpecialN (ftcomputer.c, 0x80136A20).
+- P12 -> ftComputerCheckTryCancelSpecialN (ftcomputer.c, 0x80136C0C).
+- P13 -> func_ovl3_80138AA8 (ftcomputer.c, 0x80138AA8), dentro do teste aleatório existente.
+
+Desvios do asm (todos reportados):
+1. P08: Single Button Mode só bloqueia CPUs. O asm aplica a todos, mas o comentário diz "don't let CPU tech". Sandbag continua valendo para qualquer fighter.
+2. P08: contador de techs falhas (VsStats.tech_miss_tracker) não portado.
+3. P08: Training.entry_tech_behavior não portado; treino usa o roll padrão (índice 0).
+4. P08: flag de off-stage (N64 0x18C bit 4) não mapeado; todo CPU é tratado como em palco.
+5. P08 e P09: flag Remix 1P não existe no port; tratado como FALSE.
+6. P09: no ftRemixZCancelResult, `DISABLED` para o AI vira SUCCESS (o asm deixa at=1 nessa opção). Para humanos o código existente retorna FAIL. Suspeita para o dono do ZCancel, não alterada.
+7. P12: removido o segundo teste duplicado de DSamusNSPChargeAir. Os valores de Sheik (NSPG_CHARGE 0xEB, NSPA_CHARGE 0xEE) vêm dos comentários do P14, não de Sheik.asm: validar.
+8. P13: Ness passa a ser liberado quando o próprio fighter é Sheik (o vanilla bloqueava sempre). Lucas e JNess seguem a mesma regra. Mudança de comportamento intencional do asm.
+9. P12: o asm retorna 0 para todo id não listado, o que apagaria os casos vanilla. O port cai no switch vanilla (default com break), que é o comportamento de extensão.
+
+REMIX-TODO(AI) restantes: P14 (Kirby com hat Samus/Sheik/Mewtwo/DSamus, a0 sobrescrito, mapeamento de 0x80138C44-0x80138CB8 não verificado); P11 Sheik/Peppy (inclui Samus B press com needle < 6) e Bowser/GBowser (USP zera stick X, offset 0x1C8 não confirmado); P08 contador, training menu, off-stage e Single Button Mode; P09 consumidor com Single Button Mode; P13 Kirby hat (P14).
+
+EXTRA_SYMBOLS: nenhum (nenhuma leitura da imagem Remix).
+Registro necessário pelo lead: `remixTestAiTeachingRules` e `remixTestAiSpecialsRules` em tests/remix/test_main.c e tests/remix/CMakeLists.txt.
+
+Como ver na partida (CPU nível 9 salvo indicado, com "Improved AI" ligado):
+- P08: CPU de qualquer fighter, derrubado no chão ou caindo de um hit, deve teclar com frequência (roll 30/30/30, falha em 10%). Sandbag nunca tecla. Nível 10 segue o mesmo caminho.
+- P09: CPU nível 10 (ou nível 9 com o toggle) em landing de ataque aéreo: z-cancel de aproximadamente 95%. Não ocorre na tela How to Play nem na intro DK x Samus.
+- P11: CPU DK (JDK) e Samus, DSamus, ESamus, JSamus, Mewtwo carregam NSP como o vanilla.
+- P12: CPU DSamus, Sheik ou Mewtwo segurando NSP carregado: solta a carga com Z.
+- P13: CPU Samus não dispara NSP contra Fox, Falco, Wolf, Slippy, Marina, Piano ou JFox; contra Ness, Lucas e JNess só se a CPU não for Sheik.
