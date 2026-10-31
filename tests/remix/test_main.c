@@ -35,6 +35,7 @@ extern void remixTestAiPredictionRules(void);
 extern void remixTestAiRollRules(void);
 extern void remixTestAiSpecialsRules(void);
 extern void remixTestAiTeachingRules(void);
+extern void remixTestStopwatchBgRules(void);
 
 int main(void)
 {
@@ -66,6 +67,7 @@ int main(void)
     remixTestAiRollRules();
     remixTestAiSpecialsRules();
     remixTestAiTeachingRules();
+    remixTestStopwatchBgRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;

@@ -196,7 +196,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
   absorb e reflect do Thunder Ball e do laser do Metallic, câmera e rotação do canhão do Pirate Land, ECB das bombas do Bowser, dano do
   charged smash, PK Fire com Size, Z-cancel de trip e bury, midi do martelo. Visto: 16 itens no sweep de CPU (sem crash; Lightning
   consumido 12 vezes com o céu azul-escuro do flash), special matrix de Dedede e Conker, hazards de Japes, Pirate Land, Casino, Metallic
-  Madness, Bowser B e Big Boo's Haunt sem crash. **Faltam (~96 fora de modos/menus):** Stopwatch (retângulo de Render), Crash (dig/spin),
+  Madness, Bowser B e Big Boo's Haunt sem crash. Stopwatch: retângulo de fundo do backfire feito (`if/ifremixrectangle.*`, regras em `itremixstopwatchbgrules.*` com 16 checagens; visto tinta vermelha e azul com fade). **Faltam (~90 fora de modos/menus):** Crash (dig/spin),
   Time Twister (T1.5b), Blue Shell (primeiro lugar, fumaça), Cloud/Size dos efeitos de Ness e Pikachu, hitbox display, VsStats (contadores de
   Z-cancel/tech/ledge), Marina, Younglink FGM, Corneria 0x130, Scuttle paleta, Banzai, e 0x1D0/0x1D4 (alias de `attack_pos[1]`).
 - **CP2**.
