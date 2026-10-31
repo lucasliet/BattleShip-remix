@@ -61,7 +61,6 @@ STATUS = {
     "GFXRoutine.asm": ("fighters", "ported", "gmremixcolscripts.c"),
     "CharEnvColor.asm": ("fighters", "partial", "ftremixenvcolor.c (display list fixes open)"),
     "Reflect.asm": ("fighters", "partial", "ftremixreflect.c (CPU hooks in M7)"),
-    "PokemonAnnouncer.asm": ("fighters", "todo", "ROADMAP T2.5"),
     "Toggles.asm": ("menus_modes", "partial", "remix_toggles.cpp, PortMenu.cpp (Remix section)"),
     "Hitstun.asm": ("fighters", "ported", "ftparam.c"),
     "DI.asm": ("fighters", "ported", "ftremixdi.c"),
@@ -90,7 +89,6 @@ STATUS = {
     "Hitbox.asm": ("fighters", "partial", "ftremixhitbox.c (display open)"),
     "Damage.asm": ("fighters", "partial", "ftremixdamage.c"),
     "Poison.asm": ("fighters", "ported", "ftremixpoison.c"),
-    "OnHit.asm": ("fighters", "todo", "ROADMAP T2.7"),
     "SwordTrail.asm": ("fighters", "todo", "ROADMAP T8.1"),
     "Costumes.asm": ("menus_modes", "partial", "CSS port (costume tables)"),
     "Item.asm": ("items", "partial", "itremixspawn.c, itmanager.c, mnvsitemswitch.c"),
@@ -151,7 +149,18 @@ STATUS = {
     "Shield.asm": ("menus_modes", "partial", "ftremixshield.c (Costume and egg open)"),
     "Transitions.asm": ("menus_modes", "partial", "lbtransition.c (logo open)"),
     "VsStats.asm": ("menus_modes", "partial", "mnremixvsstats.c (page and trackers open)"),
+    "PokemonAnnouncer.asm": ("fighters", "ported", "ifremixannouncer.c, ifremixhitannouncer.c (throw announcement open in ftcommonthrow.c)"),
+    "OnHit.asm": ("fighters", "ported", "ftremixchartables.c ftRemixRunOnHit"),
+    "SinglePlayerMenus.asm": ("menus_modes", "ported", "mnremix1pmode.c"),
+    "VsRemixMenu.asm": ("menus_modes", "ported", "mnremixvsmode.c"),
+    "Menu.asm": ("infra", "n/a", "replaced by the port menu (ROADMAP T4.1 deviation)"),
+    "Walljump.asm": ("infra", "n/a", "all patches are commented out in the Remix 2.0.1 build"),
+    "Practice.asm": ("menus_modes", "partial", "ftremixzcancel.c (Flash On Z-Cancel); Color Overlays open"),
+    "CharacterSelectDebugMenu.asm": ("menus_modes", "partial", "remix_player_panel.cpp (the CSS panel menu is the debug menu open)"),
+    "SwordTrail.asm": ("fighters", "partial", "afterimage flag of Link only"),
+    "Skeleton.asm": ("fighters", "partial", "ftdisplaymain.c (vanilla skeleton path, per-port force open)"),
 }
+
 
 
 def area_of_top_level(name: str) -> str:
