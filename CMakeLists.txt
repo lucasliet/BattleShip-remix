@@ -629,6 +629,16 @@ set(SSB64_DECOMP_SOURCES
 # Exclude .inc.c files (inline data included by other .c files)
 list(FILTER SSB64_DECOMP_SOURCES EXCLUDE REGEX "\\.inc\\.c$")
 
+# The vanilla builds (us, jp) carry no Remix code: the Remix-only sources are not compiled, and every hook in a shared file is
+# already behind REGION_REMIX (T9.2).
+if(NOT SSB64_VERSION STREQUAL "remix")
+    list(FILTER SSB64_DECOMP_SOURCES EXCLUDE REGEX
+        "decomp/src/(ft/ftremix|gr/grremix|it/itremix|credits/remix)/|decomp/src/[a-z]+/[a-z]*remix[A-Za-z0-9_]*\\.c$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/remix/")
+    # The debug shortcuts of scmanager.c and mntitle.c (SSB64_VS_FKINDS and friends) also exist in the vanilla builds.
+    list(APPEND SSB64_SRC_PORT "${CMAKE_CURRENT_SOURCE_DIR}/port/remix/remix_debug.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/port/remix/remix_debug.h")
+endif()
+
 # JP build excludes the US-only startup/congratulations menu sources
 # (matches the upstream decomp Makefile's VERSION=jp C_FILES filter-out).
 if(SSB64_VERSION STREQUAL "jp")

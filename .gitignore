@@ -117,3 +117,7 @@ test.zip
 
 # Contained Switch toolchain (setup-toolchain.sh)
 .toolchain/
+
+# Vanilla (REGION_US) regression build of T9.2
+build-us/
+build-us-*.log

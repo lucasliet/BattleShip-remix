@@ -521,7 +521,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 - [ ] T9.1 Sweep completo (roster × specials, stages, itens) e partidas reais via CSS: 4 jogadores, cada modo, Training. Conferir também o que ficou sem efeito visto: esteira de Surface, bury/plunge, Game Speed no Training, volta do Lightning ao tamanho do modo, Full Results e Salty Runback.
 - [ ] T9.1b Passagem de escuta pelo usuário (o lead não ouve): alguns stages, uma música de vitória, o Sound Test, SFX de golpes de
   lutadores Remix e os gráficos de menu do Remix; os `audio.wav` de cada run ficam em `build/agent-shots/vs/<run>/`.
-- [ ] T9.2 Vanilla (`REGION_US`) sem regressão: build e partida.
+- [x] T9.2 Vanilla (`REGION_US`) sem regressão: build e partida. **Feito 2026-10-31:** `cmake -B build-us -DSSB64_VERSION=us` (ignorado no git) compilava só até oito arquivos protegidos apenas por `PORT`; em vez de proteger arquivo por arquivo, o CMake dos builds `us` e `jp` agora não compila as fontes só-Remix (`ft/ftremix`, `gr/grremix`, `it/itremix`, `credits/remix`, `*remix*.c` e `port/remix/`, mantendo `remix_debug` que o `scmanager.c` e o `mntitle.c` usam); `ftport.c` e `port.cpp` ganharam guardas `REGION_REMIX` nas chamadas que sobravam. Visto: o binário vanilla compila, linka e joga uma partida VS (Mario contra Kirby, 1500 quadros, sem crash, sem elementos Remix); o build Remix segue igual (874 checagens, partida). Reexecutar o build vanilla depois de cada onda grande, porque um hook sem guarda só aparece lá.
 - [ ] T9.3 Relatório ao usuário em português: Remix jogável, desvios documentados.
 - **CP9**.
 

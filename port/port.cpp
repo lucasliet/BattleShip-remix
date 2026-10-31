@@ -1090,7 +1090,9 @@ static int PortInitImpl(int argc, char* argv[]) {
 	// EventSystemRegisterEvent, which dereferences Context::GetEventSystem()).
 	PortRegisterEvents();
 	ssb64::RegisterFocusListener();
+#ifdef REGION_REMIX
 	RegisterRemixCommandListeners();
+#endif
 	port_log("SSB64: Engine events registered\n");
 
 #ifndef DISABLE_SCRIPTING
