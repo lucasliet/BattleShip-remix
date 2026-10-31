@@ -21,3 +21,12 @@ Source: `.toolchain/pkgs/smashremix-src/src/Hazards.asm` peach_castle_II_setup_ 
 - Blast zone slot 0x398: banzai_bill_blast_zone_ returns destroy, not wired.
 - Laser pointer 0x0C of the stage state (t4 is not set in the active code), skipped.
 - Factory spawn kind (see finding 2).
+
+## Final finding (2026-10-31, user decision "same as Remix")
+
+`Stages.asm:3256` registers Peach's Castle II with `function.CLONE`, and no file references `peach_castle_II_setup_`,
+`banzai_bill_stage_setting_`, `banzai_bill_main_` or `banzai_bill_destroy_`. In Remix 2.0.1 Banzai Bill is dead code and never
+appears in any mode (confirmed in the port: the stage function of gkind 0x44 is the original Peach's Castle routine 0x801056F8, the
+hazard dispatcher is never called for it). The factory port now spawns what the asm spawns (Robot Bee 0x3B, the Banzai tracks, no
+laser because the asm stores an uninitialised register as the laser file), but it is unreachable, exactly like the original.
+The item-id question is closed.
