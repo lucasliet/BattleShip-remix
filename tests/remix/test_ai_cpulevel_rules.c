@@ -34,6 +34,22 @@ static void testUnitsDigitOfOneDigitLevelsIsTheLevel(void)
     CHECK_EQ(9, mnRemixCpuLevelUnitsDigit(9));
 }
 
+static void testHandicapRaisesUpToForty(void)
+{
+    CHECK_EQ(1, mnRemixHandicapCanRaise(9));
+    CHECK_EQ(1, mnRemixHandicapCanRaise(39));
+    CHECK_EQ(0, mnRemixHandicapCanRaise(MNREMIX_HANDICAP_MAX));
+}
+
+static void testHandicapAboveNineIsDrawnAsAnIcon(void)
+{
+    CHECK_EQ(0, mnRemixHandicapNeedsIcon(9));
+    CHECK_EQ(1, mnRemixHandicapNeedsIcon(10));
+    CHECK_EQ(-1, mnRemixHandicapIconIndex(9));
+    CHECK_EQ(0, mnRemixHandicapIconIndex(10));
+    CHECK_EQ(30, mnRemixHandicapIconIndex(40));
+}
+
 void remixTestAiCpuLevelRules(void)
 {
     testTheRightArrowRaisesLevelsBelowTen();
@@ -41,4 +57,6 @@ void remixTestAiCpuLevelRules(void)
     testOnlyLevelTenNeedsTensDigit();
     testUnitsDigitOfLevelTenIsZero();
     testUnitsDigitOfOneDigitLevelsIsTheLevel();
+    testHandicapRaisesUpToForty();
+    testHandicapAboveNineIsDrawnAsAnIcon();
 }
