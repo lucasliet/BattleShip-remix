@@ -50,6 +50,8 @@ EXTRA_SYMBOLS = [
     "Stages.stage_file_table",
     "Stages.function_table",
     "Stages.class_table",
+    "Character.magnifying_glass_zoom.table",
+    "Character.fighter_DK_mode.table",
     "Stages.string_table",
     "Stages.default_music_track_table",
     "Stages.alternate_music_table",
