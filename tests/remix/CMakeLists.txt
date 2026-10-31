@@ -31,6 +31,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_ai_specials_rules.c
     test_ai_teaching_rules.c
     test_stopwatch_bg_rules.c
+    test_ai_leftover_rules.c
+    test_vsstats_rules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c
@@ -60,6 +62,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairollrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaispecialsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixstopwatchbgrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipostsheikrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnvsmode/mnremixvsstatsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaiteachingrules.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)

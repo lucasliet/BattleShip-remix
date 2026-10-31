@@ -38,7 +38,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2). M7 (IA) fechado (CP7, sobras no T8.2): a CPU usa as tabelas de ataque do Remix, recupera e joga nos níveis 9 e 10. O próximo é o M8 (restante da paridade, T2.11 e T8). M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
+- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2). M7 (IA) fechado (CP7, sobras no T8.2): a CPU usa as tabelas de ataque do Remix, recupera e joga nos níveis 9 e 10. M8 (restante da paridade) em andamento (CP8, 2026-10-31): T2.11, T8.1 e T8.2 com a primeira onda feita. M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
 - **Último checkpoint:** CP7a, 2026-10-29 (a pedido, sem código novo; antes CP7, M7 fechado: IA do Remix em três ondas; CP6, CP6f, CP6e, CP6d, CP6c, CP6b, CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~83% (corrigida no CP6e; ver a tabela no fim deste arquivo) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
@@ -511,7 +511,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
   retratos e ícones do Rest do All-Star, ícones de série do final, `costume_fix`, `match_begin_flag`, `pause_exit`, final próprio do All-Star) e
   **Training** (menu Z personalizado passos 10 a 13, nome do item na mão passo 8, guardas de um só lutador passo 14, opções de CPU dependem do M7).
   Cada item com captura ou riscado com motivo.
-- **CP8**.
+- [x] **CP8** (checkpoint a pedido, 2026-10-31, M8 em andamento): três ondas de workers Haiku com cada diff revisado por mim contra o asm. **T2.11** (onda 1): 179 para 116 linhas `REMIX-TODO` fora de IA, offsets crus do `ITStruct` mapeados, blast zones, flash do Lightning, retângulo do Stopwatch (`if/ifremixrectangle.*`). **T8.1** (onda 1): `parity.md` refeito (STATUS do gerador), Aerial Fast Fall, Skeleton por porta, timeouts, regras de torneio, SFX Replace, Color Overlays. **T8.2** (onda 1): VsStats completo (contadores de Z-cancel, tech e ledge, dano, página de duas telas; visto em partida), IA (pós-processamento do Sheik, Bowser e Banjo; `ftremixaipostsheik*`), logos de transição (build, não visto), Settings; os workers de Training (menu Z), 1P e menus só investigaram (notas `f14_training_left.md`, `f14_onep_left.md`, `f14_menus_left.md`) e ficam para uma segunda onda com escopos menores. Visto: build, 756 checagens de unidade (suítes novas de Stopwatch, IA e VsStats com mutação verificada), 175 estágios sem crash, 16 itens no sweep de CPU, hazards de seis estágios, CPU nível 5, 9 e 10 e a matriz de especiais de Sheik, Bowser e Banjo. Não visto: logos de transição, timeouts de 5 minutos, regras de torneio no menu, Banjo Flight na CPU. Estimativa ~85%.
 
 ## M9. Verificação final no desktop
 
@@ -536,11 +536,11 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 | Área | Peso | Feito |
 |---|---|---|
 | Fighters (roster, specials, projéteis, entradas) | 35% | ~96% |
-| Itens | 10% | ~70% |
-| Stages (loader, seletor, hazards) | 20% | ~80% |
+| Itens | 10% | ~80% |
+| Stages (loader, seletor, hazards) | 20% | ~82% |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~86% |
+| Settings, menus, modos | 20% | ~88% |
 | Verificação final | 5% | 0% |
-| **Total ponderado** | | **~83%** (35×0,96 + 10×0,70 + 20×0,80 + 10×0,90 + 20×0,86 = 82,8; CP6: modos jogáveis e testados, a IA do M7 e as sobras do T8.2 seguem abertas) |
+| **Total ponderado** | | **~85%** (35×0,96 + 10×0,80 + 20×0,82 + 10×0,90 + 20×0,88 = 84,6; CP8: ondas do M8, as sobras de T2.11, T8.1 e T8.2 seguem abertas) |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).
