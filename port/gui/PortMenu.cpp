@@ -7,6 +7,7 @@
 
 #include "remix/remix_modes.h"
 #include "remix/remix_player_panel.h"
+#include "remix/remix_training.h"
 #include "remix/remix_toggles.h"
 #include "PortMenu.h"
 
@@ -1417,6 +1418,36 @@ void PortMenu::AddMenuRemix() {
     }
     AddMenuRemixPlayerPanel();
     AddMenuRemixModes();
+    AddMenuRemixTraining();
+}
+
+void PortMenu::AddMenuRemixTraining() {
+    AddSidebarEntry("Remix", "Training", 2);
+    WidgetPath path = { "Remix", "Training", SECTION_COLUMN_1 };
+    AddWidget(path, "Training custom menu", WIDGET_SEPARATOR_TEXT);
+    AddWidget(path, "Reset the Training options", WIDGET_BUTTON)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo &) { remix_training_reset(); })
+        .Options(ButtonOptions().Tooltip("Sets the Remix Training options to their defaults."));
+
+    int shown = 0;
+    for (const auto &option : remix_training::All()) {
+        path.column = (shown++ % 2 == 0) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
+        const std::string cvar = remix_training::CVarName(option);
+        if (!option.strings.empty()) {
+            AddWidget(path, option.title, WIDGET_CVAR_COMBOBOX)
+                .CVar(cvar.c_str())
+                .RaceDisable(false)
+                .Options(ComboboxOptions()
+                             .ComboMap(remix_training::ComboMap(option))
+                             .DefaultIndex(static_cast<uint32_t>(option.fallback)));
+            continue;
+        }
+        AddWidget(path, option.title, WIDGET_CVAR_SLIDER_INT)
+            .CVar(cvar.c_str())
+            .RaceDisable(false)
+            .Options(IntSliderOptions().Min(option.min).Max(option.max).DefaultValue(option.fallback));
+    }
 }
 
 void PortMenu::AddMenuRemixModes() {

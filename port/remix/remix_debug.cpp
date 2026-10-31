@@ -64,6 +64,11 @@ int remix_debug_vs_fkind(int slot)
     return readSlotFkind("SSB64_VS_FKINDS", slot);
 }
 
+int remix_debug_train_fkind(int slot)
+{
+    return readSlotFkind("SSB64_TRAIN_FKINDS", slot);
+}
+
 int remix_debug_vs_item_rate(void)
 {
     const char *text = std::getenv("SSB64_VS_ITEMS");

@@ -132,7 +132,7 @@ STATUS = {
     "TwelveCharBattle.asm": ("menus_modes", "partial", "gmremixtwelvecb*.c (T6.1f, CSS of 24 portraits in T8.2)"),
     "StockMode.asm": ("menus_modes", "partial", "gmremixstockmode.c (Last mode open)"),
     "Teams.asm": ("menus_modes", "partial", "scmanager.c, ftremixstamina*.c"),
-    "Training.asm": ("menus_modes", "partial", "sc1ptrainingmode.c (Z menu in T8.2)"),
+    "Training.asm": ("menus_modes", "partial", "sc1ptrainingmode.c, remix_training.* (Z menu as port menu; per-port chain, Music and Stage BG open)"),
     "Practice_1P.asm": ("menus_modes", "partial", "gmremixpractice.c"),
     "SinglePlayer.asm": ("menus_modes", "partial", "sc1premix*.c (T6.2, leftovers in T8.2)"),
     "SinglePlayerModes.asm": ("menus_modes", "partial", "sc1premixintro/allstar/multiman*.c"),

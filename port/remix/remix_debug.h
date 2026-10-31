@@ -27,6 +27,12 @@ int remix_debug_demo_fkind(int slot, int fallback);
 int remix_debug_vs_fkind(int slot);
 
 /**
+ * Returns the SSB64_TRAIN_FKINDS fkind for slot 0 (human) or 1 (CPU) of a Training match booted without the
+ * character select, or -1 when the override is unset, malformed, or names an unregistered fighter.
+ */
+int remix_debug_train_fkind(int slot);
+
+/**
  * Returns the SSB64_VS_ITEMS item appearance rate (0 = most frequent) that turns
  * every item switch on in the SSB64_VS_FKINDS shortcut, or -1 when unset.
  */

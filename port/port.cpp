@@ -56,6 +56,7 @@
 #include "fighter_registry.h"
 #include "remix/remix_roster.h"
 #include "remix/remix_player_panel.h"
+#include "remix/remix_training.h"
 #include "remix/remix_hud_text.h"
 #include "remix/remix_input_display.h"
 #include "remix/remix_toggles.h"
@@ -1193,6 +1194,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	remix_roster_load();
 	remix_toggles_init();
 	remix_panel_init();
+	remix_training_init();
 #endif
 
 #ifndef DISABLE_SCRIPTING

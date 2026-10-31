@@ -4,8 +4,8 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 
 | Área | ported | partial | todo | n/a | progresso |
 |---|---|---|---|---|---|
-| fighters | 104 | 47 | 0 | 0 | 84% |
-| items | 16 | 16 | 1 | 0 | 73% |
+| fighters | 108 | 43 | 0 | 0 | 86% |
+| items | 31 | 1 | 1 | 0 | 95% |
 | stages | 1 | 6 | 0 | 0 | 57% |
 | audio | 3 | 1 | 1 | 0 | 70% |
 | menus_modes | 6 | 31 | 9 | 0 | 47% |
@@ -124,8 +124,8 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `KirbyHats.asm` | fighters | partial | ftremixkirbycopy.c, ftremixkirbyhats.c, ftremixkirbypower.c |
 | `Knockback.asm` | fighters | partial | ftremixknockback.c |
 | `Lanky/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
-| `Lanky/Lanky.asm` | fighters | partial | decomp/src/ft/ftremix/lanky |
-| `Lanky/LankySpecial.asm` | fighters | partial | decomp/src/ft/ftremix/lanky |
+| `Lanky/Lanky.asm` | fighters | ported | decomp/src/ft/ftremix/lanky |
+| `Lanky/LankySpecial.asm` | fighters | ported | decomp/src/ft/ftremix/lanky |
 | `LedgeJump.asm` | fighters | ported | ftremixledgejump.c |
 | `LedgeTrump.asm` | fighters | partial | ftremixledgetrump.c |
 | `Lucas/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
@@ -231,7 +231,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Teams.asm` | menus_modes | partial | scmanager.c, ftremixstamina*.c |
 | `TimedStock.asm` | menus_modes | ported | gmremixtimedstock*.c |
 | `Toggles.asm` | menus_modes | partial | remix_toggles.cpp, PortMenu.cpp (Remix section) |
-| `Training.asm` | menus_modes | partial | sc1ptrainingmode.c (Z menu in T8.2) |
+| `Training.asm` | menus_modes | partial | sc1ptrainingmode.c, remix_training.* (Z menu as port menu; per-port chain, Music and Stage BG open) |
 | `Transitions.asm` | menus_modes | partial | lbtransition.c (logo open) |
 | `Tripping.asm` | fighters | ported | ftremixtripping.c |
 | `TugOfWar.asm` | menus_modes | partial | gmremixtugofwar*.c (T6.1b, leftovers in T8.2) |
@@ -250,44 +250,44 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Wolf/Wolf.asm` | fighters | ported | decomp/src/ft/ftremix/wolf |
 | `Wolf/WolfSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/wolf |
 | `YoungLink/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
-| `YoungLink/YoungLink.asm` | fighters | partial | decomp/src/ft/ftremix/younglink |
-| `YoungLink/YoungLinkSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/younglink |
+| `YoungLink/YoungLink.asm` | fighters | ported | decomp/src/ft/ftremix/younglink |
+| `YoungLink/YoungLinkSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/younglink |
 | `ZCancel.asm` | fighters | partial | ftremixzcancel.c |
 | `captainshared.asm` | fighters | partial | ftremixdkcaptainshared.c, ftremixentry.c |
 | `command.asm` | fighters | partial | ftremixcommand.c |
 | `dkshared.asm` | fighters | partial | ftremixdkcaptainshared.c, ftremixentry.c |
 | `fireball.asm` | fighters | partial | wpmarioremixfireball.c, wpmariofireball.c |
 | `foxshared.asm` | fighters | partial | ftremix/falco, wolf, peppy, slippy |
-| `items/Basketball.asm` | items | partial | decomp/src/it/itremix/itremixbasketball.c |
-| `items/BlueShell.asm` | items | partial | decomp/src/it/itremix/itremixblueshell.c |
+| `items/Basketball.asm` | items | ported | decomp/src/it/itremix/itremixbasketball.c |
+| `items/BlueShell.asm` | items | ported | decomp/src/it/itremix/itremixblueshell.c |
 | `items/Boomerang.asm` | items | ported | decomp/src/it/itremix/itremixboomerang.c |
-| `items/BulletBill.asm` | items | partial | decomp/src/it/itremix/itremixbulletbill.c |
-| `items/Cacodemon.asm` | items | partial | decomp/src/it/itremix/itremixcacodemon.c |
-| `items/Car.asm` | items | partial | decomp/src/it/itremix/itremixcar.c |
+| `items/BulletBill.asm` | items | ported | decomp/src/it/itremix/itremixbulletbill.c |
+| `items/Cacodemon.asm` | items | ported | decomp/src/it/itremix/itremixcacodemon.c |
+| `items/Car.asm` | items | ported | decomp/src/it/itremix/itremixcar.c |
 | `items/ClanBomb.asm` | items | ported | decomp/src/it/itremix/itremixclanbomb.c |
 | `items/CloakingDevice.asm` | items | ported | decomp/src/it/itremix/itremixcloakingdevice.c |
-| `items/Cloud.asm` | items | partial | decomp/src/it/itremix/itremixcloud.c |
+| `items/Cloud.asm` | items | ported | decomp/src/it/itremix/itremixcloud.c |
 | `items/Dango.asm` | items | ported | decomp/src/it/itremix/itremixdango.c |
 | `items/DekuNut.asm` | items | ported | decomp/src/it/itremix/itremixdekunut.c |
-| `items/Flashbang.asm` | items | partial | decomp/src/it/itremix/itremixflashbang.c |
-| `items/FranklinBadge.asm` | items | partial | decomp/src/it/itremix/itremixfranklinbadge.c |
+| `items/Flashbang.asm` | items | ported | decomp/src/it/itremix/itremixflashbang.c |
+| `items/FranklinBadge.asm` | items | ported | decomp/src/it/itremix/itremixfranklinbadge.c |
 | `items/Gem.asm` | items | ported | decomp/src/it/itremix/itremixgem.c |
-| `items/GoldenGun.asm` | items | partial | decomp/src/it/itremix/itremixgoldengun.c |
+| `items/GoldenGun.asm` | items | ported | decomp/src/it/itremix/itremixgoldengun.c |
 | `items/Gordo.asm` | items | ported | decomp/src/it/itremix/itremixgordo.c |
-| `items/KlapTrap.asm` | items | partial | decomp/src/it/itremix/itremixklaptrap.c |
+| `items/KlapTrap.asm` | items | ported | decomp/src/it/itremix/itremixklaptrap.c |
 | `items/Lightning.asm` | items | ported | decomp/src/it/itremix/itremixlightning.c |
 | `items/MrSaturn.asm` | items | ported | decomp/src/it/itremix/itremixmrsaturn.c |
-| `items/Pitfall.asm` | items | partial | decomp/src/it/itremix/itremixpitfall.c |
+| `items/Pitfall.asm` | items | ported | decomp/src/it/itremix/itremixpitfall.c |
 | `items/PoisonMushroom.asm` | items | ported | decomp/src/it/itremix/itremixpoisonmushroom.c |
 | `items/Pokemon/Psyduck.asm` | items | ported | decomp/src/it/itremix/itremixpsyduck.c |
 | `items/Pwing.asm` | items | ported | decomp/src/it/itremix/itremixpwing.c |
-| `items/RobotBee.asm` | items | partial | decomp/src/it/itremix/itremixrobotbee.c |
-| `items/ScuttleMinion.asm` | items | partial | decomp/src/it/itremix/itremixscuttleminion.c |
+| `items/RobotBee.asm` | items | ported | decomp/src/it/itremix/itremixrobotbee.c |
+| `items/ScuttleMinion.asm` | items | ported | decomp/src/it/itremix/itremixscuttleminion.c |
 | `items/Shuriken.asm` | items | ported | decomp/src/it/itremix/itremixshuriken.c |
 | `items/Stopwatch.asm` | items | ported | decomp/src/it/itremix/itremixstopwatch.c |
 | `items/SuperMushroom.asm` | items | ported | decomp/src/it/itremix/itremixsupermushroom.c |
-| `items/Turnip.asm` | items | partial | decomp/src/it/itremix/itremixturnip.c |
-| `items/WaddleDee.asm` | items | partial | decomp/src/it/itremix/itremixwaddledee.c |
+| `items/Turnip.asm` | items | ported | decomp/src/it/itremix/itremixturnip.c |
+| `items/WaddleDee.asm` | items | ported | decomp/src/it/itremix/itremixwaddledee.c |
 | `items/WaddleDoo.asm` | items | ported | decomp/src/it/itremix/itremixwaddledoo.c |
 | `jigglypuffkirbyshared.asm` | fighters | partial | ftremixpuffkirbyshared.c |
 | `linkshared.asm` | fighters | partial | ftremixlinkshared.c |

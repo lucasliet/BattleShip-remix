@@ -31,6 +31,9 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_ai_specials_rules.c
     test_ai_teaching_rules.c
     test_stopwatch_bg_rules.c
+    test_training_rules.c
+    test_ai_di_rules.c
+    test_blueshell_rules.c
     test_ai_leftover_rules.c
     test_vsstats_rules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
@@ -62,6 +65,9 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairollrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaispecialsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixstopwatchbgrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaidirules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixblueshellrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipostsheikrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnvsmode/mnremixvsstatsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaiteachingrules.c
