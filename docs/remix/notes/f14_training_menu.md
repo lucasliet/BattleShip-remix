@@ -16,15 +16,16 @@ run. The Z key does not open anything in the match. Effects are real: each entry
 | Shield Break Mode (Off, On, Infinite) | `ShieldBreak` | done, `ftremixtraining.c` + `sc1ptrainingrules.c` (state machine), seen: Infinite holds the CPU in shield |
 | OOS Action (12) | `Oos` | done (tables of both frames, wait for the last jumpsquat frame for DSP and NAir), unit tests; not seen in game (needs a hit on a shielding CPU) |
 | Music | not in the registry | **open**: needs the 0x8019xxxx `bgm_table` and the music toggle list (`play_bgm_`) |
-| Stage Background | `StageBg` | in the registry, **open**: the effect (`show_stage_bg_`, hooks 0x803F4 and 0x1146C4) is not ported |
 | CPU Teching (7) | `Tech` | done, `ftRemixAiTechByMenu` in `ftremixaiteching.c` (backward, forward, in place, left and right relative to the facing, none); the failed tech now counts `VsStats` TechMiss |
 | CPU DI Type, Strength, Direction, Start on Hit | `DiType`, `DiStrength`, `DiDirection`, `DiFirstHit` | done with `cpu_di_`, see below; not seen in game |
 | D-pad Controls (On, Reset Only, Off) | `Dpad` | done, `sc1PTrainingRemixPollDpad` |
 | DI Practice Mode | `DiPractice` | done, hitlag 2 and `ftCommonDamageCommonProcLagUpdate` on every fighter that is past the KO statuses, each frame the objects run |
 | Spam Practice (13 moves), Interval, Interval Random | `SpamPractice`, `SpamInterval`, `SpamRandom` | done, seen: Jab every 40 frames (18 spam log lines in 700 frames); the timer is one byte like the asm (999 wraps), counts only CPU outside hitlag, and Spam is ignored while Shield Break is on |
+| Percent and Reset Sets Percent (per port, P1 to P4) | `Percent1..4`, `ResetSetsPercent1..4` | done: a fighter created for the match takes the percent when Reset Sets Percent is on (`ftRemixPanelGetInitialDamage`, the asm `init_character_`), and changing Percent in the menu resets the fighter to 0 then adds it (`set_percent_`); **seen**: `Percent1=88;Percent2=123` starts the match at 88% and 123% |
+| Stage Background | `StageBg` | done, `grWallpaperMakeDecideKind`; **seen** (Dream Land background instead of the training one); the magnifying-glass background of the asm is not done |
 | Preserve Menu Selections | none | **deviation**: CVars always persist across resets, so the entry has no work to do |
 
-Not done (per-port chain of the Z menu): Character, Costume, Type (Human, CPU, Disabled), Spawn, Set Custom Spawn, Percent, Reset Sets Percent.
+Not done (per-port chain of the Z menu): Character, Costume, Type (Human, CPU, Disabled), Spawn, Set Custom Spawn.
 They change the roster of the match mid-run (`load_character_`, `init_character_`, `set_custom_spawn_`), not just numbers. Open in T8.2.
 
 ## Deviation: Shield Break only for CPUs

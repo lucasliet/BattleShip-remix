@@ -46,6 +46,14 @@ const std::vector<Option> kOptions = {
     { REMIX_TRAINING_SPAM_PRACTICE, "SpamPractice", "Spam Practice", 0, 13, 0, kSpamNames },
     { REMIX_TRAINING_SPAM_INTERVAL, "SpamInterval", "Spam Interval", 1, 999, 1, {} },
     { REMIX_TRAINING_SPAM_RANDOM, "SpamRandom", "Spam Interval Random", 0, 1, 0, { "Off", "On" } },
+    { REMIX_TRAINING_PERCENT_P1, "Percent1", "P1 Percent", 0, 999, 0, {} },
+    { REMIX_TRAINING_PERCENT_P2, "Percent2", "P2 Percent", 0, 999, 0, {} },
+    { REMIX_TRAINING_PERCENT_P3, "Percent3", "P3 Percent", 0, 999, 0, {} },
+    { REMIX_TRAINING_PERCENT_P4, "Percent4", "P4 Percent", 0, 999, 0, {} },
+    { REMIX_TRAINING_RESET_SETS_PERCENT_P1, "ResetSetsPercent1", "P1 Reset Sets Percent", 0, 1, 1, { "Off", "On" } },
+    { REMIX_TRAINING_RESET_SETS_PERCENT_P2, "ResetSetsPercent2", "P2 Reset Sets Percent", 0, 1, 1, { "Off", "On" } },
+    { REMIX_TRAINING_RESET_SETS_PERCENT_P3, "ResetSetsPercent3", "P3 Reset Sets Percent", 0, 1, 1, { "Off", "On" } },
+    { REMIX_TRAINING_RESET_SETS_PERCENT_P4, "ResetSetsPercent4", "P4 Reset Sets Percent", 0, 1, 1, { "Off", "On" } },
 };
 
 std::array<int, REMIX_TRAINING_COUNT> sOverrides;
