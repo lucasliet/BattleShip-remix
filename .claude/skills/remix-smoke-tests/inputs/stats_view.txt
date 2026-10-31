@@ -1,0 +1,6 @@
+# P1 walks off the stage (1 stock match), then on the results screen: A opens the stats, R next page, B back
+300 330 0 - 0 0
+330 900 0 - 80 0
+2400 2410 0 A 0 0
+2520 2530 0 R 0 0
+2640 2650 0 B 0 0
