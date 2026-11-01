@@ -70,8 +70,9 @@ Ids de lutador do Remix são iguais ao fkind do port (Crash 72, Marina 63, Young
 
 ## 5. Conferências do T9.1 que ainda são só minhas
 
-Esteira de Surface, bury e plunge, Game Speed no Training, volta do Lightning ao tamanho do modo, Full Results e Salty Runback.
-Rodo no próximo passo; não dependem de ouvido.
+Esteira de Surface, bury e plunge, Game Speed no Training, volta do Lightning ao tamanho do modo, Full Results e Salty Runback:
+feitas em 2026-11-01 (detalhes no T9.1 do ROADMAP). O Salty Runback tinha um defeito, já corrigido: ao testar, segure exatamente
+A+B+Z+R+START (ou A+B+Z+R+D-Left com a opção alternativa) enquanto a partida termina, sem outros botões.
 
 ## Como devolver
 

@@ -40,6 +40,7 @@ extern void remixTestTrainingRules(void);
 extern void remixTestAiDiRules(void);
 extern void remixTestBlueShellRules(void);
 extern void remixTestGameEndRowsRules(void);
+extern void remixTestGameEndInputRules(void);
 extern void remixTestAiLeftoverRules(void);
 extern void remixTestVsStatsRules(void);
 
@@ -78,6 +79,7 @@ int main(void)
     remixTestAiDiRules();
     remixTestBlueShellRules();
     remixTestGameEndRowsRules();
+    remixTestGameEndInputRules();
     remixTestAiLeftoverRules();
     remixTestVsStatsRules();
 
