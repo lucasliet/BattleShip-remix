@@ -38,7 +38,8 @@ Verification by running the real game headless with environment overrides, scree
 Outputs: `build/agent-shots/vs/<name>/` with `frame_<n>.png`, `stdout.log`, `ssb64.log`, `save.bin`.
 
 Input scripts (`inputs/`): `soundtest_browse.txt` / `soundtest_wrap.txt` (with `SSB64_START_SCENE=59`, drive the Sound Test), `grab_walk` was dropped (CPUs do not reach grabs reliably), `none.txt` (no input), `nsp_tap.txt`/`dsp_tap.txt`/`usp_tap.txt` (walk right, then the special
-every 150 frames from frame 420), `css_pick_mario.txt` (both ports pick Mario, START at 200, A on the stage select at
+every 150 frames from frame 420), `css_pick_four.txt` (four ports pick, START at 200, A at 300; run it with `css.sh` and
+`SSB64_REMIX_MODE=<mode>` to play a 4-player match of each Remix mode), `css_pick_mario.txt` (both ports pick Mario, START at 200, A on the stage select at
 300), `css_page3_stage.txt` (same, then R 15 times to reach page 3 of the stage select and A at 600). Line format:
 `<from> <to> <port> <buttons|-> [stick_x stick_y]`. Do not press A every few frames to pick an item up: the fighter stays
 locked in its jab combo; use the CPU item sweep instead.
