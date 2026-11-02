@@ -14,6 +14,7 @@
 #include <libultraship/controller/controldeck/ControlDeck.h>
 #include <fast/Fast3dWindow.h>
 #include <ship/resource/File.h>
+#include <algorithm>
 #include <chrono>
 #include <string>
 #include <vector>
@@ -72,6 +73,7 @@
 #endif
 
 extern "C" void PortRegisterEvents(void);
+extern "C" unsigned char port_diag_get_scene_curr(void);
 
 #ifndef DISABLE_SCRIPTING
 /* Force the linker to pull bridge .obj files into the EXE so their
@@ -703,6 +705,14 @@ static int PortInitImpl(int argc, char* argv[]) {
 	sContext->GetConfig()->SetInt("Window.Backend.Id",
 	                            static_cast<int>(Ship::WindowBackend::FAST3D_DXGI_DX11));
 	sContext->GetConfig()->SetString("Window.Backend.Name", "DirectX 11");
+#endif
+
+#ifdef __SWITCH__
+	/* No keyboard on the console: Minus (ImGuiKey_GamepadBack) only opens the port menu, and its Quit
+	 * button, when controller navigation is on. Keep a value the player already saved. */
+	if (sContext->GetConsoleVariables()->GetInteger("gControlNav", -1) < 0) {
+		sContext->GetConsoleVariables()->SetInteger("gControlNav", 1);
+	}
 #endif
 
 	/* Latch the Classic Co-op menu choice for this launch — the toggle
@@ -1464,11 +1474,17 @@ int main(int argc, char* argv[]) {
 	}
 	int frame = 0;
 	bool firstRunHintShown = false;
-	// Hitch log: a frame slower than kSlowFrameMs is written to ssb64.log (capped) so a Switch log shows where the stutter is
-	// (file loads, scene changes) instead of only the frames that crashed.
+	// Hitch log: frames slower than kSlowFrameMs are counted per 1000-frame window and written with the scene id;
+	// frames slower than kHitchFrameMs are also written one by one. ssb64.log is stdio-buffered and only flushed on exit,
+	// so a Switch run closed from the HOME menu loses it; the spdlog file next to the .nro is flushed.
 	constexpr double kSlowFrameMs = 50.0;
-	constexpr int kSlowFrameLogMax = 200;
-	int slowFramesLogged = 0;
+	constexpr double kHitchFrameMs = 100.0;
+	constexpr int kHitchLogMax = 1500;
+	constexpr int kSlowWindowFrames = 1000;
+	int hitchesLogged = 0;
+	int windowSlowFrames = 0;
+	double windowSlowMs = 0.0;
+	double windowMaxMs = 0.0;
 	while (WindowIsRunning()) {
 		port_input_script_tick();
 		const auto frameStart = std::chrono::steady_clock::now();
@@ -1476,12 +1492,22 @@ int main(int argc, char* argv[]) {
 		const double frameMs =
 		    std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - frameStart).count();
 		frame++;
-		if (frameMs > kSlowFrameMs && slowFramesLogged < kSlowFrameLogMax) {
-			slowFramesLogged++;
-			port_log("SSB64: slow frame %d took %.1f ms%s\n", frame, frameMs,
-			         (slowFramesLogged == kSlowFrameLogMax) ? " (slow frame log cap reached)" : "");
-			/* ssb64.log is stdio-buffered and flushed on exit only, so a Switch run closed from the HOME menu loses it; the spdlog file next to the .nro is flushed. */
-			SPDLOG_WARN("slow frame {} took {:.1f} ms", frame, frameMs);
+		if (frameMs > kSlowFrameMs) {
+			windowSlowFrames++;
+			windowSlowMs += frameMs;
+			windowMaxMs = std::max(windowMaxMs, frameMs);
+			if (frameMs > kHitchFrameMs && hitchesLogged < kHitchLogMax) {
+				hitchesLogged++;
+				SPDLOG_WARN("slow frame {} scene {} took {:.1f} ms", frame, port_diag_get_scene_curr(), frameMs);
+			}
+		}
+		if (frame % kSlowWindowFrames == 0) {
+			SPDLOG_WARN("frames {}-{}: {} slow (>{:.0f} ms), {:.0f} ms total, max {:.1f} ms, scene {}",
+			            frame - kSlowWindowFrames + 1, frame, windowSlowFrames, kSlowFrameMs, windowSlowMs,
+			            windowMaxMs, port_diag_get_scene_curr());
+			windowSlowFrames = 0;
+			windowSlowMs = 0.0;
+			windowMaxMs = 0.0;
 		}
 
 		if (!firstRunHintShown && frame == 60) {
