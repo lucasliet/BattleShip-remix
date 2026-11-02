@@ -539,7 +539,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 
 ## M10. Switch
 
-- [ ] T10.1 Build `.nro` do `REGION_REMIX` (`scripts/switch/build.sh`), pacote com o `.o2r` do Remix.
+- [x] T10.1 Build `.nro` do `REGION_REMIX` (`scripts/switch/build.sh`), pacote com o `.o2r` do Remix. **Feito 2026-11-02:** `scripts/switch/build.sh remix` (devkitA64 em `.toolchain`) compilou as 1034 unidades com **um** erro, a ordem de `#include` em `ftremixaipostsheik.c` (`<math.h>` antes de `<ft/fighter.h>` deixava `wint_t` indefinido no newlib), e gerou `build-switch/BattleShip-Remix.nro` (13,0 MB, o anterior era de 12/10); `scripts/switch/pack.sh` montou `dist/switch/SD/switch/BattleShip-Remix/` com o `.nro`, o `BattleShip-Remix.o2r` (59,9 MB) e o `f3d.o2r` (`dist` é ignorado no git). Não foi executado: sem hardware aqui.
 - [ ] T10.2 Validação em hardware pelo usuário (checklist de `docs/switch_port_2026-10-12.md`), RAM com o `.o2r` de 60 MB
   (os dados do Remix na ROM somam ~36,6 MB contra ~9,5 MB do vanilla) e armazenamento no SD.
 - **CP10**.
