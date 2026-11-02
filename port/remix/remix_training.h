@@ -36,17 +36,44 @@ typedef enum RemixTrainingOption {
     REMIX_TRAINING_RESET_SETS_PERCENT_P2,
     REMIX_TRAINING_RESET_SETS_PERCENT_P3,
     REMIX_TRAINING_RESET_SETS_PERCENT_P4,
+    REMIX_TRAINING_TYPE_P1,
+    REMIX_TRAINING_TYPE_P2,
+    REMIX_TRAINING_TYPE_P3,
+    REMIX_TRAINING_TYPE_P4,
+    REMIX_TRAINING_CHARACTER_P1,
+    REMIX_TRAINING_CHARACTER_P2,
+    REMIX_TRAINING_CHARACTER_P3,
+    REMIX_TRAINING_CHARACTER_P4,
+    REMIX_TRAINING_COSTUME_P1,
+    REMIX_TRAINING_COSTUME_P2,
+    REMIX_TRAINING_COSTUME_P3,
+    REMIX_TRAINING_COSTUME_P4,
+    REMIX_TRAINING_SPAWN_P1,
+    REMIX_TRAINING_SPAWN_P2,
+    REMIX_TRAINING_SPAWN_P3,
+    REMIX_TRAINING_SPAWN_P4,
     REMIX_TRAINING_COUNT
 } RemixTrainingOption;
 
 /** Per-port entries (Training.asm tail_px): the option of `port` 0..3 for a base of the P1 id. */
 #define REMIX_TRAINING_PERCENT(port) (REMIX_TRAINING_PERCENT_P1 + (port))
 #define REMIX_TRAINING_RESET_SETS_PERCENT(port) (REMIX_TRAINING_RESET_SETS_PERCENT_P1 + (port))
+#define REMIX_TRAINING_TYPE(port) (REMIX_TRAINING_TYPE_P1 + (port))
+#define REMIX_TRAINING_CHARACTER(port) (REMIX_TRAINING_CHARACTER_P1 + (port))
+#define REMIX_TRAINING_COSTUME(port) (REMIX_TRAINING_COSTUME_P1 + (port))
+#define REMIX_TRAINING_SPAWN(port) (REMIX_TRAINING_SPAWN_P1 + (port))
 
 /** D-pad Controls entry values (string_table_dpad_controls). */
 #define REMIX_TRAINING_DPAD_ON 0
 #define REMIX_TRAINING_DPAD_RESET_ONLY 1
 #define REMIX_TRAINING_DPAD_OFF 2
+
+/**
+ * Fighter id of a Character entry value (0 is Auto, n is the n-th Training.asm string_table_char entry).
+ *
+ * @return The Remix fighter id, or -1 for Auto and for a value past the table.
+ */
+int remix_training_character_fkind(int entry_value);
 
 /** Value of `option`, its default for an invalid index. */
 int remix_training_get(int option);

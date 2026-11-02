@@ -36,6 +36,30 @@ const std::vector<std::string> kMusicNames = {
     "Hyrule Castle", "Meta Crystal", "Mushroom Kingdom", "Peach's Castle", "Planet Zebes", "Saffron City", "Sector Z", "Yoshi's Island",
 };
 
+struct CharacterEntry {
+    int fkind;
+    const char *name;
+};
+
+const CharacterEntry kCharacters[] = {
+#include "remix_training_characters_data.inc"
+};
+
+const int kCharacterCount = static_cast<int>(sizeof(kCharacters) / sizeof(kCharacters[0]));
+
+std::vector<std::string> BuildCharacterNames() {
+    std::vector<std::string> names = { "Auto" };
+    for (const CharacterEntry &entry : kCharacters) {
+        names.push_back(entry.name);
+    }
+    return names;
+}
+
+const std::vector<std::string> kCharacterNames = BuildCharacterNames();
+const std::vector<std::string> kTypeNames = { "Auto", "Human", "CPU", "Disabled" };
+const std::vector<std::string> kCostumeNames = { "Auto", "1", "2", "3", "4", "5", "6" };
+const std::vector<std::string> kSpawnNames = { "Auto", "Port 1", "Port 2", "Port 3", "Port 4" };
+
 const std::vector<Option> kOptions = {
     { REMIX_TRAINING_SHIELD_BREAK, "ShieldBreak", "Shield Break Mode", 0, 2, 0, { "Off", "On", "Infinite" } },
     { REMIX_TRAINING_OOS, "Oos", "OOS Action", 0, 11, 0, kOosNames },
@@ -60,6 +84,22 @@ const std::vector<Option> kOptions = {
     { REMIX_TRAINING_RESET_SETS_PERCENT_P2, "ResetSetsPercent2", "P2 Reset Sets Percent", 0, 1, 1, { "Off", "On" } },
     { REMIX_TRAINING_RESET_SETS_PERCENT_P3, "ResetSetsPercent3", "P3 Reset Sets Percent", 0, 1, 1, { "Off", "On" } },
     { REMIX_TRAINING_RESET_SETS_PERCENT_P4, "ResetSetsPercent4", "P4 Reset Sets Percent", 0, 1, 1, { "Off", "On" } },
+    { REMIX_TRAINING_TYPE_P1, "Type1", "P1 Type", 0, 3, 0, kTypeNames },
+    { REMIX_TRAINING_TYPE_P2, "Type2", "P2 Type", 0, 3, 0, kTypeNames },
+    { REMIX_TRAINING_TYPE_P3, "Type3", "P3 Type", 0, 3, 0, kTypeNames },
+    { REMIX_TRAINING_TYPE_P4, "Type4", "P4 Type", 0, 3, 0, kTypeNames },
+    { REMIX_TRAINING_CHARACTER_P1, "Character1", "P1 Character", 0, kCharacterCount, 0, kCharacterNames },
+    { REMIX_TRAINING_CHARACTER_P2, "Character2", "P2 Character", 0, kCharacterCount, 0, kCharacterNames },
+    { REMIX_TRAINING_CHARACTER_P3, "Character3", "P3 Character", 0, kCharacterCount, 0, kCharacterNames },
+    { REMIX_TRAINING_CHARACTER_P4, "Character4", "P4 Character", 0, kCharacterCount, 0, kCharacterNames },
+    { REMIX_TRAINING_COSTUME_P1, "Costume1", "P1 Costume", 0, 6, 0, kCostumeNames },
+    { REMIX_TRAINING_COSTUME_P2, "Costume2", "P2 Costume", 0, 6, 0, kCostumeNames },
+    { REMIX_TRAINING_COSTUME_P3, "Costume3", "P3 Costume", 0, 6, 0, kCostumeNames },
+    { REMIX_TRAINING_COSTUME_P4, "Costume4", "P4 Costume", 0, 6, 0, kCostumeNames },
+    { REMIX_TRAINING_SPAWN_P1, "Spawn1", "P1 Spawn", 0, 4, 0, kSpawnNames },
+    { REMIX_TRAINING_SPAWN_P2, "Spawn2", "P2 Spawn", 0, 4, 0, kSpawnNames },
+    { REMIX_TRAINING_SPAWN_P3, "Spawn3", "P3 Spawn", 0, 4, 0, kSpawnNames },
+    { REMIX_TRAINING_SPAWN_P4, "Spawn4", "P4 Spawn", 0, 4, 0, kSpawnNames },
 };
 
 std::array<int, REMIX_TRAINING_COUNT> sOverrides;
@@ -133,6 +173,15 @@ extern "C" void remix_training_init(void) {
         start = end + 1;
     }
     port_log("SSB64: remix_training: overrides from SSB64_REMIX_TRAINING applied\n");
+}
+
+extern "C" int remix_training_character_fkind(int entry_value) {
+    using namespace remix_training;
+
+    if ((entry_value < 1) || (entry_value > kCharacterCount)) {
+        return -1;
+    }
+    return kCharacters[entry_value - 1].fkind;
 }
 
 extern "C" int remix_training_get(int option) {
