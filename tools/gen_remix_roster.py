@@ -28,6 +28,14 @@ STATIC_VARIANT_PAD = "NA"
 STATIC_SOUND_PAD = "U"
 POLYGON_VARIANT = "POLYGON"
 
+# Vanilla menu zoom table (ROM 0x108370, ids 0x00..0x0B). Character.asm moves it with move_table_12 and the
+# Remix ROM stores the same floats (checked against Character.menu_zoom.table in baserom.remix.z64).
+VANILLA_MENU_ZOOM = (1.25, 1.15, 1.0, 1.03, 1.21, 1.33, 1.05, 1.07, 1.22, 1.2, 1.26, 1.3)
+MENU_ZOOM_PATCH_PATTERN = re.compile(
+    r"table_patch_start\(menu_zoom,\s*Character\.id\.(\w+),\s*0x4\)\s*float32\s+([0-9.]+)"
+)
+CHARACTER_SELECT_FILE = "CharacterSelect.asm"
+
 DEFINE_ARG_COUNT = 21
 ARG_NAME = 0
 ARG_PARENT = 1
@@ -301,7 +309,49 @@ def assemble_roster(remix_src):
         CLONE_ID, primary_name_by_id[CLONE_ID], static_name_for(variant_table, CLONE_ID),
         static_name_for(sound_table, CLONE_ID), costumes_by_id,
     )
-    return [entries[remix_id] for remix_id in range(ROSTER_SIZE)]
+    roster = [entries[remix_id] for remix_id in range(ROSTER_SIZE)]
+    apply_menu_zoom(roster, remix_src, ids_by_name)
+    return roster
+
+
+def menu_zoom_patches(remix_src, ids_by_name):
+    """Return {id: zoom} from every `table_patch_start(menu_zoom, ...)` in the Remix source.
+
+    CharacterSelect.asm is read first: Sheik and NSheik are patched there and again in their own files,
+    and the ROM keeps the character file's value.
+    """
+    source_files = sorted((remix_src / "src").rglob("*.asm"), key=lambda path: path.name != CHARACTER_SELECT_FILE)
+    zoom_by_id = {}
+    for path in source_files:
+        for match in MENU_ZOOM_PATCH_PATTERN.finditer(read_text(path)):
+            if match.group(1) not in ids_by_name:
+                raise RosterParseError(f"{path.name}: menu_zoom patch for unknown character {match.group(1)!r}")
+            zoom_by_id[ids_by_name[match.group(1)]] = float(match.group(2))
+    return zoom_by_id
+
+
+def base_menu_zoom(entry, ids_by_name):
+    """Zoom an id holds before the patches, mirroring move_table_12 and the parent copy in define_character."""
+    remix_id = entry["remix_id"]
+    if remix_id <= MAX_VANILLA_PARENT_ID:
+        return VANILLA_MENU_ZOOM[remix_id]
+    if remix_id in (ids_by_name["BOSS"], ids_by_name["METAL"]):
+        return VANILLA_MENU_ZOOM[ids_by_name["MARIO"]]
+    if remix_id == ids_by_name["GDONKEY"]:
+        return VANILLA_MENU_ZOOM[ids_by_name["DONKEY"]]
+    polygon_base = ids_by_name["NMARIO"]
+    if polygon_base <= remix_id < polygon_base + len(VANILLA_MENU_ZOOM):
+        return VANILLA_MENU_ZOOM[remix_id - polygon_base]
+    if entry["has_define_character"]:
+        return VANILLA_MENU_ZOOM[entry["parent_remix_id"]]
+    return 0.0
+
+
+def apply_menu_zoom(entries, remix_src, ids_by_name):
+    """Set entry["menu_zoom"] on every record."""
+    patches = menu_zoom_patches(remix_src, ids_by_name)
+    for entry in entries:
+        entry["menu_zoom"] = patches.get(entry["remix_id"], base_menu_zoom(entry, ids_by_name))
 
 
 def check_roster(roster):
@@ -347,6 +397,7 @@ def render_entry(entry):
         c_string(entry["file_moveset"]),
         c_string(entry["file_char"]),
         f"0x{entry['attrib_offset']:03X}",
+        f"{entry['menu_zoom']!r}f",
     ]
     costume_note = entry["costume_file"] or "no costume file"
     return f"    {{{', '.join(fields)}}},  /* {entry['name']}: {costume_note} */"
@@ -358,7 +409,8 @@ HEADER_PROLOGUE = """/*
  *
  * Entries with has_define_character == false are vanilla or non-fighter slots:
  * their add_actions, file_*, attrib_offset and jab3/inhale_copy are not defined by
- * the Remix source and are zero/NULL/false placeholders.
+ * the Remix source and are zero/NULL/false placeholders. menu_zoom is the CSS/results panel
+ * scale of the fighter (Character.menu_zoom.table), patches included.
  */
 #ifndef REMIX_ROSTER_DATA_H
 #define REMIX_ROSTER_DATA_H
@@ -402,6 +454,7 @@ typedef struct RemixRosterEntry {
     const char *file_moveset;
     const char *file_char;
     uint16_t attrib_offset;
+    float menu_zoom;
 } RemixRosterEntry;
 """
 

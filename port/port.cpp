@@ -9,6 +9,7 @@
 #include "gameloop.h"
 
 #include <libultraship/libultraship.h>
+#include <spdlog/spdlog.h>
 #include <SDL2/SDL.h>
 #include <libultraship/controller/controldeck/ControlDeck.h>
 #include <fast/Fast3dWindow.h>
@@ -1479,6 +1480,8 @@ int main(int argc, char* argv[]) {
 			slowFramesLogged++;
 			port_log("SSB64: slow frame %d took %.1f ms%s\n", frame, frameMs,
 			         (slowFramesLogged == kSlowFrameLogMax) ? " (slow frame log cap reached)" : "");
+			/* ssb64.log is stdio-buffered and flushed on exit only, so a Switch run closed from the HOME menu loses it; the spdlog file next to the .nro is flushed. */
+			SPDLOG_WARN("slow frame {} took {:.1f} ms", frame, frameMs);
 		}
 
 		if (!firstRunHintShown && frame == 60) {

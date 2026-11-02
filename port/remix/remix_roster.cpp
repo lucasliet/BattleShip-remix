@@ -46,6 +46,8 @@ constexpr int kLastSynthRemixId = 0x60;
 constexpr uint8_t kVanillaFighterCount = 27;
 constexpr int kFirstRelocatedAttributesFkind = 13;
 constexpr int kLastRelocatedAttributesFkind = 25;
+constexpr int kFirstVanillaMenuZoomFkind = 12;
+constexpr int kLastVanillaMenuZoomFkind = 26;
 
 /* Field offsets inside one 0x80-byte record (see docs/remix/torch_factories.md). */
 constexpr size_t kOffFileIds = 0x04;
@@ -301,6 +303,7 @@ SynthFighterPtr buildSynthFighter(const std::vector<uint8_t> &bytes, int remixId
     synth->name = std::string(kRemixRoster[index].name);
     synth->descriptor = *parent;
     synth->descriptor.parent_fkind = parentFkind;
+    synth->descriptor.scale = kRemixRoster[index].menu_zoom;
     synth->descriptor.ft_data = synth->ft_data.get();
     synth->descriptor.results_name = synth->name.c_str();
     setResultsLayout(synth->descriptor, synth->name);
@@ -322,6 +325,21 @@ void patchVanillaAttributeOffsets(const std::vector<uint8_t> &bytes)
         if (!port_fighter_set_attributes_offset(fkind, record.o_attributes)) {
             spdlog::warn("remix_roster: vanilla fkind {} has no FTData to patch", fkind);
         }
+    }
+}
+
+/* The vanilla descriptors of Master Hand, Metal Mario, the polygon team and Giant DK carry a neutral
+ * 1.0 panel scale; Remix gives each of them its own entry in Character.menu_zoom.table. */
+void patchVanillaMenuZoom()
+{
+    for (int fkind = kFirstVanillaMenuZoomFkind; fkind <= kLastVanillaMenuZoomFkind; ++fkind) {
+        const FighterDescriptor *vanilla = port_fighter_descriptor(fkind);
+        if (vanilla == nullptr) {
+            continue;
+        }
+        FighterDescriptor patched = *vanilla;
+        patched.scale = kRemixRoster[static_cast<size_t>(fkind)].menu_zoom;
+        port_fighter_register(fkind, &patched);
     }
 }
 
@@ -368,6 +386,7 @@ bool remix_roster_load()
         return false;
     }
     patchVanillaAttributeOffsets(blob->Data);
+    patchVanillaMenuZoom();
 
     std::vector<SynthFighterPtr> built;
     for (int remixId = kFirstSynthRemixId; remixId <= kLastSynthRemixId; ++remixId) {
