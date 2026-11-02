@@ -58,6 +58,9 @@ assets/*
 !assets/icon-jp.png
 !assets/icon-jp.ico
 !assets/icon-jp.icns
+!assets/icon-remix.png
+!assets/switch/
+!assets/switch/*.jpg
 !assets/macos_dmg_banner.png
 !assets/BattleShip.svg
 !assets/readme-stats/

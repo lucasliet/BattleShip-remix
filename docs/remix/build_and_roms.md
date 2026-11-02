@@ -128,6 +128,10 @@ empacote cada versão logo depois do seu build.
 3. Copie a pasta `dist/switch/SD/switch/BattleShip-Remix/` inteira para o SD, em `/switch/`.
 4. Abra pelo Homebrew Menu em modo de memória completa (segurando R ao abrir um jogo instalado).
 
+O ícone do Home menu é um JPEG 256x256 embutido no `.nro` pelo CMake (`assets/switch/icon.jpg` no original,
+`assets/switch/icon-remix.jpg` no Remix, com "SR"). Os dois saem de `assets/icon.png` por
+`.toolchain/host/venv/bin/python -I tools/gen_switch_icon.py` (só Pillow); o script também grava `assets/icon-remix.png`.
+
 Se o `.o2r` ou o `Torch` mudarem (novo `.recipe`), refaça o pacote: um `.o2r` antigo no SD com um `.nro` novo causa tempestade
 de tokens de reloc inválidos. O jogo grava `BattleShip-Remix.log` ao lado do `.nro`, no SD.
 

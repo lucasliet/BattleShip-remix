@@ -974,8 +974,16 @@ if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
         AUTHOR "BattleShip"
         VERSION "${SSB64_VERSION}"
     )
+    # Home menu icon (256x256 JPEG, tools/gen_switch_icon.py). Without ICON the
+    # .nro carries none and the Home menu shows the "?" placeholder.
+    if (SSB64_VERSION STREQUAL "remix")
+        set(SSB64_SWITCH_ICON ${CMAKE_CURRENT_SOURCE_DIR}/assets/switch/icon-remix.jpg)
+    else()
+        set(SSB64_SWITCH_ICON ${CMAKE_CURRENT_SOURCE_DIR}/assets/switch/icon.jpg)
+    endif()
     nx_create_nro(${PROJECT_NAME}
         NACP ${PROJECT_NAME}.nacp
+        ICON ${SSB64_SWITCH_ICON}
     )
     # nx_create_nro already registers the user-facing build target
     # (${PROJECT_NAME}_nro == ssb64_nro); nothing extra to declare here.
