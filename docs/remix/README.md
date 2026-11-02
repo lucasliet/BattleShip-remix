@@ -4,6 +4,8 @@
 pasta são referência ou ferramenta de trabalho; nenhum guarda plano nem estado de progresso. [`parity.md`](parity.md) é a tabela
 de paridade por arquivo `.asm` (gerada por `tools/gen_remix_parity.py`).
 
+ROMs necessárias (com SHA), versão do Remix (2.0.1) e passo a passo dos builds desktop e Switch: [`build_and_roms.md`](build_and_roms.md).
+
 Bugs corrigidos e decisões ficam em [`../bugs/README.md`](../bugs/README.md) (arquivos `remix_*`). Testes em jogo: skill
 `remix-smoke-tests` (`.claude/skills/remix-smoke-tests/`).
 

@@ -13,10 +13,10 @@
   - `& 'C:\Program Files\CMake\bin\cmake.exe' --build .\build\x64 --target ExtractAssetHeaders`
 - The executable target is `ssb64`, but the produced binary is `BattleShip`.
 
-### ROM version (US / JP)
+### ROM version (Remix / US / JP)
 
-`-DSSB64_VERSION=us` (default) or `-DSSB64_VERSION=jp` selects the ROM
-version. The decomp game code is region-conditionally compiled
+`-DSSB64_VERSION=remix` (default), `us` or `jp` selects the ROM
+version (Remix ROMs, hashes and builds: `docs/remix/build_and_roms.md`). The decomp game code is region-conditionally compiled
 (`#if REGION_US/REGION_JP`), so **US and JP are separate builds — use a
 separate build dir per version.** The switch drives the region defines,
 `yamls/<v>` extraction configs, `baserom.<v>.{z64,n64,v64}` selection,

@@ -18,17 +18,22 @@ of the build (cached afterwards) — there is no separate extract step.
   Windows SDK (Windows)
 - Submodules: `git submodule update --init --recursive`
 - A legal ROM at the repo root matching the version you are building:
-  - **US:** `baserom.us.z64` — `cmake -DSSB64_VERSION=us` (default)
+  - **US:** `baserom.us.z64` — `cmake -DSSB64_VERSION=us`
   - **JP:** `baserom.jp.z64` — `cmake -DSSB64_VERSION=jp`
-  - **Remix:** `baserom.remix.z64` — `cmake -DSSB64_VERSION=remix`
+  - **Remix:** `baserom.remix.z64` — `cmake -DSSB64_VERSION=remix` (the
+    default). The Remix build also reads `baserom.us.z64` for the CSS stage
+    images.
 
   | Version | Game code | SHA‑1 | MD5 |
   |---------|-----------|-------|-----|
   | US (NTSC-U v1.0) | `NALE` | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
   | JP (NALJ v1.0)   | `NALJ` | `4b71f0e01878696733eefa9c80d11c147ecb4984` | `66db457b130d31a286a23d6e4dd9726e` |
+  | Remix (Smash Remix 2.0.1 release, 64 MB) | `NALE` | `13716381ed5e29be2606e0f4724b18fd00789d04` | `2b2d6b295106c54216b7fc7a2f14346e` |
 
-  A dump that doesn't match these hashes will not work. The Remix dump has
-  no hash row here yet, so verify it against your own source.
+  A dump that doesn't match these hashes will not work. The Remix hashes
+  are those of the development copy; see
+  [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md) for the
+  version evidence and the Remix-specific build and Switch packaging steps.
 
 `.z64` is shown above; `.n64`/`.v64` are also accepted.
 
