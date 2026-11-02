@@ -40,6 +40,9 @@ Atalhos para ir direto ao ponto (variáveis de ambiente antes do comando):
 | Training com opções do menu | acrescente `SSB64_REMIX_TRAINING="ShieldBreak=1;Oos=3;Tech=4"` |
 | DK Mode | `SSB64_DK_MODE=<modo> ./BattleShip-Remix` (o easter egg do CSS ainda não existe) |
 
+Teclado (padrão do libultraship, igual ao BattleShip original): **WASD é o analógico e as setas são os C-buttons**, e um toque
+em C-button faz o lutador pular. Para andar use WASD (X = A, C = B, Z = Z, E = L, R = R, Espaço = Start).
+
 Ids de lutador do Remix são iguais ao fkind do port (Crash 72, Marina 63, Young Link 31, Lanky 76, Marth 58).
 
 ## 1. Música e estágios
@@ -65,7 +68,8 @@ Ids de lutador do Remix são iguais ao fkind do port (Crash 72, Marina 63, Young
 
 - [ ] Menu do port, Remix > Training: cada entrada muda o comportamento (Shield Break Infinite segura a CPU no escudo; Spam Practice
   repete o golpe no intervalo; Percent aplica o valor ao criar a partida; Stage BG troca o fundo).
-- [ ] Ainda não visto em jogo: OOS contra escudo real, Tech do menu (spike a CPU no chão com `Tech=4`, ela rola para a esquerda),
+- [x] OOS contra escudo real: visto em 2026-11-02 por script (Grab saindo do escudo, ver T9.1 do ROADMAP).
+- [ ] Ainda não visto em jogo: Tech do menu (spike a CPU no chão com `Tech=4`, ela rola para a esquerda),
   DI da CPU (`DiType=3;DiStrength=1;DiDirection=1;DiFirstHit=1`).
 
 ## 5. Conferências do T9.1 que ainda são só minhas

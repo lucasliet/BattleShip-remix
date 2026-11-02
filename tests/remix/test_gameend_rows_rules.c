@@ -20,6 +20,7 @@ static void testGoalsAreCappedLikeTheKoColumn(void)
 {
     CHECK_EQ(7, gmRemixGameEndRowsClampCount(7));
     CHECK_EQ(999, gmRemixGameEndRowsClampCount(999));
+    CHECK_EQ(999, gmRemixGameEndRowsClampCount(1000));
     CHECK_EQ(999, gmRemixGameEndRowsClampCount(1500));
 }
 
