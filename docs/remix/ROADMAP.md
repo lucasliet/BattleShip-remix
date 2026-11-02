@@ -540,7 +540,7 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 ## M10. Switch
 
 - [x] T10.1 Build `.nro` do `REGION_REMIX` (`scripts/switch/build.sh`), pacote com o `.o2r` do Remix. **Feito 2026-11-02:** `scripts/switch/build.sh remix` (devkitA64 em `.toolchain`) compilou as 1034 unidades com **um** erro, a ordem de `#include` em `ftremixaipostsheik.c` (`<math.h>` antes de `<ft/fighter.h>` deixava `wint_t` indefinido no newlib), e gerou `build-switch/BattleShip-Remix.nro` (13,0 MB, o anterior era de 12/10); `scripts/switch/pack.sh` montou `dist/switch/SD/switch/BattleShip-Remix/` com o `.nro`, o `BattleShip-Remix.o2r` (59,9 MB) e o `f3d.o2r` (`dist` é ignorado no git). Não foi executado: sem hardware aqui.
-- [ ] T10.2 Validação em hardware pelo usuário (checklist de `docs/switch_port_2026-10-12.md`), RAM com o `.o2r` de 60 MB
+- [ ] T10.2 Validação em hardware pelo usuário (checklist de `docs/switch_port_2026-10-12.md`), RAM com o `.o2r` de 60 MB **1ª tentativa 2026-11-02:** tela preta e áudio lento. O log do Switch tinha 16614 linhas, todas `G_VTX(f3dex2) skipped: unresolved addr=0xa2...` (raw w1 era token). Causa: `gfx_vtx_addr_is_unresolved` rejeitava todo ponteiro abaixo de 4 GB, e no Switch o heap fica abaixo disso (`0xa2xxxxxx`), então nenhum Vtx era desenhado e o log de erro por frame pesava na CPU (áudio lento). Correção em `libultraship/src/fast/interpreter.cpp`: com `__SWITCH__` só é pulado o que está abaixo de `0x10000000` (mesmo limite do guard do SETTIMG). `.nro` refeito e empacotado; aguarda novo teste do usuário.
   (os dados do Remix na ROM somam ~36,6 MB contra ~9,5 MB do vanilla) e armazenamento no SD.
 - **CP10**.
 
