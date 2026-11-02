@@ -40,7 +40,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 - **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2). M7 (IA) fechado (CP7, sobras no T8.2): a CPU usa as tabelas de ataque do Remix, recupera e joga nos níveis 9 e 10. M8 (restante da paridade) em andamento (CP9, 2026-10-31): T2.11, T8.1 e T8.2 com três ondas feitas, sobras dependentes de assets e subsistemas; T9.2 (vanilla) feito. M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
 - **Último checkpoint:** CP10, 2026-11-02 (a pedido; antes CP9b, CP9a, CP9, CP8, CP7a, CP7, CP6, CP6f a CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~89% (CP10; ver a tabela no fim deste arquivo) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+- **Estimativa geral:** ~91% (CP10 mais o trabalho de 2026-11-02 depois dele: Training Music, Tech visto, cadeia por porta, T10.1; a tabela no fim ainda mostra o cálculo do CP10) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
 ---
 
