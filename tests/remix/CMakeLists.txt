@@ -32,6 +32,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_ai_teaching_rules.c
     test_stopwatch_bg_rules.c
     test_training_rules.c
+    test_training_port_rules.c
     test_ai_di_rules.c
     test_blueshell_rules.c
     test_gameend_rows_rules.c
@@ -68,6 +69,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaispecialsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixstopwatchbgrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingportrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaidirules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixblueshellrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgameendrowsrules.c

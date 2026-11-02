@@ -37,6 +37,7 @@ extern void remixTestAiSpecialsRules(void);
 extern void remixTestAiTeachingRules(void);
 extern void remixTestStopwatchBgRules(void);
 extern void remixTestTrainingRules(void);
+extern void remixTestTrainingPortRules(void);
 extern void remixTestAiDiRules(void);
 extern void remixTestBlueShellRules(void);
 extern void remixTestGameEndRowsRules(void);
@@ -76,6 +77,7 @@ int main(void)
     remixTestAiTeachingRules();
     remixTestStopwatchBgRules();
     remixTestTrainingRules();
+    remixTestTrainingPortRules();
     remixTestAiDiRules();
     remixTestBlueShellRules();
     remixTestGameEndRowsRules();
