@@ -9,6 +9,10 @@
 
 #include "remix/remix_overlay.h"
 
+extern "C" {
+#include "port_log.h"
+}
+
 namespace {
 
 struct RemixMusicTitleRow {
@@ -47,8 +51,10 @@ extern "C" void remix_music_title_show(int32_t bgm_id, float seconds) {
     }
     row = FindRemixMusicTitleRow(static_cast<uint32_t>(bgm_id));
     if (row == nullptr) {
+        port_log("SSB64: music title: bgm %d has no title\n", static_cast<int>(bgm_id));
         return;
     }
     std::snprintf(line, sizeof(line), "%s - %s", row->track, row->game);
+    port_log("SSB64: music title: bgm %d \"%s\"\n", static_cast<int>(bgm_id), line);
     remix_overlay_show_text(line, seconds);
 }

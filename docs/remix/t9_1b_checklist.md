@@ -48,6 +48,20 @@ Ids de lutador do Remix são iguais ao fkind do port (Crash 72, Marina 63, Young
 ## 1. Música e estágios
 
 - [ ] Para cada estágio da tabela: a faixa é a do Remix para aquele estágio e não pula nem engasga nos primeiros 20 s.
+  **Como saber qual é a faixa certa:** com o toggle "Music Title at Match Start" ligado (é o padrão), o título "faixa - jogo" aparece na tela durante a contagem de 3, 2, 1. Conferido por mim no log (`music title: bgm N "..."`) contra a tabela de música padrão do Remix de cada estágio, as oito batem (a música alternativa sorteia 35% das vezes, então um título diferente do abaixo pode ser legítimo):
+
+  | Estágio | Título esperado |
+  |---|---|
+  | Dream Land (6) | Dream Land - Kirby Super Star |
+  | Deku Tree (41) | Kokiri Forest - The Legend of Zelda: Ocarina of Time |
+  | Pokémon Stadium (45) | Trainer Battle - Pokemon Red & Blue |
+  | Taltal (46) | Link's Awakening Medley - The Legend of Zelda: Link's Awakening |
+  | Glacial (47) | River Stage - Marvel vs. Capcom 2 |
+  | WarioWare (48) | WarioWare, Inc. - WarioWare, Inc.: Mega Microgame$! |
+  | Battlefield (49) | Battlefield - Super Smash Bros. Brawl |
+  | Dr. Mario (51) | Fever - Dr. Mario |
+
+  Você só precisa dizer se o título na tela é esse e se o som da faixa é o dessa música (o que eu não consigo ouvir).
 - [ ] Peach's Castle II (id 68): abre como o Peach's Castle original (sem Banzai Bill, é código morto no Remix).
 - [ ] Música de vitória de um lutador Remix (termine uma partida com Crash, Marina ou Marth) e a tela de resultados.
 - [ ] Sound Test: navegar, tocar uma faixa Remix e uma vanilla, voltar à primeira ao dar a volta na lista.
