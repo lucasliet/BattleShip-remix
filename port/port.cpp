@@ -1463,10 +1463,23 @@ int main(int argc, char* argv[]) {
 	}
 	int frame = 0;
 	bool firstRunHintShown = false;
+	// Hitch log: a frame slower than kSlowFrameMs is written to ssb64.log (capped) so a Switch log shows where the stutter is
+	// (file loads, scene changes) instead of only the frames that crashed.
+	constexpr double kSlowFrameMs = 50.0;
+	constexpr int kSlowFrameLogMax = 200;
+	int slowFramesLogged = 0;
 	while (WindowIsRunning()) {
 		port_input_script_tick();
+		const auto frameStart = std::chrono::steady_clock::now();
 		PortPushFrame();
+		const double frameMs =
+		    std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - frameStart).count();
 		frame++;
+		if (frameMs > kSlowFrameMs && slowFramesLogged < kSlowFrameLogMax) {
+			slowFramesLogged++;
+			port_log("SSB64: slow frame %d took %.1f ms%s\n", frame, frameMs,
+			         (slowFramesLogged == kSlowFrameLogMax) ? " (slow frame log cap reached)" : "");
+		}
 
 		if (!firstRunHintShown && frame == 60) {
 			auto cv = sContext->GetConsoleVariables();
