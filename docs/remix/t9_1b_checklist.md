@@ -71,8 +71,8 @@ Ids de lutador do Remix são iguais ao fkind do port (Crash 72, Marina 63, Young
 - [ ] Music do Training (Remix > Training > Music): escolher uma faixa troca a música da partida na hora e o martelo e a estrela
   mantêm o tema próprio; ao acabar, a faixa escolhida volta. Visto por script só ao abrir a partida (`Music=7` toca Final Destination).
 - [x] OOS contra escudo real: visto em 2026-11-02 por script (Grab saindo do escudo, ver T9.1 do ROADMAP).
-- [ ] Ainda não visto em jogo: Tech do menu (spike a CPU no chão com `Tech=4`, ela rola para a esquerda),
-  DI da CPU (`DiType=3;DiStrength=1;DiDirection=1;DiFirstHit=1`).
+- [x] Tech do menu: visto em 2026-11-02 por script (fsmash da plataforma a 30%, a CPU toca o chão e rola: status 73 para Roll Left, 74 para Roll Right, 81 para In Place).
+- [ ] Ainda não visto em jogo: DI da CPU (`DiType=3;DiStrength=1;DiDirection=1;DiFirstHit=1`).
 
 ## 5. Conferências do T9.1 que ainda são só minhas
 
