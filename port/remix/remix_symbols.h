@@ -5048,6 +5048,8 @@
 #define REMIX_SYM_Toggles__profile_defaults_JP 0x8046B6F8u
 #define REMIX_SYM_Toggles__profile_defaults_NE 0x8046AEA8u
 #define REMIX_SYM_Toggles__profile_defaults_TE 0x8046A658u
+#define REMIX_SYM_Training__bgm_table 0x804E4F4Cu
+#define REMIX_SYM_Training__entry_music 0x804E52C0u
 #define REMIX_SYM_Wario__Action__action_string_table 0x80547340u
 #define REMIX_SYM_Wario__Action__string_0x0DF 0x805472C8u
 #define REMIX_SYM_Wario__Action__string_0x0E0 0x805472D4u

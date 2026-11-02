@@ -31,9 +31,15 @@ const std::vector<std::string> kSpamNames = {
     "Neutral Special", "Up Special", "Grab", "Jab", "Short Hop", "Full Hop",
 };
 
+const std::vector<std::string> kMusicNames = {
+    "Training Mode", "Bonus", "Congo Jungle", "Credits", "Data", "Dream Land", "Duel Zone", "Final Destination", "How to Play",
+    "Hyrule Castle", "Meta Crystal", "Mushroom Kingdom", "Peach's Castle", "Planet Zebes", "Saffron City", "Sector Z", "Yoshi's Island",
+};
+
 const std::vector<Option> kOptions = {
     { REMIX_TRAINING_SHIELD_BREAK, "ShieldBreak", "Shield Break Mode", 0, 2, 0, { "Off", "On", "Infinite" } },
     { REMIX_TRAINING_OOS, "Oos", "OOS Action", 0, 11, 0, kOosNames },
+    { REMIX_TRAINING_MUSIC, "Music", "Music", 0, 16, 0, kMusicNames },
     { REMIX_TRAINING_STAGE_BG, "StageBg", "Stage Background", 0, 1, 0, { "Off", "On" } },
     { REMIX_TRAINING_TECH, "Tech", "CPU Teching", 0, 6, 0, kTechNames },
     { REMIX_TRAINING_DI_TYPE, "DiType", "CPU DI Type", 0, 3, 0, { "None", "Random", "Smash", "Slide" } },

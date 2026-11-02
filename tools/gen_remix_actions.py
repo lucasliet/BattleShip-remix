@@ -39,6 +39,8 @@ ACTION_ENTRY_SIZE = 0x14
 SPECIAL_TABLES = ["ground_nsp", "ground_usp", "ground_dsp", "air_nsp", "air_usp", "air_dsp"]
 KIRBY_COPY_TABLES = ["kirby_ground_nsp", "kirby_air_nsp"]
 EXTRA_SYMBOLS = [
+    "Training.bgm_table",
+    "Training.entry_music",
     "Character.default_costume.table",
     "Character.variants.table",
     "Stages.variant_table",
