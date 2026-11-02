@@ -30,6 +30,8 @@
 #include "fighter_registry.h"
 #include "remix/remix_action_bind.h"
 #include "remix/remix_action_layout.h"
+#include "remix/remix_ram_image.h"
+#include "remix/remix_symbols.h"
 #include "remix/remix_synth_ft.h"
 #include "remix_roster_data.h"
 
@@ -46,6 +48,7 @@ constexpr int kLastSynthRemixId = 0x60;
 constexpr uint8_t kVanillaFighterCount = 27;
 constexpr int kFirstRelocatedAttributesFkind = 13;
 constexpr int kLastRelocatedAttributesFkind = 25;
+constexpr uint32_t kEntryActionRowSize = 8;
 constexpr int kFirstVanillaMenuZoomFkind = 12;
 constexpr int kLastVanillaMenuZoomFkind = 26;
 
@@ -272,6 +275,22 @@ void bindSpecials(SynthFighter &synth, int remixId, int parentFkind)
     ftRemixBindDescriptorHooks(remixId, &synth.descriptor);
 }
 
+/* Remix keeps one row of two entry statuses per character (Character.entry_action.table); a clone starts
+ * with its parent's row and may override it (Peach, Marth, Dedede...). Keeping the parent's statuses
+ * plays another fighter's action on the clone's own motions. */
+void bindEntryStatuses(SynthFighter &synth, int remixId)
+{
+    const uint32_t row = REMIX_SYM_Character__entry_action__table + static_cast<uint32_t>(remixId) * kEntryActionRowSize;
+    for (uint32_t entryId = 0; entryId < 2; ++entryId) {
+        const uint32_t status = remix_ram_image_read_word(row + entryId * 4u);
+        if (status == 0) {
+            spdlog::warn("remix_roster: no entry status {} for remix id 0x{:02X}, keeping the parent's", entryId, remixId);
+            continue;
+        }
+        synth.descriptor.entry_appear_status[entryId] = static_cast<int>(status);
+    }
+}
+
 /* Builds one synth from its Remix record. The FTData clones the parent's, so
  * fields the record does not supply keep the parent's values. The descriptor is
  * a copy of the parent's, with the Remix-specific fields replaced. */
@@ -308,6 +327,7 @@ SynthFighterPtr buildSynthFighter(const std::vector<uint8_t> &bytes, int remixId
     synth->descriptor.results_name = synth->name.c_str();
     setResultsLayout(synth->descriptor, synth->name);
     bindSpecials(*synth, remixId, parentFkind);
+    bindEntryStatuses(*synth, remixId);
     return synth;
 }
 

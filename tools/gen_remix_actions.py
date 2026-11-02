@@ -43,6 +43,7 @@ EXTRA_SYMBOLS = [
     "Training.entry_music",
     "Character.default_costume.table",
     "Character.variants.table",
+    "Character.entry_action.table",
     "Stages.variant_table",
     "CharacterSelect.series_logo.table",
     "Costumes.select_.num_costumes",
