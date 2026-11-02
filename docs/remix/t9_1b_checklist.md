@@ -75,8 +75,8 @@ Ids de lutador do Remix são iguais ao fkind do port (Crash 72, Marina 63, Young
 ## 3. Menus e gráficos
 
 - [ ] Título, CSS (grade de 24 retratos do 12CB não existe; confira o CSS padrão do port) e seleção de estágio.
-- [ ] Pausa: legendas "R: Legend" na posição certa e sem sobrepor "1P PAUSE".
-- [ ] Resultados do KOTH e do Smashketball: linhas extras na tela de fim.
+- [x] Pausa: legendas "R: Legend" na posição certa e sem sobrepor "1P PAUSE" (visto por mim em 2026-11-02, `menu_pause`: "1P PAUSE", a linha A+B+Z+R: RESET e "R: Legend" no canto, sem sobreposição).
+- [x] Resultados do KOTH e do Smashketball: linhas extras na tela de fim (KOTH e Smashketball vistos no CP8; a tela de uma partida stock com KOs, TKO, Pts, Place e "Press A for Match Stats" revista por mim em 2026-11-02, `menu_results`).
 
 ## 4. Training
 
