@@ -1,4 +1,4 @@
-# Remix: builds e ROMs
+# Builds e ROMs: BattleShip original (US) e BattleShip-Remix
 
 Nada de ROM nem de `.o2r` entra no git (`*.z64`, `build/`, `build-*/` e `dist/` estão no `.gitignore`). Quem clona o
 repositório precisa fornecer as ROMs abaixo e gerar o `.o2r` no desktop.
@@ -46,7 +46,34 @@ O fonte do Remix traz o `original.xdelta` (SHA-256 `e892db9f57135ae2ba380e6db985
 que gera a ROM-base para a montagem do ASM a partir de uma US. A ROM vanilla não serve como `baserom.remix.z64`, porque
 muitas edições do Remix estão dentro de arquivos comprimidos da ROM. Não rodamos o xdelta nesta máquina.
 
-## Build desktop (macOS, toolchain contida)
+## Dois produtos, dois diretórios de build
+
+| Produto | `SSB64_VERSION` | ROM | Binário | Arquivo de assets | Diretório de build sugerido |
+|---|---|---|---|---|---|
+| BattleShip (SSB64 original, US) | `us` | `baserom.us.z64` | `BattleShip` | `BattleShip.o2r` | `build-us` |
+| BattleShip-Remix | `remix` (padrão) | `baserom.remix.z64` (+ `baserom.us.z64`) | `BattleShip-Remix` | `BattleShip-Remix.o2r` | `build` |
+
+O código do jogo é compilado por região (`REGION_US` ou `REGION_REMIX`), então cada versão é um build próprio, com seu
+diretório. O nome do binário e do `.o2r` vem de `SSB64_APP_NAME` (`CMakeLists.txt:661-670`). Os dois podem existir lado a
+lado.
+
+## Build desktop do BattleShip original (macOS, toolchain contida)
+
+Mesmos comandos do Remix, trocando a versão e o diretório. Precisa só de `baserom.us.z64`.
+
+```bash
+PATH=$PWD/.toolchain/host/ninja:$PATH
+.toolchain/host/cmake/CMake.app/Contents/bin/cmake -S $PWD -B $PWD/build-us -GNinja -DCMAKE_BUILD_TYPE=Release \
+  -DSSB64_VERSION=us -DCMAKE_IGNORE_PREFIX_PATH="/opt/homebrew;/usr/local" \
+  -DCMAKE_PREFIX_PATH=$PWD/.toolchain/host/deps
+.toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build-us --target ssb64 -j 4
+(cd build-us && ./BattleShip)
+```
+
+O binário `BattleShip` carrega `BattleShip.o2r` e `f3d.o2r` do diretório onde roda (o `ExtractAssets` os gera a partir de
+`baserom.us.z64`). Em Linux e Windows os comandos genéricos estão em `BUILDING.md`.
+
+## Build desktop do BattleShip-Remix (macOS, toolchain contida)
 
 Tudo vem de `.toolchain/` (veja `AGENTS.md`). `SSB64_VERSION` tem como padrão `remix`. O diretório `build/` desta
 máquina foi configurado assim (Ninja, `Release`):
@@ -70,15 +97,28 @@ o `config.yml`, os `yamls/remix/*.yml` ou a ROM mudam. O `.recipe` (41 bytes) é
 
 Para refazer só os assets: `cmake --build build --target ExtractAssets`.
 
-## Build Switch
+## Build Switch (BattleShip e BattleShip-Remix)
 
-O console nunca lê ROM: o `.nro` é compilado com o devkitA64 e o `.o2r` vem do build desktop.
+O console nunca lê ROM: o `.nro` é compilado com o devkitA64 e o `.o2r` vem do build desktop da mesma versão.
 
 ```bash
 scripts/switch/setup-toolchain.sh        # uma vez; rede só nessa etapa
+
+# Remix (padrão)
 scripts/switch/build.sh remix            # build-switch/BattleShip-Remix.nro
-scripts/switch/pack.sh remix             # dist/switch/SD/switch/BattleShip-Remix/
+VERSION=remix scripts/switch/pack.sh     # dist/switch/SD/switch/BattleShip-Remix/
+
+# BattleShip original (US)
+scripts/switch/build.sh us               # build-switch/BattleShip.nro
+VERSION=us scripts/switch/pack.sh        # dist/switch/SD/switch/BattleShip/
 ```
+
+O `pack.sh` procura `<app>.o2r`, `<app>.o2r.recipe` e `f3d.o2r` em `build/` e depois na raiz do repositório, nunca em
+`build-us/`. Para o original, copie esses três arquivos de `build-us/` para a raiz (ou para `build/`) antes do pack.
+
+O `pack.sh` escolhe a versão só pela variável `VERSION` (padrão `remix`), não pelo argumento; sem `VERSION=us` ele empacota o
+Remix. O `build-switch/` é compartilhado: rodar `build.sh us` e depois `build.sh remix` reconfigura o mesmo diretório, então
+empacote cada versão logo depois do seu build.
 
 `pack.sh` só copia: o `.nro` de `build-switch/`, e `BattleShip-Remix.o2r`, `BattleShip-Remix.o2r.recipe` e `f3d.o2r` de
 `build/`. Se algum não existir, ele só imprime `AVISO` e segue, e o pacote sai incompleto. Por isso:

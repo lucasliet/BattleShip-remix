@@ -172,7 +172,7 @@ scripts/switch/build.sh us                 # -> build-switch/BattleShip.nro
 VERSION=remix scripts/switch/build.sh      # -> build-switch/BattleShip-Remix.nro
 
 # 3. Package the SD card layout
-scripts/switch/build.sh us && scripts/switch/pack.sh
+scripts/switch/build.sh us && VERSION=us scripts/switch/pack.sh
 #    dist/switch/SD/switch/BattleShip/{BattleShip.nro, *.o2r, ...}
 VERSION=remix scripts/switch/build.sh && VERSION=remix scripts/switch/pack.sh
 #    dist/switch/SD/switch/BattleShip-Remix/{BattleShip-Remix.nro, *.o2r, ...}
