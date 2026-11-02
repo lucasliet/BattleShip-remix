@@ -12,6 +12,15 @@ namespace ssb64 {
             return "gEnhancements.ClassicCoopFriendlyFire";
         }
 
+        // Smash Remix 1P Game is one fighter plus the difficulty selector, so the co-op CSS is opt-in there.
+        bool ClassicCoopDefault() {
+#if defined(REGION_REMIX)
+            return false;
+#else
+            return true;
+#endif
+        }
+
     } // namespace enhancements
 } // namespace ssb64
 
@@ -27,7 +36,7 @@ static int sClassicCoopLatched = -1;
 static int sClassicCoopContext = 0;
 
 extern "C" void port_classic_coop_latch(void) {
-    sClassicCoopLatched = CVarGetInteger(ssb64::enhancements::ClassicCoopCVarName(), 1) != 0;
+    sClassicCoopLatched = CVarGetInteger(ssb64::enhancements::ClassicCoopCVarName(), ssb64::enhancements::ClassicCoopDefault()) != 0;
 }
 
 extern "C" int port_enhancement_classic_coop(void) {

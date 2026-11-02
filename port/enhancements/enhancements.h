@@ -104,6 +104,7 @@ const char* SkipResultsScreenCVarName();
 const char* CpuLevel9CVarName();
 const char* ClassicCoopCVarName();
 const char* ClassicCoopFriendlyFireCVarName();
+bool ClassicCoopDefault();
 const char* ShuffleMusicCVarName();
 const char* MusicSelectionCVarName();
 const char* DisableHUDCVarName();

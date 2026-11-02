@@ -1145,7 +1145,7 @@ void PortMenu::AddMenuSettings() {
                               "second player can join the whole run as a co-op partner. If only "
                               "one player picks a character, the run plays as normal solo "
                               "Classic. Restart required for the toggle to take effect.")
-                     .DefaultValue(true));
+                     .DefaultValue(ssb64::enhancements::ClassicCoopDefault()));
     AddWidget(path, "Co-op Friendly Fire", WIDGET_CVAR_CHECKBOX)
         .CVar(ssb64::enhancements::ClassicCoopFriendlyFireCVarName())
         .RaceDisable(false)
