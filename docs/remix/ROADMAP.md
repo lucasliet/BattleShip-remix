@@ -606,7 +606,11 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     Resolvidos em `notes/n64_address_resolutions.md`: 0x80131580 = `gIFCommonPlayerInterface.is_magnify_display`, 0x80131AD8 =
     `sEFGroundActor`, 0x800F9C8C/0x800F9CC4 = `mpCollisionCheckProjectRWall`; 0x80132704 fica no padrão (rotação 0, vista em
     tela); 0x8014A24C e 0x8019C230 entram na Fase 3.
-  - [ ] I6 grupo 2 do estágio e rotina de câmera
+  - [x] I6 grupo 2 do estágio e rotina de câmera. Feito (2026-11-03): `gr/grremix/grremixstagebg.*` (caminhada `gGCCommonLinks[2]` ->
+    junta -> bola de warp e paleta, `grRemixStageBgBitmapToken` com o fix-up do sprite, `grRemixStageBgSetBitmap` troca o
+    `Sprite.bitmap` do wallpaper, `grWallpaperGetGObj`), usado pelo T1.5b: Time Twister completo (warp, zoom da câmera pelo
+    `gmCameraSetStatusMapZoom`, cor da lupa, troca de fundo, troca e fade da música com `gmRemixBgm*`; visto em `tt3`: o estágio vira
+    N. Sanity Beach e a música 318, log `remix time twister`) e Scuttle Town (paleta lida, fundo noite e dia trocado; visto em `sc2`).
   - [ ] I7 troca de imagem por parte de modelo
   - [x] I8 emulador de referência em `.toolchain/ref-emu/`. Feito (2026-11-03): `scripts/macos/setup-ref-emu.sh` (mupen64plus 2.6.0
     com interpretador puro, rsp-cxd4, angrylion-rdp-plus 1.6, SDL2 e libpng compartilhados, tudo por sha256 em `.toolchain/ref-emu`),
