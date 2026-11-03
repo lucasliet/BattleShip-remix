@@ -16,7 +16,7 @@ Needs Pillow only (run it with the repo venv: .toolchain/host/venv/bin/python -I
 import random
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ASSETS = REPO_ROOT / "assets"
@@ -41,7 +41,13 @@ LETTER_ORIGIN = (225, 312)
 OUTLINE_GROW = 27
 SHADOW_OFFSET = (22, 26)
 FILL_TOP = (255, 238, 0)
-FILL_BOTTOM = (255, 128, 0)
+FILL_MID = (255, 176, 0)
+FILL_BOTTOM = (255, 118, 0)
+GRUNGE_COARSE_CELLS = 36
+GRUNGE_FINE_CELLS = 130
+GRUNGE_FINE_WEIGHT = 0.5
+GRUNGE_TOP_BIAS = 225
+GRUNGE_BOTTOM_BIAS = 40
 OUTLINE_COLOR = (255, 0, 0)
 SUPERSAMPLE = 3
 SHADOW_REACH = 13
@@ -148,23 +154,43 @@ def offset(shape, dx, dy):
     return ImageChops.offset(shape, dx, dy)
 
 
+def noise_field(cells, sigma, seed):
+    """Smooth random field, 0..255, whose blobs are about SIZE / cells pixels wide."""
+    random.seed(seed)
+    field = Image.effect_noise((cells, cells), sigma).resize((SIZE, SIZE), Image.BICUBIC)
+    return ImageOps.autocontrast(field, cutoff=1)
+
+
+def vertical_ramp(box, top_value, bottom_value):
+    ramp = Image.new("L", (SIZE, SIZE), top_value)
+    draw = ImageDraw.Draw(ramp)
+    height = box[3] - box[1]
+    for y in range(box[1], box[3]):
+        ratio = (y - box[1]) / height
+        draw.line([(0, y), (SIZE, y)], fill=round(top_value + (bottom_value - top_value) * ratio))
+    return ramp
+
+
+def distressed_patches(box, seed):
+    """Mask of ragged yellow patches: dense at the top of the letters, gone near the bottom."""
+    coarse = noise_field(GRUNGE_COARSE_CELLS, 90, seed)
+    fine = noise_field(GRUNGE_FINE_CELLS, 90, seed + 1)
+    field = ImageChops.add(Image.blend(coarse, fine, GRUNGE_FINE_WEIGHT), vertical_ramp(box, GRUNGE_TOP_BIAS, GRUNGE_BOTTOM_BIAS), 1, -128)
+    return field.point(lambda value: 255 if value > 128 else 0)
+
+
 def gradient_fill(shape):
     box = shape.getbbox()
     fill = Image.new("RGB", (SIZE, SIZE), FILL_TOP)
     pixels = fill.load()
-    rng = random.Random(RNG_SEED)
     height = box[3] - box[1]
     for y in range(box[1], box[3]):
-        ratio = (y - box[1]) / height
-        ratio = min(1.0, max(0.0, ratio * 1.15 - 0.1))
-        base = tuple(FILL_TOP[channel] + (FILL_BOTTOM[channel] - FILL_TOP[channel]) * ratio for channel in range(3))
+        ratio = min(1.0, max(0.0, (y - box[1]) / height * 1.1))
+        base = tuple(FILL_MID[channel] + (FILL_BOTTOM[channel] - FILL_MID[channel]) * ratio for channel in range(3))
         for x in range(box[0], box[2]):
-            noise = rng.uniform(-14, 14) * (0.4 + ratio)
-            pixels[x, y] = (
-                round(min(255, max(0, base[0]))),
-                round(min(255, max(0, base[1] + noise))),
-                round(min(255, max(0, base[2]))),
-            )
+            pixels[x, y] = tuple(round(min(255, max(0, value))) for value in base)
+    yellow = Image.new("RGB", (SIZE, SIZE), FILL_TOP)
+    fill.paste(yellow, mask=distressed_patches(box, RNG_SEED))
     return fill
 
 

@@ -5,6 +5,8 @@
 #include "port_watchdog.h"
 #include "port_log.h"
 
+#include <spdlog/spdlog.h>
+
 #include <atomic>
 #include <cerrno>
 #include <chrono>
@@ -420,10 +422,11 @@ void WatchdogLoop() {
         uint64_t since_yield_ms = now - last_yield_change_ms;
         uint64_t since_frame_ms = now - last_frame_change_ms;
 
-        /* Require both liveness counters to stall. A running coroutine
-         * could yield tens of thousands of times per frame; a frame that
-         * takes >3s without any yield is a genuine hang. */
-        if (since_frame_ms > kHangThresholdMs && since_yield_ms > kHangThresholdMs) {
+        /* The frame counter is the liveness signal. A stall with no yields is
+         * a spin inside one coroutine; a stall with yields still advancing is
+         * a livelock between coroutines. Both are reported (since_yield tells
+         * them apart). */
+        if (since_frame_ms > kHangThresholdMs) {
             if (now - last_log_ms < kRepeatLogMs) continue;
             last_log_ms = now;
 
@@ -461,6 +464,13 @@ void WatchdogLoop() {
                          (unsigned long long)fc,
                          (unsigned long long)yc);
             std::fflush(stderr);
+
+            /* ssb64.log is stdio-buffered and lost when the process is killed from the HOME menu; the spdlog
+             * file is flushed, so a freeze on the Switch still leaves this line behind. */
+            SPDLOG_CRITICAL("watchdog: main loop stalled since_frame={} ms since_yield={} ms active_tid={}({}) "
+                            "active_elapsed={} ms scene={}({}) prev={} frame={} yield_count={}",
+                            since_frame_ms, since_yield_ms, active_id, ThreadLabel(active_id), resume_elapsed_ms,
+                            (unsigned)scene, port_diag_get_scene_name(scene), (unsigned)scene_prev, fc, yc);
 
 #if !defined(_WIN32) && !defined(__SWITCH__)
             /* Ask the main thread to dump its own backtrace via SIGUSR1. One
