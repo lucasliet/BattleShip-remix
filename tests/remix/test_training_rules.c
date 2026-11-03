@@ -178,6 +178,16 @@ static void testSpamTimerOnlyCountsDownForACpuOutsideHitlag(void)
     CHECK_EQ(0, sc1PTrainingRulesSpamTickTimer(0, 1, 0));
 }
 
+static void testDpadLegendGroupsFollowTheDpadSetting(void)
+{
+    CHECK_EQ(1, sc1PTrainingRulesIsDpadToggleLegendShown(SC1PTRAININGRULES_DPAD_ON));
+    CHECK_EQ(0, sc1PTrainingRulesIsDpadToggleLegendShown(SC1PTRAININGRULES_DPAD_RESET_ONLY));
+    CHECK_EQ(0, sc1PTrainingRulesIsDpadToggleLegendShown(SC1PTRAININGRULES_DPAD_OFF));
+    CHECK_EQ(1, sc1PTrainingRulesIsDpadResetLegendShown(SC1PTRAININGRULES_DPAD_ON));
+    CHECK_EQ(1, sc1PTrainingRulesIsDpadResetLegendShown(SC1PTRAININGRULES_DPAD_RESET_ONLY));
+    CHECK_EQ(0, sc1PTrainingRulesIsDpadResetLegendShown(SC1PTRAININGRULES_DPAD_OFF));
+}
+
 void remixTestTrainingRules(void)
 {
     printf("training custom menu rules\n");
@@ -195,4 +205,5 @@ void remixTestTrainingRules(void)
     RUN_TEST(testOosTablesMatchTheAsmEntries);
     RUN_TEST(testSpamTimerReload);
     RUN_TEST(testSpamTimerOnlyCountsDownForACpuOutsideHitlag);
+    RUN_TEST(testDpadLegendGroupsFollowTheDpadSetting);
 }
