@@ -184,6 +184,14 @@ void DrawHudRects(ImDrawList *drawList, ImVec2 origin, ImVec2 scale) {
     }
 }
 
+/** Whether the port menu is open: the HUD overlay stays under it instead of drawing over its widgets. */
+bool IsPortMenuOpen() {
+    auto context = Ship::Context::GetInstance();
+    auto menu = (context && context->GetWindow() && context->GetWindow()->GetGui()) ? context->GetWindow()->GetGui()->GetMenu() : nullptr;
+
+    return menu && menu->IsVisible();
+}
+
 void DrawHudLabels() {
     const ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImDrawList *drawList = ImGui::GetForegroundDrawList();
@@ -191,6 +199,9 @@ void DrawHudLabels() {
     ImVec2 scale;
 
     sCurrentFrame = ImGui::GetFrameCount();
+    if (IsPortMenuOpen()) {
+        return;
+    }
     GameRect(viewport, &origin, &scale);
     DrawHudRects(drawList, origin, scale);
     DrawHudBars(drawList, origin, scale);

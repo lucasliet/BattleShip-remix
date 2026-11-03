@@ -24,7 +24,7 @@ extern "C" {
  *   0..2    results screen: Match Stats prompt and page hints (mnremixvsstatsview.c)
  *   19..23  (old pause legend slots, free)
  *   51..70  battle pause legend: its text rows and the music title (ifremixpauselegend.c), VS and 1P battles
- *   73..76  Training D-pad legend lines (sc1ptrainingremixlegend.c)
+ *   73..77  Training D-pad legend lines and the Z prompt (sc1ptrainingremixlegend.c)
  *   71..72  match start banner: track and game line (gmremixmusictitle.c)
  *   20..23  results screen: KOTH/Smashketball score per port (gmremixgameendrows.c), 30: its row label
  *   25..27  Training: reset count value/label and the item name (sc1ptrainingremix.c)

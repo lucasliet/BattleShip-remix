@@ -87,6 +87,12 @@ void remix_training_reset(void);
 /** Reads the SSB64_REMIX_TRAINING overrides. Call once at start-up. */
 void remix_training_init(void);
 
+/** Opens the port menu, where the Remix Training options live (the Z menu of the asm). Does nothing when it is already open. */
+void remix_training_open_menu(void);
+
+/** Whether the port menu is open. */
+int remix_training_is_menu_open(void);
+
 #ifdef __cplusplus
 }
 

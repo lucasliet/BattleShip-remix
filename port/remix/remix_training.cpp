@@ -5,6 +5,9 @@
 #include "remix_training.h"
 
 #include <libultraship/bridge/consolevariablebridge.h>
+#include <ship/Context.h>
+#include <ship/window/Window.h>
+#include <ship/window/gui/Gui.h>
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
@@ -214,4 +217,32 @@ extern "C" void remix_training_reset(void) {
     for (const Option &option : kOptions) {
         remix_training_set(option.id, option.fallback);
     }
+}
+
+namespace {
+
+/** The port menu, or nullptr before the window and its GUI exist. */
+std::shared_ptr<Ship::GuiWindow> GetPortMenu() {
+    auto context = Ship::Context::GetInstance();
+
+    if (!context || !context->GetWindow() || !context->GetWindow()->GetGui()) {
+        return nullptr;
+    }
+    return context->GetWindow()->GetGui()->GetMenu();
+}
+
+} // namespace
+
+extern "C" void remix_training_open_menu(void) {
+    auto menu = GetPortMenu();
+
+    if (menu && !menu->IsVisible()) {
+        menu->ToggleVisibility();
+    }
+}
+
+extern "C" int remix_training_is_menu_open(void) {
+    auto menu = GetPortMenu();
+
+    return (menu && menu->IsVisible()) ? 1 : 0;
 }
