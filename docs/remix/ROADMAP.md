@@ -564,7 +564,12 @@ T8.2, T8.3, T9.1 e T9.3 acima.
   - [x] R3 scripts de pacote versionados (`scripts/linux/` com sha256 fixos, `scripts/macos/package-remix-contained.sh`
     com `TMPDIR` e `trap`), fluxo em `build_and_roms.md`.
     Evidência: `podman build` do `Dockerfile.jammy` passou com os três `sha256sum -c` OK (2026-11-03).
-  - [ ] R4 conferir os três subagentes de outubro (Sheik copiada pelo Kirby, tabelas FGM, nota do Crash DSP) e `f7_GFX.md`.
+  - [x] R4 conferir os três subagentes de outubro (Sheik copiada pelo Kirby, tabelas FGM, nota do Crash DSP) e `f7_GFX.md`.
+    Tudo já estava refeito, sem código novo (2026-11-03): as 4 rotinas do Kirby com a Sheik (`kirby_ground_{begin,charge,shoot}_collision_`
+    e `air_shoot_collision_`) estão em `ftremixsheiknsp.c:570-573`; as tabelas FGM foram substituídas pelo T3.2 (`fgm_tbl`/`fgm_ucd`
+    autossuficientes); a nota do Crash DSP é `notes/48_CRASH_DSP.md`; o `f7_GFX.md` virou `docs/bugs/remix_gfx_and_gfxroutine_2026-10-16.md`
+    e `notes/f7_charge_gfx_goemon_dedede_sheik.md`. As recomendações de diagnóstico (fflush antes do `abort`, hitch por cena,
+    `lbReloc` lento, escala do painel J) ficam para a Fase 7.
   - [ ] R5 `parity.md` atual, memória do checkpoint atualizada. **Aceite:** árvore limpa, testes verdes.
 - [ ] **Fase 1** infraestrutura: I1 grupos de display, I2 sprites de extensão por SObj, I3 texto Kabel completo, I4 BGM em
   runtime, I5 endereço N64 para símbolo, I6 grupo 2 do estágio e rotina de câmera, I7 troca de imagem por parte de modelo,
