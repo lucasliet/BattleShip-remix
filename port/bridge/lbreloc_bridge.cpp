@@ -478,6 +478,8 @@ void lbRelocAddStatusBufferFile(u32 id, void *addr)
 
 	if (num >= (u32)sLBRelocInternBuffer.status_buffer_max)
 	{
+		spdlog::critical("lbReloc bridge: status buffer full (num={} max={}) while adding file_id {}", num,
+		                 (u32)sLBRelocInternBuffer.status_buffer_max, id);
 		while (TRUE)
 		{
 			syDebugPrintf("Relocatable Data Manager: Status Buffer is full !!\n");
@@ -495,6 +497,8 @@ void lbRelocAddForceStatusBufferFile(u32 id, void *addr)
 
 	if (num >= (u32)sLBRelocInternBuffer.force_status_buffer_max)
 	{
+		spdlog::critical("lbReloc bridge: force status buffer full (num={} max={}) while adding file_id {}", num,
+		                 (u32)sLBRelocInternBuffer.force_status_buffer_max, id);
 		while (TRUE)
 		{
 			syDebugPrintf("Relocatable Data Manager: Force Status Buffer is full !!\n");
