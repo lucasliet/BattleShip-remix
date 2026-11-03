@@ -223,6 +223,37 @@ static void testGameRecordsStopAtTheLimitInsteadOfOverrunning(void)
     CHECK_EQ(1, state.players[0].best_fkind);
 }
 
+static void testWinnerMustKeepThePortraitHeWonWith(void)
+{
+    GMRemixTwelveCBState state;
+
+    gmRemixTwelveCBInit(&state);
+    CHECK_EQ(-1, gmRemixTwelveCBGetWinnerPortraitOf(&state, 0));
+
+    playGame(&state, 1, 2, 5, 9, 3, 3);
+    gmRemixTwelveCBRecordKo(&state, 1, -1);
+
+    CHECK_EQ(5, gmRemixTwelveCBGetWinnerPortraitOf(&state, 0));
+    CHECK_EQ(-1, gmRemixTwelveCBGetWinnerPortraitOf(&state, 1));
+    CHECK_EQ(-1, gmRemixTwelveCBGetWinnerPortraitOf(&state, 2));
+}
+
+static void testNoWinnerPortraitOnceTheBattleIsOver(void)
+{
+    GMRemixTwelveCBState state;
+    int32_t ko;
+
+    gmRemixTwelveCBInit(&state);
+    gmRemixTwelveCBUpdateStocks(&state, 0);
+    playGame(&state, 1, 2, 5, 9, 0, 0);
+    for (ko = 0; ko < 12; ko++)
+    {
+        gmRemixTwelveCBRecordKo(&state, 1, -1);
+    }
+    CHECK_EQ(GMREMIX_TWELVECB_STATUS_COMPLETE, state.status);
+    CHECK_EQ(-1, gmRemixTwelveCBGetWinnerPortraitOf(&state, 0));
+}
+
 void remixTestTwelveCBRules(void)
 {
     printf("twelvecb rules\n");
@@ -239,4 +270,6 @@ void remixTestTwelveCBRules(void)
     RUN_TEST(testBestCharacterTakesTheMostStocksAndBreaksTiesByFewerLost);
     RUN_TEST(testBestCharacterIsUnsetBeforeTheBattleStarts);
     RUN_TEST(testGameRecordsStopAtTheLimitInsteadOfOverrunning);
+    RUN_TEST(testWinnerMustKeepThePortraitHeWonWith);
+    RUN_TEST(testNoWinnerPortraitOnceTheBattleIsOver);
 }

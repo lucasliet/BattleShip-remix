@@ -621,6 +621,14 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     1P/2P e, na pausa, o bloco de música com glifos, os glifos dos botões e o close-up do lutador (Fase 2).
 - [ ] **Fase 2** T8.3: CSS do 12CB (19 passos de `f15_twelvecb_css_spec.md`), Match Stats, demais HUDs. **Aceite:** nenhum
   chamador de `remix_hud_text_*` nos modos, uma captura por tela.
+  - 12CB, passos 1 a 17 do spec feitos (2026-11-03, comparado com a ROM no emulador de referência): painéis P1 e P2 na posição do
+    quarto (`mnPlayersVSGetPanelIndex`), sem 3P/4P (escondidos por quadro), cabeçalho 0x2048 também nos resultados, grade de 24
+    retratos por metade com escala 1.0 e slide-in (`mnremixtwelvecblayout.*`, 8 testes), hit test por jogador, retrato por jogador
+    passado às regras (`gmRemixTwelveCBSetCssPortrait`), conjuntos Default, Japanese, Polygon e Remix com setas e nomes, retratos
+    derrotados escurecidos, indicador de stocks no painel (ícone, cruz em sprite e número), RESET, coroa do vencedor, bloqueio do stock
+    depois do início, ícones J, E e polígono nos retratos, derrotado e vencedor travados no clique e no Random
+    (`gmRemixTwelveCBGetWinnerPortraitOf`, 2 testes), "Game N" escondido sob a Match Stats. Faltam: Gentlemen's Reset da pausa
+    (passo 18), conjunto Custom e StockMode Manual (passo 19), o emblema Smash dos painéis sem lutador (é do CSS geral, Fase 4).
 - [ ] **Fase 3** estágios e gameplay (T1.5b, T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0.
 - [ ] **Fase 4** CSS, stage select, painel por porta, telas (T8.1, T8.2).
 - [ ] **Fase 5** modos (Tag Team, Tug of War/Stamina, KOTH, Smashketball, 1P, Training).
