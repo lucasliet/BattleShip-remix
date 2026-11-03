@@ -82,6 +82,24 @@ static void testOnlyTheResetButtonRestartsTheRun(void)
     CHECK_EQ(0, sc1PRemixMultimanRestartsRun(0));
 }
 
+static void testMultimanHudMovesDownOnlyOnTheAlwaysSetting(void)
+{
+    float polygon_y;
+    float cross_y;
+    float counter_y;
+
+    sc1PRemixMultimanHudY(0, &polygon_y, &cross_y, &counter_y);
+    CHECK_EQ(20, (int)polygon_y);
+    CHECK_EQ(18, (int)cross_y);
+    CHECK_EQ(18, (int)counter_y);
+    sc1PRemixMultimanHudY(1, &polygon_y, &cross_y, &counter_y);
+    CHECK_EQ(214, (int)polygon_y);
+    CHECK_EQ(212, (int)cross_y);
+    CHECK_EQ(212, (int)counter_y);
+    sc1PRemixMultimanHudY(2, &polygon_y, &cross_y, &counter_y);
+    CHECK_EQ(18, (int)counter_y);
+}
+
 void remixTest1PModeRules(void)
 {
     printf("1p mode rules\n");
@@ -93,4 +111,5 @@ void remixTest1PModeRules(void)
     RUN_TEST(testKosCountUntilThePlayerIsKod);
     RUN_TEST(testResetClearsTheKosAndThePlayerKo);
     RUN_TEST(testOnlyTheResetButtonRestartsTheRun);
+    RUN_TEST(testMultimanHudMovesDownOnlyOnTheAlwaysSetting);
 }

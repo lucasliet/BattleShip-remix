@@ -611,7 +611,7 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     escurecidos, indicador de stocks no painel, RESET, coroa do vencedor, trava do stock, ícones J/E/polígono, derrotado e
     vencedor travados no clique e no Random, "Game N" nos resultados.
   - [ ] 12CB passo 18 (Gentlemen's Reset da pausa) e passo 19 (conjunto Custom e StockMode Manual).
-  - [ ] Multi-Man: ícone do polígono e "X" em sprite, variante Dragon King (Y 212).
+  - [x] Multi-Man: ícone do polígono (0x19 @0x80, (30,20)) e "X" (0x24 @0x828, (39,18)) como sprites nativos, contador em (50,18); variante Dragon King (toggle "always") em 214/212/212 (`sc1PRemixMultimanHudY`, testada). Visto em partida (`multiman_hud`: ícone, X e "0" no canto); a variante Dragon King só nas regras puras.
   - [ ] HRC: conferir o contador no COMPLETE em tela contra a referência.
   - [ ] Training: "Press Z for Custom Menu", legenda do L, D-pad, "(Hold --)", nome do item como imagem (arquivo 0xFE),
     condição exata do Reset Count.
