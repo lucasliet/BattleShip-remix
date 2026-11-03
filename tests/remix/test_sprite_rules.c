@@ -17,14 +17,27 @@ static void testButtonOffsetsMatchTheAsmConstants(void)
     CHECK_EQ(0x1B10, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_BUTTON_L_THIN)->sprite_offset);
 }
 
-static void testEveryButtonLivesInFileC5(void)
+static void testButtonsAndLegendWordLiveInFileC5(void)
 {
     int id;
 
-    for (id = 0; id < IFREMIX_SPRITE_COUNT; id++)
+    for (id = IFREMIX_SPRITE_BUTTON_A; id <= IFREMIX_SPRITE_LEGEND_WORD; id++)
     {
         CHECK_EQ(0xC5, (int)ifRemixSpriteRulesGetEntry(id)->file_id);
     }
+    CHECK_EQ(0x19F8, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_LEGEND_WORD)->sprite_offset);
+}
+
+static void testDpadAndCStickArrowsLiveInTheCssImagesFile(void)
+{
+    int id;
+
+    for (id = IFREMIX_SPRITE_DPAD; id <= IFREMIX_SPRITE_C_ARROW_D; id++)
+    {
+        CHECK_EQ(0xA06, (int)ifRemixSpriteRulesGetEntry(id)->file_id);
+    }
+    CHECK_EQ(0x218, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_DPAD)->sprite_offset);
+    CHECK_EQ(0x1BB8, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_C_ARROW_D)->sprite_offset);
 }
 
 static void testOutOfRangeIdHasNoEntry(void)
@@ -56,7 +69,8 @@ void remixTestSpriteRules(void)
 {
     printf("sprite rules\n");
     RUN_TEST(testButtonOffsetsMatchTheAsmConstants);
-    RUN_TEST(testEveryButtonLivesInFileC5);
+    RUN_TEST(testButtonsAndLegendWordLiveInFileC5);
+    RUN_TEST(testDpadAndCStickArrowsLiveInTheCssImagesFile);
     RUN_TEST(testOutOfRangeIdHasNoEntry);
     RUN_TEST(testUnpackColorSplitsTheBytes);
 }

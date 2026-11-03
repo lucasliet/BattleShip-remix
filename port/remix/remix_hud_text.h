@@ -22,7 +22,8 @@ extern "C" {
  * Text slot map (each owner #defines its slots in its own file). Ranges may be reused only by owners that never draw in
  * the same scene; a label lives two frames, so a reused slot just changes owner when the scene changes.
  *   0..2    results screen: Match Stats prompt and page hints (mnremixvsstatsview.c)
- *   19..23  battle pause: R / Legend and the camera legend (ifremixpauselegend.c), VS and 1P battles
+ *   19..23  (old pause legend slots, free)
+ *   51..70  battle pause legend: its text rows and the music title (ifremixpauselegend.c), VS and 1P battles
  *   20..23  results screen: KOTH/Smashketball score per port (gmremixgameendrows.c), 30: its row label
  *   25..27  Training: reset count value/label and the item name (sc1ptrainingremix.c)
  *   28      1P Multi-Man: KO counter (sc1premixmultiman.c)
@@ -31,7 +32,7 @@ extern "C" {
  *           (gmremixtwelvecbhud.c); 44..46 12CB Character Set title and the set name of each player,
  *           47..48 12CB stock number of the panels (mnplayersvs.c)
  *   48..127 results screen: Match Stats page texts, taken in draw order (mnremixvsstatspages.c)
- * Rect slots: 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
+ * Rect slots: 0..1 battle pause legend squares, 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
  */
 #define REMIX_HUD_TEXT_SLOTS 128
 #define REMIX_HUD_BAR_SLOTS 16

@@ -58,3 +58,22 @@ extern "C" void remix_music_title_show(int32_t bgm_id, float seconds) {
     port_log("SSB64: music title: bgm %d \"%s\"\n", static_cast<int>(bgm_id), line);
     remix_overlay_show_text(line, seconds);
 }
+
+extern "C" int remix_music_title_get(int32_t bgm_id, const char **track, const char **game) {
+    const RemixMusicTitleRow *row;
+
+    if (bgm_id < 0) {
+        return 0;
+    }
+    row = FindRemixMusicTitleRow(static_cast<uint32_t>(bgm_id));
+    if (row == nullptr) {
+        return 0;
+    }
+    if (track != nullptr) {
+        *track = row->track;
+    }
+    if (game != nullptr) {
+        *game = row->game;
+    }
+    return 1;
+}
