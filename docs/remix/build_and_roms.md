@@ -97,6 +97,25 @@ o `config.yml`, os `yamls/remix/*.yml` ou a ROM mudam. O `.recipe` (41 bytes) é
 
 Para refazer só os assets: `cmake --build build --target ExtractAssets`.
 
+## Pacotes de teste do BattleShip-Remix (macOS e Linux)
+
+Estes pacotes **embutem o `BattleShip-Remix.o2r`**, que é derivado da ROM. Servem só para uso pessoal e nunca são
+redistribuídos. O pacote distribuível não leva o `.o2r`: ele é extraído da ROM do usuário na primeira execução, como fazem
+`scripts/package-macos.sh` e `scripts/package-linux.sh`. Esse fluxo fica para a M11 Fase 7, que também acrescenta `remix` à
+matriz `version: [us, jp]` do `.github/workflows/release.yml`.
+
+- **macOS:** primeiro faça um build Release com `-DNON_PORTABLE=ON` em `build-macos-release/`, depois rode
+  `scripts/macos/package-remix-contained.sh`. Ele lê o `.o2r`, o `f3d.o2r` e os ícones de `build/` e grava
+  `dist/desktop/BattleShip-Remix.app`, `.dmg` e `.zip`. Não usa dylibbundler: as libs vêm estáticas de
+  `.toolchain/host/deps`. Os rascunhos ficam em `$TMPDIR` (padrão `build-macos-release/`) e são apagados ao sair.
+- **Linux x86_64 (AppImage, via podman):** rode `scripts/linux/package-remix-appimage.sh [build|package|all]`. Ele monta a
+  imagem `scripts/linux/Dockerfile.jammy` (Ubuntu 22.04; CMake 3.31.6, appimagetool 1.9.1 e linuxdeploy
+  `1-alpha-20251107-1` fixados por sha256) e chama `build-in-container.sh` e depois `package-in-container.sh`. A saída vai
+  para `build-linux-release/`. O volume `ssb64-linux-work` guarda a árvore de build entre execuções. No Apple silicon a
+  imagem amd64 roda emulada, então o primeiro build é lento.
+- A versão vem de `DIST_VERSION`, com padrão `2.0.1-port.<HEAD curto>`. Confira se o `.o2r.recipe` de `build/` bate com o
+  Torch atual antes de empacotar.
+
 ## Build Switch (BattleShip e BattleShip-Remix)
 
 O console nunca lê ROM: o `.nro` é compilado com o devkitA64 e o `.o2r` vem do build desktop da mesma versão.

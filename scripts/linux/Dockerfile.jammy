@@ -1,0 +1,33 @@
+# Ubuntu 22.04 amd64 image that builds BattleShip-Remix and packs it as an AppImage (see scripts/linux/package-remix-appimage.sh).
+# Every download is pinned by URL and sha256; bump both together.
+FROM docker.io/library/ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates git wget file patchelf squashfs-tools desktop-file-utils \
+    cmake ninja-build zip clang \
+    libsdl2-dev libzip-dev libglew-dev \
+    nlohmann-json3-dev libtinyxml2-dev libspdlog-dev \
+    libgl1-mesa-dev libegl1-mesa-dev \
+    libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+    python3 python3-pil imagemagick \
+ && touch /usr/bin/zipcmp /usr/bin/zipmerge /usr/bin/ziptool \
+ && chmod +x /usr/bin/zipcmp /usr/bin/zipmerge /usr/bin/ziptool \
+ && rm -rf /var/lib/apt/lists/*
+
+# The zip* stubs above satisfy libzip's CMake config, which lists the CLI tools Ubuntu ships in a separate package.
+
+ARG CMAKE_URL=https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz
+ARG CMAKE_SHA256=5a1133ff103c71eb5120e2cc3de922733e7d8a26a98ae716397e8676adb367bf
+RUN wget -q "$CMAKE_URL" -O /tmp/cmake.tgz \
+ && echo "$CMAKE_SHA256  /tmp/cmake.tgz" | sha256sum -c - \
+ && tar -C /opt -xzf /tmp/cmake.tgz && ln -sf /opt/cmake-3.31.6-linux-x86_64/bin/* /usr/local/bin/ && rm /tmp/cmake.tgz
+
+ARG APPIMAGETOOL_URL=https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+ARG APPIMAGETOOL_SHA256=ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0
+ARG LINUXDEPLOY_URL=https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
+ARG LINUXDEPLOY_SHA256=c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d
+RUN wget -q "$APPIMAGETOOL_URL" -O /usr/local/bin/appimagetool \
+ && echo "$APPIMAGETOOL_SHA256  /usr/local/bin/appimagetool" | sha256sum -c - \
+ && wget -q "$LINUXDEPLOY_URL" -O /usr/local/bin/linuxdeploy \
+ && echo "$LINUXDEPLOY_SHA256  /usr/local/bin/linuxdeploy" | sha256sum -c - \
+ && chmod +x /usr/local/bin/appimagetool /usr/local/bin/linuxdeploy

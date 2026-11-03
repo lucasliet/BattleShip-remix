@@ -561,8 +561,9 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     Evidência: decomp `bfb95da10`, `df7dbcc`; 928 checks/0; capturas `r1_{stats,pause,hrc,multiman,training,12cb}`.
     Pendente para a Fase 2: o texto do CSS do 12CB fica sobre os painéis (spec em `f15_twelvecb_css_spec.md`).
   - [x] R2 nota `notes/f15_button_sprites.md` (arquivos, offsets, formatos e cor dos sprites de botão; decisão SObj nativo).
-  - [ ] R3 scripts de pacote versionados (`scripts/linux/` com sha256 fixos, `scripts/macos/package-remix-contained.sh`
+  - [x] R3 scripts de pacote versionados (`scripts/linux/` com sha256 fixos, `scripts/macos/package-remix-contained.sh`
     com `TMPDIR` e `trap`), fluxo em `build_and_roms.md`.
+    Evidência: `podman build` do `Dockerfile.jammy` passou com os três `sha256sum -c` OK (2026-11-03).
   - [ ] R4 conferir os três subagentes de outubro (Sheik copiada pelo Kirby, tabelas FGM, nota do Crash DSP) e `f7_GFX.md`.
   - [ ] R5 `parity.md` atual, memória do checkpoint atualizada. **Aceite:** árvore limpa, testes verdes.
 - [ ] **Fase 1** infraestrutura: I1 grupos de display, I2 sprites de extensão por SObj, I3 texto Kabel completo, I4 BGM em
