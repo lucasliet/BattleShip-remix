@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "remix_font_decode.h"
+#include "remix_font_layout.h"
 #include "remix_ram_image.h"
 #include "remix_symbols.h"
 #include "resource/RelocFile.h"
@@ -35,7 +36,6 @@ constexpr int kCellSize = REMIX_FONT_GLYPH_SIZE + 2;
 constexpr int kAtlasWidth = kGlyphColumns * kCellSize;
 constexpr int kAtlasHeight = kGlyphRows * kCellSize;
 constexpr int kSpaceCharacter = 0x20;
-constexpr float kSpaceAdvance = 4.0f;
 constexpr uint32_t kWidthEntrySize = 8;
 constexpr uint32_t kHeightByteOffset = 1;
 constexpr float kLineBaseHeight = 14.0f;
@@ -120,10 +120,7 @@ ImVec2 UvOf(int character, int column, int row) {
 }
 
 float AdvanceOf(int character, float scale) {
-    if (character == kSpaceCharacter || !CharacterHasGlyph(character)) {
-        return kSpaceAdvance * scale;
-    }
-    return (static_cast<float>(sWidths[character]) + 1.0f) * scale;
+    return remix_font_layout_advance(character, sWidths.data(), REMIX_FONT_LAST_CHARACTER, scale);
 }
 
 /** Render.draw_string_ drops each glyph by (14 - glyph height) so that the glyph bottoms share one baseline. */
@@ -159,12 +156,11 @@ bool Ensure() {
 }
 
 float Measure(const std::string &text, float scale) {
-    float width = 0.0f;
+    return remix_font_layout_aligned_width(text.c_str(), sWidths.data(), REMIX_FONT_LAST_CHARACTER, scale);
+}
 
-    for (const char character : text) {
-        width += AdvanceOf(static_cast<unsigned char>(character), scale);
-    }
-    return width;
+float FitFactor(const std::string &text, float scale, float maxWidth) {
+    return remix_font_layout_fit_factor(text.c_str(), sWidths.data(), REMIX_FONT_LAST_CHARACTER, scale, maxWidth);
 }
 
 void Draw(ImDrawList *drawList, ImVec2 position, ImVec2 pixelsPerUnit, float scale, ImU32 color,

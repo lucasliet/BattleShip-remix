@@ -118,12 +118,7 @@ float AnchorFraction(int align) {
 
 /** Horizontal squeeze that makes the string fit the label max width; 1 when it already fits or has no limit. */
 float WidthFactorOf(const HudLabel &label) {
-    const float naturalWidth = RemixFont::Measure(label.text, label.scale);
-
-    if (label.maxWidth <= 0.0f || naturalWidth <= label.maxWidth) {
-        return 1.0f;
-    }
-    return label.maxWidth / naturalWidth;
+    return RemixFont::FitFactor(label.text, label.scale, label.maxWidth);
 }
 
 void DrawLabelWithRemixFont(ImDrawList *drawList, ImVec2 origin, ImVec2 scale, const HudLabel &label) {

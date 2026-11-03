@@ -42,7 +42,9 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_font_decode.c
     test_group_display_rules.c
     test_sprite_rules.c
+    test_font_layout.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_decode.c
+    ${CMAKE_SOURCE_DIR}/port/remix/remix_font_layout.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c

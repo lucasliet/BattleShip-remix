@@ -38,6 +38,17 @@ bool Ensure();
 float Measure(const std::string &text, float scale);
 
 /**
+ * Horizontal squeeze Render.apply_max_width_ applies to a string: maxWidth over the width from the first glyph to the right
+ * edge of the last glyph sprite when that is wider than maxWidth, else 1.
+ *
+ * @param text Text to fit.
+ * @param scale Font scale.
+ * @param maxWidth Widest the string may be in N64 screen units; zero or less means no limit.
+ * @return Factor for Draw's widthFactor, 1 when the text already fits.
+ */
+float FitFactor(const std::string &text, float scale, float maxWidth);
+
+/**
  * Draws a string with its top-left corner at position.
  *
  * @param drawList Draw list receiving the glyph quads.

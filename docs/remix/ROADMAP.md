@@ -588,7 +588,12 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     botão A do prompt, B e R das dicas e o fundo escurecido como objeto da DL do jogo, abaixo dos glifos e acima do texto
     ImGui (`i2stats`). Os sprites dos arquivos 0xA06, 0x19 e 0x14F3 entram na tabela junto de cada consumidor (Fase 2 e 4),
     com o offset conferido na tela. 961 checagens.
-  - [ ] I3 texto Kabel completo
+  - [x] I3 texto Kabel completo. Feito (2026-11-03): as regras do `draw_string_` e do `apply_max_width_` viraram C puro
+    (`port/remix/remix_font_layout.*`, 18 checagens): avanço `(largura+1)*escala`, espaço 4, largura de alinhamento somando
+    tudo, e largura do ajuste = do X do primeiro glifo até a borda direita do sprite do último (16 de largura, sem contar os
+    espaços das pontas, como o asm). `RemixFont::FitFactor` substitui a conta antiga, que usava a soma dos avanços. Já
+    existiam: 128 slots, alinhamento LEFT/RIGHT/CENTER, altura do glifo (`14 - altura`), `put_fit`. 979 checagens, Match Stats
+    sem regressão (`i3stats`).
   - [ ] I4 BGM em runtime
   - [ ] I5 endereço N64 para símbolo
   - [ ] I6 grupo 2 do estágio e rotina de câmera
