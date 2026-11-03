@@ -595,7 +595,11 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     existiam: 128 slots, alinhamento LEFT/RIGHT/CENTER, altura do glifo (`14 - altura`), `put_fit`. 979 checagens, Match Stats
     sem regressão (`i3stats`).
   - [ ] I4 BGM em runtime
-  - [ ] I5 endereço N64 para símbolo
+  - [x] I5 endereço N64 para símbolo. Feito (2026-11-03): `tools/n64_addr_to_symbol.py` (comentários `// 0xADDR` e nomes com
+    endereço do decomp, mais `remix.sym`; `--near` lista donos abaixo) e `tools/test_n64_addr_to_symbol.py` (8 testes).
+    Resolvidos em `notes/n64_address_resolutions.md`: 0x80131580 = `gIFCommonPlayerInterface.is_magnify_display`, 0x80131AD8 =
+    `sEFGroundActor`, 0x800F9C8C/0x800F9CC4 = `mpCollisionCheckProjectRWall`; 0x80132704 fica no padrão (rotação 0, vista em
+    tela); 0x8014A24C e 0x8019C230 entram na Fase 3.
   - [ ] I6 grupo 2 do estágio e rotina de câmera
   - [ ] I7 troca de imagem por parte de modelo
   - [ ] I8 emulador de referência em `.toolchain/ref-emu/`
