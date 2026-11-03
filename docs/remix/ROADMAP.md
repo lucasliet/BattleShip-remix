@@ -608,7 +608,13 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     tela); 0x8014A24C e 0x8019C230 entram na Fase 3.
   - [ ] I6 grupo 2 do estágio e rotina de câmera
   - [ ] I7 troca de imagem por parte de modelo
-  - [ ] I8 emulador de referência em `.toolchain/ref-emu/`
+  - [x] I8 emulador de referência em `.toolchain/ref-emu/`. Feito (2026-11-03): `scripts/macos/setup-ref-emu.sh` (mupen64plus 2.6.0
+    com interpretador puro, rsp-cxd4, angrylion-rdp-plus 1.6, SDL2 e libpng compartilhados, tudo por sha256 em `.toolchain/ref-emu`),
+    plugin de entrada por script `scripts/ref-emu/input-script.c` (mesmo formato do `SSB64_INPUT_SCRIPT`), `capture.sh`, `sheet.py` e
+    os roteiros `scripts/ref-emu/inputs/vs_{match,stats,pause}.txt`. 3000 quadros em 25 s. Capturas de referência da Match Stats e da pausa
+    do Remix em `build/ref-shots/` (não versionadas), comparadas em `notes/i8_reference_emulator.md`: a Match Stats do port agora
+    mantém o prompt "Press A" e o botão A escurecidos sob o fundo, como no Remix; faltam o ícone de personagem nos cabeçalhos
+    1P/2P e, na pausa, o bloco de música com glifos, os glifos dos botões e o close-up do lutador (Fase 2).
 - [ ] **Fase 2** T8.3: CSS do 12CB (19 passos de `f15_twelvecb_css_spec.md`), Match Stats, demais HUDs. **Aceite:** nenhum
   chamador de `remix_hud_text_*` nos modos, uma captura por tela.
 - [ ] **Fase 3** estágios e gameplay (T1.5b, T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0.

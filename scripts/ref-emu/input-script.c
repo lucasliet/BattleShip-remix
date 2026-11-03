@@ -166,6 +166,16 @@ EXPORT void CALL GetKeys(int control, BUTTONS *keys)
         }
     }
     keys->Value = toMupenValue(wire, stick_x, stick_y);
+    if (getenv("REF_EMU_INPUT_TRACE") != NULL)
+    {
+        static unsigned int last[MAX_PORTS];
+
+        if ((control < MAX_PORTS) && (keys->Value != last[control]))
+        {
+            fprintf(stderr, "input-script: poll %d port %d value 0x%08X\n", sFrame, control, keys->Value);
+            last[control] = keys->Value;
+        }
+    }
     if (control == 0)
     {
         sFrame++;
@@ -175,7 +185,7 @@ EXPORT void CALL GetKeys(int control, BUTTONS *keys)
 EXPORT void CALL ControllerCommand(int control, unsigned char *command) { (void)control; (void)command; }
 EXPORT void CALL ReadController(int control, unsigned char *command) { (void)control; (void)command; }
 EXPORT int CALL RomOpen(void) { sFrame = 0; return 1; }
-EXPORT void CALL RomClosed(void) {}
+EXPORT void CALL RomClosed(void) { fprintf(stderr, "input-script: %d polls of port 0\n", sFrame); }
 EXPORT void CALL SDL_KeyDown(int keymod, int keysym) { (void)keymod; (void)keysym; }
 EXPORT void CALL SDL_KeyUp(int keymod, int keysym) { (void)keymod; (void)keysym; }
 EXPORT void CALL RenderCallback(void) {}
