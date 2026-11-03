@@ -38,7 +38,7 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone:** M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2). M7 (IA) fechado (CP7, sobras no T8.2): a CPU usa as tabelas de ataque do Remix, recupera e joga nos níveis 9 e 10. M8 (restante da paridade) em andamento (CP9, 2026-10-31): T2.11, T8.1 e T8.2 com três ondas feitas, sobras dependentes de assets e subsistemas; T9.2 (vanilla) feito. M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
+- **Milestone atual: M11 Finalização** (2026-11-03), começando pela Fase R. Antes dele: M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2). M7 (IA) fechado (CP7, sobras no T8.2): a CPU usa as tabelas de ataque do Remix, recupera e joga nos níveis 9 e 10. M8 (restante da paridade) em andamento (CP9, 2026-10-31): T2.11, T8.1 e T8.2 com três ondas feitas, sobras dependentes de assets e subsistemas; T9.2 (vanilla) feito. M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
 - **Último checkpoint:** CP10, 2026-11-02 (a pedido; antes CP9b, CP9a, CP9, CP8, CP7a, CP7, CP6, CP6f a CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
 - **Estimativa geral:** ~87% (recalculada pela tabela em 2026-11-02 depois da auditoria do visual: o ~91% anterior não vinha da tabela e ignorava que os HUDs dos modos são provisórios, T8.3) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
 
@@ -546,6 +546,35 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
   (os dados do Remix na ROM somam ~36,6 MB contra ~9,5 MB do vanilla) e armazenamento no SD.
 - **CP10**.
 - **CP10a** (checkpoint a pedido, 2026-11-02): auditoria de itens provisórios e visíveis ao jogador (agente de leitura): os HUDs de oito arquivos de modos usam o overlay ImGui; achados `REMIX-TODO` de impacto visível em stages (Time Twister, Scuttle Town, Pirate cannonball), Crash, Yoshi egg e efeitos de Pikachu/Ness; título sem \"Smash Remix v2.0.1\"; Gallery com 12 de 40; Character Data sem os 18 estendidos. Nova task T8.3. Estimativa recalculada ~87%.
+
+## M11. Finalização (aprovado em 2026-11-03)
+
+Plano detalhado com os diagnósticos de cada fase: [`notes/m11_finalization_plan.md`](notes/m11_finalization_plan.md).
+Critério de fim: "Remix jogável" com **todas** as features do Remix presentes; adaptação ao port é aceita com o desvio
+documentado; `n/a` só para os quatro itens aprovados (emblema/golpes dos 18 extras no Character Data, overlay de Practice
+do Spawned Fear, Advanced Hurtbox e debug do `Hitbox.asm`, speed assist dos créditos). Execução: subagentes Haiku para
+leitura e specs, o lead implementa, compila e confere em tela. Este milestone substitui a ordem das sobras de T2.11, T8.1,
+T8.2, T8.3, T9.1 e T9.3 acima.
+
+- [ ] **Fase R** recuperar o trabalho interrompido da sessão `18aceb9d`:
+  - [ ] R1 HUD Kabel do lead: off-by-one de escala/y do HRC, testes verdes, telas conferidas, mapa de slots, commit.
+  - [ ] R2 nota `notes/f15_button_sprites.md` (arquivos, offsets, formatos e cor dos sprites de botão; decisão SObj nativo).
+  - [ ] R3 scripts de pacote versionados (`scripts/linux/` com sha256 fixos, `scripts/macos/package-remix-contained.sh`
+    com `TMPDIR` e `trap`), fluxo em `build_and_roms.md`.
+  - [ ] R4 conferir os três subagentes de outubro (Sheik copiada pelo Kirby, tabelas FGM, nota do Crash DSP) e `f7_GFX.md`.
+  - [ ] R5 `parity.md` atual, memória do checkpoint atualizada. **Aceite:** árvore limpa, testes verdes.
+- [ ] **Fase 1** infraestrutura: I1 grupos de display, I2 sprites de extensão por SObj, I3 texto Kabel completo, I4 BGM em
+  runtime, I5 endereço N64 para símbolo, I6 grupo 2 do estágio e rotina de câmera, I7 troca de imagem por parte de modelo,
+  I8 emulador de referência em `.toolchain/ref-emu/`. **Aceite:** regra pura testada e um consumidor visto por peça.
+- [ ] **Fase 2** T8.3: CSS do 12CB (19 passos de `f15_twelvecb_css_spec.md`), Match Stats, demais HUDs. **Aceite:** nenhum
+  chamador de `remix_hud_text_*` nos modos, uma captura por tela.
+- [ ] **Fase 3** estágios e gameplay (T1.5b, T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0.
+- [ ] **Fase 4** CSS, stage select, painel por porta, telas (T8.1, T8.2).
+- [ ] **Fase 5** modos (Tag Team, Tug of War/Stamina, KOTH, Smashketball, 1P, Training).
+- [ ] **Fase 6** IA. **Aceite:** `REMIX-TODO(AI)` em 0, recuperação no nível 9 sem regressão (base 181/222).
+- [ ] **Fase 7** bugs abertos, instrumentação, pacotes de teste (com `.o2r`, uso pessoal) e finais (sem `.o2r`, CI com `remix`).
+- [ ] **Fase 8** regressão completa, passadas do usuário (T9.1b, T10.2), comparação com o emulador, `parity.md` só com
+  `ported`/`adapted`/`n/a`, T9.3 e checkpoint final.
 
 ---
 

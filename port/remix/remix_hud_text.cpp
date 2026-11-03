@@ -11,6 +11,9 @@
 
 #include <imgui.h>
 #include <libultraship/libultraship.h>
+#include <ship/Context.h>
+#include <ship/config/ConsoleVariable.h>
+#include "gui/Compat.h"
 
 #include "remix_font.h"
 
@@ -25,6 +28,7 @@ namespace {
 
 constexpr float kN64ScreenWidth = 320.0f;
 constexpr float kN64ScreenHeight = 240.0f;
+constexpr float kDefaultOverscan = 10.0f;
 constexpr int kLabelLifeFrames = 2;
 constexpr uint32_t kShadowColor = IM_COL32(0, 0, 0, 200);
 
@@ -35,7 +39,9 @@ struct HudLabel {
     float x = 0.0f;
     float y = 0.0f;
     uint32_t rgba = 0xFFFFFFFF;
-    float height = 12.0f;
+    float scale = 1.0f;
+    int align = REMIX_HUD_ALIGN_LEFT;
+    float maxWidth = 0.0f;
 };
 
 struct HudBar {
@@ -50,42 +56,92 @@ struct HudBar {
     float flash = 0.0f;
 };
 
+struct HudRect {
+    bool active = false;
+    int lastFrame = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    uint32_t rgba = 0xFFFFFFFF;
+};
+
+std::array<HudRect, REMIX_HUD_RECT_SLOTS> sRects;
 std::array<HudLabel, REMIX_HUD_TEXT_SLOTS> sLabels;
 std::array<HudBar, REMIX_HUD_BAR_SLOTS> sBars;
 int sCurrentFrame = 0;
 
-/** Largest 4:3 rectangle centred in the viewport work area: the game image. */
-void GameRect(const ImGuiViewport *viewport, ImVec2 *origin, float *scale) {
-    const float scaleX = viewport->WorkSize.x / kN64ScreenWidth;
-    const float scaleY = viewport->WorkSize.y / kN64ScreenHeight;
-    *scale = std::min(scaleX, scaleY);
-    origin->x = viewport->WorkPos.x + (viewport->WorkSize.x - kN64ScreenWidth * *scale) * 0.5f;
-    origin->y = viewport->WorkPos.y + (viewport->WorkSize.y - kN64ScreenHeight * *scale) * 0.5f;
+/** Overscan margin in N64 units that Gui::DrawGame crops from every side of the presented frame (zero when disabled). */
+ImVec2 OverscanMargin() {
+    const auto cvars = Ship::Context::GetInstance()->GetConsoleVariables();
+    const bool pixelPerfect = cvars->GetInteger(CVAR_PREFIX_ADVANCED_RESOLUTION ".Enabled", 0) &&
+                              cvars->GetInteger(CVAR_PREFIX_ADVANCED_RESOLUTION ".PixelPerfectMode", 0);
+
+    if (pixelPerfect || !cvars->GetInteger(CVAR_PREFIX_ADVANCED_RESOLUTION ".Overscan.Enabled", 1)) {
+        return ImVec2(0.0f, 0.0f);
+    }
+    return ImVec2(cvars->GetFloat(CVAR_PREFIX_ADVANCED_RESOLUTION ".Overscan.Horizontal", kDefaultOverscan),
+                  cvars->GetFloat(CVAR_PREFIX_ADVANCED_RESOLUTION ".Overscan.Vertical", kDefaultOverscan));
+}
+
+/**
+ * Maps N64 screen units to window pixels: the largest 4:3 rectangle centred in the viewport work area shows the frame without
+ * its overscan margin, exactly as the presented game image does. The two axes scale slightly differently (the margin is not 4:3).
+ */
+void GameRect(const ImGuiViewport *viewport, ImVec2 *origin, ImVec2 *scale) {
+    const float fitScale = std::min(viewport->WorkSize.x / kN64ScreenWidth, viewport->WorkSize.y / kN64ScreenHeight);
+    const float rectWidth = kN64ScreenWidth * fitScale;
+    const float rectHeight = kN64ScreenHeight * fitScale;
+    const ImVec2 margin = OverscanMargin();
+
+    scale->x = rectWidth / (kN64ScreenWidth - 2.0f * margin.x);
+    scale->y = rectHeight / (kN64ScreenHeight - 2.0f * margin.y);
+    origin->x = viewport->WorkPos.x + (viewport->WorkSize.x - rectWidth) * 0.5f - margin.x * scale->x;
+    origin->y = viewport->WorkPos.y + (viewport->WorkSize.y - rectHeight) * 0.5f - margin.y * scale->y;
 }
 
 ImU32 ColorOf(uint32_t rgba) {
     return IM_COL32((rgba >> 24) & 0xFF, (rgba >> 16) & 0xFF, (rgba >> 8) & 0xFF, rgba & 0xFF);
 }
 
-/** Draws the label with the Remix font; the height is the glyph box height, so the font scale is height / 16. */
-void DrawLabelWithRemixFont(ImDrawList *drawList, ImVec2 origin, float scale, const HudLabel &label) {
-    const float fontScale = label.height / RemixFont::kGlyphHeight;
-    const float textWidth = RemixFont::Measure(label.text, fontScale) * scale;
-    const float boxHeight = label.height * scale;
-    const ImVec2 position(origin.x + label.x * scale - textWidth * 0.5f, origin.y + label.y * scale - boxHeight * 0.5f);
-
-    RemixFont::Draw(drawList, position, scale, fontScale, ColorOf(label.rgba), label.text);
+/** Fraction of the string width that lies left of the anchor X for each Render alignment. */
+float AnchorFraction(int align) {
+    switch (align) {
+        case REMIX_HUD_ALIGN_RIGHT:
+            return 1.0f;
+        case REMIX_HUD_ALIGN_CENTER:
+            return 0.5f;
+        default:
+            return 0.0f;
+    }
 }
 
-void DrawLabel(ImDrawList *drawList, ImVec2 origin, float scale, const HudLabel &label) {
+/** Horizontal squeeze that makes the string fit the label max width; 1 when it already fits or has no limit. */
+float WidthFactorOf(const HudLabel &label) {
+    const float naturalWidth = RemixFont::Measure(label.text, label.scale);
+
+    if (label.maxWidth <= 0.0f || naturalWidth <= label.maxWidth) {
+        return 1.0f;
+    }
+    return label.maxWidth / naturalWidth;
+}
+
+void DrawLabelWithRemixFont(ImDrawList *drawList, ImVec2 origin, ImVec2 scale, const HudLabel &label) {
+    const float widthFactor = WidthFactorOf(label);
+    const float textWidth = RemixFont::Measure(label.text, label.scale) * widthFactor * scale.x;
+    const ImVec2 position(origin.x + label.x * scale.x - textWidth * AnchorFraction(label.align), origin.y + label.y * scale.y);
+
+    RemixFont::Draw(drawList, position, scale, label.scale, ColorOf(label.rgba), label.text, widthFactor);
+}
+
+void DrawLabel(ImDrawList *drawList, ImVec2 origin, ImVec2 scale, const HudLabel &label) {
     if (RemixFont::Ensure()) {
         DrawLabelWithRemixFont(drawList, origin, scale, label);
         return;
     }
-    const float fontSize = label.height * scale;
+    const float fontSize = RemixFont::kGlyphHeight * label.scale * scale.y;
     const ImVec2 textSize = ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, label.text);
-    const ImVec2 position(origin.x + label.x * scale - textSize.x * 0.5f,
-                          origin.y + label.y * scale - textSize.y * 0.5f);
+    const ImVec2 position(origin.x + label.x * scale.x - textSize.x * AnchorFraction(label.align), origin.y + label.y * scale.y);
     const float shadow = std::max(1.0f, fontSize * 0.08f);
 
     drawList->AddText(ImGui::GetFont(), fontSize, ImVec2(position.x + shadow, position.y + shadow), kShadowColor,
@@ -93,10 +149,10 @@ void DrawLabel(ImDrawList *drawList, ImVec2 origin, float scale, const HudLabel 
     drawList->AddText(ImGui::GetFont(), fontSize, position, ColorOf(label.rgba), label.text);
 }
 
-void DrawBar(ImDrawList *drawList, ImVec2 origin, float scale, const HudBar &bar) {
-    const ImVec2 min(origin.x + bar.x * scale, origin.y + bar.y * scale);
-    const ImVec2 max(min.x + bar.width * scale, min.y + bar.height * scale);
-    const ImVec2 fillMax(min.x + bar.width * scale * std::clamp(bar.fraction, 0.0f, 1.0f), max.y);
+void DrawBar(ImDrawList *drawList, ImVec2 origin, ImVec2 scale, const HudBar &bar) {
+    const ImVec2 min(origin.x + bar.x * scale.x, origin.y + bar.y * scale.y);
+    const ImVec2 max(min.x + bar.width * scale.x, min.y + bar.height * scale.y);
+    const ImVec2 fillMax(min.x + bar.width * scale.x * std::clamp(bar.fraction, 0.0f, 1.0f), max.y);
 
     drawList->AddRectFilled(min, max, IM_COL32(0, 0, 0, 160));
     drawList->AddRectFilled(min, fillMax, ColorOf(bar.rgba));
@@ -106,7 +162,7 @@ void DrawBar(ImDrawList *drawList, ImVec2 origin, float scale, const HudBar &bar
     drawList->AddRect(min, max, IM_COL32(255, 255, 255, 220));
 }
 
-void DrawHudBars(ImDrawList *drawList, ImVec2 origin, float scale) {
+void DrawHudBars(ImDrawList *drawList, ImVec2 origin, ImVec2 scale) {
     for (HudBar &bar : sBars) {
         if (!bar.active) {
             continue;
@@ -119,14 +175,29 @@ void DrawHudBars(ImDrawList *drawList, ImVec2 origin, float scale) {
     }
 }
 
+void DrawHudRects(ImDrawList *drawList, ImVec2 origin, ImVec2 scale) {
+    for (HudRect &rect : sRects) {
+        if (!rect.active) {
+            continue;
+        }
+        if (sCurrentFrame - rect.lastFrame > kLabelLifeFrames) {
+            rect.active = false;
+            continue;
+        }
+        const ImVec2 min(origin.x + rect.x * scale.x, origin.y + rect.y * scale.y);
+        drawList->AddRectFilled(min, ImVec2(min.x + rect.width * scale.x, min.y + rect.height * scale.y), ColorOf(rect.rgba));
+    }
+}
+
 void DrawHudLabels() {
     const ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImDrawList *drawList = ImGui::GetForegroundDrawList();
     ImVec2 origin;
-    float scale;
+    ImVec2 scale;
 
     sCurrentFrame = ImGui::GetFrameCount();
     GameRect(viewport, &origin, &scale);
+    DrawHudRects(drawList, origin, scale);
     DrawHudBars(drawList, origin, scale);
     for (HudLabel &label : sLabels) {
         if (!label.active) {
@@ -163,7 +234,7 @@ class RemixHudTextWindow : public Ship::GuiWindow {
 
 } // namespace
 
-extern "C" void remix_hud_text_put(int slot, const char *text, float x, float y, uint32_t rgba, float height) {
+extern "C" void remix_hud_text_put(int slot, const char *text, float x, float y, uint32_t rgba, float scale, int align) {
     if (slot < 0 || slot >= REMIX_HUD_TEXT_SLOTS || text == nullptr) {
         return;
     }
@@ -173,19 +244,30 @@ extern "C" void remix_hud_text_put(int slot, const char *text, float x, float y,
     label.x = x;
     label.y = y;
     label.rgba = rgba;
-    label.height = height;
+    label.scale = scale;
+    label.align = align;
+    label.maxWidth = 0.0f;
     label.active = true;
     label.lastFrame = sCurrentFrame;
 }
 
-extern "C" void remix_hud_text_putf(int slot, float x, float y, uint32_t rgba, float height, const char *format, ...) {
+extern "C" void remix_hud_text_put_fit(int slot, const char *text, float x, float y, uint32_t rgba, float scale, int align,
+                                       float max_width) {
+    remix_hud_text_put(slot, text, x, y, rgba, scale, align);
+    if (slot >= 0 && slot < REMIX_HUD_TEXT_SLOTS && text != nullptr) {
+        sLabels[slot].maxWidth = max_width;
+    }
+}
+
+extern "C" void remix_hud_text_putf(int slot, float x, float y, uint32_t rgba, float scale, int align, const char *format,
+                                    ...) {
     char text[REMIX_HUD_TEXT_LENGTH];
     va_list arguments;
 
     va_start(arguments, format);
     std::vsnprintf(text, sizeof(text), format, arguments);
     va_end(arguments);
-    remix_hud_text_put(slot, text, x, y, rgba, height);
+    remix_hud_text_put(slot, text, x, y, rgba, scale, align);
 }
 
 extern "C" void remix_hud_bar_put(int slot, float x, float y, float width, float height, float fraction, uint32_t rgba,
@@ -205,6 +287,27 @@ extern "C" void remix_hud_bar_put(int slot, float x, float y, float width, float
     bar.lastFrame = sCurrentFrame;
 }
 
+extern "C" float remix_hud_text_measure(const char *text, float scale) {
+    if (text == nullptr || !RemixFont::Ensure()) {
+        return 0.0f;
+    }
+    return RemixFont::Measure(text, scale);
+}
+
+extern "C" void remix_hud_rect_put(int slot, float x, float y, float width, float height, uint32_t rgba) {
+    if (slot < 0 || slot >= REMIX_HUD_RECT_SLOTS) {
+        return;
+    }
+    HudRect &rect = sRects[slot];
+    rect.x = x;
+    rect.y = y;
+    rect.width = width;
+    rect.height = height;
+    rect.rgba = rgba;
+    rect.active = true;
+    rect.lastFrame = sCurrentFrame;
+}
+
 extern "C" void remix_hud_text_hide(int slot) {
     if (slot < 0 || slot >= REMIX_HUD_TEXT_SLOTS) {
         return;
@@ -218,6 +321,9 @@ extern "C" void remix_hud_text_clear(void) {
     }
     for (HudBar &bar : sBars) {
         bar.active = false;
+    }
+    for (HudRect &rect : sRects) {
+        rect.active = false;
     }
 }
 

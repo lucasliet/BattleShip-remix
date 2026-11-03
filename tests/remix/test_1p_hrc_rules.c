@@ -142,30 +142,47 @@ static void testCounterStaysInTheCornerWhileTheAttemptIsOn(void)
 {
     SC1PRemixHrcCounterLayout layout;
 
-    sc1PRemixHrcCounterAt(0, &layout);
-    CHECK_EQ(246, (int)layout.x);
-    CHECK_EQ(44, (int)layout.y);
-    CHECK_EQ(16, (int)layout.height);
+    sc1PRemixHrcCounterAt(0, 0, 40.0F, &layout);
+    CHECK_EQ(278, (int)layout.counter_x);
+    CHECK_EQ(44, (int)layout.counter_y);
+    CHECK_EQ(282, (int)layout.label_x);
+    CHECK_EQ(47, (int)layout.label_y);
+    CHECK_EQ(90, (int)(layout.counter_scale * 100.0F + 0.5F));
+    CHECK_EQ(62, (int)(layout.label_scale * 100.0F));
 }
 
-static void testCounterEndsCenteredAndTwiceAsTallAtComplete(void)
+static void testCounterSlidesToTheCentreAndGrowsAtComplete(void)
 {
     SC1PRemixHrcCounterLayout layout;
+    float final_right_edge = 160.0F + 0.725F * 40.0F - 12.5F;
 
-    sc1PRemixHrcCounterAt(45, &layout);
-    CHECK_EQ(160, (int)layout.x);
-    CHECK_EQ(66, (int)layout.y);
-    CHECK_EQ(32, (int)layout.height);
+    sc1PRemixHrcCounterAt(45, 1, 40.0F, &layout);
+    /* HRC.asm _complete animates X, Y and scale once per frame for timer 45..0: 46 steps of each. */
+    CHECK_EQ((int)(final_right_edge * 10.0F + 0.5F), (int)(layout.counter_x * 10.0F + 0.5F));
+    CHECK_EQ(67, (int)layout.counter_y);
+    CHECK_EQ(136, (int)(layout.counter_scale * 100.0F + 0.5F));
+    CHECK_EQ(109, (int)(layout.label_scale * 100.0F + 0.5F));
+    CHECK_EQ((int)(layout.label_x - layout.counter_x), 4);
+}
+
+static void testCounterMovesOneStepInTheFirstTicOfComplete(void)
+{
+    SC1PRemixHrcCounterLayout layout;
+    float step = (278.0F - (160.0F + 0.725F * 40.0F - 12.5F)) / 46.0F;
+
+    sc1PRemixHrcCounterAt(0, 1, 40.0F, &layout);
+    CHECK_EQ((int)((278.0F - step) * 100.0F), (int)(layout.counter_x * 100.0F));
+    CHECK_EQ(44, (int)layout.counter_y);
 }
 
 static void testCounterClampsTheTicsToTheEndTimer(void)
 {
     SC1PRemixHrcCounterLayout layout;
 
-    sc1PRemixHrcCounterAt(-5, &layout);
-    CHECK_EQ(246, (int)layout.x);
-    sc1PRemixHrcCounterAt(900, &layout);
-    CHECK_EQ(32, (int)layout.height);
+    sc1PRemixHrcCounterAt(-5, 1, 40.0F, &layout);
+    CHECK_EQ(221, (int)((278.0F - layout.counter_x) * 100.0F + 0.5F));
+    sc1PRemixHrcCounterAt(900, 1, 40.0F, &layout);
+    CHECK_EQ(136, (int)(layout.counter_scale * 100.0F + 0.5F));
 }
 
 static void testCloudsStandStillBeforeTheStartLine(void)
@@ -225,7 +242,8 @@ void remixTest1PHrcRules(void)
     RUN_TEST(testTimeUpBeforeTheLineWaitsForTheHumanToRest);
     RUN_TEST(testTimeUpWithTheHumanStuckInAHoldEndsAtOnce);
     RUN_TEST(testCounterStaysInTheCornerWhileTheAttemptIsOn);
-    RUN_TEST(testCounterEndsCenteredAndTwiceAsTallAtComplete);
+    RUN_TEST(testCounterSlidesToTheCentreAndGrowsAtComplete);
+    RUN_TEST(testCounterMovesOneStepInTheFirstTicOfComplete);
     RUN_TEST(testCounterClampsTheTicsToTheEndTimer);
     RUN_TEST(testTheFirstDistanceIsSavedQuietly);
     RUN_TEST(testAZeroDistanceNeverMakesARecord);

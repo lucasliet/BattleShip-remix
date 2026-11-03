@@ -37,12 +37,15 @@ constexpr int kAtlasHeight = kGlyphRows * kCellSize;
 constexpr int kSpaceCharacter = 0x20;
 constexpr float kSpaceAdvance = 4.0f;
 constexpr uint32_t kWidthEntrySize = 8;
+constexpr uint32_t kHeightByteOffset = 1;
+constexpr float kLineBaseHeight = 14.0f;
 
 enum class FontState { NotLoaded, Ready, Failed };
 
 FontState sState = FontState::NotLoaded;
 ImTextureID sTexture = nullptr;
 std::array<uint8_t, REMIX_FONT_LAST_CHARACTER + 1> sWidths{};
+std::array<uint8_t, REMIX_FONT_LAST_CHARACTER + 1> sHeights{};
 
 bool CharacterHasGlyph(int character) {
     return character >= REMIX_FONT_FIRST_CHARACTER && character <= REMIX_FONT_LAST_CHARACTER;
@@ -53,6 +56,7 @@ void ReadWidths() {
         const uint32_t entry = REMIX_SYM_Render__character_offsets_custom +
                                kWidthEntrySize * static_cast<uint32_t>(character - kSpaceCharacter);
         sWidths[character] = static_cast<uint8_t>(remix_ram_image_read_byte(entry));
+        sHeights[character] = static_cast<uint8_t>(remix_ram_image_read_byte(entry + kHeightByteOffset));
     }
 }
 
@@ -122,6 +126,11 @@ float AdvanceOf(int character, float scale) {
     return (static_cast<float>(sWidths[character]) + 1.0f) * scale;
 }
 
+/** Render.draw_string_ drops each glyph by (14 - glyph height) so that the glyph bottoms share one baseline. */
+float TopPaddingOf(int character, float scale) {
+    return (kLineBaseHeight - static_cast<float>(sHeights[character])) * scale;
+}
+
 } // namespace
 
 namespace RemixFont {
@@ -158,9 +167,10 @@ float Measure(const std::string &text, float scale) {
     return width;
 }
 
-void Draw(ImDrawList *drawList, ImVec2 position, float pixelsPerUnit, float scale, ImU32 color,
-          const std::string &text) {
-    const float glyphPixels = REMIX_FONT_GLYPH_SIZE * scale * pixelsPerUnit;
+void Draw(ImDrawList *drawList, ImVec2 position, ImVec2 pixelsPerUnit, float scale, ImU32 color,
+          const std::string &text, float widthFactor) {
+    const float glyphWidth = REMIX_FONT_GLYPH_SIZE * scale * pixelsPerUnit.x * widthFactor;
+    const float glyphHeight = REMIX_FONT_GLYPH_SIZE * scale * pixelsPerUnit.y;
     float cursor = position.x;
     const float uvSize = static_cast<float>(REMIX_FONT_GLYPH_SIZE);
 
@@ -170,10 +180,12 @@ void Draw(ImDrawList *drawList, ImVec2 position, float pixelsPerUnit, float scal
         if (CharacterHasGlyph(character)) {
             const ImVec2 uvMin = UvOf(character, 0, 0);
             const ImVec2 uvMax(uvMin.x + uvSize / kAtlasWidth, uvMin.y + uvSize / kAtlasHeight);
-            drawList->AddImage(sTexture, ImVec2(cursor, position.y), ImVec2(cursor + glyphPixels, position.y + glyphPixels),
-                               uvMin, uvMax, color);
+            const float top = position.y + TopPaddingOf(character, scale) * pixelsPerUnit.y;
+
+            drawList->AddImage(sTexture, ImVec2(cursor, top), ImVec2(cursor + glyphWidth, top + glyphHeight), uvMin, uvMax,
+                               color);
         }
-        cursor += AdvanceOf(character, scale) * pixelsPerUnit;
+        cursor += AdvanceOf(character, scale) * pixelsPerUnit.x * widthFactor;
     }
 }
 

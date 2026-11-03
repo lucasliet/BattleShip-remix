@@ -42,12 +42,14 @@ float Measure(const std::string &text, float scale);
  *
  * @param drawList Draw list receiving the glyph quads.
  * @param position Top-left corner in window pixels.
- * @param pixelsPerUnit Window pixels per N64 screen unit.
+ * @param pixelsPerUnit Window pixels per N64 screen unit, horizontally and vertically.
  * @param scale Remix font scale (0.875 for the 12-Character Battle numbers).
  * @param color ImGui colour used as the tint.
  * @param text Text to draw.
+ * @param widthFactor Horizontal squeeze applied to glyphs and advances (Render.apply_max_width_ flattens only the X axis).
  */
-void Draw(ImDrawList *drawList, ImVec2 position, float pixelsPerUnit, float scale, ImU32 color, const std::string &text);
+void Draw(ImDrawList *drawList, ImVec2 position, ImVec2 pixelsPerUnit, float scale, ImU32 color, const std::string &text,
+          float widthFactor);
 
 } // namespace RemixFont
 
