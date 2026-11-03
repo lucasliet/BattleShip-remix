@@ -57,6 +57,7 @@ locked in its jab combo; use the CPU item sweep instead.
 | `SSB64_AUDIO_FGM_LOG=1` | Logs `[fgm] play id=<n> table=<count>` for every FGM the game plays (ids >= 695 are Remix sounds); count them per run to prove SFX play |
 | `SSB64_VS_STOCKS=<n>` | The VS shortcut becomes a stock match with n stocks (Royal), so a KO ends it and the results scene runs; with `walk_right.txt` P1 falls off the stage |
 | `SSB64_AUDIO_DUMP_PATH=<file>` / `SSB64_AUDIO_DUMP_SECONDS=<n>` | WAV dump of the first n seconds (default 16, at most 120); `vs.sh` sets the path to `<run>/audio.wav` and `AUDIO_SECONDS` the length. Summarize with `.toolchain/host/venv/bin/python -I scripts/wavstat.py <run>...` |
+| `SSB64_START_SCENE=52 SSB64_REMIX_1P_MODE=<mode> SSB64_SPGAME_FKIND=<fkind>` | Boot a Remix 1P mode (`hrc`, `multiman`, `cruel`, `remix1p`, `allstar`, `bonus3`); Multi-Man and Cruel also need `SSB64_SPGAME_STAGE=12` (the Polygon Team stage), else stage 0 (VS Link) runs |
 | `SSB64_VS_STAGE=<decimal>` | Stage id (vanilla 0..0x28, Remix 0x29..0xD7; names in `decomp/src/gr/grremix/grremixids.h`) |
 | `SSB64_VS_ITEMS=<1..5>` | Turns every item switch on with that rate (0 means no items) |
 | `SSB64_REMIX_FORCE_ITEM=<kind>` | Every stage-spawned item becomes `<kind>`, with a 60-tick spawn wait |
