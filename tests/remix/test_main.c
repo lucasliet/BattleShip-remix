@@ -48,6 +48,7 @@ extern void remixTestFontDecode(void);
 extern void remixTestGroupDisplayRules(void);
 extern void remixTestSpriteRules(void);
 extern void remixTestFontLayout(void);
+extern void remixTestBgmRules(void);
 
 int main(void)
 {
@@ -92,6 +93,7 @@ int main(void)
     remixTestGroupDisplayRules();
     remixTestSpriteRules();
     remixTestFontLayout();
+    remixTestBgmRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;

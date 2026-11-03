@@ -594,7 +594,13 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     espaços das pontas, como o asm). `RemixFont::FitFactor` substitui a conta antiga, que usava a soma dos avanços. Já
     existiam: 128 slots, alinhamento LEFT/RIGHT/CENTER, altura do glifo (`14 - altura`), `put_fit`. 979 checagens, Match Stats
     sem regressão (`i3stats`).
-  - [ ] I4 BGM em runtime
+  - [x] I4 BGM em runtime. Feito (2026-11-03): `gm/gmremixbgmrules.*` (regra pura: música de item protegida 45 e 46, próxima
+    alternativa do D-pad, troca do Time Twister, 7 testes) e `gm/gmremixbgm.*` (`gmRemixBgmSetStageTracks` chamado por
+    `grRemixGetStageBGM`, `gmRemixBgmChange`, `gmRemixBgmFadeOut`, `gmRemixBgmPauseUpdate`). Consumidores vistos: pausa com D-pad
+    (`Pause.asm set_alternate_music_`): Direita percorre padrão, ocasional, rara, rara 2 e volta (estágio 41: 49, 236, 57, 49;
+    log `remix bgm: track`), Baixo sorteia da lista (`grRemixRandomMusicPickForced`); e Menu Music 17 e 18 (ids 369 e 371
+    dos MIDI extras, `seqCount` 375). O Time Twister usa `gmRemixBgmRulesTimeTwister*`, `gmRemixBgmChange` e `FadeOut` no T1.5b
+    (Fase 3). 1001 checagens.
   - [x] I5 endereço N64 para símbolo. Feito (2026-11-03): `tools/n64_addr_to_symbol.py` (comentários `// 0xADDR` e nomes com
     endereço do decomp, mais `remix.sym`; `--near` lista donos abaixo) e `tools/test_n64_addr_to_symbol.py` (8 testes).
     Resolvidos em `notes/n64_address_resolutions.md`: 0x80131580 = `gIFCommonPlayerInterface.is_magnify_display`, 0x80131AD8 =
