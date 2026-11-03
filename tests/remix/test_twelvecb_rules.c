@@ -340,6 +340,72 @@ static void testResetNamesTheRequestingPlayer(void)
     CHECK_EQ('2', gmRemixTwelveCBResetRequesterDigit(1));
 }
 
+static void testStepStocksMovesThePortraitAndThePool(void)
+{
+    GMRemixTwelveCBState state;
+
+    gmRemixTwelveCBInit(&state);
+    CHECK_EQ(1, gmRemixTwelveCBStepPortraitStocks(&state, 0, 3, -1));
+
+    CHECK_EQ(2, state.stocks_by_portrait[3]);
+    CHECK_EQ(47, state.players[0].stocks_remaining);
+    CHECK_EQ(48, state.players[1].stocks_remaining);
+}
+
+static void testStepStocksWrapsThroughDefeatedAtBothEnds(void)
+{
+    GMRemixTwelveCBState state;
+    int32_t step;
+
+    gmRemixTwelveCBInit(&state);
+    state.stocks_by_portrait[5] = 0;
+    gmRemixTwelveCBStepPortraitStocks(&state, 0, 5, -1);
+    CHECK_EQ(-1, state.stocks_by_portrait[5]);
+    CHECK_EQ(0, gmRemixTwelveCBGetPortraitStocks(&state, 5));
+
+    gmRemixTwelveCBStepPortraitStocks(&state, 0, 5, -1);
+    CHECK_EQ(3, state.stocks_by_portrait[5]);
+
+    gmRemixTwelveCBStepPortraitStocks(&state, 0, 5, 1);
+    CHECK_EQ(-1, state.stocks_by_portrait[5]);
+
+    for (step = 0; step < 4; step++)
+    {
+        gmRemixTwelveCBStepPortraitStocks(&state, 0, 5, 1);
+    }
+    CHECK_EQ(3, state.stocks_by_portrait[5]);
+    CHECK_EQ(51, state.players[0].stocks_remaining);
+}
+
+static void testStepStocksRejectsOutOfRangeArguments(void)
+{
+    GMRemixTwelveCBState state;
+
+    gmRemixTwelveCBInit(&state);
+
+    CHECK_EQ(0, gmRemixTwelveCBStepPortraitStocks(&state, 2, 3, 1));
+    CHECK_EQ(0, gmRemixTwelveCBStepPortraitStocks(&state, 0, 24, 1));
+    CHECK_EQ(0, gmRemixTwelveCBStepPortraitStocks(&state, 0, -1, 1));
+    CHECK_EQ(48, state.players[0].stocks_remaining);
+}
+
+static void testWasPortraitPlayedOnlyCountsGamesUpToTheCurrentOne(void)
+{
+    GMRemixTwelveCBState state;
+
+    gmRemixTwelveCBInit(&state);
+    CHECK_EQ(0, gmRemixTwelveCBWasPortraitPlayed(&state, 0, 0));
+
+    gmRemixTwelveCBSetNextPortrait(&state, 0, 6);
+    CHECK_EQ(0, gmRemixTwelveCBWasPortraitPlayed(&state, 0, 6));
+
+    playGame(&state, 6, 2, 6, 2, 3, 3);
+    CHECK_EQ(1, gmRemixTwelveCBWasPortraitPlayed(&state, 0, 6));
+    CHECK_EQ(0, gmRemixTwelveCBWasPortraitPlayed(&state, 1, 6));
+    CHECK_EQ(1, gmRemixTwelveCBWasPortraitPlayed(&state, 1, 2));
+    CHECK_EQ(0, gmRemixTwelveCBWasPortraitPlayed(&state, 0, 7));
+}
+
 void remixTestTwelveCBRules(void)
 {
     printf("twelvecb rules\n");
@@ -364,4 +430,8 @@ void remixTestTwelveCBRules(void)
     RUN_TEST(testUndoGameBeforeAnyGameChangesNothing);
     RUN_TEST(testResetPassesTheControlToAHumanOpponent);
     RUN_TEST(testResetNamesTheRequestingPlayer);
+    RUN_TEST(testStepStocksMovesThePortraitAndThePool);
+    RUN_TEST(testStepStocksWrapsThroughDefeatedAtBothEnds);
+    RUN_TEST(testStepStocksRejectsOutOfRangeArguments);
+    RUN_TEST(testWasPortraitPlayedOnlyCountsGamesUpToTheCurrentOne);
 }

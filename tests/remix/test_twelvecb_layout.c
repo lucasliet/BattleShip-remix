@@ -121,6 +121,15 @@ static void testSlotOfFkindFindsThePlayersOwnPortrait(void)
     CHECK_EQ(-1, mnRemixTwelveCBLayoutOwner(24));
 }
 
+static void testStockPaddingFollowsTheArrowsAndTheDigits(void)
+{
+    CHECK_EQ(-4, mnRemixTwelveCBLayoutStockPadding(0, 4));
+    CHECK_EQ(-4, mnRemixTwelveCBLayoutStockPadding(0, 12));
+    CHECK_EQ(-10, mnRemixTwelveCBLayoutStockPadding(1, 4));
+    CHECK_EQ(-10, mnRemixTwelveCBLayoutStockPadding(1, 9));
+    CHECK_EQ(-7, mnRemixTwelveCBLayoutStockPadding(1, 10));
+}
+
 void remixTestTwelveCBLayout(void)
 {
     printf("twelvecb layout\n");
@@ -132,4 +141,5 @@ void remixTestTwelveCBLayout(void)
     RUN_TEST(testHitTestKeepsEachPlayerInHisHalf);
     RUN_TEST(testHitTestRejectsRowsBelowTheGrid);
     RUN_TEST(testSlotOfFkindFindsThePlayersOwnPortrait);
+    RUN_TEST(testStockPaddingFollowsTheArrowsAndTheDigits);
 }
