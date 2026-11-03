@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <array>
 #include <cfloat>
+#include <cmath>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
@@ -144,17 +145,18 @@ void DrawLabel(ImDrawList *drawList, ImVec2 origin, ImVec2 scale, const HudLabel
     drawList->AddText(ImGui::GetFont(), fontSize, position, ColorOf(label.rgba), label.text);
 }
 
+/** KingOfTheHill.asm update_indicators_: the bar is a plain rectangle trunc(fraction * width) wide, and the white flash covers the whole bar. */
 void DrawBar(ImDrawList *drawList, ImVec2 origin, ImVec2 scale, const HudBar &bar) {
     const ImVec2 min(origin.x + bar.x * scale.x, origin.y + bar.y * scale.y);
     const ImVec2 max(min.x + bar.width * scale.x, min.y + bar.height * scale.y);
-    const ImVec2 fillMax(min.x + bar.width * scale.x * std::clamp(bar.fraction, 0.0f, 1.0f), max.y);
+    const float fillWidth = std::floor(std::clamp(bar.fraction, 0.0f, 1.0f) * bar.width);
 
-    drawList->AddRectFilled(min, max, IM_COL32(0, 0, 0, 160));
-    drawList->AddRectFilled(min, fillMax, ColorOf(bar.rgba));
+    if (fillWidth > 0.0f) {
+        drawList->AddRectFilled(min, ImVec2(min.x + fillWidth * scale.x, max.y), ColorOf(bar.rgba));
+    }
     if (bar.flash > 0.0f) {
         drawList->AddRectFilled(min, max, IM_COL32(255, 255, 255, static_cast<int>(255.0f * std::clamp(bar.flash, 0.0f, 1.0f))));
     }
-    drawList->AddRect(min, max, IM_COL32(255, 255, 255, 220));
 }
 
 void DrawHudBars(ImDrawList *drawList, ImVec2 origin, ImVec2 scale) {
