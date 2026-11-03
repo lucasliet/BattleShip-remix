@@ -44,6 +44,7 @@ EXTRA_SYMBOLS = [
     "Character.default_costume.table",
     "Character.variants.table",
     "Character.entry_action.table",
+    "Render.character_offsets_custom",
     "Stages.variant_table",
     "CharacterSelect.series_logo.table",
     "Costumes.select_.num_costumes",

@@ -3377,6 +3377,7 @@
 #define REMIX_SYM_PianoUSP__initial_ 0x80551914u
 #define REMIX_SYM_PianoUSP__main_ 0x805519A0u
 #define REMIX_SYM_PianoUSP__physics_ 0x80551A30u
+#define REMIX_SYM_Render__character_offsets_custom 0x804002DCu
 #define REMIX_SYM_RoyDSP__air_begin_initial_ 0x80585B30u
 #define REMIX_SYM_RoyDSP__air_begin_main_ 0x80585C94u
 #define REMIX_SYM_RoyDSP__air_collision_ 0x80585E9Cu

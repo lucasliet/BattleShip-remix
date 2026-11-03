@@ -1,7 +1,8 @@
 /**
  * remix_hud_text.h - positioned HUD text of the Remix VS modes (scores, counters, labels) drawn as a port overlay.
  *
- * Remix draws these with its own font sprites; the port draws them with ImGui. The match hooks call
+ * Remix draws these with its own font (Kabel); the port rebuilds that font from the user's .o2r (remix_font.h) and falls back to
+ * the ImGui font only when the font file is missing. The match hooks call
  * remix_hud_text_put every frame for every label they want visible: a label is shown for the frame it was put in and the
  * next one, so a hook that stops calling it hides the label. Positions are in the N64 screen (320 x 240), the overlay
  * maps them to the 4:3 game image centred in the window.
@@ -28,7 +29,7 @@ extern "C" {
  * @param x Horizontal centre of the text in N64 screen units.
  * @param y Vertical centre of the text in N64 screen units.
  * @param rgba Colour as 0xRRGGBBAA.
- * @param height Height of the text in N64 screen units (the 240-unit screen height scales it).
+ * @param height Height of the 16 pixel glyph box in N64 screen units; the Remix font scale is height / 16 (14 is Remix's 0.875).
  */
 void remix_hud_text_put(int slot, const char *text, float x, float y, uint32_t rgba, float height);
 
@@ -39,7 +40,7 @@ void remix_hud_text_put(int slot, const char *text, float x, float y, uint32_t r
  * @param x Horizontal centre of the text in N64 screen units.
  * @param y Vertical centre of the text in N64 screen units.
  * @param rgba Colour as 0xRRGGBBAA.
- * @param height Height of the text in N64 screen units.
+ * @param height Height of the 16 pixel glyph box in N64 screen units (see remix_hud_text_put).
  * @param format printf format string.
  */
 void remix_hud_text_putf(int slot, float x, float y, uint32_t rgba, float height, const char *format, ...);

@@ -12,6 +12,8 @@
 #include <imgui.h>
 #include <libultraship/libultraship.h>
 
+#include "remix_font.h"
+
 #include <algorithm>
 #include <array>
 #include <cfloat>
@@ -65,7 +67,21 @@ ImU32 ColorOf(uint32_t rgba) {
     return IM_COL32((rgba >> 24) & 0xFF, (rgba >> 16) & 0xFF, (rgba >> 8) & 0xFF, rgba & 0xFF);
 }
 
+/** Draws the label with the Remix font; the height is the glyph box height, so the font scale is height / 16. */
+void DrawLabelWithRemixFont(ImDrawList *drawList, ImVec2 origin, float scale, const HudLabel &label) {
+    const float fontScale = label.height / RemixFont::kGlyphHeight;
+    const float textWidth = RemixFont::Measure(label.text, fontScale) * scale;
+    const float boxHeight = label.height * scale;
+    const ImVec2 position(origin.x + label.x * scale - textWidth * 0.5f, origin.y + label.y * scale - boxHeight * 0.5f);
+
+    RemixFont::Draw(drawList, position, scale, fontScale, ColorOf(label.rgba), label.text);
+}
+
 void DrawLabel(ImDrawList *drawList, ImVec2 origin, float scale, const HudLabel &label) {
+    if (RemixFont::Ensure()) {
+        DrawLabelWithRemixFont(drawList, origin, scale, label);
+        return;
+    }
     const float fontSize = label.height * scale;
     const ImVec2 textSize = ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, label.text);
     const ImVec2 position(origin.x + label.x * scale - textSize.x * 0.5f,
