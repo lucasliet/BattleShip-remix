@@ -560,7 +560,7 @@ T8.2, T8.3, T9.1 e T9.3 acima.
   - [x] R1 HUD Kabel do lead: off-by-one de escala/y do HRC, testes verdes, telas conferidas, mapa de slots, commit.
     Evidência: decomp `bfb95da10`, `df7dbcc`; 928 checks/0; capturas `r1_{stats,pause,hrc,multiman,training,12cb}`.
     Pendente para a Fase 2: o texto do CSS do 12CB fica sobre os painéis (spec em `f15_twelvecb_css_spec.md`).
-  - [ ] R2 nota `notes/f15_button_sprites.md` (arquivos, offsets, formatos e cor dos sprites de botão; decisão SObj nativo).
+  - [x] R2 nota `notes/f15_button_sprites.md` (arquivos, offsets, formatos e cor dos sprites de botão; decisão SObj nativo).
   - [ ] R3 scripts de pacote versionados (`scripts/linux/` com sha256 fixos, `scripts/macos/package-remix-contained.sh`
     com `TMPDIR` e `trap`), fluxo em `build_and_roms.md`.
   - [ ] R4 conferir os três subagentes de outubro (Sheik copiada pelo Kirby, tabelas FGM, nota do Crash DSP) e `f7_GFX.md`.
