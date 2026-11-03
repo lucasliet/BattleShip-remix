@@ -1,6 +1,7 @@
 # F14: SpecialZoom stage groups 1 and 2 (REMIX-TODO(Render))
 
-Status: NOT MAPPED. `decomp/src/gm/gmremixspecialzoom.c` is unchanged; both TODO markers remain (lines 127 and 160).
+Status: RESOLVED in M11 I1 (2026-11-03): `GROUP_TABLE` is `gGCCommonLinks`, see `gmremixgroupdisplay.c`; the KO zoom hides links 1 and 2.
+The text below is the historical F14 analysis, which concluded wrongly that there was no port equivalent. Original status: NOT MAPPED. `decomp/src/gm/gmremixspecialzoom.c` is unchanged; both TODO markers remain (lines 127 and 160).
 
 ## Remix source
 

@@ -574,9 +574,20 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     Feito (2026-11-03): `gen_remix_parity.py` ganhou o status `adapted` (conta como feito); STATUS atualizado com as ondas do M8
     (0 linhas `todo`; `Crash.asm` adapted; Cheats, VsDemo, timeouts, Settings, SinglePlayerEnemy, MagnifyingGlass e SRAM `partial`
     com o que falta). Memória `project_remix_port_checkpoint.md` com a seção M11.
-- [ ] **Fase 1** infraestrutura: I1 grupos de display, I2 sprites de extensão por SObj, I3 texto Kabel completo, I4 BGM em
-  runtime, I5 endereço N64 para símbolo, I6 grupo 2 do estágio e rotina de câmera, I7 troca de imagem por parte de modelo,
-  I8 emulador de referência em `.toolchain/ref-emu/`. **Aceite:** regra pura testada e um consumidor visto por peça.
+- [ ] **Fase 1** infraestrutura (I1 a I8). **Aceite:** regra pura testada e um consumidor visto por peça.
+  - [x] I1 grupos de display (`gmremixgroupdisplay*`, `gGCCommonLinks` é o `Render.GROUP_TABLE`). Feito (2026-11-03): regra
+    pura `gmRemixGroupDisplayRules*` (5 checagens com mutação), `gmRemixGroupDisplaySet` e `TempSet`. Consumidores vistos:
+    Match Stats do VS (A esconde as linhas dos grupos 0x0D e 0x16, B restaura; `i1stats`) e zoom de KO (esconde e restaura os
+    grupos 1 e 2 do estágio; visto com `SSB64_REMIX_PANEL=Damage.1=300;Damage.2=300` e `Special Zoom (BETA)=2`, `kozoom3`).
+    Os demais grupos do asm (Toggles, Stages, Training, Bonus, Pause 0x0E a 0x10) são menus do Remix que o port desenha por
+    `remix_hud_text`, sem objetos para esconder; o Item troca de página ejetando e recriando o GObj. 937 checagens.
+  - [ ] I2 sprites de extensão por SObj
+  - [ ] I3 texto Kabel completo
+  - [ ] I4 BGM em runtime
+  - [ ] I5 endereço N64 para símbolo
+  - [ ] I6 grupo 2 do estágio e rotina de câmera
+  - [ ] I7 troca de imagem por parte de modelo
+  - [ ] I8 emulador de referência em `.toolchain/ref-emu/`
 - [ ] **Fase 2** T8.3: CSS do 12CB (19 passos de `f15_twelvecb_css_spec.md`), Match Stats, demais HUDs. **Aceite:** nenhum
   chamador de `remix_hud_text_*` nos modos, uma captura por tela.
 - [ ] **Fase 3** estágios e gameplay (T1.5b, T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0.

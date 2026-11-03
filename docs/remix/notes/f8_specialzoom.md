@@ -62,7 +62,7 @@ update (every odd game update), and the final knockback body. Commented asm and 
 
 ## REMIX-TODO markers (no port yet)
 
-- REMIX-TODO(Render): `temp_toggle_group_display_` (asm lines 917, 922, 1125, 1130) hides and shows the stage groups 1
+- RESOLVED (M11 I1, `gmRemixGroupDisplayTempSet`): `temp_toggle_group_display_` (asm lines 917, 922, 1125, 1130) hides and shows the stage groups 1
   and 2 through `Render.GROUP_TABLE` (RAM 0x800466F0). Those lists are walked with the Remix `link_next` (0x4) and the
   GObj flags (0x7C) and have no port. Effect: with the toggle on, the stage is NOT hidden during a KO zoom.
 - REMIX-TODO(Stamina): `check_gamemode_2` (asm line 141) skips Stamina battles through `Stamina.VS_MODE` (RAM
