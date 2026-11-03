@@ -2,11 +2,11 @@
 
 Este é o **único plano** da implementação do Remix. Quem trabalhar no Remix (agente ou humano) segue este arquivo na
 ordem, sem abrir frentes fora dele. Ele substitui os planos antigos (`docs/remix_port_map_2026-10-12.md`, `docs/remix/implementation_plan.md`, removidos;
-o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claude/plans/`. Widescreen/aspect ratio está **fora do escopo** (o jogo fica em 4:3).
+o contrato dos blobs foi para `docs/remix/torch_factories.md`). Widescreen/aspect ratio está **fora do escopo** (o jogo fica em 4:3).
 
 ## Como usar (protocolo de trabalho)
 
-1. No início de cada sessão, e depois de cada compressão de contexto, ler a seção **Posição atual** e a lista de tasks.
+1. No início de cada sessão, ler a seção **Posição atual** e a lista de tasks; o plano detalhado do M11 está em `notes/m11_finalization_plan.md`.
 2. Trabalhar **só na primeira task não concluída** do milestone atual. Uma task bloqueada recebe `BLOQUEADA: <motivo>`
    e a próxima é feita. Nunca começar o milestone seguinte com tasks abertas no atual, salvo bloqueio registrado.
 3. Cada task só é marcada `[x]` depois de passar no critério de aceite (build + o teste descrito). Ao marcar, anotar
@@ -38,15 +38,33 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`) e os de `~/.claud
 
 ## Posição atual
 
-- **Milestone atual: M11 Finalização** (2026-11-03), começando pela Fase R. Antes dele: M5 fechado (CP5, sobras no T8.2). M6 (modos) fechado (CP6, sobras no T8.2). M7 (IA) fechado (CP7, sobras no T8.2): a CPU usa as tabelas de ataque do Remix, recupera e joga nos níveis 9 e 10. M8 (restante da paridade) em andamento (CP9, 2026-10-31): T2.11, T8.1 e T8.2 com três ondas feitas, sobras dependentes de assets e subsistemas; T9.2 (vanilla) feito. M4 fechado (CP4). M2 fechado (CP2b) exceto T2.9b e T2.11. T1.5b segue pendente de M1.
-- **Último checkpoint:** CP10, 2026-11-02 (a pedido; antes CP9b, CP9a, CP9, CP8, CP7a, CP7, CP6, CP6f a CP6a, CP5) (ver `git log`). Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~87% (recalculada pela tabela em 2026-11-02 depois da auditoria do visual: o ~91% anterior não vinha da tabela e ignorava que os HUDs dos modos são provisórios, T8.3) (cálculo no fim deste arquivo; recalcular a cada checkpoint pela tabela de paridade, T0.2).
+**Em andamento: M11 Finalização, Fase 2 (visual dos modos).** O que falta para "Remix jogável" está na lista da Fase 2 e
+nas Fases 3 a 8 do M11 (no fim deste arquivo); os milestones antigos ficam como histórico e detalhe de cada task.
+
+| Milestone | Estado |
+|---|---|
+| M0 a M4: governança, estabilização, subsistemas, áudio, settings | fechados (sobras de M2 passaram para a Fase 3 do M11: T2.9b, T2.11) |
+| M5 CSS, menus e telas | fechado com sobras (T8.1, T8.2), que a Fase 4 do M11 absorve |
+| M6 modos | fechado com sobras (T8.2); o visual dos HUDs é a Fase 2 do M11 |
+| M7 IA | fechado (a CPU usa as tabelas do Remix); sobras `REMIX-TODO(AI)` na Fase 6 |
+| M8 restante da paridade | substituído pelas fases do M11 |
+| M9 verificação final no desktop | adiado para a Fase 8; T9.1b (escuta) é do usuário |
+| M10 Switch | T10.1 feito (`.nro` e pacote); T10.2 (hardware) é do usuário, com 6 rodadas de achados corrigidos |
+| **M11 Finalização** | Fase R e Fase 1 feitas (exceto I7); Fase 2 em andamento; Fases 3 a 8 abertas |
+
+- **Próximo passo:** terminar a Fase 2 (itens abertos listados no M11) e seguir pelas fases em ordem, com checkpoint e commit
+  por fase.
+- **Depende do usuário:** T9.1b (passagem de escuta e visual) e T10.2 (validação na Switch). "Remix jogável" (T9.3) só é
+  reportado depois da Fase 8.
+- **Último checkpoint:** CP10a (2026-11-02); o M11 registra o avanço de 2026-11-03 por task. Índice dos docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~87% pela tabela do fim do arquivo (recalcular no checkpoint da Fase 2; as peças da Fase 1 e do CSS do
+  12CB ainda não entraram na conta).
 
 ---
 
 ## M0. Governança
 
-- [x] T0.1 Este roadmap, referenciado em `AGENTS.md`, na memória e no plano da sessão.
+- [x] T0.1 Este roadmap, referenciado em `AGENTS.md` e na memória do projeto.
 - [x] T0.2 `docs/remix/parity.md` gerado por `tools/gen_remix_parity.py`: uma linha por `.asm` do Remix (exceto
   `Moveset/`, `costumes/`, `stages/*.asm` de sprite, `Req/`), com status (`ported` / `partial` / `todo` / `n/a`), arquivo C
   e verificação. Status inicial a partir dos arquivos `ftremix`/`itremix`/`grremix` e dos `REMIX-TODO`. É a medida de
@@ -526,7 +544,9 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 - [x] **Triagem dos `REMIX-TODO` fora de IA (2026-11-02, quatro workers de leitura, `docs/remix/notes/t2_11_triage_{a,b,c,d}.md`)** e dois itens portados: a lupa continua desligada ao despausar durante um Special Zoom (`ftRemixSpecialZoomIsActive`, `gmremixcamerapause.c`) e o pulo aéreo simples cai para 0.8 enquanto o lutador pula com Pwing (`itRemixPwingIsJumping`, `ftRemixSizeAerialJumpHeightSingle`; o patch do Kirby de pulos múltiplos não tem o fator). Visto só que a build e o item Pwing rodam sem erro (`cpu_55`, rc 0, 1 consumo); a altura do pulo não foi medida. Sobram **prontos mas de efeito pequeno:** Pikachu DSP e Ness DSP/USP com escala de Size, escala do entry, Banjo USP onda de impacto, Golden Gun (o TODO está obsoleto, a bala já existe em `itlgun.c`), Yoshi clouds e Whispy Hyper (confirmar a condição de tela), som do Rainbow Chomp. **Travados:** ver as notas (símbolos ou arquivos que faltam, `Render.GROUP_TABLE`, texturas do Credits, câmera e BGM do Time Twister, arquivo 0x153 do ovo, 0xFE do item na mão).
 - [x] **T9.1, Training pelo CSS real (2026-11-02):** `training_css_pick.txt` com `SSB64_START_SCENE=18`: a mão do 1P escolhe o Mario, o CSS mantém a CPU (Sheik), START e A no seletor levam à partida no castelo da Peach com música 42; o log `training port` mostra as portas 0 (fkind 0) e 1 (fkind 62) e as outras duas desativadas. Era um dos itens não vistos do CP9.
 
-- [ ] **T8.3 Fidelidade visual dos textos e HUDs dos modos (aberto, achado na auditoria de 2026-11-02; bloqueia "Remix jogável")** Todo texto e barra dos modos Remix sai por `port/remix/remix_hud_text.cpp` (fonte padrão do ImGui, barra preta com contorno branco); o Remix desenha com a própria fonte e sprites (`Render.load_font` -> "Kabel", `load_font_2` -> arquivo 0xC3). Nenhum chamador é fiel. Ordem de impacto: (1) 12CB: CSS de 24 retratos com dois painéis, "Stocks Remaining" e número por painel (`TwelveCharBattle.asm:5092-5120`), imagem de título 0x2048, Character Set, Best Character, reset e coroa do vencedor (P5/P6/P8); `gmremixtwelvecbhud.c`. (2) "Press A for Match Stats" aparece em todo resultado do VS sem opção de esconder e usa texto, deveria ser o ícone do botão A em (160,218) (`VsStats.asm:940`; `mnremixvsstatsview.c:94`). (3) Página Match Stats inteira (`mnremixvsstatspages.c`): texto ImGui, barras chapadas e retângulo de fundo sobre as linhas normais (falta ocultar os grupos 0x16/0x0D). (4) Multi-Man "KOs N", contador do HRC, "Reset Count" do Training, linhas Goals/Time dos resultados, legenda da pausa, medidor do KOTH, título da música no início da partida (`BGM.asm:1032`), "Press Z for Custom Menu" e legendas do Training. Plano: extrair a fonte do Remix da ROM do usuário em tempo de build do `.o2r` (nada de ROM no git), carregar o atlas e desenhar glifos pelo caminho nativo de sprites, depois trocar chamador por chamador e conferir cada um em tela contra a referência. Critério de fechamento: nenhum chamador de `remix_hud_text_*` restante nos modos, cada tela vista em print.
+- [ ] **T8.3 Fidelidade visual dos textos e HUDs dos modos** (achado na auditoria de 2026-11-02; bloqueia "Remix jogável").
+  Executada na **Fase 2 do M11** (lista de itens e estado lá). Já feito: fonte Kabel real decodificada do `.o2r`, layout do
+  `draw_string_`, overscan, sprites de botão por SObj, Match Stats, legenda da pausa e CSS do 12CB até o passo 17.
 
 ## M9. Verificação final no desktop
 
@@ -552,88 +572,62 @@ HRC fechado no que o asm faz em partida (P13 a P15); faltam só os recordes na t
 Plano detalhado com os diagnósticos de cada fase: [`notes/m11_finalization_plan.md`](notes/m11_finalization_plan.md).
 Critério de fim: "Remix jogável" com **todas** as features do Remix presentes; adaptação ao port é aceita com o desvio
 documentado; `n/a` só para os quatro itens aprovados (emblema/golpes dos 18 extras no Character Data, overlay de Practice
-do Spawned Fear, Advanced Hurtbox e debug do `Hitbox.asm`, speed assist dos créditos). Execução: subagentes Haiku para
-leitura e specs, o lead implementa, compila e confere em tela. Este milestone substitui a ordem das sobras de T2.11, T8.1,
+do Spawned Fear, Advanced Hurtbox e debug do `Hitbox.asm`, speed assist dos créditos). Execução: subagentes de leitura e specs
+(Haiku), o lead implementa, compila e confere em tela. Este milestone substitui a ordem das sobras de T2.11, T8.1,
 T8.2, T8.3, T9.1 e T9.3 acima.
 
-- [ ] **Fase R** recuperar o trabalho interrompido da sessão `18aceb9d`:
-  - [x] R1 HUD Kabel do lead: off-by-one de escala/y do HRC, testes verdes, telas conferidas, mapa de slots, commit.
-    Evidência: decomp `bfb95da10`, `df7dbcc`; 928 checks/0; capturas `r1_{stats,pause,hrc,multiman,training,12cb}`.
-    Pendente para a Fase 2: o texto do CSS do 12CB fica sobre os painéis (spec em `f15_twelvecb_css_spec.md`).
+- [x] **Fase R** recuperar o trabalho interrompido de outubro e do início de novembro.
+  - [x] R1 HUD Kabel: layout do HRC corrigido (46 passos), testes verdes, telas conferidas, mapa de slots.
   - [x] R2 nota `notes/f15_button_sprites.md` (arquivos, offsets, formatos e cor dos sprites de botão; decisão SObj nativo).
   - [x] R3 scripts de pacote versionados (`scripts/linux/` com sha256 fixos, `scripts/macos/package-remix-contained.sh`
-    com `TMPDIR` e `trap`), fluxo em `build_and_roms.md`.
-    Evidência: `podman build` do `Dockerfile.jammy` passou com os três `sha256sum -c` OK (2026-11-03).
-  - [x] R4 conferir os três subagentes de outubro (Sheik copiada pelo Kirby, tabelas FGM, nota do Crash DSP) e `f7_GFX.md`.
-    Tudo já estava refeito, sem código novo (2026-11-03): as 4 rotinas do Kirby com a Sheik (`kirby_ground_{begin,charge,shoot}_collision_`
-    e `air_shoot_collision_`) estão em `ftremixsheiknsp.c:570-573`; as tabelas FGM foram substituídas pelo T3.2 (`fgm_tbl`/`fgm_ucd`
-    autossuficientes); a nota do Crash DSP é `notes/48_CRASH_DSP.md`; o `f7_GFX.md` virou `docs/bugs/remix_gfx_and_gfxroutine_2026-10-16.md`
-    e `notes/f7_charge_gfx_goemon_dedede_sheik.md`. As recomendações de diagnóstico (fflush antes do `abort`, hitch por cena,
-    `lbReloc` lento, escala do painel J) ficam para a Fase 7.
-  - [x] R5 `parity.md` atual, memória do checkpoint atualizada. **Aceite:** árvore limpa, testes verdes.
-    Feito (2026-11-03): `gen_remix_parity.py` ganhou o status `adapted` (conta como feito); STATUS atualizado com as ondas do M8
-    (0 linhas `todo`; `Crash.asm` adapted; Cheats, VsDemo, timeouts, Settings, SinglePlayerEnemy, MagnifyingGlass e SRAM `partial`
-    com o que falta). Memória `project_remix_port_checkpoint.md` com a seção M11.
+    com `TMPDIR` e `trap`), fluxo em `build_and_roms.md`; `podman build` do Dockerfile conferido.
+  - [x] R4 trabalhos de subagentes antigos conferidos (Sheik copiada pelo Kirby, tabelas FGM, nota do Crash DSP, notas de GFX):
+    tudo já estava refeito. Recomendações de diagnóstico (`fflush` antes do `abort`, hitch por cena, `lbReloc` lento, escala do
+    painel J) seguem na Fase 7.
+  - [x] R5 `parity.md` atual (status `adapted` conta como feito; 0 linhas `todo`) e memória do checkpoint atualizada.
 - [ ] **Fase 1** infraestrutura (I1 a I8). **Aceite:** regra pura testada e um consumidor visto por peça.
-  - [x] I1 grupos de display (`gmremixgroupdisplay*`, `gGCCommonLinks` é o `Render.GROUP_TABLE`). Feito (2026-11-03): regra
-    pura `gmRemixGroupDisplayRules*` (5 checagens com mutação), `gmRemixGroupDisplaySet` e `TempSet`. Consumidores vistos:
-    Match Stats do VS (A esconde as linhas dos grupos 0x0D e 0x16, B restaura; `i1stats`) e zoom de KO (esconde e restaura os
-    grupos 1 e 2 do estágio; visto com `SSB64_REMIX_PANEL=Damage.1=300;Damage.2=300` e `Special Zoom (BETA)=2`, `kozoom3`).
-    Os demais grupos do asm (Toggles, Stages, Training, Bonus, Pause 0x0E a 0x10) são menus do Remix que o port desenha por
-    `remix_hud_text`, sem objetos para esconder; o Item troca de página ejetando e recriando o GObj. 937 checagens.
-  - [x] I2 sprites de extensão por SObj. Feito (2026-11-03): `if/ifremixspriterules.*` (tabela de offsets do `file_c5_offsets`
-    e desempacote de cor, 24 checagens com mutação) e `if/ifremixsprite.*` (`ifRemixSpriteMake(id, grupo, dl, x, y, tint,
-    palette, escala)`: SObj nativo, o grupo é o link do GObj, então o I1 liga e desliga; cache dos arquivos zerado por cena em
-    `gmRemixModeSceneClear`). Consumidor visto: Match Stats (`mnremixvsstatsscene.*`, câmera própria dl 36 e 37 prioridade 12):
-    botão A do prompt, B e R das dicas e o fundo escurecido como objeto da DL do jogo, abaixo dos glifos e acima do texto
-    ImGui (`i2stats`). Os sprites dos arquivos 0xA06, 0x19 e 0x14F3 entram na tabela junto de cada consumidor (Fase 2 e 4),
-    com o offset conferido na tela. 961 checagens.
-  - [x] I3 texto Kabel completo. Feito (2026-11-03): as regras do `draw_string_` e do `apply_max_width_` viraram C puro
-    (`port/remix/remix_font_layout.*`, 18 checagens): avanço `(largura+1)*escala`, espaço 4, largura de alinhamento somando
-    tudo, e largura do ajuste = do X do primeiro glifo até a borda direita do sprite do último (16 de largura, sem contar os
-    espaços das pontas, como o asm). `RemixFont::FitFactor` substitui a conta antiga, que usava a soma dos avanços. Já
-    existiam: 128 slots, alinhamento LEFT/RIGHT/CENTER, altura do glifo (`14 - altura`), `put_fit`. 979 checagens, Match Stats
-    sem regressão (`i3stats`).
-  - [x] I4 BGM em runtime. Feito (2026-11-03): `gm/gmremixbgmrules.*` (regra pura: música de item protegida 45 e 46, próxima
-    alternativa do D-pad, troca do Time Twister, 7 testes) e `gm/gmremixbgm.*` (`gmRemixBgmSetStageTracks` chamado por
-    `grRemixGetStageBGM`, `gmRemixBgmChange`, `gmRemixBgmFadeOut`, `gmRemixBgmPauseUpdate`). Consumidores vistos: pausa com D-pad
-    (`Pause.asm set_alternate_music_`): Direita percorre padrão, ocasional, rara, rara 2 e volta (estágio 41: 49, 236, 57, 49;
-    log `remix bgm: track`), Baixo sorteia da lista (`grRemixRandomMusicPickForced`); e Menu Music 17 e 18 (ids 369 e 371
-    dos MIDI extras, `seqCount` 375). O Time Twister usa `gmRemixBgmRulesTimeTwister*`, `gmRemixBgmChange` e `FadeOut` no T1.5b
-    (Fase 3). 1001 checagens.
-  - [x] I5 endereço N64 para símbolo. Feito (2026-11-03): `tools/n64_addr_to_symbol.py` (comentários `// 0xADDR` e nomes com
-    endereço do decomp, mais `remix.sym`; `--near` lista donos abaixo) e `tools/test_n64_addr_to_symbol.py` (8 testes).
-    Resolvidos em `notes/n64_address_resolutions.md`: 0x80131580 = `gIFCommonPlayerInterface.is_magnify_display`, 0x80131AD8 =
-    `sEFGroundActor`, 0x800F9C8C/0x800F9CC4 = `mpCollisionCheckProjectRWall`; 0x80132704 fica no padrão (rotação 0, vista em
-    tela); 0x8014A24C e 0x8019C230 entram na Fase 3.
-  - [x] I6 grupo 2 do estágio e rotina de câmera. Feito (2026-11-03): `gr/grremix/grremixstagebg.*` (caminhada `gGCCommonLinks[2]` ->
-    junta -> bola de warp e paleta, `grRemixStageBgBitmapToken` com o fix-up do sprite, `grRemixStageBgSetBitmap` troca o
-    `Sprite.bitmap` do wallpaper, `grWallpaperGetGObj`), usado pelo T1.5b: Time Twister completo (warp, zoom da câmera pelo
-    `gmCameraSetStatusMapZoom`, cor da lupa, troca de fundo, troca e fade da música com `gmRemixBgm*`; visto em `tt3`: o estágio vira
-    N. Sanity Beach e a música 318, log `remix time twister`) e Scuttle Town (paleta lida, fundo noite e dia trocado; visto em `sc2`).
-  - [ ] I7 troca de imagem por parte de modelo
-  - [x] I8 emulador de referência em `.toolchain/ref-emu/`. Feito (2026-11-03): `scripts/macos/setup-ref-emu.sh` (mupen64plus 2.6.0
-    com interpretador puro, rsp-cxd4, angrylion-rdp-plus 1.6, SDL2 e libpng compartilhados, tudo por sha256 em `.toolchain/ref-emu`),
-    plugin de entrada por script `scripts/ref-emu/input-script.c` (mesmo formato do `SSB64_INPUT_SCRIPT`), `capture.sh`, `sheet.py` e
-    os roteiros `scripts/ref-emu/inputs/vs_{match,stats,pause}.txt`. 3000 quadros em 25 s. Capturas de referência da Match Stats e da pausa
-    do Remix em `build/ref-shots/` (não versionadas), comparadas em `notes/i8_reference_emulator.md`: a Match Stats do port agora
-    mantém o prompt "Press A" e o botão A escurecidos sob o fundo, como no Remix; faltam o ícone de personagem nos cabeçalhos
-    1P/2P e, na pausa, o bloco de música com glifos, os glifos dos botões e o close-up do lutador (Fase 2).
-- [ ] **Fase 2** T8.3: CSS do 12CB (19 passos de `f15_twelvecb_css_spec.md`), Match Stats, demais HUDs. **Aceite:** nenhum
-  chamador de `remix_hud_text_*` nos modos, uma captura por tela.
-  - 12CB, passos 1 a 17 do spec feitos (2026-11-03, comparado com a ROM no emulador de referência): painéis P1 e P2 na posição do
-    quarto (`mnPlayersVSGetPanelIndex`), sem 3P/4P (escondidos por quadro), cabeçalho 0x2048 também nos resultados, grade de 24
-    retratos por metade com escala 1.0 e slide-in (`mnremixtwelvecblayout.*`, 8 testes), hit test por jogador, retrato por jogador
-    passado às regras (`gmRemixTwelveCBSetCssPortrait`), conjuntos Default, Japanese, Polygon e Remix com setas e nomes, retratos
-    derrotados escurecidos, indicador de stocks no painel (ícone, cruz em sprite e número), RESET, coroa do vencedor, bloqueio do stock
-    depois do início, ícones J, E e polígono nos retratos, derrotado e vencedor travados no clique e no Random
-    (`gmRemixTwelveCBGetWinnerPortraitOf`, 2 testes), "Game N" escondido sob a Match Stats. Faltam: Gentlemen's Reset da pausa
-    (passo 18), conjunto Custom e StockMode Manual (passo 19), o emblema Smash dos painéis sem lutador (é do CSS geral, Fase 4).
-- [ ] **Fase 3** estágios e gameplay (T1.5b, T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0.
-- [ ] **Fase 4** CSS, stage select, painel por porta, telas (T8.1, T8.2).
+  - [x] I1 grupos de display (`gmremixgroupdisplay*`; `gGCCommonLinks` é o `Render.GROUP_TABLE`). Consumidores vistos: Match
+    Stats (A esconde os grupos 0x0D e 0x16, B restaura) e zoom de KO (esconde e restaura os grupos 1 e 2 do estágio).
+  - [x] I2 sprites de extensão por SObj (`if/ifremixspriterules.*`, `if/ifremixsprite.*`): tabela de offsets e cor
+    (tint = PRIM, palette = ENV), grupo = link do GObj. Consumidor visto: botões A, B e R da Match Stats.
+  - [x] I3 texto Kabel completo: regras do `draw_string_` e do `apply_max_width_` em C puro (`port/remix/remix_font_layout.*`),
+    128 slots, alinhamento, altura do glifo, `put_fit`.
+  - [x] I4 BGM em runtime (`gm/gmremixbgm*`): música de item protegida, alternativa do D-pad na pausa, troca e fade, Menu
+    Music 17 e 18.
+  - [x] I5 endereço N64 para símbolo (`tools/n64_addr_to_symbol.py`, resoluções em `notes/n64_address_resolutions.md`).
+  - [x] I6 grupo 2 do estágio e rotina de câmera (`gr/grremix/grremixstagebg.*`): Time Twister e Scuttle Town completos
+    (T1.5b), vistos em tela.
+  - [ ] I7 troca de imagem ou paleta por parte de modelo (`MODEL_PART_IMAGE_INIT_`): costumes além de `num_costumes`, cor do
+    ovo do Yoshi no escudo, Sonic clássico.
+  - [x] I8 emulador de referência em `.toolchain/ref-emu/` (`scripts/macos/setup-ref-emu.sh`, plugin de entrada por script,
+    `scripts/ref-emu/capture.sh`); capturas de referência da Match Stats e da pausa comparadas em `notes/i8_reference_emulator.md`.
+- [ ] **Fase 2** T8.3, visual dos modos. **Aceite:** cada tela vista em captura e comparada com a referência; nenhum texto ou
+  sprite provisório.
+  - [x] Texto: todos os chamadores de `remix_hud_text_*` usam os parâmetros do asm (X, Y do topo, escala, alinhamento).
+  - [x] Match Stats: prompt, botões A/B/R em sprite, página em Kabel, grupos ocultos.
+  - [x] Pausa: legenda com sprites e bloco de música.
+  - [x] 12CB, passos 1 a 17 de `notes/f15_twelvecb_css_spec.md`: painéis P1/P2 na posição do quarto, sem 3P/4P, cabeçalho 0x2048,
+    grade de 24 retratos com slide-in, hit test por jogador, conjuntos Default/Japanese/Polygon/Remix, retratos derrotados
+    escurecidos, indicador de stocks no painel, RESET, coroa do vencedor, trava do stock, ícones J/E/polígono, derrotado e
+    vencedor travados no clique e no Random, "Game N" nos resultados.
+  - [ ] 12CB passo 18 (Gentlemen's Reset da pausa) e passo 19 (conjunto Custom e StockMode Manual).
+  - [ ] Multi-Man: ícone do polígono e "X" em sprite, variante Dragon King (Y 212).
+  - [ ] HRC: conferir o contador no COMPLETE em tela contra a referência.
+  - [ ] Training: "Press Z for Custom Menu", legenda do L, D-pad, "(Hold --)", nome do item como imagem (arquivo 0xFE),
+    condição exata do Reset Count.
+  - [ ] Resultados: rótulos "Times" e "FGs" como sprite e números pelo sprite do resultado (KOTH e Smashketball).
+  - [ ] Medidor do KOTH (moldura 0x14F3+0xAA8, barra em y 188, X = 40 + 70 × porta, variante Dragon King).
+  - [ ] Banner do título da música (retângulo 0x34343494, faixa e jogo em Kabel; hoje usa o toast do LUS).
+  - [ ] Match Stats: ícone de personagem nos cabeçalhos 1P/2P; pausa: close-up do lutador.
+  - [ ] Emblema Smash dos painéis sem lutador (CSS geral; faz parte da Fase 4).
+- [ ] **Fase 3** estágios e gameplay (T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0 (hoje 61 linhas no total).
+- [ ] **Fase 4** CSS, stage select, painel por porta, telas (T8.1, T8.2): costumes extras, D-pad e bandeiras J/E, ícones do
+  handicap, roulette do Random, painel por porta, "Smash Remix v2.0.1" no título, glifos dos créditos, Gallery com 40.
 - [ ] **Fase 5** modos (Tag Team, Tug of War/Stamina, KOTH, Smashketball, 1P, Training).
 - [ ] **Fase 6** IA. **Aceite:** `REMIX-TODO(AI)` em 0, recuperação no nível 9 sem regressão (base 181/222).
-- [ ] **Fase 7** bugs abertos, instrumentação, pacotes de teste (com `.o2r`, uso pessoal) e finais (sem `.o2r`, CI com `remix`).
+- [ ] **Fase 7** bugs abertos (Poly Young Link ausente na CSS, Metal Mario parcial no Training, stutter do Switch, OOB do
+  `PEACH_TURNIP_GFX`, zoom 1,70 do Giga Bowser, flake do Taltal), instrumentação, pacotes de teste (com `.o2r`, uso pessoal) e
+  finais (sem `.o2r`, CI com `remix`).
 - [ ] **Fase 8** regressão completa, passadas do usuário (T9.1b, T10.2), comparação com o emulador, `parity.md` só com
   `ported`/`adapted`/`n/a`, T9.3 e checkpoint final.
 
@@ -647,7 +641,7 @@ T8.2, T8.3, T9.1 e T9.3 acima.
 | Itens | 10% | ~83% |
 | Stages (loader, seletor, hazards) | 20% | ~84% |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~80% (HUDs dos modos em fonte de debug, 12CB sem a CSS própria, T8.3) |
+| Settings, menus, modos | 20% | ~80% (HUDs agora em Kabel e CSS do 12CB feita até o passo 17; faltam os itens abertos da Fase 2 do M11) |
 | Verificação final | 5% | ~55% (T9.2 feito; T9.1 completo na parte automatizável, falta só o Tech do menu visto; T9.1b preparado, T9.3 só depois da sua passada) |
 | **Total ponderado** | | **~87%** (35×0,97 + 10×0,83 + 20×0,84 + 10×0,90 + 20×0,80 + 5×0,55 = 86,8; 2026-11-02 pós-auditoria: menus e modos de 90 para 80 por T8.3; antes, CP10 88,8: CP10: T9.1 automatizável completo e OOS visto; antes CP9b: conferências do T9.1 e correção do Salty Runback; as sobras de T2.11, T8.1 e T8.2 seguem abertas) |
 

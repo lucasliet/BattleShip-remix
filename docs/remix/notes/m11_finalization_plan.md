@@ -1,8 +1,7 @@
 # Plano de finalização do Smash Remix no BattleShip
 
-Criado em 2026-11-03. Fonte do estado: `docs/remix/ROADMAP.md` (CP10a, ~87%), transcrição da última sessão do Claude Code
-(`~/.claude/projects/-Users-lucas-Projetos-Pessoal-BattleShip/18aceb9d-...jsonl`, cortada por limite de uso em 2026-11-03 00:58Z
-e por falta de crédito às 02:52Z) e as triagens `docs/remix/notes/t2_11_triage_{a..d}.md`.
+Criado em 2026-11-03. Fonte do estado: `docs/remix/ROADMAP.md` (CP10a, ~87%), o histórico de trabalho de outubro e novembro
+e as triagens `docs/remix/notes/t2_11_triage_{a..d}.md`. O ROADMAP é o resumo vivo; este arquivo guarda os diagnósticos de cada fase.
 
 Regra de execução: exploração e leitura por subagentes com `anthropic/claude-haiku-5-5` (economia de tokens); o lead implementa,
 compila, roda e confere em tela. Uma task por vez, checkpoint por fase, commits sem trailers de atribuição. Ao sair do modo de
@@ -15,11 +14,11 @@ aceitas, desde que documentadas. As decisões estão no fim do arquivo.
 
 ## Fase R: recuperar o trabalho interrompido (antes de tudo)
 
-### R1. Trabalho do lead (sessão 18aceb9d), não commitado
+### R1. Trabalho do lead, não commitado (feito)
 
-Último commit: `11d791d` (fonte Kabel real decodificada do `.o2r` do usuário, teste do decodificador). Depois disso, sem commit:
+Ponto de partida: fonte Kabel real decodificada do `.o2r` do usuário e teste do decodificador, já commitados. Depois disso, sem commit:
 
-| Arquivo | O que a sessão fez (00:40Z a 00:58Z) |
+| Arquivo | O que mudou |
 |---|---|
 | `port/remix/remix_hud_text.{h,cpp}` | mais slots (antes 32), alinhamento LEFT/RIGHT/CENTER, função de largura do `draw_string_`, corte do overscan de 10 px lido do CVar como o `Gui.cpp` |
 | `port/remix/remix_font.{h,cpp}` | `Draw` com escala e altura de glifo |
@@ -31,10 +30,10 @@ aceitas, desde que documentadas. As decisões estão no fim do arquivo.
 | `decomp/src/gm/gmremixtwelvecbhud.c` | textos reais do asm (Stocks Remaining etc.), slots 32+ |
 | `decomp/src/gm/gmremixgameendrows.c`, `sc1premixmultiman.c` | parâmetros de texto |
 
-Estado medido pela sessão: `ssb64` linkou; `run_remix_mode_tests` com **928 checagens, 3 falhas** em
+Estado medido: `ssb64` linkou; `run_remix_mode_tests` com **928 checagens, 3 falhas** em
 `tests/remix/test_1p_hrc_rules.c:160,163,182` (176 contra 177; 108 contra 109; 1 contra 2). Nada conferido em tela.
 
-Revisão Haiku do diff (`ses_e60a58b5...`, 2026-11-03):
+Revisão Haiku do diff (2026-11-03):
 - **Conforme a spec:**
   - overlay com alinhamento, `put_fit`, `remix_hud_rect_put`, 128 rótulos, 16 barras, 48 retângulos;
   - corte de overscan feito (`OverscanMargin`/`GameRect` leem `.Overscan.*`, pixel-perfect desliga);
@@ -82,7 +81,7 @@ Passos:
 
 - Parou decodificando o botão A do `.o2r` (a leitura do zip em Python passou de 120 s, foi para background e foi morta).
 - O arquivo alvo `docs/remix/notes/f15_button_sprites.md` **nunca foi escrito**.
-- Refeito por Haiku (`ses_e60a4dce...`, 2026-11-03). Na Fase R, gravar o resultado abaixo nessa nota.
+- Refeito por Haiku (2026-11-03). Na Fase R, gravar o resultado abaixo nessa nota.
 - Destrava: sprite do botão A da Match Stats, glifos de botão nas legendas da pausa e do Training, setas/D-pad do CSS, ícone
   de polígono do Multi-Man, moldura do KOTH (infra I2 da Fase 1).
 
@@ -151,7 +150,7 @@ Resultado:
   `build-linux-release/BattleShip-Remix` (log termina em `BUILD_DONE`, também do `fb50770`). O empacotamento AppImage
   (`package-in-container.sh`) foi escrito mas **nunca rodou**. Os scripts estão no scratchpad em `/private/tmp/...`, que é volátil.
 
-Auditoria Haiku (`ses_e60a51b8...`, 2026-11-03):
+Auditoria Haiku (2026-11-03):
 - **macOS:**
   - O `.dmg` e o `.zip` não existem em lugar nenhum (`dist/`, `build-*`, Desktop, Downloads). Sobrou só a `.app` de 21:32.
   - A `.app` está completa: binário arm64 de 22,8 MB, `.o2r` de 59,9 MB com o recipe, `f3d.o2r`, ícone, gamecontrollerdb,
@@ -186,7 +185,7 @@ Passos:
 
 ### R4. Outros subagentes da sessão
 
-- Terminaram com relatório, que ficou só na transcrição:
+- Terminaram com relatório (não versionado):
   - análise de slow frames do Switch;
   - freeze no Training;
   - dois crashes (Status Buffer, já corrigido para 1024);
@@ -197,20 +196,20 @@ Passos:
   - resumo de hitch por cena;
   - log de `lbReloc` lento;
   - log de escala do painel J.
-- **Varredura Haiku** (`ses_e60a559a...`):
-  - Na `18aceb9d`, 77 de 79 subagentes terminaram com relatório. Só faltam os dois conhecidos (R2 e R3).
+- **Varredura Haiku** :
+  - 77 de 79 subagentes de outubro terminaram com relatório; só faltavam os dois conhecidos (R2 e R3).
   - Os 40 notes citados existem, exceto `f15_button_sprites.md`.
   - Única task de background morta: `blloq55yx`, a leitura do `.o2r` do R2.
   - O lead não deixou lista de tarefas; o último trabalho foi o HUD do 12CB e as linhas de resultado.
-- **Sessão antiga `b7b2d850`**, três subagentes interrompidos em outubro. Conferir se o trabalho foi refeito depois:
-  1. `a3a05ce1...` "Port leftover Kirby-copy routines A" (limite semanal, 13/10): faltavam 4 rotinas da Sheik copiada pelo
+- **Três subagentes interrompidos em outubro.** Conferir se o trabalho foi refeito depois:
+  1. "Port leftover Kirby-copy routines A" (limite semanal, 13/10): faltavam 4 rotinas da Sheik copiada pelo
      Kirby (3 colisões de chão e `air_shoot_collision_`). Conferir `ftremixkirbycopy`/sheik e o T2.6.
-  2. `a4cf90a9...` "Reconstruct Remix FGM tables for Torch" (interrompido pelo usuário, 12/10). Provavelmente substituído: o
+  2. "Reconstruct Remix FGM tables for Torch" (interrompido pelo usuário, 12/10). Provavelmente substituído: o
      T3.2 diz que `fgm_tbl`/`fgm_ucd` já são autossuficientes. Confirmar e descartar.
-  3. `affa6fd2...` "Port Remix Crash DSP" (interrompido pelo usuário, 13/10): faltava a nota do Crash DSP (11 rotinas de `dig`).
+  3. "Port Remix Crash DSP" (interrompido pelo usuário, 13/10): faltava a nota do Crash DSP (11 rotinas de `dig`).
      O código existe (Crash Dig no T2.11 onda 2); conferir se a nota existe.
   - `docs/remix/notes/f7_GFX.md` foi citado e não existe. Conferir se foi renomeado (o doc do T2.1 está em `docs/bugs/`).
-- **Pendências `REMIX-TODO(AI)` dos relatórios da 18aceb9d:** B2 sem P10, B1 com P02 e P06 parcial, A4c com P14, A4b com P05 e
+- **Pendências `REMIX-TODO(AI)` dos relatórios de outubro:** B2 sem P10, B1 com P02 e P06 parcial, A4c com P14, A4b com P05 e
   Banjo P06. Já estão na Fase 6.
 
 ### R5. Fechamento da Fase R
@@ -393,12 +392,3 @@ desvio documentado em `docs/bugs/` ou na nota da área (decisão 1). Feature aus
 6. **Pacotes:** com o `.o2r` embutido (uso pessoal) para testes agora; sem o `.o2r`, extraído da ROM do usuário no primeiro
    uso, para os pacotes finais publicáveis.
 7. **CI:** incluir `remix` na matriz do `.github/workflows/release.yml`, com os pacotes do modelo sem `.o2r`.
-
-## Explorações Haiku (todas concluídas em 2026-11-03)
-
-| Sessão | Escopo |
-|---|---|
-| `ses_e60a58b5affeAAIc18iDMUIsXI` | **concluída**, incorporada no R1 |
-| `ses_e60a559a4ffet4UwnAaqmNxg3I` | **concluída**, incorporada no R4 |
-| `ses_e60a51b85ffe4vyxI74SngSuxn` | **concluída**, incorporada no R3 |
-| `ses_e60a4dce1ffeoNWEiGG3HV6tWO` | **concluída**, incorporada no R2 |
