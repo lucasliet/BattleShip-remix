@@ -570,7 +570,10 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     autossuficientes); a nota do Crash DSP é `notes/48_CRASH_DSP.md`; o `f7_GFX.md` virou `docs/bugs/remix_gfx_and_gfxroutine_2026-10-16.md`
     e `notes/f7_charge_gfx_goemon_dedede_sheik.md`. As recomendações de diagnóstico (fflush antes do `abort`, hitch por cena,
     `lbReloc` lento, escala do painel J) ficam para a Fase 7.
-  - [ ] R5 `parity.md` atual, memória do checkpoint atualizada. **Aceite:** árvore limpa, testes verdes.
+  - [x] R5 `parity.md` atual, memória do checkpoint atualizada. **Aceite:** árvore limpa, testes verdes.
+    Feito (2026-11-03): `gen_remix_parity.py` ganhou o status `adapted` (conta como feito); STATUS atualizado com as ondas do M8
+    (0 linhas `todo`; `Crash.asm` adapted; Cheats, VsDemo, timeouts, Settings, SinglePlayerEnemy, MagnifyingGlass e SRAM `partial`
+    com o que falta). Memória `project_remix_port_checkpoint.md` com a seção M11.
 - [ ] **Fase 1** infraestrutura: I1 grupos de display, I2 sprites de extensão por SObj, I3 texto Kabel completo, I4 BGM em
   runtime, I5 endereço N64 para símbolo, I6 grupo 2 do estágio e rotina de câmera, I7 troca de imagem por parte de modelo,
   I8 emulador de referência em `.toolchain/ref-emu/`. **Aceite:** regra pura testada e um consumidor visto por peça.

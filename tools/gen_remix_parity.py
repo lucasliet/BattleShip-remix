@@ -9,7 +9,7 @@ Status rules:
 - Every other file takes its status from STATUS below; a file missing there is `todo`. Update STATUS when a task of
   docs/remix/ROADMAP.md lands, then rerun this script.
 
-Progress per area = (ported + partial / 2) / (rows that are not n/a).
+Progress per area = (ported + adapted + partial / 2) / (rows that are not n/a).
 """
 import re
 import sys
@@ -35,7 +35,8 @@ FIGHTER_DIRS = {
 
 AREAS = ["fighters", "items", "stages", "audio", "menus_modes", "ai", "infra"]
 
-# file -> (area, status, port location / note). Status: ported | partial | todo | n/a.
+# file -> (area, status, port location / note). Status: ported | adapted | partial | todo | n/a.
+# adapted = the feature exists for the player through a documented port deviation; it counts as done.
 STATUS = {
     "Character.asm": ("fighters", "ported", "port/remix/remix_roster.cpp, ftremix*"),
     "Action.asm": ("fighters", "ported", "ftremixvanillaprocs.c, remix_action_layout.h"),
@@ -83,16 +84,15 @@ STATUS = {
     "Japan.asm": ("fighters", "partial", "ftremixhitlag.c, shieldstun, jstunsleep, japanesesounds"),
     "SpecialZoom.asm": ("fighters", "partial", "gmremixspecialzoom*.c (stage hide open)"),
     "Combo.asm": ("fighters", "ported", "ftremixcombo.c"),
-    "Accessibility.asm": ("fighters", "partial", "ifscreenflash.c, efremixscreenshake.c"),
+    "Accessibility.asm": ("fighters", "ported", "ifscreenflash.c, efremixscreenshake.c, gmremixaccessibility.c"),
     "Pause.asm": ("menus_modes", "partial", "ftremixpause.c (Disable HUD, music, legend open)"),
     "Knockback.asm": ("fighters", "partial", "ftremixknockback.c"),
     "Hitbox.asm": ("fighters", "partial", "ftremixhitbox.c (display open)"),
     "Damage.asm": ("fighters", "partial", "ftremixdamage.c"),
     "Poison.asm": ("fighters", "ported", "ftremixpoison.c"),
-    "SwordTrail.asm": ("fighters", "todo", "ROADMAP T8.1"),
     "Costumes.asm": ("menus_modes", "partial", "CSS port (costume tables)"),
     "Item.asm": ("items", "partial", "itremixspawn.c, itmanager.c, mnvsitemswitch.c"),
-    "MagnifyingGlass.asm": ("items", "todo", ""),
+    "MagnifyingGlass.asm": ("items", "partial", "gmremixmagnify.c (not seen: needs a fighter off screen)"),
     "Stages.asm": ("stages", "partial", "grremixstage.c, mnmaps.c"),
     "Hazards.asm": ("stages", "partial", "grremixhazards_*.c, grremixgating.c"),
     "FD.asm": ("stages", "ported", "scvsbattle.c (FD music), port stage page"),
@@ -101,7 +101,7 @@ STATUS = {
     "Spawn.asm": ("stages", "partial", "grremixspawn.c"),
     "Camera.asm": ("stages", "partial", "grremixcamera.c"),
     "BGM.asm": ("audio", "partial", "grRemixGetStageBGM"),
-    "SFXReplace.asm": ("audio", "todo", "ROADMAP T3.2"),
+    "SFXReplace.asm": ("audio", "ported", "ftremixsfxreplace.c"),
     "Global.asm": ("infra", "n/a", "addresses and constants"),
     "os.asm": ("infra", "n/a", "assembler helpers"),
     "String.asm": ("infra", "n/a", "assembler helpers"),
@@ -111,7 +111,7 @@ STATUS = {
     "Joypad.asm": ("infra", "n/a", "replaced by the port's controller code"),
     "PAL.asm": ("infra", "n/a", "N64 TV type"),
     "Boot.asm": ("infra", "n/a", "N64 boot"),
-    "SRAM.asm": ("menus_modes", "todo", "ROADMAP T4.1"),
+    "SRAM.asm": ("menus_modes", "partial", "lbBackup records + port config for toggles (T4.1); Remix save blocks not mapped yet"),
     "Widescreen.asm": ("infra", "n/a", "out of scope (4:3)"),
     "FPS.asm": ("infra", "n/a", "N64 frame counter"),
     "CharacterSelect.asm": ("menus_modes", "partial", "CSS port (port/css_*, mnplayers*)"),
@@ -155,10 +155,18 @@ STATUS = {
     "VsRemixMenu.asm": ("menus_modes", "ported", "mnremixvsmode.c"),
     "Menu.asm": ("infra", "n/a", "replaced by the port menu (ROADMAP T4.1 deviation)"),
     "Walljump.asm": ("infra", "n/a", "all patches are commented out in the Remix 2.0.1 build"),
-    "Practice.asm": ("menus_modes", "partial", "ftremixzcancel.c (Flash On Z-Cancel); Color Overlays open"),
+    "Practice.asm": ("menus_modes", "ported", "ftremixzcancel.c (Flash On Z-Cancel), ftremixoverlay.c (Spawned Fear overlay n/a, M11)"),
     "CharacterSelectDebugMenu.asm": ("menus_modes", "partial", "remix_player_panel.cpp (the CSS panel menu is the debug menu open)"),
-    "SwordTrail.asm": ("fighters", "partial", "afterimage flag of Link only"),
-    "Skeleton.asm": ("fighters", "partial", "ftdisplaymain.c (vanilla skeleton path, per-port force open)"),
+    "SwordTrail.asm": ("fighters", "ported", "ftremixswordtrail.c"),
+    "Skeleton.asm": ("fighters", "ported", "ftremixskeleton.c (per-port force)"),
+    "AerialAttackFastFall.asm": ("fighters", "ported", "ftremixaerialfastfall.c"),
+    "DKMode.asm": ("fighters", "ported", "ftremixdkmode.c (port variable: the RAM image is read-only)"),
+    "Cheats.asm": ("menus_modes", "partial", "unlock all and music are port toggles; stock threshold, Pupupu nop, BGM store, AA open (M11 Fase 4)"),
+    "Crash.asm": ("infra", "adapted", "N64 crash debugger; the port crash handler logs the backtrace without the button sequence"),
+    "VsDemo.asm": ("menus_modes", "partial", "scremixvsdemo.c (Remix name in the demo and the port 3 rule open)"),
+    "timeouts.asm": ("menus_modes", "partial", "mnremixtimeouts.c (not seen on screen, M11 Fase 4)"),
+    "Settings.asm": ("menus_modes", "partial", "scremixtournament.c (tournament rules, not seen in the menu, M11 Fase 4)"),
+    "SinglePlayerEnemy.asm": ("menus_modes", "partial", "CPU hooks checked (f14_sbm_enemy_audit.md); 7 groups open (M11 Fase 4)"),
 }
 
 
@@ -215,13 +223,14 @@ def collect_rows() -> list:
 
 
 def summary_lines(rows: list) -> list:
-    lines = ["| Área | ported | partial | todo | n/a | progresso |", "|---|---|---|---|---|---|"]
+    lines = ["| Área | ported | adapted | partial | todo | n/a | progresso |", "|---|---|---|---|---|---|---|"]
     for area in AREAS:
         counts = {key: sum(1 for row in rows if row[1] == area and row[2] == key)
-                  for key in ("ported", "partial", "todo", "n/a")}
-        scored = counts["ported"] + counts["partial"] + counts["todo"]
-        progress = (counts["ported"] + counts["partial"] / 2) / scored * 100 if scored else 100.0
-        lines.append(f"| {area} | {counts['ported']} | {counts['partial']} | {counts['todo']} | {counts['n/a']} | "
+                  for key in ("ported", "adapted", "partial", "todo", "n/a")}
+        done = counts["ported"] + counts["adapted"]
+        scored = done + counts["partial"] + counts["todo"]
+        progress = (done + counts["partial"] / 2) / scored * 100 if scored else 100.0
+        lines.append(f"| {area} | {counts['ported']} | {counts['adapted']} | {counts['partial']} | {counts['todo']} | {counts['n/a']} | "
                      f"{progress:.0f}% |")
     return lines
 

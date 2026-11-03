@@ -2,23 +2,23 @@
 
 Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `ROADMAP.md` fechar.
 
-| Área | ported | partial | todo | n/a | progresso |
-|---|---|---|---|---|---|
-| fighters | 108 | 43 | 0 | 0 | 86% |
-| items | 31 | 1 | 1 | 0 | 95% |
-| stages | 1 | 6 | 0 | 0 | 57% |
-| audio | 3 | 1 | 1 | 0 | 70% |
-| menus_modes | 6 | 31 | 9 | 0 | 47% |
-| ai | 30 | 2 | 0 | 0 | 97% |
-| infra | 1 | 0 | 0 | 12 | 100% |
+| Área | ported | adapted | partial | todo | n/a | progresso |
+|---|---|---|---|---|---|---|
+| fighters | 113 | 0 | 40 | 0 | 0 | 87% |
+| items | 31 | 0 | 2 | 0 | 0 | 97% |
+| stages | 1 | 0 | 6 | 0 | 0 | 57% |
+| audio | 4 | 0 | 1 | 0 | 0 | 90% |
+| menus_modes | 7 | 0 | 36 | 0 | 0 | 58% |
+| ai | 30 | 0 | 2 | 0 | 0 | 97% |
+| infra | 1 | 1 | 0 | 0 | 12 | 100% |
 
 | Arquivo | Área | Status | Port |
 |---|---|---|---|
 | `AA.asm` | menus_modes | ported | remix_display_settings.cpp (MSAA) |
 | `AI.asm` | ai | partial | ftremixai*.c, ftcomputer.c hooks (ROADMAP T7.1, leftovers in T8.2) |
-| `Accessibility.asm` | fighters | partial | ifscreenflash.c, efremixscreenshake.c |
+| `Accessibility.asm` | fighters | ported | ifscreenflash.c, efremixscreenshake.c, gmremixaccessibility.c |
 | `Action.asm` | fighters | ported | ftremixvanillaprocs.c, remix_action_layout.h |
-| `AerialAttackFastFall.asm` | menus_modes | todo |  |
+| `AerialAttackFastFall.asm` | fighters | ported | ftremixaerialfastfall.c |
 | `AirDodge.asm` | fighters | ported | ftremixairdodge.c |
 | `BGM.asm` | audio | partial | grRemixGetStageBGM |
 | `Banjo/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
@@ -37,7 +37,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `CharacterSelect.asm` | menus_modes | partial | CSS port (port/css_*, mnplayers*) |
 | `CharacterSelectDebugMenu.asm` | menus_modes | partial | remix_player_panel.cpp (the CSS panel menu is the debug menu open) |
 | `ChargeSmashAttacks.asm` | fighters | ported | ftremixchargesmash.c |
-| `Cheats.asm` | menus_modes | todo |  |
+| `Cheats.asm` | menus_modes | partial | unlock all and music are port toggles; stock threshold, Pupupu nop, BGM store, AA open (M11 Fase 4) |
 | `Color.asm` | infra | n/a | constants |
 | `Combo.asm` | fighters | ported | ftremixcombo.c |
 | `ComboMeter.asm` | menus_modes | ported | ifremixcombometer.c, ifremixcombohits.c |
@@ -48,11 +48,11 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Crash/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
 | `Crash/Crash.asm` | fighters | partial | decomp/src/ft/ftremix/crash |
 | `Crash/CrashSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/crash |
-| `Crash.asm` | menus_modes | todo |  |
+| `Crash.asm` | infra | adapted | N64 crash debugger; the port crash handler logs the backtrace without the button sequence |
 | `Credits.asm` | menus_modes | partial | scstaffroll.c (glyphs and speed assist open) |
 | `CustomGrabAction.asm` | fighters | partial | ftremixpianoshared.c, fighter_registry custom_capture_* |
 | `DI.asm` | fighters | ported | ftremixdi.c |
-| `DKMode.asm` | menus_modes | todo |  |
+| `DKMode.asm` | fighters | ported | ftremixdkmode.c (port variable: the RAM image is read-only) |
 | `DSamus/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
 | `DSamus/DSamus.asm` | fighters | ported | decomp/src/ft/ftremix/dsamus |
 | `DSamus/DsamusSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/dsamus |
@@ -132,7 +132,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Lucas/Lucas.asm` | fighters | ported | decomp/src/ft/ftremix/lucas |
 | `Lucas/LucasSpecial.asm` | fighters | ported | decomp/src/ft/ftremix/lucas |
 | `MLuigi/MLuigi.asm` | fighters | ported | data-only clone (roster) |
-| `MagnifyingGlass.asm` | items | todo |  |
+| `MagnifyingGlass.asm` | items | partial | gmremixmagnify.c (not seen: needs a fighter off screen) |
 | `Marina/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
 | `Marina/Marina.asm` | fighters | partial | decomp/src/ft/ftremix/marina |
 | `Marina/MarinaSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/marina |
@@ -181,7 +181,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `PlayerTag.asm` | menus_modes | partial | ifremixplayertag.c |
 | `Poison.asm` | fighters | ported | ftremixpoison.c |
 | `PokemonAnnouncer.asm` | fighters | ported | ifremixannouncer.c, ifremixhitannouncer.c (throw announcement open in ftcommonthrow.c) |
-| `Practice.asm` | menus_modes | partial | ftremixzcancel.c (Flash On Z-Cancel); Color Overlays open |
+| `Practice.asm` | menus_modes | ported | ftremixzcancel.c (Flash On Z-Cancel), ftremixoverlay.c (Spawned Fear overlay n/a, M11) |
 | `Practice_1P.asm` | menus_modes | partial | gmremixpractice.c |
 | `Projectile.asm` | fighters | ported | decomp/src/wp/*remix* |
 | `Rage.asm` | fighters | ported | ftremixrage.c |
@@ -190,23 +190,23 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `Roy/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
 | `Roy/Roy.asm` | fighters | ported | decomp/src/ft/ftremix/roy |
 | `Roy/RoySpecial.asm` | fighters | ported | decomp/src/ft/ftremix/roy |
-| `SFXReplace.asm` | audio | todo | ROADMAP T3.2 |
-| `SRAM.asm` | menus_modes | todo | ROADMAP T4.1 |
+| `SFXReplace.asm` | audio | ported | ftremixsfxreplace.c |
+| `SRAM.asm` | menus_modes | partial | lbBackup records + port config for toggles (T4.1); Remix save blocks not mapped yet |
 | `SSonic/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
 | `SSonic/SSonic.asm` | fighters | ported | decomp/src/ft/ftremix/ssonic |
 | `Sandbag/Sandbag.asm` | fighters | ported | data-only clone (roster) |
-| `Settings.asm` | menus_modes | todo |  |
+| `Settings.asm` | menus_modes | partial | scremixtournament.c (tournament rules, not seen in the menu, M11 Fase 4) |
 | `Sheik/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
 | `Sheik/Sheik.asm` | fighters | partial | decomp/src/ft/ftremix/sheik |
 | `Sheik/SheikSpecial.asm` | fighters | partial | decomp/src/ft/ftremix/sheik |
 | `Shield.asm` | menus_modes | partial | ftremixshield.c (Costume and egg open) |
 | `SingleButtonMode.asm` | fighters | partial | ftremixsinglebutton.c (entry wiring open) |
 | `SinglePlayer.asm` | menus_modes | partial | sc1premix*.c (T6.2, leftovers in T8.2) |
-| `SinglePlayerEnemy.asm` | menus_modes | todo |  |
+| `SinglePlayerEnemy.asm` | menus_modes | partial | CPU hooks checked (f14_sbm_enemy_audit.md); 7 groups open (M11 Fase 4) |
 | `SinglePlayerMenus.asm` | menus_modes | ported | mnremix1pmode.c |
 | `SinglePlayerModes.asm` | menus_modes | partial | sc1premixintro/allstar/multiman*.c |
 | `Size.asm` | fighters | partial | ftremixsize*.c (phases a, b, c partial) |
-| `Skeleton.asm` | fighters | partial | ftdisplaymain.c (vanilla skeleton path, per-port force open) |
+| `Skeleton.asm` | fighters | ported | ftremixskeleton.c (per-port force) |
 | `Slippy/AI/Attacks.asm` | ai | ported | ftremixaitables.c reads the attack table from the Remix image (T7.1) |
 | `Slippy/Slippy.asm` | fighters | ported | decomp/src/ft/ftremix/slippy |
 | `Slippy/SlippyHipTranslation.asm` | fighters | ported | decomp/src/ft/ftremix/slippy |
@@ -226,7 +226,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `StockMode.asm` | menus_modes | partial | gmremixstockmode.c (Last mode open) |
 | `String.asm` | infra | n/a | assembler helpers |
 | `Surface.asm` | stages | partial | grremixsurface.c |
-| `SwordTrail.asm` | fighters | partial | afterimage flag of Link only |
+| `SwordTrail.asm` | fighters | ported | ftremixswordtrail.c |
 | `TagTeam.asm` | menus_modes | partial | gmremixtagteam*.c (T6.1d) |
 | `Teams.asm` | menus_modes | partial | scmanager.c, ftremixstamina*.c |
 | `TimedStock.asm` | menus_modes | ported | gmremixtimedstock*.c |
@@ -237,7 +237,7 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `TugOfWar.asm` | menus_modes | partial | gmremixtugofwar*.c (T6.1b, leftovers in T8.2) |
 | `TwelveCharBattle.asm` | menus_modes | partial | gmremixtwelvecb*.c (T6.1f, CSS of 24 portraits in T8.2) |
 | `VanillaLv10Attacks.asm` | ai | partial | ftremixailv10.c (PREVENT routines of vanilla fighters in T8.2) |
-| `VsDemo.asm` | menus_modes | todo |  |
+| `VsDemo.asm` | menus_modes | partial | scremixvsdemo.c (Remix name in the demo and the port 3 rule open) |
 | `VsRemixMenu.asm` | menus_modes | ported | mnremixvsmode.c |
 | `VsStats.asm` | menus_modes | partial | mnremixvsstats.c (page and trackers open) |
 | `WallTeching.asm` | fighters | partial | ftremixwalltech.c |
@@ -299,5 +299,5 @@ Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `R
 | `pikashared.asm` | fighters | partial | ftremix/jpika |
 | `resultsscreen.asm` | menus_modes | partial | mnremixwinbgm.c, mnvsresults.c |
 | `samusshared.asm` | fighters | partial | ftremixsamusshared.c, ftremixsamusshared2.c |
-| `timeouts.asm` | menus_modes | todo |  |
+| `timeouts.asm` | menus_modes | partial | mnremixtimeouts.c (not seen on screen, M11 Fase 4) |
 | `yoshishared.asm` | fighters | partial | ftremixyoshishared.c |
