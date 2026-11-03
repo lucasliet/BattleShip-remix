@@ -254,6 +254,92 @@ static void testNoWinnerPortraitOnceTheBattleIsOver(void)
     CHECK_EQ(-1, gmRemixTwelveCBGetWinnerPortraitOf(&state, 0));
 }
 
+static void testUndoGameReturnsTheStocksLostThisGame(void)
+{
+    GMRemixTwelveCBState state;
+
+    gmRemixTwelveCBInit(&state);
+    playGame(&state, 1, 2, 5, 9, 3, 3);
+    gmRemixTwelveCBRecordKo(&state, 0, 2);
+    gmRemixTwelveCBRecordKo(&state, 0, 1);
+    gmRemixTwelveCBRecordKo(&state, 1, 2);
+    CHECK_EQ(46, state.players[0].stocks_remaining);
+    CHECK_EQ(47, state.players[1].stocks_remaining);
+
+    gmRemixTwelveCBUndoGame(&state);
+
+    CHECK_EQ(48, state.players[0].stocks_remaining);
+    CHECK_EQ(48, state.players[1].stocks_remaining);
+    CHECK_EQ(3, state.stocks_by_portrait[5]);
+    CHECK_EQ(3, state.stocks_by_portrait[9]);
+    CHECK_EQ(GMREMIX_TWELVECB_STATUS_NOT_STARTED, state.status);
+    CHECK_EQ(-1, state.current_game);
+}
+
+static void testUndoGameCountsAPlayerThatLostEveryStock(void)
+{
+    GMRemixTwelveCBState state;
+    gmRemixTwelveCBInit(&state);
+    gmRemixTwelveCBUpdateStocks(&state, 1);
+    playGame(&state, 1, 2, 5, 9, 1, 1);
+    gmRemixTwelveCBRecordKo(&state, 1, 0);
+    gmRemixTwelveCBRecordKo(&state, 1, -1);
+    CHECK_EQ(22, state.players[1].stocks_remaining);
+
+    gmRemixTwelveCBUndoGame(&state);
+
+    CHECK_EQ(24, state.players[1].stocks_remaining);
+    CHECK_EQ(1, state.stocks_by_portrait[9]);
+}
+
+static void testUndoGameKeepsTheEarlierGamesAndTheStatus(void)
+{
+    GMRemixTwelveCBState state;
+
+    gmRemixTwelveCBInit(&state);
+    playGame(&state, 1, 2, 5, 9, 3, 3);
+    gmRemixTwelveCBRecordKo(&state, 1, 2);
+    playGame(&state, 1, 3, 5, 10, 3, 3);
+    gmRemixTwelveCBRecordKo(&state, 1, 2);
+    CHECK_EQ(1, state.current_game);
+
+    gmRemixTwelveCBUndoGame(&state);
+
+    CHECK_EQ(0, state.current_game);
+    CHECK_EQ(GMREMIX_TWELVECB_STATUS_STARTED, state.status);
+    CHECK_EQ(47, state.players[1].stocks_remaining);
+    CHECK_EQ(2, state.stocks_by_portrait[9]);
+    CHECK_EQ(3, state.stocks_by_portrait[10]);
+    CHECK_EQ(5, state.players[0].matches[1].portrait);
+    CHECK_EQ(10, state.players[1].matches[1].portrait);
+}
+
+static void testUndoGameBeforeAnyGameChangesNothing(void)
+{
+    GMRemixTwelveCBState state;
+
+    gmRemixTwelveCBInit(&state);
+    gmRemixTwelveCBUndoGame(&state);
+
+    CHECK_EQ(-1, state.current_game);
+    CHECK_EQ(48, state.players[0].stocks_remaining);
+    CHECK_EQ(GMREMIX_TWELVECB_STATUS_NOT_STARTED, state.status);
+}
+
+static void testResetPassesTheControlToAHumanOpponent(void)
+{
+    CHECK_EQ(1, gmRemixTwelveCBResetControllerPort(0, 1));
+    CHECK_EQ(0, gmRemixTwelveCBResetControllerPort(1, 1));
+    CHECK_EQ(0, gmRemixTwelveCBResetControllerPort(0, 0));
+    CHECK_EQ(1, gmRemixTwelveCBResetControllerPort(1, 0));
+}
+
+static void testResetNamesTheRequestingPlayer(void)
+{
+    CHECK_EQ('1', gmRemixTwelveCBResetRequesterDigit(0));
+    CHECK_EQ('2', gmRemixTwelveCBResetRequesterDigit(1));
+}
+
 void remixTestTwelveCBRules(void)
 {
     printf("twelvecb rules\n");
@@ -272,4 +358,10 @@ void remixTestTwelveCBRules(void)
     RUN_TEST(testGameRecordsStopAtTheLimitInsteadOfOverrunning);
     RUN_TEST(testWinnerMustKeepThePortraitHeWonWith);
     RUN_TEST(testNoWinnerPortraitOnceTheBattleIsOver);
+    RUN_TEST(testUndoGameReturnsTheStocksLostThisGame);
+    RUN_TEST(testUndoGameCountsAPlayerThatLostEveryStock);
+    RUN_TEST(testUndoGameKeepsTheEarlierGamesAndTheStatus);
+    RUN_TEST(testUndoGameBeforeAnyGameChangesNothing);
+    RUN_TEST(testResetPassesTheControlToAHumanOpponent);
+    RUN_TEST(testResetNamesTheRequestingPlayer);
 }

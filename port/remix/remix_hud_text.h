@@ -22,7 +22,7 @@ extern "C" {
  * Text slot map (each owner #defines its slots in its own file). Ranges may be reused only by owners that never draw in
  * the same scene; a label lives two frames, so a reused slot just changes owner when the scene changes.
  *   0..2    results screen: Match Stats prompt and page hints (mnremixvsstatsview.c)
- *   19..23  (old pause legend slots, free)
+ *   19..22  battle pause: Gentlemen's Reset request texts (ifremixgentlemensreset.c); 23 free
  *   51..70  battle pause legend: its text rows and the music title (ifremixpauselegend.c), VS and 1P battles
  *   73..77  Training D-pad legend lines and the Z prompt (sc1ptrainingremixlegend.c)
  *   71..72  match start banner: track and game line (gmremixmusictitle.c)

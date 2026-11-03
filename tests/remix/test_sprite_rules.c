@@ -54,6 +54,12 @@ static void testMultimanIconAndCrossFiles(void)
     CHECK_EQ(0x828, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_MULTIMAN_CROSS)->sprite_offset);
 }
 
+static void testStartButtonLivesInTheSoundTestFile(void)
+{
+    CHECK_EQ(0xC4, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_START_BUTTON)->file_id);
+    CHECK_EQ(0x1D50, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_START_BUTTON)->sprite_offset);
+}
+
 static void testOutOfRangeIdHasNoEntry(void)
 {
     CHECK_TRUE(ifRemixSpriteRulesGetEntry(-1) == NULL);
@@ -87,6 +93,7 @@ void remixTestSpriteRules(void)
     RUN_TEST(testDpadAndCStickArrowsLiveInTheCssImagesFile);
     RUN_TEST(testKothMeterFrameLivesInTheKothGfxFile);
     RUN_TEST(testMultimanIconAndCrossFiles);
+    RUN_TEST(testStartButtonLivesInTheSoundTestFile);
     RUN_TEST(testOutOfRangeIdHasNoEntry);
     RUN_TEST(testUnpackColorSplitsTheBytes);
 }
