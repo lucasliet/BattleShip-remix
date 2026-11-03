@@ -28,7 +28,7 @@ extern "C" {
  *   28      1P Multi-Man: KO counter (sc1premixmultiman.c)
  *   29..30  1P Home-Run Contest: distance and "FT." (sc1premixhrcrun.c)
  *   32..43  12-Character Battle, CSS and results screen: stocks remaining, pool, best character, TKOs, game number
- *           (gmremixtwelvecbhud.c)
+ *           (gmremixtwelvecbhud.c); 44..46 12CB Character Set title and the set name of each player
  *   48..127 results screen: Match Stats page texts, taken in draw order (mnremixvsstatspages.c)
  * Rect slots: 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
  */
