@@ -621,7 +621,7 @@ T8.2, T8.3, T9.1 e T9.3 acima.
   - [x] Medidor do KOTH (moldura 0x14F3+0xAA8 como sprite nativo no link 23, barra em y 188, X = 40 + 70 × porta, variante Dragon King em y 8/16). Visto em partida: `koth_hud` (3 portas, moldura vermelha no P1 e cinza nas CPUs) e `koth_dk` (Dragon King, medidores no topo). Regras puras com teste em `gmremixkothrules.*`.
   - [x] Banner do título da música (retângulo 0x34343494 em (1,156) 320x28, faixa "♪ título ♪" em (160,158) e jogo a 0,75 em (160,172), Kabel, do início da contagem até o GO!; o toast do LUS e `remix_overlay.*` foram removidos). Visto em partida: `music_banner` e `music_banner2` (banner com o retângulo e as duas linhas na contagem, some com o GO!).
   - [x] Match Stats: ícone de personagem (stock icon com a paleta do traje) nos cabeçalhos 1P/2P, em X 158 + 35 por coluna e Y 16 (`mnRemixVSStatsSceneMakeHeaderIcons`, chamado no fim de `mnVSResultsMakeHeader` quando os lutadores já existem; grupo das páginas). Visto em partida (`stats_icons`: ícones do Mario e do Kirby ao lado de "1P" e "2P").
-  - [ ] Pausa: close-up do lutador.
+  - [x] Pausa: close-up do lutador. É a câmera de pausa original do jogo e o port a mantém: visto em partida (`pause_cmp`: Mario de perto, "1P PAUSE" e a linha RESET/LEGEND). A legenda completa só aparece depois do R (o script da referência aperta R em 3700, por isso a captura dela mostra o bloco de música).
   - [ ] Emblema Smash dos painéis sem lutador (CSS geral; faz parte da Fase 4).
 - [ ] **Fase 3** estágios e gameplay (T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0 (hoje 61 linhas no total).
 - [ ] **Fase 4** CSS, stage select, painel por porta, telas (T8.1, T8.2): costumes extras, D-pad e bandeiras J/E, ícones do
