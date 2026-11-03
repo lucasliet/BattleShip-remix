@@ -30,7 +30,7 @@ extern "C" {
  *   32..43  12-Character Battle, CSS and results screen: stocks remaining, pool, best character, TKOs, game number
  *           (gmremixtwelvecbhud.c)
  *   48..127 results screen: Match Stats page texts, taken in draw order (mnremixvsstatspages.c)
- * Rect slots: 0..47 Match Stats pages. Bar slots: KOTH bars from 0 (gmremixkothhud.c).
+ * Rect slots: 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
  */
 #define REMIX_HUD_TEXT_SLOTS 128
 #define REMIX_HUD_BAR_SLOTS 16

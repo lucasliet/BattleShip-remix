@@ -57,7 +57,7 @@ Fields are big-endian; the Bitmap sits at `sprite - 0x10`; the row stride is `wi
 - Cost: today's callers draw every frame (`remix_hud_text_put`). With sprites each HUD needs a live GObj with a lifecycle
   (create, destroy or hide), e.g. the pause legend.
 
-## I2 (M11 Fase 1)
+## I2 (M11 Fase 1): DONE 2026-11-03, `ifremixsprite.*` and `ifremixspriterules.*` (first consumer: Match Stats, `mnremixvsstatsscene.c`)
 
 - Small module (e.g. `ifremixsprite.c`): load the extension file, make an SObj with tint and palette, hide and show.
 - Unit test of the offset and format table; the Match Stats A button is the first on-screen consumer.

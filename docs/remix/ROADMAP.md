@@ -581,7 +581,13 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     grupos 1 e 2 do estágio; visto com `SSB64_REMIX_PANEL=Damage.1=300;Damage.2=300` e `Special Zoom (BETA)=2`, `kozoom3`).
     Os demais grupos do asm (Toggles, Stages, Training, Bonus, Pause 0x0E a 0x10) são menus do Remix que o port desenha por
     `remix_hud_text`, sem objetos para esconder; o Item troca de página ejetando e recriando o GObj. 937 checagens.
-  - [ ] I2 sprites de extensão por SObj
+  - [x] I2 sprites de extensão por SObj. Feito (2026-11-03): `if/ifremixspriterules.*` (tabela de offsets do `file_c5_offsets`
+    e desempacote de cor, 24 checagens com mutação) e `if/ifremixsprite.*` (`ifRemixSpriteMake(id, grupo, dl, x, y, tint,
+    palette, escala)`: SObj nativo, o grupo é o link do GObj, então o I1 liga e desliga; cache dos arquivos zerado por cena em
+    `gmRemixModeSceneClear`). Consumidor visto: Match Stats (`mnremixvsstatsscene.*`, câmera própria dl 36 e 37 prioridade 12):
+    botão A do prompt, B e R das dicas e o fundo escurecido como objeto da DL do jogo, abaixo dos glifos e acima do texto
+    ImGui (`i2stats`). Os sprites dos arquivos 0xA06, 0x19 e 0x14F3 entram na tabela junto de cada consumidor (Fase 2 e 4),
+    com o offset conferido na tela. 961 checagens.
   - [ ] I3 texto Kabel completo
   - [ ] I4 BGM em runtime
   - [ ] I5 endereço N64 para símbolo

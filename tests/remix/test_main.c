@@ -46,6 +46,7 @@ extern void remixTestAiLeftoverRules(void);
 extern void remixTestVsStatsRules(void);
 extern void remixTestFontDecode(void);
 extern void remixTestGroupDisplayRules(void);
+extern void remixTestSpriteRules(void);
 
 int main(void)
 {
@@ -88,6 +89,7 @@ int main(void)
     remixTestVsStatsRules();
     remixTestFontDecode();
     remixTestGroupDisplayRules();
+    remixTestSpriteRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;
