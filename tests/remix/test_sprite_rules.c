@@ -40,6 +40,12 @@ static void testDpadAndCStickArrowsLiveInTheCssImagesFile(void)
     CHECK_EQ(0x1BB8, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_C_ARROW_D)->sprite_offset);
 }
 
+static void testKothMeterFrameLivesInTheKothGfxFile(void)
+{
+    CHECK_EQ(0x14F3, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_KOTH_METER)->file_id);
+    CHECK_EQ(0xAA8, (int)ifRemixSpriteRulesGetEntry(IFREMIX_SPRITE_KOTH_METER)->sprite_offset);
+}
+
 static void testOutOfRangeIdHasNoEntry(void)
 {
     CHECK_TRUE(ifRemixSpriteRulesGetEntry(-1) == NULL);
@@ -71,6 +77,7 @@ void remixTestSpriteRules(void)
     RUN_TEST(testButtonOffsetsMatchTheAsmConstants);
     RUN_TEST(testButtonsAndLegendWordLiveInFileC5);
     RUN_TEST(testDpadAndCStickArrowsLiveInTheCssImagesFile);
+    RUN_TEST(testKothMeterFrameLivesInTheKothGfxFile);
     RUN_TEST(testOutOfRangeIdHasNoEntry);
     RUN_TEST(testUnpackColorSplitsTheBytes);
 }

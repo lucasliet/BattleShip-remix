@@ -70,6 +70,30 @@ static void testTheBufferHoldsTheHillUntilItRunsOut(void)
     CHECK_EQ(1, gmRemixKothRulesSettle(1, &buffer, BUFFER));
 }
 
+static void testMeterSitsAtTheBottomUnlessTheDragonKingHudApplies(void)
+{
+    float frame_y;
+    float bar_y;
+
+    gmRemixKothRulesMeterY(GMREMIX_KOTHRULES_DK_HUD_DEFAULT, 0, &frame_y, &bar_y);
+    CHECK_EQ(180, (int)frame_y);
+    CHECK_EQ(188, (int)bar_y);
+    gmRemixKothRulesMeterY(GMREMIX_KOTHRULES_DK_HUD_DEFAULT, 1, &frame_y, &bar_y);
+    CHECK_EQ(8, (int)frame_y);
+    CHECK_EQ(16, (int)bar_y);
+    gmRemixKothRulesMeterY(GMREMIX_KOTHRULES_DK_HUD_ALWAYS, 0, &frame_y, &bar_y);
+    CHECK_EQ(16, (int)bar_y);
+    gmRemixKothRulesMeterY(GMREMIX_KOTHRULES_DK_HUD_OFF, 1, &frame_y, &bar_y);
+    CHECK_EQ(188, (int)bar_y);
+}
+
+static void testMeterXFollowsThePort(void)
+{
+    CHECK_EQ(40, (int)gmRemixKothRulesMeterX(0));
+    CHECK_EQ(110, (int)gmRemixKothRulesMeterX(1));
+    CHECK_EQ(250, (int)gmRemixKothRulesMeterX(3));
+}
+
 void remixTestKothRules(void)
 {
     printf("koth rules\n");
@@ -80,4 +104,6 @@ void remixTestKothRules(void)
     RUN_TEST(testHoldingAnEnemyContestsTheHillAndLosesTheClaim);
     RUN_TEST(testAContestStartsTheBuffer);
     RUN_TEST(testTheBufferHoldsTheHillUntilItRunsOut);
+    RUN_TEST(testMeterSitsAtTheBottomUnlessTheDragonKingHudApplies);
+    RUN_TEST(testMeterXFollowsThePort);
 }

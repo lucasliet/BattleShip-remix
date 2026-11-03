@@ -616,7 +616,7 @@ T8.2, T8.3, T9.1 e T9.3 acima.
   - [ ] Training: "Press Z for Custom Menu", legenda do L, D-pad, "(Hold --)", nome do item como imagem (arquivo 0xFE),
     condição exata do Reset Count.
   - [ ] Resultados: rótulos "Times" e "FGs" como sprite e números pelo sprite do resultado (KOTH e Smashketball).
-  - [ ] Medidor do KOTH (moldura 0x14F3+0xAA8, barra em y 188, X = 40 + 70 × porta, variante Dragon King).
+  - [x] Medidor do KOTH (moldura 0x14F3+0xAA8 como sprite nativo no link 23, barra em y 188, X = 40 + 70 × porta, variante Dragon King em y 8/16). Visto em partida: `koth_hud` (3 portas, moldura vermelha no P1 e cinza nas CPUs) e `koth_dk` (Dragon King, medidores no topo). Regras puras com teste em `gmremixkothrules.*`.
   - [ ] Banner do título da música (retângulo 0x34343494, faixa e jogo em Kabel; hoje usa o toast do LUS).
   - [ ] Match Stats: ícone de personagem nos cabeçalhos 1P/2P; pausa: close-up do lutador.
   - [ ] Emblema Smash dos painéis sem lutador (CSS geral; faz parte da Fase 4).
