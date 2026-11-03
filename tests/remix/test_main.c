@@ -50,6 +50,7 @@ extern void remixTestSpriteRules(void);
 extern void remixTestFontLayout(void);
 extern void remixTestBgmRules(void);
 extern void remixTestTwelveCBLayout(void);
+extern void remixTestTwelveCBCustom(void);
 
 int main(void)
 {
@@ -96,6 +97,7 @@ int main(void)
     remixTestFontLayout();
     remixTestBgmRules();
     remixTestTwelveCBLayout();
+    remixTestTwelveCBCustom();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;

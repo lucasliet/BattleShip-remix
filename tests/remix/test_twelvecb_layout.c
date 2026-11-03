@@ -53,7 +53,7 @@ static void testDefaultSetMatchesTheAsm(void)
 static void testInvalidSetOrSlotHasNoFighter(void)
 {
     CHECK_EQ(-1, mnRemixTwelveCBLayoutFkind(-1, 0));
-    CHECK_EQ(-1, mnRemixTwelveCBLayoutFkind(MNREMIX_TCB_SETS, 0));
+    CHECK_EQ(-1, mnRemixTwelveCBLayoutFkind(MNREMIX_TCB_SETS + 1, 0));
     CHECK_EQ(-1, mnRemixTwelveCBLayoutFkind(0, MNREMIX_TCB_SLOTS));
 }
 

@@ -45,6 +45,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_font_layout.c
     test_bgm_rules.c
     test_twelvecb_layout.c
+    test_twelvecb_custom.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_decode.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_layout.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
@@ -89,6 +90,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixspriterules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixbgmrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecblayout.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecbcustom.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)
 target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src ${CMAKE_SOURCE_DIR}/port/remix)
