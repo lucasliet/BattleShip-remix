@@ -311,7 +311,10 @@ Closed phases:
     - Tests: `special_matrix.sh` for every touched fighter, `vs.sh` with the new inputs, the Kirby copy test for F4,
       `SSB64_REMIX_FIGHTER_LOG` for ammo, knockback, heal and lifetime, reference captures for egg colour, Visibility and
       fireball.
-  - [ ] **Lot 4, items and Size.** I1 (`itbox.c`, `itmain.c`, `ftremixstartitem.c`): IT-2 first (Remix items never come
+  - [ ] **Lot 4, items and Size.** Progress (2026-11-05): coded and built; IT-2 and IT-3 done with runs; IT-4, IT-5, IT-6, IT-9 and IT-11
+    ported, in-game check pending (the shadows are too small in the headless frames; the sing toggle showed no difference in the
+    frames taken). Note: `SSB64_REMIX_FORCE_ITEM` rewrites every item made, container drops included; use `SSB64_FORCE_ITEM_KIND`
+    for container tests. I1 (`itbox.c`, `itmain.c`, `ftremixstartitem.c`): IT-2 first (Remix items never come
     out of containers), IT-3. I2 (`ftshadow.c`, `ftremixsize.c`): IT-5, IT-6. I3: IT-4, IT-9, IT-11. Tests:
     `SSB64_FORCE_CONTAINER_DROP` with `SSB64_REMIX_ITEM_LOG` and `item_cpu_sweep.sh`; `SSB64_REMIX_PANEL` (Start With,
     Size, Visibility) against the reference; two matches in a row for IT-4; `SSB64_REMIX_FORCE_ITEM` for IT-11.
@@ -373,7 +376,9 @@ Closed phases:
   2. [x] coded (2026-11-05): FT-6, FT-8 = CT-19, FT-9, FT-11, FT-12, FT-13, CT-17 (the PREVENT routines now act per
      candidate in `ftComputerCheckDetectTarget`, as the asm does), CT-20, FT-52; unit tests. Rule files, in parallel: FT-6, FT-8 = CT-19, FT-12, FT-13 (decision in its row first), CT-17, CT-20, FT-9, FT-52,
      FT-11 (human handicap up to 40 and the icons above 9).
-  3. Second batch coded (2026-11-05): FT-3 with FT-36, FT-4 with FT-7 (FT-10 was already ported), GP-8 = CT-21 (all seven
+  3. Re-measure after the second batch (2026-11-05): 811 episodes, 720 ok (88.8%, not below the 88.6% baseline), 70 KO of
+     which 60 self-destructs; the two vanilla-only runs (unchanged code) show 12 self-destructs in 15 KOs, so most level-9
+     recovery KOs are self-destructs in vanilla too. Second batch coded (2026-11-05): FT-3 with FT-36, FT-4 with FT-7 (FT-10 was already ported), GP-8 = CT-21 (all seven
      Reflect.asm AI patches), MD-10 and MD-11 (ball and hill targets), the self-destruct count in the AI log (`selfko` in
      `ai_recovery.sh`); PUFF_DSP is commented out in the asm (nothing to port); the Default CPU LVL refresh and the `CpuLevel9`
      conflict with level 10 are left (a design decision). Deviations in `deviations.md` 5.9. First batch coded (2026-11-05): SH-16 to SH-27 (SH-20 and SH-21 narrower than the ledger, `ai.md`), ST-27, FT-1 = CT-18

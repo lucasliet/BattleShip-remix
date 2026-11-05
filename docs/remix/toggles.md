@@ -154,7 +154,7 @@ Deviation: entries that carry an A-press function in `Toggles.asm` are not liste
 
 - **Jigglypuff Sing GFX Anims** (`puff_sing_anim`; 0 off, 1 on; default 0)  
   Asm: Size.asm: ON keeps the animated scale of Jigglypuff's sing effect; OFF forces scale 1.0.  
-  Port: No reader; the sing effect is drawn as in the port's vanilla path.
+  Port: `efRemixPurinSingProcUpdate` (ef/efremixpuffsing.c, the sing effect's update): the second joint uses matrix kind 0x2E every frame and, unless the toggle is on, its scale is reset to 1.0 (IT-9).
 
 - **'L' Selects Random Character** (`l_random_char`; 0 off, 1 on; default 0)  
   Asm: CharacterSelect.asm:6569: L selects a random character with the token.  
