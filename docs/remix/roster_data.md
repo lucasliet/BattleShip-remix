@@ -1,31 +1,34 @@
-# Roster data gerado do código-fonte do Remix
+# Roster data generated from the Remix source
 
-Arquivo gerado: `port/remix/remix_roster_data.h` (97 entradas, ids 0x00..0x60, `kRemixRoster`).
-Gerador: `tools/gen_remix_roster.py` (python3 do sistema, só stdlib). Regerar com:
+Covers `port/remix/remix_roster_data.h` (97 entries, ids 0x00..0x60, `kRemixRoster`), the generated table of per-fighter facts the port needs at
+compile time. Generator: `tools/gen_remix_roster.py` (stdlib only). Consumers: `port/remix/remix_roster.cpp` (`docs/remix/roster_loader.md`) and the
+`REMIX_ID_*` constants used across `decomp/src`.
+Regenerate with:
 
-    python3 tools/gen_remix_roster.py [caminho/para/smashremix-src]
+    .toolchain/host/venv/bin/python -I tools/gen_remix_roster.py [path/to/smashremix-src]
 
-Padrão: `.toolchain/pkgs/smashremix-src`. Lê `src/Character.asm` (tabela `scope id`,
-`variant_type`/`sound_type`, chamadas `define_character`) e `src/costumes/*.asm`
-(`NUM_COSTUMES`, `NUM_EXTRA_COSTUMES`, `register_extra_costumes_for_char`).
+Default source: `.toolchain/pkgs/smashremix-src`. It reads `src/Character.asm` (the `scope id` table, `variant_type` / `sound_type`, the
+`define_character` calls), `src/costumes/*.asm` (`NUM_COSTUMES`, `NUM_EXTRA_COSTUMES`, `register_extra_costumes_for_char`) and the
+`menu_zoom` patches (`table_patch_start(menu_zoom, ...)`).
+Test: `tools/test_remix_menu_zoom.py` checks the `menu_zoom` column against the Remix ROM.
 
-## Decisões
+## Decisions
 
-- `parent_remix_id` é o parent real do `define_character` (ids 0x00..0x0B). Vanilla e 0x1C ficam em 0xFF.
-- `variant_type` usa o valor que o `define_character` grava na tabela (`table_patch_start`), não a tabela estática.
-  Por isso 0x1B sai como SPECIAL (a tabela estática diz UNUSED).
-- `has_define_character == false` marca slots sem `define_character` (vanilla e 0x1C). Nesses,
-  `add_actions`, `file_*`, `attrib_offset`, `jab3` e `inhale_copy` são placeholders zero/NULL/false.
-- Ids seguem a ordem do macro: RANDOM = 0x1B, 0x1C é o clone do Mario (pulado), depois 0x1D em diante.
-  Cada comentário `// 0xNN - NOME` é conferido contra o id calculado (id divergente aborta).
+- `parent_remix_id` is the real parent of the `define_character` (ids 0x00..0x0B). Vanilla and 0x1C stay at 0xFF.
+- `variant_type` uses the value that `define_character` writes into the table (`table_patch_start`), not the static table. That is why 0x1B comes out
+  as SPECIAL (the static table says UNUSED).
+- `has_define_character == false` marks slots without a `define_character` (vanilla and 0x1C). For those, `add_actions`, `file_*`,
+  `attrib_offset`, `jab3` and `inhale_copy` are zero/NULL/false placeholders.
+- Ids follow the macro order: RANDOM = 0x1B, 0x1C is the Mario clone (skipped), then 0x1D onward. Every `// 0xNN - NAME` comment is checked against
+  the computed id (a mismatch aborts).
+- The port fkind of a Remix id is the id itself: `REMIX_ID_TO_PORT_FKIND(id) = id`.
 
-## Lacunas conhecidas
+## Known limits
 
-- 24 entradas com `num_costumes == 0` (desconhecido): BOSS, METAL, RANDOM, NONE, FALCO, GND, DRM, DSAMUS,
-  LUCAS, GBOWSER, PIANO, MARTH, SONIC, SANDBAG, SSONIC, DEDEDE, PEPPY, MLUIGI, EBI, DRAGONKING, CRASH, ROY,
-  DRL, LANKY. Nenhum `costumes/*.asm` os registra diretamente.
-- Labels de comentário divergentes no fonte (só aviso, o id confere): SSONIC (`SUPER SONIC`),
-  MLUIGI (`METAL`), EBI (`EBISUMARU`).
-- `file_*` são o texto do argumento: `File.X` ou literal hex (ex.: `0x0D9`), sem resolver o valor RAM.
-- `kRemixRoster` é `static const` em header: cada unidade de tradução que incluir o header tem sua cópia
-  (aviso `-Wunused-const-variable` em TUs que não usam a tabela).
+- 24 entries have `num_costumes == 0` (no `costumes/*.asm` registers them directly): BOSS, METAL, RANDOM, NONE, FALCO, GND, DRM, DSAMUS, LUCAS,
+  GBOWSER, PIANO, MARTH, SONIC, SANDBAG, SSONIC, DEDEDE, PEPPY, MLUIGI, EBI, DRAGONKING, CRASH, ROY, DRL, LANKY. The port does not use the column for
+  costume logic: it reads `Costumes.select_.num_costumes` and the extra-costume tables from the Remix RAM image (`docs/remix/notes/i7_part_image.md`).
+- Comment labels that disagree in the source (warning only, the id matches): SSONIC (`SUPER SONIC`), MLUIGI (`METAL`), EBI (`EBISUMARU`).
+- `file_*` are the argument text: `File.X` or a hex literal (for example `0x0D9`), with no RAM value resolved.
+- `kRemixRoster` is `static const` in a header: every translation unit that includes it has its own copy (`-Wunused-const-variable` warning in
+  units that do not use the table).

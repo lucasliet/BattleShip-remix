@@ -2,7 +2,7 @@
 #
 # Output name is <this file's path under yamls/remix>/<entry key>, so this file yields remix/fighters.
 # The blob is the FTData struct table of the Remix ROM (struct table at ROM 0x92610, 97 fighters).
-# Format: docs/remix/implementation_plan.md ("remix/fighters"). Reference: tools/remix_dump_fighters.py.
+# Format: docs/remix/torch_factories.md ("remix/fighters"). Reference: tools/remix_dump_fighters.py.
 
 :config:
   segments:

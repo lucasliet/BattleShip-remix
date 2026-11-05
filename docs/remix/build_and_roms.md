@@ -1,65 +1,63 @@
-# Builds e ROMs: BattleShip original (US) e BattleShip-Remix
+# Builds and ROMs: BattleShip original (US) and BattleShip-Remix
 
-Nada de ROM nem de `.o2r` entra no git (`*.z64`, `build/`, `build-*/` e `dist/` estão no `.gitignore`). Quem clona o
-repositório precisa fornecer as ROMs abaixo e gerar o `.o2r` no desktop.
+Covers the ROMs each build needs, which Remix version they are, and the desktop, test-package and Switch build commands. Code and scripts:
+`CMakeLists.txt` (`SSB64_VERSION`, `SSB64_APP_NAME`), `scripts/macos/`, `scripts/linux/`, `scripts/switch/`, `scripts/remix/`. Generic build steps for
+Linux and Windows are in `BUILDING.md`; the toolchain rules are in `AGENTS.md`.
+Test: the smoke tests in `.claude/skills/remix-smoke-tests/` run the built `build/BattleShip-Remix`.
 
-## ROMs necessárias
+No ROM and no `.o2r` enters git (`*.z64`, `build/`, `build-*/` and `dist/` are in `.gitignore`). Whoever clones the repository supplies the ROMs below and
+generates the `.o2r` on the desktop.
 
-Ficam na **raiz do repositório**. O CMake aceita `.z64`, `.n64` e `.v64` (o Torch normaliza a ordem dos bytes).
+## Required ROMs
 
-| Arquivo | Para quê | Tamanho | SHA-1 | MD5 |
+They sit in the **repository root**. CMake accepts `.z64`, `.n64` and `.v64` (Torch normalizes the byte order).
+
+| File | Used for | Size | SHA-1 | MD5 |
 |---|---|---|---|---|
-| `baserom.remix.z64` | Build Remix: fonte do `BattleShip-Remix.o2r` (`torch o2r`) e das tabelas de lutadores, áudio e arquivos | 65 536 000 | `13716381ed5e29be2606e0f4724b18fd00789d04` | `2b2d6b295106c54216b7fc7a2f14346e` |
-| `baserom.us.z64` | Build vanilla, e também no build Remix: três imagens de stage do CSS (`derive_stage_assets.py` só entende o layout US) e `scripts/remix/assemble-remix.sh` | 16 777 216 | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
+| `baserom.remix.z64` | Remix build: source of `BattleShip-Remix.o2r` (`torch o2r`) and of the fighter, audio and file tables | 65 536 000 | `13716381ed5e29be2606e0f4724b18fd00789d04` | `2b2d6b295106c54216b7fc7a2f14346e` |
+| `baserom.us.z64` | Vanilla build, and also the Remix build: three CSS stage images (`derive_stage_assets.py` only understands the US layout) and `scripts/remix/assemble-remix.sh` | 16 777 216 | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
 
-SHA-256 das duas, medidos nas cópias desta máquina:
+SHA-256 of the reference copies:
 
 - `baserom.remix.z64`: `7efec9e0983656bb0219a23c511cd1505a5f84d524e50ad4284dc1c7eb4d1403`
 - `baserom.us.z64`: `15592e79d3c5295cef4371d4992f0bd25bec2102fc29644c93e682f7ea99ef3d`
 
-CRCs do cabeçalho N64: Remix `34EE4749 1833C64C`; US `916B8B5B 780B85A4`. Os dois têm o código de jogo `NALE`; o nome interno
-da ROM do Remix é `SMASH REMIX`.
+N64 header CRCs: Remix `34EE4749 1833C64C`; US `916B8B5B 780B85A4`. Both have the game code `NALE`; the internal name of the Remix ROM is `SMASH REMIX`.
 
-A ROM JP (`baserom.jp.z64`) não é usada no Remix.
+The JP ROM (`baserom.jp.z64`) is not used by the Remix.
 
-Sem `baserom.us.z64` o build Remix ainda compila (o alvo `DeriveStageAssets` vira um stub), mas as imagens de stage do CSS
-ficam faltando.
+Without `baserom.us.z64` the Remix build still compiles (the `DeriveStageAssets` target becomes a stub), but the CSS stage images are missing.
 
-## Qual versão do Remix
+## Which Remix version
 
-**Smash Remix 2.0.1**, a ROM de release (a que o projeto distribui na aba Releases do repositório
-`JSsixtyfour/smashremix`, aplicada sobre uma ROM US).
+**Smash Remix 2.0.1**, the release ROM (the one the project distributes on the Releases tab of the `JSsixtyfour/smashremix` repository, applied over a US ROM).
 
-Evidências de que a nossa `baserom.remix.z64` é a 2.0.1:
+Evidence that `baserom.remix.z64` is 2.0.1:
 
-- A string `Smash Remix v2.0.1` está dentro da ROM.
-- O fonte do Remix que usamos (`.toolchain/pkgs/smashremix-src`) está pinado no commit
-  `5e04fe7fcd023cd43c71f25f89bb6e810d254d55` (tag `2.0.1`, 2026-03-08). Montado por `scripts/remix/assemble-remix.sh`
-  sobre `baserom.us.z64`, a imagem de código (ROM `0x2C00000`, 4 MB) bate com a da nossa ROM exceto em 1 038 de 1 048 576
-  palavras, que são os dados lidos dos arquivos injetados.
+- The string `Smash Remix v2.0.1` is inside the ROM.
+- The Remix source used (`.toolchain/pkgs/smashremix-src`) is pinned at commit `5e04fe7fcd023cd43c71f25f89bb6e810d254d55` (tag `2.0.1`, 2026-03-08).
+  Assembled by `scripts/remix/assemble-remix.sh` over `baserom.us.z64`, the code image (ROM `0x2C00000`, 4 MB) matches the one in `baserom.remix.z64`
+  except in 1 038 of 1 048 576 words, which are data read from the injected files.
 
-O que não está verificado: os hashes acima são os da cópia usada no desenvolvimento. Eu não confirmei que toda ROM de
-release 2.0.1 tenha exatamente o mesmo SHA-1; se outra cópia divergir, compare o código de jogo, a string de versão e a
-imagem de código antes de concluir que ela está errada.
+The hashes above are those of the reference copy. If another 2.0.1 release copy differs, compare the game code, the version string and the code image before
+concluding it is wrong.
 
-O fonte do Remix traz o `original.xdelta` (SHA-256 `e892db9f57135ae2ba380e6db98516dd849dcabb4be5c553ea48158ec7dece1d`),
-que gera a ROM-base para a montagem do ASM a partir de uma US. A ROM vanilla não serve como `baserom.remix.z64`, porque
-muitas edições do Remix estão dentro de arquivos comprimidos da ROM. Não rodamos o xdelta nesta máquina.
+The Remix source ships `original.xdelta` (SHA-256 `e892db9f57135ae2ba380e6db98516dd849dcabb4be5c553ea48158ec7dece1d`), which produces the base ROM for the asm
+assembly from a US ROM. The vanilla ROM cannot stand in for `baserom.remix.z64`, because many Remix edits are inside compressed ROM files. The project does not run xdelta.
 
-## Dois produtos, dois diretórios de build
+## Two products, two build directories
 
-| Produto | `SSB64_VERSION` | ROM | Binário | Arquivo de assets | Diretório de build sugerido |
+| Product | `SSB64_VERSION` | ROM | Binary | Assets archive | Suggested build directory |
 |---|---|---|---|---|---|
-| BattleShip (SSB64 original, US) | `us` | `baserom.us.z64` | `BattleShip` | `BattleShip.o2r` | `build-us` |
-| BattleShip-Remix | `remix` (padrão) | `baserom.remix.z64` (+ `baserom.us.z64`) | `BattleShip-Remix` | `BattleShip-Remix.o2r` | `build` |
+| BattleShip (original SSB64, US) | `us` | `baserom.us.z64` | `BattleShip` | `BattleShip.o2r` | `build-us` |
+| BattleShip-Remix | `remix` (default) | `baserom.remix.z64` (+ `baserom.us.z64`) | `BattleShip-Remix` | `BattleShip-Remix.o2r` | `build` |
 
-O código do jogo é compilado por região (`REGION_US` ou `REGION_REMIX`), então cada versão é um build próprio, com seu
-diretório. O nome do binário e do `.o2r` vem de `SSB64_APP_NAME` (`CMakeLists.txt:661-670`). Os dois podem existir lado a
-lado.
+The game code is compiled per region (`REGION_US` or `REGION_REMIX`), so each version is its own build with its own directory. The binary and `.o2r` names come from
+`SSB64_APP_NAME` (`CMakeLists.txt`). Both can exist side by side.
 
-## Build desktop do BattleShip original (macOS, toolchain contida)
+## Desktop build of the original BattleShip (macOS, contained toolchain)
 
-Mesmos comandos do Remix, trocando a versão e o diretório. Precisa só de `baserom.us.z64`.
+Same commands as the Remix, changing the version and the directory. It only needs `baserom.us.z64`.
 
 ```bash
 PATH=$PWD/.toolchain/host/ninja:$PATH
@@ -70,13 +68,11 @@ PATH=$PWD/.toolchain/host/ninja:$PATH
 (cd build-us && ./BattleShip)
 ```
 
-O binário `BattleShip` carrega `BattleShip.o2r` e `f3d.o2r` do diretório onde roda (o `ExtractAssets` os gera a partir de
-`baserom.us.z64`). Em Linux e Windows os comandos genéricos estão em `BUILDING.md`.
+The `BattleShip` binary loads `BattleShip.o2r` and `f3d.o2r` from the directory where it runs (`ExtractAssets` generates them from `baserom.us.z64`).
 
-## Build desktop do BattleShip-Remix (macOS, toolchain contida)
+## Desktop build of BattleShip-Remix (macOS, contained toolchain)
 
-Tudo vem de `.toolchain/` (veja `AGENTS.md`). `SSB64_VERSION` tem como padrão `remix`. O diretório `build/` desta
-máquina foi configurado assim (Ninja, `Release`):
+Everything comes from `.toolchain/` (see `AGENTS.md`). `SSB64_VERSION` defaults to `remix`. Configure with Ninja and `Release`:
 
 ```bash
 PATH=$PWD/.toolchain/host/ninja:$PATH
@@ -86,77 +82,71 @@ PATH=$PWD/.toolchain/host/ninja:$PATH
 .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j 4
 ```
 
-Resultado em `build/`: `BattleShip-Remix` (o alvo é `ssb64`), `BattleShip-Remix.o2r`, `BattleShip-Remix.o2r.recipe`,
-`f3d.o2r`. Dependências do desktop: `scripts/macos/setup-host-deps.sh`. Um arquivo novo em `decomp/src` pede o
-`cmake -S ... -B ...` antes do build.
+Result in `build/`: `BattleShip-Remix` (the target is `ssb64`), `BattleShip-Remix.o2r`, `BattleShip-Remix.o2r.recipe`, `f3d.o2r`. Desktop dependencies:
+`scripts/macos/setup-host-deps.sh`. A new file under `decomp/src` needs the `cmake -S ... -B ...` step before the build.
 
-O `ssb64` depende do `ExtractAssets`: com `baserom.remix.z64` presente, o build roda
-`torch o2r baserom.remix.z64 -s <repo> -d build/extracted` e copia o resultado. Depois ele só refaz o `.o2r` quando o Torch,
-o `config.yml`, os `yamls/remix/*.yml` ou a ROM mudam. O `.recipe` (41 bytes) é o SHA-1 desses insumos
-(`<sha do torch>:<sha do config.yml>:<sha de cada yaml>`); se ele mudar, o port reextrai o `.o2r` sozinho.
+`ssb64` depends on `ExtractAssets`: with `baserom.remix.z64` present, the build runs `torch o2r baserom.remix.z64 -s <repo> -d build/extracted` and copies the result.
+It then redoes the `.o2r` only when Torch, `config.yml`, `yamls/remix/*.yml` or the ROM change. The `.recipe` (41 bytes) is the SHA-1 of those inputs
+(`<torch sha>:<config.yml sha>:<sha of each yaml>`); if it changes, the port re-extracts the `.o2r` by itself.
 
-Para refazer só os assets: `cmake --build build --target ExtractAssets`.
+To redo only the assets: `cmake --build build --target ExtractAssets`.
 
-## Pacotes de teste do BattleShip-Remix (macOS e Linux)
+## Test packages of BattleShip-Remix (macOS and Linux)
 
-Estes pacotes **embutem o `BattleShip-Remix.o2r`**, que é derivado da ROM. Servem só para uso pessoal e nunca são
-redistribuídos. O pacote distribuível não leva o `.o2r`: ele é extraído da ROM do usuário na primeira execução, como fazem
-`scripts/package-macos.sh` e `scripts/package-linux.sh`. Esse fluxo fica para a M11 Fase 7, que também acrescenta `remix` à
-matriz `version: [us, jp]` do `.github/workflows/release.yml`.
+These packages **embed `BattleShip-Remix.o2r`**, which is derived from the ROM. They are for personal use only and are never redistributed. A distributable package does
+not carry the `.o2r`: it is extracted from the user's ROM on first run, as `scripts/package-macos.sh` and `scripts/package-linux.sh` do for the original game; the
+release matrix of `.github/workflows/release.yml` builds `us` and `jp` only.
 
-- **macOS:** primeiro faça um build Release com `-DNON_PORTABLE=ON` em `build-macos-release/`, depois rode
-  `scripts/macos/package-remix-contained.sh`. Ele lê o `.o2r`, o `f3d.o2r` e os ícones de `build/` e grava
-  `dist/desktop/BattleShip-Remix.app`, `.dmg` e `.zip`. Não usa dylibbundler: as libs vêm estáticas de
-  `.toolchain/host/deps`. Os rascunhos ficam em `$TMPDIR` (padrão `build-macos-release/`) e são apagados ao sair.
-- **Linux x86_64 (AppImage, via podman):** rode `scripts/linux/package-remix-appimage.sh [build|package|all]`. Ele monta a
-  imagem `scripts/linux/Dockerfile.jammy` (Ubuntu 22.04; CMake 3.31.6, appimagetool 1.9.1 e linuxdeploy
-  `1-alpha-20251107-1` fixados por sha256) e chama `build-in-container.sh` e depois `package-in-container.sh`. A saída vai
-  para `build-linux-release/`. O volume `ssb64-linux-work` guarda a árvore de build entre execuções. No Apple silicon a
-  imagem amd64 roda emulada, então o primeiro build é lento.
-- A versão vem de `DIST_VERSION`, com padrão `2.0.1-port.<HEAD curto>`. Confira se o `.o2r.recipe` de `build/` bate com o
-  Torch atual antes de empacotar.
+- **macOS:** first make a Release build with `-DNON_PORTABLE=ON` in `build-macos-release/`, then run `scripts/macos/package-remix-contained.sh`. It reads the `.o2r`,
+  `f3d.o2r` and the icons from `build/` and writes `dist/desktop/BattleShip-Remix.app`, `.dmg` and `.zip`. It does not use dylibbundler: the libraries are static from
+  `.toolchain/host/deps`. Scratch files go to `$TMPDIR` (default `build-macos-release/`) and are removed on exit.
+- **Linux x86_64 (AppImage, via podman):** run `scripts/linux/package-remix-appimage.sh [build|package|all]`. It builds the image from `scripts/linux/Dockerfile.jammy`
+  (Ubuntu 22.04; CMake 3.31.6, appimagetool 1.9.1 and linuxdeploy `1-alpha-20251107-1` pinned by sha256) and calls `build-in-container.sh` and then
+  `package-in-container.sh`. Output goes to `build-linux-release/`. The volume `ssb64-linux-work` keeps the build tree between runs. On Apple silicon the amd64
+  image runs emulated, so the first build is slow.
+- The version comes from `DIST_VERSION`, default `2.0.1-port.<short HEAD>`. Check that the `.o2r.recipe` in `build/` matches the current Torch before packaging.
 
-## Build Switch (BattleShip e BattleShip-Remix)
+## Switch build (BattleShip and BattleShip-Remix)
 
-O console nunca lê ROM: o `.nro` é compilado com o devkitA64 e o `.o2r` vem do build desktop da mesma versão.
+The console never reads a ROM: the `.nro` is compiled with devkitA64 and the `.o2r` comes from the desktop build of the same version.
 
 ```bash
-scripts/switch/setup-toolchain.sh        # uma vez; rede só nessa etapa
+scripts/switch/setup-toolchain.sh        # once; network only in this step
 
-# Remix (padrão)
+# Remix (default)
 scripts/switch/build.sh remix            # build-switch/BattleShip-Remix.nro
 VERSION=remix scripts/switch/pack.sh     # dist/switch/SD/switch/BattleShip-Remix/
 
-# BattleShip original (US)
+# Original BattleShip (US)
 scripts/switch/build.sh us               # build-switch/BattleShip.nro
 VERSION=us scripts/switch/pack.sh        # dist/switch/SD/switch/BattleShip/
 ```
 
-O `pack.sh` procura `<app>.o2r`, `<app>.o2r.recipe` e `f3d.o2r` em `build/` e depois na raiz do repositório, nunca em
-`build-us/`. Para o original, copie esses três arquivos de `build-us/` para a raiz (ou para `build/`) antes do pack.
+`pack.sh` looks for `<app>.o2r`, `<app>.o2r.recipe` and `f3d.o2r` in `build/` and then in the repository root, never in `build-us/`. For the original, copy those three files
+from `build-us/` to the root (or to `build/`) before packing.
 
-O `pack.sh` escolhe a versão só pela variável `VERSION` (padrão `remix`), não pelo argumento; sem `VERSION=us` ele empacota o
-Remix. O `build-switch/` é compartilhado: rodar `build.sh us` e depois `build.sh remix` reconfigura o mesmo diretório, então
-empacote cada versão logo depois do seu build.
+`pack.sh` picks the version only from the `VERSION` variable (default `remix`), not from an argument; without `VERSION=us` it packs the Remix. `build-switch/` is shared:
+running `build.sh us` and then `build.sh remix` reconfigures the same directory, so pack each version right after its build.
 
-`pack.sh` só copia: o `.nro` de `build-switch/`, e `BattleShip-Remix.o2r`, `BattleShip-Remix.o2r.recipe` e `f3d.o2r` de
-`build/`. Se algum não existir, ele só imprime `AVISO` e segue, e o pacote sai incompleto. Por isso:
+`pack.sh` only copies: the `.nro` from `build-switch/`, and `BattleShip-Remix.o2r`, `BattleShip-Remix.o2r.recipe` and `f3d.o2r` from `build/`. If one is missing it only prints
+`AVISO` and goes on, and the package comes out incomplete. So:
 
-1. Rode o build desktop antes (gera os `.o2r` a partir de `baserom.remix.z64`).
-2. Rode o build Switch e o `pack.sh`.
-3. Copie a pasta `dist/switch/SD/switch/BattleShip-Remix/` inteira para o SD, em `/switch/`.
-4. Abra pelo Homebrew Menu em modo de memória completa (segurando R ao abrir um jogo instalado).
+1. Run the desktop build first (it produces the `.o2r` files from `baserom.remix.z64`).
+2. Run the Switch build and `pack.sh`.
+3. Copy the whole folder `dist/switch/SD/switch/BattleShip-Remix/` to the SD card, under `/switch/`.
+4. Open it from the Homebrew Menu in full-memory mode (hold R while opening an installed game).
 
-O ícone do Home menu é um JPEG 256x256 embutido no `.nro` pelo CMake (`assets/switch/icon.jpg` no original,
-`assets/switch/icon-remix.jpg` no Remix, com "SR"). Os dois saem de `assets/icon.png` por
-`.toolchain/host/venv/bin/python -I tools/gen_switch_icon.py` (só Pillow); o script também grava `assets/icon-remix.png`.
+The Home menu icon is a 256x256 JPEG embedded in the `.nro` by CMake (`assets/switch/icon.jpg` for the original, `assets/switch/icon-remix.jpg` for the Remix, with "SR"). Both
+are made from `assets/icon.png` by `.toolchain/host/venv/bin/python -I tools/gen_switch_icon.py` (Pillow only); the script also writes `assets/icon-remix.png`.
 
-Se o `.o2r` ou o `Torch` mudarem (novo `.recipe`), refaça o pacote: um `.o2r` antigo no SD com um `.nro` novo causa tempestade
-de tokens de reloc inválidos. O jogo grava `BattleShip-Remix.log` ao lado do `.nro`, no SD.
+If the `.o2r` or Torch change (a new `.recipe`), rebuild the package: an old `.o2r` on the SD card with a new `.nro` causes a storm of invalid reloc tokens. The game writes
+`BattleShip-Remix.log` next to the `.nro`, on the SD card.
 
-## Checklist para um clone novo
+## Checklist for a fresh clone
 
 1. `git submodule update --init --recursive`.
-2. Colocar `baserom.remix.z64` e `baserom.us.z64` na raiz e conferir o SHA-1 com a tabela acima (`shasum -a 1 baserom.*.z64`).
-3. `scripts/macos/setup-host-deps.sh` (desktop) e `scripts/switch/setup-toolchain.sh` (Switch).
-4. Build desktop (acima), depois o build e o pack do Switch.
+2. Put `baserom.remix.z64` and `baserom.us.z64` in the root and check the SHA-1 against the table above (`shasum -a 1 baserom.*.z64`).
+3. `scripts/macos/setup-host-deps.sh` (desktop) and `scripts/switch/setup-toolchain.sh` (Switch).
+4. Desktop build (above), then the Switch build and pack.
+5. For the Remix symbol map and the action tables: `scripts/remix/assemble-remix.sh` (writes `build/remixasm/remix.sym`), then
+   `.toolchain/host/venv/bin/python -I tools/gen_remix_actions.py`.

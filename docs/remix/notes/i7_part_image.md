@@ -1,4 +1,8 @@
-# I7: image or palette swap per model part (`MODEL_PART_IMAGE_INIT_`)
+# Image and palette swap per model part (`MODEL_PART_IMAGE_INIT_`)
+
+Covers how the Remix swaps the texture, palette and colours of a fighter's model parts (extra costumes, Yoshi egg colour) and what the port does. Code:
+`decomp/src/ft/ftremix/ftremixpartimage*.{c,h}`, `ftremixyoshiegg.c`, `decomp/src/mn/mnplayers/mnremixcostumes.c` (CSS). Test: unit test
+`tests/remix/test_partimage_rules.c` and the recipe at the end (`SSB64_REMIX_COSTUME_P1..P4`). Open gaps: `docs/remix/patch_audit.md`.
 
 ## How the asm works
 
@@ -52,54 +56,44 @@ Decisions:
 - The special part index is the model part id of the joint only when the joint has a model part description (asm: only the special
   part swap of `ftParamSetModelPartID` knows it, every other path uses the normal images array; the difference shows only if a joint
   keeps a special part through `ftParamInitAllParts`, which the CSS never does).
-- Yoshi egg: only the shield and the egg escape effect are ported (both draw through `efManagerYoshiShieldProcDisplay` and share one
-  display list, which has a single user in the Yoshi model file). `Character.yoshi_egg_color.table` is never written by any Remix
+- Yoshi egg: the shield and the egg escape effect are ported (both draw through `efManagerYoshiShieldProcDisplay` and share one display list,
+  which has a single user in the Yoshi model file). The thrown egg (`0x8015EAF4`), the egg lay egg (`0x8014D080`, `0x8014C984`) and the entry egg
+  (`0x80102F5C`, palette table `table_entry_palettes`) patch other display lists with the same technique and are not wired.
+  `Character.yoshi_egg_color.table` is never written by any Remix
   file (zero fill, `Character.asm:3089`), so the palette index is 0 for every Shield option except Costume (17), which uses
   `Character.costume_shield_color` (`ftRemixShieldGetCostumeColorIndex`); Vanilla (16) is 0. The patch checks that command 10 is the RGBA16
   `G_SETTIMG` and command 12 a `G_LOADTLUT` before writing, so the polygon Yoshi list is left alone.
 
-## Classic Sonic is not an I7 consumer
+## Classic Sonic is not a part-image consumer
 
-`Sonic.classic_table` (`src/Sonic/Sonic.asm:1000`) selects a different model file, not part images: `load_classic_model_` (`0x800D7FDC`)
-loads `File.CSONIC_MAIN` (0xE38, also 0xE39 character, 0xE3A shield pose) instead of `File.SONIC_MAIN` from the character struct field
-at +0x40 (`Character.asm:3737`), the CSS toggles the flag when the costume cycles through 0 (`Costumes.asm select_` `_sonic`), the FGM and
-voice patches (`Sonic.asm:545-700`) swap sounds, and the shield colour reads the costume +6 (`Shield.asm color_fix_`). The port keeps the
-flag (`ftRemixSonicSetClassic`, nothing sets it yet). Needs its own task: load the classic main file for the synth Sonic when the flag is
-set, the CSS toggle, then the `+6` in `ftRemixShieldGetCostumeColorIndex`.
+`Sonic.classic_table` (`src/Sonic/Sonic.asm:1000`) selects a different model file, not part images: `load_classic_model_` (`0x800D7FDC`) loads
+`File.CSONIC_MAIN` (0xE38, also 0xE39 character, 0xE3A shield pose) instead of `File.SONIC_MAIN` from the character struct field at +0x40
+(`Character.asm:3737`), the CSS toggles the flag when the costume cycles through 0 (`Costumes.asm select_` `_sonic`), the FGM and voice patches
+(`Sonic.asm:545-700`) swap sounds, and the shield colour reads the costume +6 (`Shield.asm color_fix_`). The port implements this on the match side in
+`decomp/src/ft/ftremix/sonic/ftremixsonicclassic.c` (model file, FGM swaps, muted voices, shield colour offset, select animation) and on the CSS side in
+`decomp/src/mn/mnplayers/mnremixsonicclassic.c`; `SSB64_REMIX_CLASSIC_SONIC_P1..P4=1` forces the flag for a port in the VS shortcut.
 
-## Hooks for the other owners
+## Callers
 
-1. CSS (`mn/`, other worker). After a fighter model is made or re-costumed on any CSS, call `ftRemixPartImageApplyFighter(fp)`
-   (`ft/ftremix/ftremixpartimage.h`), because the CSS model is not drawn by `ftDisplayMainProcDisplay`. Replace
-   `mnRemixCostumeGetMaxID`'s use in the cycle by the pair `ftRemixPartImageGetNextCostume(fkind, costume)` and
-   `ftRemixPartImageGetPrevCostume(fkind, costume)` (they jump the skipped ids and wrap over the extras), and use
-   `ftRemixPartImageIsLegalRandomCostume(fkind, costume)` and `ftRemixPartImageGetMaxCostumeID(fkind)` for the Random pick
-   (`get_random_legal_costume_` rerolls ids that are skipped).
-2. Match HUD stock icon (`decomp/src/if/ifcommon.c:1154, 1159, 1187, 1192, 1358, 1361, 1450, 1453`): `_luts[fp->costume]` reads past the
-   vanilla LUT array for an extra costume. Wrap each token with `ftRemixPartImageGetStockIconLUT(fp, _luts[fp->costume])`
-   (returns the vanilla token for every other costume). Not wired because `ifcommon.c` is outside this item's files.
-3. Symbols: `tools/gen_remix_actions.py` `EXTRA_SYMBOLS` should list `Shield.alter_yoshi_egg_color_.table_palettes`,
-   `Shield.alter_yoshi_egg_color_.table_entry_palettes` and `Costumes.stock_icon_palette_array_table`. Until then
-   `ftremixyoshiegg.c` and `ftremixpartimage.c` define the first and the last one as a fallback with the Remix 2.0.1 address (`0x804E0CC4`,
-   `0x805289B4`).
-4. `ftremixshield.c` still says the Yoshi egg is "Not portable"; that paragraph is stale now.
+- Match: `ftDisplayMainProcDisplay` calls `ftRemixPartImageApplyFighter(fp)` once per fighter and frame.
+- CSS: `mnremixcostumes.c` calls `ftRemixPartImageApplyFighter` after a model is made or re-costumed (the CSS model is not drawn by
+  `ftDisplayMainProcDisplay`), cycles C right/left with `ftRemixPartImageGetNextCostume` / `ftRemixPartImageGetPrevCostume` (they jump the skipped ids and wrap
+  over the extras), and picks the Random costume with `ftRemixPartImageIsLegalRandomCostume` and `ftRemixPartImageGetMaxCostumeID`
+  (`get_random_legal_costume_` rerolls skipped ids).
+- Match HUD stock icon (`decomp/src/if/ifcommon.c`): the LUT token is wrapped with `ftRemixPartImageGetStockIconLUT(fp, token)`, which returns the vanilla token for
+  every non-extra costume.
+- Symbols: `tools/gen_remix_actions.py` `EXTRA_SYMBOLS` lists `Shield.alter_yoshi_egg_color_.table_palettes`, `...table_entry_palettes` and
+  `Costumes.stock_icon_palette_array_table`; they reach the code as `REMIX_SYM_*` in `port/remix/remix_symbols.h`.
 
-## Hazards met
+## Hazards
 
 - No sprite or texture header is involved: every palette is read as raw RGBA5551 words, so the `width_img` hazard of
   `lbreloc_byteswap.cpp` does not apply. Stock icon palettes are 16 colours (CI4).
 - The `ram_image` resource has a 0x44 byte header before the 4 MiB image when read with a plain unzip (the loader strips it).
 
-## Not done
+## Test recipe
 
-- Thrown egg (`0x8015EAF4`), egg lay egg (`0x8014D080`, `0x8014C984`) and entry egg (`0x80102F5C`, palette table `table_entry_palettes`):
-  same technique, other display lists, other creation functions (`wp/`, `ef/`, `ft/`).
-- Per-character `Character.costume_shield_color` rows for extra costumes beyond the 8 byte rows already in `ftremixshieldcostume.c`.
-- Classic Sonic (above).
-
-## Test recipe (not run: the build and the game were not available to the worker)
-
-Debug override added for it: `SSB64_REMIX_COSTUME_P1..P4=<costume id>` (`ftRemixPartImageDebugCostume`, called from `ftManagerMakeFighter`),
+Debug override: `SSB64_REMIX_COSTUME_P1..P4=<costume id>` (`ftRemixPartImageDebugCostume`, called from `ftManagerMakeFighter`),
 because the VS shortcut always makes costume 0.
 
 - Extra costume: `SSB64_START_SCENE=22 SSB64_VS_FKINDS=0,0 SSB64_REMIX_COSTUME_P1=5 SSB64_REMIX_COSTUME_P2=7 SSB64_SCREENSHOT_FRAMES=520,540`.

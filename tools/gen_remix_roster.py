@@ -5,7 +5,7 @@ Reads src/Character.asm (ids, variant/sound tables, define_character calls) and
 src/costumes/*.asm (NUM_COSTUMES, NUM_EXTRA_COSTUMES, register_extra_costumes_for_char)
 from a Remix checkout. Stdlib only. Run with system python3:
 
-    python3 tools/gen_remix_roster.py [path/to/smashremix-src]
+    .toolchain/host/venv/bin/python -I tools/gen_remix_roster.py [path/to/smashremix-src]
 """
 
 import re

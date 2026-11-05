@@ -1,22 +1,19 @@
-# Remix gameplay subsystems, milestone M2 (2026-10-16)
+# Remix gameplay subsystems: where they live and what to remember
 
-Status of ROADMAP M2 at checkpoint CP2a. The GFX and GFXRoutine details are in `remix_gfx_and_gfxroutine_2026-10-16.md`.
+Map of the Smash Remix gameplay subsystems in the port, with the findings that are not obvious from the code. Per-subsystem
+bug write-ups: `remix_gfx_and_gfxroutine_2026-10-16.md`, `remix_kirby_copy_actions_2026-10-16.md`. Test: the special matrix
+(`special_matrix.sh`, 80 fighters by NSP, DSP and USP), `stage_sweep.sh` (175 stage ids) and `item_cpu_sweep.sh` (13 standard
+items), run with `parallel.sh 6 ...` (`.claude/skills/remix-smoke-tests/SKILL.md`).
 
-| Task | Result | Code |
-|---|---|---|
-| T2.1 GFX, GFXRoutine | done | `lbremixgfx.c`, `gmremixcolscripts.c` |
-| T2.2 CharEnvColor | done (display list fixes open) | `ftremixenvcolor.c`, `ftdisplaymain.c`, cloak, Dracula, Reapers |
-| T2.3 Reflect | done (CPU hooks in M7) | `ftremixreflect.c`, hooks in `ftmain.c`, `wpprocess.c`, `itprocess.c`, `wpmain.c`, `itmain.c` |
-| T2.4 Size phases b and c | done, sources by the menu open | `ftremixsize*.c` |
-| T2.6 Kirby | done, `spawn_with_hat` in M4/M5 (see `remix_kirby_copy_actions_2026-10-16.md`) | `ftremixkirbycopy.c`, `ftremixkirbyhats.c`, `ftremixkirbypower.c`, `ftremixbind.c` |
-| T2.7 other systems | done, gaps in T2.7b | `ftremixknockback.c`, `ftremixdamage.c`, `ftremixpoison.c`, `grremixsurface.c` ... |
-| T2.8 leftovers | done except two sites | `ftremixleftovers.c` |
-
-## Evidence
-
-Lead-run validation after the worker waves, with `parallel.sh` (6 game instances at once): special matrix 240/240 (80 fighters
-by NSP, DSP and USP), 175/175 stages, 13/13 standard items, no abort/assert/fatal line in any log. Two runs died on the
-macOS Metal `nextDrawable` flake and one lost its screenshot to a stray Esc; all three passed on rerun.
+| Subsystem | Code |
+|---|---|
+| GFX, GFXRoutine | `decomp/src/lb/lbremixgfx.c`, `decomp/src/gm/gmremixcolscripts.c` |
+| CharEnvColor | `decomp/src/ft/ftremix/ftremixenvcolor.c`, `ftdisplaymain.c`, cloak, Dracula and Reaper colours |
+| Reflect | `decomp/src/ft/ftremix/ftremixreflect.c`, hooks in `ftmain.c`, `wpprocess.c`, `itprocess.c`, `wpmain.c`, `itmain.c` |
+| Size | `decomp/src/ft/ftremix/ftremixsize*.c` |
+| Kirby copy and hats | `ftremixkirbycopy.c`, `ftremixkirbyhats.c`, `ftremixkirbypower.c`, `ftremixbind.c` |
+| Knockback, damage, poison, surface | `ftremixknockback.c`, `ftremixdamage.c`, `ftremixpoison.c`, `decomp/src/gr/grremix/grremixsurface.c` |
+| Leftover vanilla patches | `ftremixleftovers.c` |
 
 ## Findings worth keeping
 
@@ -25,6 +22,9 @@ macOS Metal `nextDrawable` flake and one lost its screenshot to a stray Esc; all
   endian first (`lbRemixGfxCopyBytes`).
 - Kirby's copy table is the Remix `Character.kirby_inhale_struct.table`, indexed by Remix character id; the vanilla table of
   the Kirby file only has 27 rows.
-- The harness actors (`SSB64_REMIX_GFX_TEST`, `SSB64_REMIX_COLANIM_TEST`, `SSB64_REMIX_KIRBY_COPY_TEST`, `SSB64_VS_P2_HUMAN`,
-  `SSB64_MAPS_START_GKIND`) are documented in the `remix-smoke-tests` skill.
-- Copying a power in the appear status (frame 1) crashes: the harness waits for frame 330.
+- The harness actors (`SSB64_REMIX_GFX_TEST`, `SSB64_REMIX_COLANIM_TEST`, `SSB64_REMIX_KIRBY_COPY_TEST`,
+  `SSB64_VS_P2_HUMAN`, `SSB64_MAPS_START_GKIND`) are documented in the `remix-smoke-tests` skill.
+- Copying a power in the appear status (frame 1) crashes: the Kirby copy harness waits until frame ~405.
+- On macOS, runs can die on the Metal `nextDrawable` flake; a rerun alone passes, and only a reproducible crash is a bug.
+
+Open gaps: `docs/remix/patch_audit.md`, groups g5 and g7.

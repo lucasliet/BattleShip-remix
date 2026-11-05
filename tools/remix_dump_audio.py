@@ -16,7 +16,7 @@ Runtime model (see docs/remix/audio.md and docs/remix/audio_extraction.md):
 - The SBK blob is a contiguous ROM slice starting at the SBK table; entry offsets
   are relative to that start.
 
-Usage: python3 tools/remix_dump_audio.py [--rom PATH] [--out DIR]
+Usage: .toolchain/host/venv/bin/python -I tools/remix_dump_audio.py [--rom PATH] [--out DIR]
 Requires only the Python standard library.
 """
 

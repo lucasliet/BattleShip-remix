@@ -1,0 +1,287 @@
+AA.asm	Toggle that disables anti-aliasing by patching the scheduler/graphics task setup.
+AI.asm	Remix CPU AI: default CPU level, extended per-fighter attack and recovery tables, evade/avoid rules (no evading while invulnerable), item and edge handling, level 10 behaviour and polygon-aware checks.
+Accessibility.asm	Accessibility options: anti-flash for screen flashes, screenshake intensity (reduce or off), blast-zone explosion graphics, and related effect toggles.
+Action.asm	Constants for the known vanilla and Remix fighter action ids (names such as WalkEnd, ThrownDK, Laser) used by every fighter file.
+AerialAttackFastFall.asm	Toggle that lets aerial attacks be fast-fallen (holding down during aerials).
+AirDodge.asm	Air dodge changes: resets the air dash flag on landing and at fighter start, and hooks the jump-input check for the Remix air dodge rules.
+BGM.asm	Background music system: play/stop/volume hooks, stage music selection, random music lists, menu music, and the music title shown at match start.
+Banjo/AI/Attacks.asm	CPU attack table of Banjo: move choices with ranges, angles and timing for the Remix AI.
+Banjo/Banjo.asm	Banjo: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Banjo/BanjoSpecial.asm	Banjo special moves: egg shooting forward and backward on the ground and in the air, plus the other special-move actions, physics and collisions.
+Blastzone.asm	Blast zone options: skip the bottom blast zone sound and replace the routines that KO players at the edges of the screen (blast zone modes).
+Bonus.asm	Bonus 1/2/3 mode select: CSS objects when cycling between modes, no auto-start after choosing a fighter in Remix mode, and bonus stage handling.
+Boot.asm	Boot loader of the Remix image (DMAs the code to RAM 0x80400000), version string on the title screen, and the 1P victory image shown after the N64 logo.
+Bowser/AI/Attacks.asm	CPU attack table of Bowser: move choices with ranges, angles and timing for the Remix AI.
+Bowser/BowserSpecial.asm	Bowser special moves: fire breath and flame-cancel handling, projectile skip, air/ground transitions and the Giant Bowser variant.
+Bowser/bowser.asm	Bowser: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Camera.asm	Camera options: camera mode selection and values on creation, fixed camera during Master Hand entry, and camera tweaks for Remix stages and modes.
+CharEnvColor.asm	Per-character environment colour overrides (cloaked/invisible and other tints), custom display list reset on fighter load, and player indicator alpha.
+Character.asm	Fighter framework: defines the 97 character ids, the id-indexed tables (moves, AI, sounds, variants, costume data) and the define_character macro for all added fighters.
+CharacterDataScreen.asm	Character data screen (the Data menu fighter viewer) extended for the Remix roster.
+CharacterSelect.asm	Character select screen extended to the full roster: grid layout and pages, portraits, name textures, series logos, CPU/costume handling, tables per character.
+CharacterSelectDebugMenu.asm	Debug menu on the character select screen with extra control over characters and gameplay options.
+ChargeSmashAttacks.asm	Charge smash attacks: charging routine, display of the charge, and item position update on hitlag.
+Cheats.asm	Permanent patches such as unlocking everything.
+Color.asm	Colour constants (generated).
+Combo.asm	Combo counting that includes grabs and wall bounces.
+ComboMeter.asm	Combo meter display; hides it while a SCORE +/-1 value is shown for a port.
+Conker/AI/Attacks.asm	CPU attack table of Conker: move choices with ranges, angles and timing for the Remix AI.
+Conker/Conker.asm	Conker: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Conker/ConkerSpecial.asm	Conker special moves: grenade throw (begin, explosion, resting, blast zone, collision), wait/descent air states.
+Costumes.asm	Extended costumes: 19XX-style C-left/C-right selection, extra costumes per fighter (palette, prim colour, texture parts), CPU costumes, team costumes and stock icon palettes.
+Crash/AI/Attacks.asm	CPU attack table of Crash Bandicoot: move choices with ranges, angles and timing for the Remix AI.
+Crash/Crash.asm	Crash Bandicoot: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Crash/CrashSpecial.asm	Crash special moves: spin and dig/dive actions with their GFX, blocked variants, shield hitlag and ECB patches.
+Crash.asm	Disables the vanilla crash-debugger button checks.
+Credits.asm	Remix credits: extended section info table and the credits file load.
+CustomGrabAction.asm	Custom grabbed-action support: a fighter can use its own action instead of CapturePulled, position fix on frame 1, and the ThrownDK break-out/mash rules.
+DI.asm	Toggle for Japanese-style directional influence strength.
+DKMode.asm	DK mode / Lanky mode: enlarges the head and arms of fighters through the render hook (portrait easter egg).
+DSamus/AI/Attacks.asm	CPU attack table of Dark Samus: move choices with ranges, angles and timing for the Remix AI.
+DSamus/DSamus.asm	Dark Samus: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+DSamus/DsamusSpecial.asm	Dark Samus special moves: charge shot with ground/air charge levels, Kirby copy variants, and the physics/transition patches.
+Damage.asm	Damage types: jump tables for damage effects by id, a stun damage type that puts opponents in the Stun action, and extended damage handling.
+Dedede/AI/Attacks.asm	CPU attack table of King Dedede: move choices with ranges, angles and timing for the Remix AI.
+Dedede/Dedede.asm	King Dedede: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Dedede/DededeSpecial.asm	King Dedede special moves: swallow/spit, Super Dedede Jump with ceiling bonk, idle/walk/turn states while holding.
+DrLuigi/AI/Attacks.asm	CPU attack table of Dr. Luigi: move choices with ranges, angles and timing for the Remix AI.
+DrLuigi/DrLuigi.asm	Dr. Luigi: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+DrMario/AI/Attacks.asm	CPU attack table of Dr. Mario: move choices with ranges, angles and timing for the Remix AI.
+DrMario/DrMario.asm	Dr. Mario: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+DragonKing/AI/Attacks.asm	CPU attack table of Dragon King: move choices with ranges, angles and timing for the Remix AI.
+DragonKing/DragonKing.asm	Dragon King: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+DragonKing/DragonKingSpecial.asm	Dragon King special moves: dragon ball spawn and destruction, air pull/drain with the drain flash fix, Kirby copy variants.
+DragonKingHUD.asm	Damage-number HUD rework used by Dragon King: damage digit offsets, horizontal spacing and vertical position.
+ELink/ELink.asm	E Link (European-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+EPika/EPika.asm	E Pikachu (European-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+EPuff/EPuff.asm	E Jigglypuff (European-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+ESamus/ESamus.asm	E Samus (European-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+Ebi/AI/Attacks.asm	CPU attack table of Ebisumaru: move choices with ranges, angles and timing for the Remix AI.
+Ebi/Ebi.asm	Ebisumaru: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Ebi/EbiSpecial.asm	Ebisumaru special moves: begin/wait/end ground and air actions with recoil and the Goemon on-hit subroutine.
+FD.asm	Plays the Final Destination battle music after the VS intro.
+FGM.asm	Sound effect system: registers new SFX/FGM and Sound Test entries, writes the extended bank tables and hooks FGM play/volume.
+FPS.asm	FPS counter calculation.
+Falco/AI/Attacks.asm	CPU attack table of Falco: move choices with ranges, angles and timing for the Remix AI.
+Falco/Falco.asm	Falco: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Falco/Phantasm.asm	Falco Phantasm: the side-special dash with ground/air subroutines and variable setup.
+File.asm	Constants for the Remix file ids (3329 names for the files added to the ROM).
+FootStool.asm	Footstool jump: stops the jump reset during jump squat and handles the aerial jump press that triggers a footstool.
+GBowser/AI/Attacks.asm	CPU attack table of Giant Bowser: move choices with ranges, angles and timing for the Remix AI.
+GBowser/gbowser.asm	Giant Bowser: giant variant of Bowser with its own moveset and tables.
+GFX.asm	Extended graphics effects: custom GFX instruction ids and an extended GFX id table for moveset commands.
+GFXRoutine.asm	Extended GFX routine table for action changes and when a fighter graphics routine ends.
+Gallery.asm	Gallery on the Congratulations screen: image viewer with fades, music reset and cycling.
+GameEnd.asm	Skip-results option: changes the screen loaded after a match when skipping the results screen is enabled.
+Ganondorf/AI/Attacks.asm	CPU attack table of Ganondorf: move choices with ranges, angles and timing for the Remix AI.
+Ganondorf/Ganondorf.asm	Ganondorf: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Global.asm	Enumeration of global variables and addresses of the vanilla game used by the Remix code.
+Goemon/AI/Attacks.asm	CPU attack table of Goemon: move choices with ranges, angles and timing for the Remix AI.
+Goemon/Goemon.asm	Goemon: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Goemon/GoemonSpecial.asm	Goemon special moves: chain attack with wall/air pull and cloud attach/destroy, projectile and collision logic.
+HRC.asm	Home-Run Contest changes: players load visible, countdown SFX and the "Are You Ready?" call.
+Handicap.asm	Lets the Remix override the handicap values of CPUs.
+Hazards.asm	Stage hazard toggles and Remix hazard logic: Dream Land wind, Sector Z Arwing, Mushroom Kingdom POW blocks, Big Boo laugh and other stage-specific behaviour.
+Hitbox.asm	Hitbox and hurtbox display: fighter, projectile and item hitboxes, advanced hurtbox colours for armour and grab-immune frames, transparency options.
+Hitstun.asm	Toggle for Melee-style hitstun (knockback divided by 2.5 instead of 1.875).
+InputDelay.asm	Input delay option: buffers the controller struct writes when the delay is above 0.
+InputDisplay.asm	Input display HUD; moves the VS timer when the 4P display is at the top.
+Item.asm	Item framework: registers custom items and their ids, spawn GFX, pick-up hooks, item tables, and the item switch/spawn options.
+JDK/JDK.asm	J Donkey Kong (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JFalcon/JFalcon.asm	J Captain Falcon (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JFox/JFox.asm	J Fox (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JKirby/JKirby.asm	J Kirby (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JLink/JLink.asm	J Link (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JLuigi/JLuigi.asm	J Luigi (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JMario/JMario.asm	J Mario (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JNess/JNess.asm	J Ness (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JPika/JPika.asm	J Pikachu (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JPika/JPikaSpecial.asm	J Pikachu special-move process map for up special (Thunder).
+JPuff/JPuff.asm	J Jigglypuff (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JSamus/JSamus.asm	J Samus (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JYoshi/JYoshi.asm	J Yoshi (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries.
+JabLock.asm	Jab lock prevention on DownBounce actions (lock flag, restart on low-knockback hits, forced stand-up at the end).
+Japan.asm	Japanese-version behaviour toggles: hitlag, shield stun, momentum sliding glitch and other J-version rules.
+Joypad.asm	Per-port taunt button override and the fix that stops the remapped taunt button from jumping.
+KingOfTheHill.asm	King of the Hill mode: 3-digit scroller, CPU seeks the hill, delayed respawn and scoring.
+Kirby/Kirby.asm	Kirby: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+KirbyHats.asm	Kirby copy hats for the added fighters: custom hat models, hat switching between high and low poly, and special image/track setup.
+Knockback.asm	Random knockback angle mode: randomises angles per action at fighter init, hitbox creation and throws.
+Lanky/AI/Attacks.asm	CPU attack table of Lanky Kong: move choices with ranges, angles and timing for the Remix AI.
+Lanky/Lanky.asm	Lanky Kong: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Lanky/LankySpecial.asm	Lanky Kong special moves: grape shooter, damage and cancel actions with their stage setting and collision.
+LedgeJump.asm	Ledge jump option: extends the ledge hold input check to allow ledge jumping via C-jump below/above 100%.
+LedgeTrump.asm	Ledge trump option and the ledge grab counter for VS stats.
+Lucas/AI/Attacks.asm	CPU attack table of Lucas: move choices with ranges, angles and timing for the Remix AI.
+Lucas/Lucas.asm	Lucas: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Lucas/LucasSpecial.asm	Lucas special move movement (air move) helper.
+MLuigi/MLuigi.asm	Metal Luigi: new fighter based on Luigi with metal appearance, costumes and per-id table entries.
+MagnifyingGlass.asm	Custom zoom for the magnifying glass item applied to the camera viewport.
+Marina/AI/Attacks.asm	CPU attack table of Marina: move choices with ranges, angles and timing for the Remix AI.
+Marina/Marina.asm	Marina: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Marina/MarinaSpecial.asm	Marina special moves: absorb, clanpot throw/pull/stow with ground and air versions and the throw turn.
+Marth/AI/Attacks.asm	CPU attack table of Marth: move choices with ranges, angles and timing for the Remix AI.
+Marth/Marth.asm	Marth: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Marth/MarthSpecial.asm	Marth special moves: multi-hit sword special with ground/air stages 1 to 3, attack and counter style actions, collision and detection patches.
+Menu.asm	Menu framework for the Remix settings menus (menu arguments, entries, scrolling).
+MetalMario/MetalMario.asm	Metal Mario: redefines the Metal Mario slot (0x0D) with Remix actions and tables.
+Mewtwo/AI/Attacks.asm	CPU attack table of Mewtwo: move choices with ranges, angles and timing for the Remix AI.
+Mewtwo/Mewtwo.asm	Mewtwo: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Mewtwo/MewtwoSpecial.asm	Mewtwo special moves: charged Shadow Ball with charge level, teleport movement and the other special actions.
+NBanjo/NBanjo.asm	Polygon (N) team variant of Banjo: fighter entry that reuses the Banjo moveset labels, with menu zoom, action strings and polygon setup.
+NBowser/nbowser.asm	Polygon Bowser: polygon-team variant entry; sets the jab 3 action for the polygon version.
+NConker/NConker.asm	Polygon (N) team variant of Conker: fighter entry that reuses the Conker moveset labels, with menu zoom, action strings and polygon setup.
+NCrash/NCrash.asm	Polygon (N) team variant of Crash: fighter entry that reuses the Crash moveset labels, with menu zoom, action strings and polygon setup.
+NDSamus/NDSamus.asm	Polygon (N) team variant of Dark Samus: fighter entry that reuses the Dark Samus moveset labels, with menu zoom, action strings and polygon setup.
+NDedede/NDedede.asm	Polygon (N) team variant of King Dedede: fighter entry that reuses the King Dedede moveset labels, with menu zoom, action strings and polygon setup.
+NDrMario/NDrMario.asm	Polygon (N) team variant of Dr. Mario: fighter entry that reuses the Dr. Mario moveset labels, with menu zoom, action strings and polygon setup.
+NFalco/NFalco.asm	Polygon (N) team variant of Falco: fighter entry that reuses the Falco moveset labels, with menu zoom, action strings and polygon setup.
+NGanondorf/NGanondorf.asm	Polygon (N) team variant of Ganondorf: fighter entry that reuses the Ganondorf moveset labels, with menu zoom, action strings and polygon setup.
+NGoemon/NGoemon.asm	Polygon (N) team variant of Goemon: fighter entry that reuses the Goemon moveset labels, with menu zoom, action strings and polygon setup.
+NLucas/NLucas.asm	Polygon (N) team variant of Lucas: fighter entry that reuses the Lucas moveset labels, with menu zoom, action strings and polygon setup.
+NMarina/NMarina.asm	Polygon (N) team variant of Marina: fighter entry that reuses the Marina moveset labels, with menu zoom, action strings and polygon setup.
+NMarth/NMarth.asm	Polygon (N) team variant of Marth: fighter entry that reuses the Marth moveset labels, with menu zoom, action strings and polygon setup.
+NMewtwo/NMewtwo.asm	Polygon (N) team variant of Mewtwo: fighter entry that reuses the Mewtwo moveset labels, with menu zoom, action strings and polygon setup.
+NPeach/NPeach.asm	Polygon (N) team variant of Peach: fighter entry that reuses the Peach moveset labels, with menu zoom, action strings and polygon setup.
+NSheik/NSheik.asm	Polygon (N) team variant of Sheik: fighter entry that reuses the Sheik moveset labels, with menu zoom, action strings and polygon setup.
+NSonic/NSonic.asm	Polygon (N) team variant of Sonic: fighter entry that reuses the Sonic moveset labels, with menu zoom, action strings and polygon setup.
+NWario/NWario.asm	Polygon (N) team variant of Wario: fighter entry that reuses the Wario moveset labels, with menu zoom, action strings and polygon setup.
+NWolf/NWolf.asm	Polygon (N) team variant of Wolf: fighter entry that reuses the Wolf moveset labels, with menu zoom, action strings and polygon setup.
+NYoungLink/NYoungLink.asm	Polygon (N) team variant of Young Link: fighter entry that reuses the Young Link moveset labels, with menu zoom, action strings and polygon setup.
+OnHit.asm	On-hit hook that calls a per-fighter Remix routine when a player is hit.
+PAL.asm	TV type (PAL/NTSC) detection and update at boot.
+Parry.asm	Parry: hit parry detection per fighter, item and projectile, parry bubble and extra hitlag on the attacker.
+Pause.asm	Pause menu additions: extra camera controls, HUD hide, controls legend, hold-to-pause.
+Peach/AI/Attacks.asm	CPU attack table of Peach: move choices with ranges, angles and timing for the Remix AI.
+Peach/Peach.asm	Peach: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Peach/PeachSpecial.asm	Peach special moves: item pull (turnip) creation, float and fall overrides, parasol/close actions and aerial auto-cancel.
+Peppy/AI/Attacks.asm	CPU attack table of Peppy Hare: move choices with ranges, angles and timing for the Remix AI.
+Peppy/Peppy.asm	Peppy Hare: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Peppy/PeppySpecial.asm	Peppy special moves: blaster with charge and shoot actions, projectile collision, and the Flashbang item spawn.
+PerfectShield.asm	Perfect shield: reflects projectiles and items and skips the shield stun action change.
+Piano/AI/Attacks.asm	CPU attack table of Piano Mario: move choices with ranges, angles and timing for the Remix AI.
+Piano/Piano.asm	Piano Mario: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Piano/PianoSpecial.asm	Piano Mario special moves: absorb behaviour and the command throw with hide and grab-action fix.
+PlayerTag.asm	Custom player tag shown above the fighter (creation, position, image, always-on display).
+Poison.asm	Poison status: damage-over-time hook and a star fix.
+PokemonAnnouncer.asm	Pokemon-style voice announcer: hit, charge, special move, clang and other callouts.
+Practice.asm	Practice mode: Z-cancel flash and overlay colour.
+Practice_1P.asm	1P practice: hold L to retry, bonus retries and Master Hand softlock prevention.
+Projectile.asm	Projectile registry: macro to add Remix projectile ids after the 0x1F vanilla ones.
+Rage.asm	Rage: knockback multiplier by damage, applied to direct hits, projectiles and throws, with graphics.
+Reflect.asm	Reflect: reflect input handling, extension of reflection to items and projectiles, direction fix.
+Render.asm	Rendering and file helpers: load_file (reloc file loader), textures, strings, display objects, font setup and character width tables, heap.
+Roy/AI/Attacks.asm	CPU attack table of Roy: move choices with ranges, angles and timing for the Remix AI.
+Roy/Roy.asm	Roy: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Roy/RoySpecial.asm	Roy special moves: begin/wait/end ground and air actions (charged sword special).
+SFXReplace.asm	Sound effect replacement for steps, landing and down bounce.
+SRAM.asm	Save data (SRAM) read/write for Remix settings and records.
+SSonic/AI/Attacks.asm	CPU attack table of Super Sonic: move choices with ranges, angles and timing for the Remix AI.
+SSonic/SSonic.asm	Super Sonic: special variant of Sonic with its own moveset hooks and tables.
+Sandbag/Sandbag.asm	Sandbag: training dummy fighter with its own tables.
+Settings.asm	Default tournament settings loaded on boot.
+Sheik/AI/Attacks.asm	CPU attack table of Sheik: move choices with ranges, angles and timing for the Remix AI.
+Sheik/Sheik.asm	Sheik: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Sheik/SheikSpecial.asm	Sheik special moves: charged needle shots, move and attack actions with ground/air transitions.
+Shield.asm	Shield colour fixes and the Yoshi egg colour change.
+SingleButtonMode.asm	Single-button mode: CPU input handling.
+SinglePlayer.asm	1P mode extensions: tally, 1P high scores per fighter, environment mapping, team costume preview and per-character victory/name tables.
+SinglePlayerEnemy.asm	Remix 1P enemy control: AFK enemies, button behaviour, respawn and shield.
+SinglePlayerMenus.asm	Revised 1P menu screens and buttons.
+SinglePlayerModes.asm	Remix single-player modes: stage list, All-Star finale, Multi-Man, Cruel, HRC and Bonus 3 logic, crash on death and end-of-match screen.
+Size.asm	Size mode: camera centre and zoom, ECB, graphic scale, jump height and PK fire position for resized fighters.
+Skeleton.asm	Skeleton display mode per port.
+Slippy/AI/Attacks.asm	CPU attack table of Slippy Toad: move choices with ranges, angles and timing for the Remix AI.
+Slippy/Slippy.asm	Slippy Toad: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Slippy/SlippyHipTranslation.asm	Slippy hip joint translation patch for his animations.
+Slippy/SlippySpecial.asm	Slippy special moves: laser shot, movement physics, Kirby copy variants and stage setting.
+Smashketball.asm	Smashketball mode: ball AI, overtime, chant, goal selector, despawn and stats.
+Sonic/AI/Attacks.asm	CPU attack table of Sonic: move choices with ranges, angles and timing for the Remix AI.
+Sonic/Sonic.asm	Sonic: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Sonic/SonicSpecial.asm	Sonic special moves: charged spin dash, homing/air move actions, jump and recoil actions and physics.
+Spawn.asm	Spawn and respawn point loading.
+SpecialZoom.asm	Special Zoom (beta): camera zoom for special moves and final knockback, with offset.
+Speed.asm	Game speed option: update rate and processing.
+SpotDodge.asm	Spot dodge input check.
+Stages.asm	Stage select expansion: stage ids, pages, previews, names, stage-specific data and random stage lists for the Remix stages.
+StaleMoves.asm	Stale move negation: penalty for repeated moves.
+Stamina.asm	Stamina mode: stock/time display, crash prevention, down-bounce input and percent port update.
+Stereo.asm	Stereo pan fix for sound effects.
+StockMode.asm	Stock mode: sets the starting stock count.
+String.asm	String functions (a few string.h equivalents).
+Surface.asm	Surface behaviours: friction, conveyors for fighters and items, Zebes acid fix and FGM override.
+SwordTrail.asm	Sword trail effect: axis setup, drawing and checks.
+TagTeam.asm	Tag Team mode: slot swap, stock steal, icons, token pickup and file loading.
+Teams.asm	Teams mode: team setup, results screen extensions and classic costume fixes (team costumes per fighter).
+TimedStock.asm	Timed Stock mode: scoring, sudden death prevention and full results.
+Toggles.asm	Settings framework: all toggle entries of the Remix menus, defaults per profile, saved values.
+Training.asm	Training mode: menus, reset, item spawn disable, Pokemon crash fixes and Z sector.
+Transitions.asm	Restores unused VS-to-results screen transitions.
+Tripping.asm	Tripping: hitstun retention on turn and the trip check.
+TugOfWar.asm	Tug of War mode: stock credit and last-hit tracking.
+TwelveCharBattle.asm	12 Char Battle mode: stock changes, FFA, ports 3/4, portrait and defeated-fighter select prevention.
+VanillaLv10Attacks.asm	Level 10 AI attack behaviour tables for the vanilla fighters (data).
+VsDemo.asm	VS demo: enables Remix fighters and stages in the attract-mode demo and an offset fix.
+VsRemixMenu.asm	VS menu for the Remix modes.
+VsStats.asm	VS match statistics: special-move tracker and row-flash prevention.
+WallTeching.asm	Wall teching: tracks successful rolls and techs.
+Walljump.asm	Wall jump logic (hooks are present but commented out).
+Wario/AI/Attacks.asm	CPU attack table of Wario: move choices with ranges, angles and timing for the Remix AI.
+Wario/Wario.asm	Wario: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Wario/WarioSpecial.asm	Wario special moves: bike/move actions with recoil, direction change and collision handling.
+Widescreen.asm	Widescreen mode switch and menu aspect-ratio fix.
+Wolf/AI/Attacks.asm	CPU attack table of Wolf: move choices with ranges, angles and timing for the Remix AI.
+Wolf/Wolf.asm	Wolf: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+Wolf/WolfSpecial.asm	Wolf special moves: two-stage up special and the other special actions with ground/air transitions.
+YoungLink/AI/Attacks.asm	CPU attack table of Young Link: move choices with ranges, angles and timing for the Remix AI.
+YoungLink/YoungLink.asm	Young Link: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries.
+YoungLink/YoungLinkSpecial.asm	Young Link special moves: bombs and bombchu (held, thrown, resting, exploding states), reflect and hurtbox logic.
+ZCancel.asm	Z-cancel options including Cruel Z-Cancel and the 1P boss instant-KO rule.
+captainshared.asm	Shared Captain Falcon/Ganondorf code: per-fighter animation struct for Ganondorf specials, entry and other id-based changes.
+command.asm	Moveset command extensions: end/create hitbox resets, set-texture-form change for Metal Mario, aerial/ground speed and FGM overrides.
+dkshared.asm	Shared Donkey Kong code for DK clones: character id checks for cargo hold, barrel/box grabbing and related actions.
+fireball.asm	Fireball and capsule projectiles: Dr. Mario capsule, Banjo egg, Kirby copy joint fix.
+foxshared.asm	Shared Fox code: CPU recovery angle logic and post-process tables for Fox and clones.
+items/Basketball.asm	Basketball item of Smashketball: ball physics, hitbox, bounce FGM and barrel entry.
+items/BlueShell.asm	Blue Shell item: seeks and explodes on the leading player.
+items/Boomerang.asm	Boomerang item: a thrown weapon that turns around and returns to its thrower.
+items/BulletBill.asm	Unused Bullet Bill item.
+items/Cacodemon.asm	Cacodemon hazard item: a floating DOOM enemy spawned by a stage.
+items/Car.asm	Car hazard item of Onett: a car that drives along the street and hits players.
+items/ClanBomb.asm	Clan Bomb item: a bomb with a thrown state, owned by the fighter that throws it (Marina).
+items/CloakingDevice.asm	Cloaking Device item: makes the holder invisible and immune to damage and shadow while active.
+items/Cloud.asm	Cloud item (Goemon cloud): an attached cloud with a flash flag.
+items/Dango.asm	Dango item: a Maxim Tomato-like food item that restores damage.
+items/DekuNut.asm	Deku Nut item: a throwable nut that bursts on impact.
+items/Flashbang.asm	Flashbang item: grenade that flashes the screen (Peppy down special).
+items/FranklinBadge.asm	Franklin Badge item: reflects items and projectiles.
+items/Gem.asm	Gem item thrown by Marina.
+items/GoldenGun.asm	Golden Gun item: a one-hit gun with aerial and ground shots.
+items/Gordo.asm	Gordo item: a spiked ball thrown by King Dedede.
+items/KlapTrap.asm	Klap Trap hazard item: the Donkey Kong Country crocodile enemy spawned by a stage.
+items/Lightning.asm	Lightning item: a Maxim Tomato-style pickup with the Lightning effect on opponents.
+items/MrSaturn.asm	Mr. Saturn item: a throwable character item.
+items/Pitfall.asm	Pitfall item: a trap with wait, fall, pickup, thrown and buried states.
+items/PoisonMushroom.asm	Poison Mushroom item: shrinks and poisons the player who touches it.
+items/Pokemon/Psyduck.asm	Psyduck item: a Pokemon summoned from a Poke Ball.
+items/Pwing.asm	P-Wing item: grants flight.
+items/RobotBee.asm	Robot Bee hazard item: a flying enemy spawned by a stage.
+items/ScuttleMinion.asm	Scuttle Minion hazard item: a stage-spawned minion built on the bob-omb; removes the bob-omb walking FGM.
+items/Shuriken.asm	Shuriken item: a thrown projectile with a slow state.
+items/Stopwatch.asm	Stopwatch item: slows time for opponents; physics map and a shadow-crash fix on platform despawn.
+items/SuperMushroom.asm	Super Mushroom item: grows the player who touches it.
+items/Turnip.asm	Turnip item: a pulled vegetable projectile (Peach).
+items/WaddleDee.asm	Waddle Dee item: an enemy that walks and attacks; removes the bob-omb walking FGM.
+items/WaddleDoo.asm	Waddle Doo item: an enemy that fires a beam; beam knockback direction fix.
+jigglypuffkirbyshared.asm	Shared Jigglypuff/Kirby code: id checks for Jigglypuff clones (multi-jumps, air state) and recovery logic.
+linkshared.asm	Shared Link code: animation struct for Young Link/Marth entry, bomb struct by character id and bomb flashing.
+marioshared.asm	Shared Mario code: pipe entry/exit turn and tables for Mario clones.
+midi.asm	Music system: music table, MIDI bank, bank map DMA at boot, instrument samples and master volume.
+moveset.asm	Custom moveset support: command address lookup and shared moveset scripts.
+nessshared.asm	Shared Ness code: PK Thunder/PK Fire fixes, Lucas/Ness id checks and CPU USP use.
+os.asm	OS helper macros (patch_start/patch_end, tables, print helpers); no gameplay routines.
+pikashared.asm	Shared Pikachu code: Thunder/Thunder Jolt, smash forward fixes and animation structs.
+resultsscreen.asm	Results screen: winner logo, win animations, winner BGM/FGM and win record.
+samusshared.asm	Shared Samus code: charge shot, bomb, grapple and Kirby power.
+timeouts.asm	Timeout hooks: branch hooks in time-limit routines.
+yoshishared.asm	Shared Yoshi code: shield, grab, double jump, CPU and special-move struct fixes.

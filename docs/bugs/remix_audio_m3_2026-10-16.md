@@ -1,38 +1,38 @@
-# Remix audio, milestone M3 (2026-10-16)
+# Remix audio: how the port plays Remix music and sound effects
 
-| Task | Result | Code |
-|---|---|---|
-| T3.1 BGM | stage music, victory music per fighter, results scene | `mnremixwinbgm.c`, `mnvsresults.c`, `grremixstage.c` |
-| T3.2 SFX and voices | new FGM ids (0x2B7..0x608) play, none out of the table | `audio_bridge.cpp` blobs, `n_env.c` log, `lbcommon.c` pan |
-| T3.3 Sound test | 375 songs, 1094 voices | `mnsoundtest.c`, `mnremixsoundtest.c` |
+Covers stage and victory music, the new FGM (sound effect) ids, the sound test, and what to check when "nothing plays". Code:
+`decomp/src/mn/mnvsmode/mnremixwinbgm.c`, `mnvsresults.c` (victory music), `decomp/src/gr/grremix/grremixstage.c` (stage BGM),
+`port/bridge/audio_bridge.cpp` and `yamls/remix/audio.yml` (`SSB64:REMIXAUDIO` blobs), `decomp/src/libultra/n_audio/n_env.c`
+(FGM play), `decomp/src/mn/mndata/mnsoundtest.c`, `mnremixsoundtest.c` (sound test, 375 songs and the extra voices). Test:
+`.claude/skills/remix-smoke-tests/` with the variables listed under "Harness". Ported menu music, announcer and SFX replace
+live in `gmremixmenumusic.c`, `ifremixannouncer.c` and `ftremixsfxreplace.c`.
 
 ## Findings worth keeping
 
-- The Torch `REMIXAUDIO` blobs already work: `audio/fgm_tbl` (1288 entries) and `audio/fgm_ucd` (1545) are self-contained (every
-  offset lies inside the blob, the moved and new blocks are appended after the grown pointer table), so no runtime image lookup
-  is needed. Do not add one.
-- **Two FGM play functions exist in `n_env.c`**: `func_800269C0_275C0` is the one the game calls (fighter motion events, items,
-  menus); `func_80026A10_27610` is a sibling. A trace placed in the wrong one reads as "SFX are mute"; use lldb
-  (`breakpoint set -n func_800269C0_275C0`) before concluding that nothing plays.
+- The Torch `REMIXAUDIO` blobs `fgm_tbl` and `fgm_ucd` are self-contained: every offset lies inside the blob, and the moved
+  and new blocks are appended after the grown pointer table. No runtime image lookup is needed for FGM data; do not add one.
+- **Two FGM play functions exist in `n_env.c`.** `func_800269C0_275C0` is the one the game calls (fighter motion events, items,
+  menus); `func_80026A10_27610` is a sibling. A trace placed in the wrong one reads as "SFX are mute". Break on
+  `func_800269C0_275C0` in lldb before concluding that nothing plays.
 - Remix keeps music ids 0-based in `Stages.alternate_music_table` and 1-based in `default_music_track_table`
-  (`grRemixGetStageBGM` subtracts 1); the winner music table holds code addresses (`add_victory_bgm`), whose `ori a1` carries the id.
-- The sound test selector shows `id + 1`; Remix did not widen the digit objects (vanilla has three), the port makes four.
-- A VS shortcut with no `SSB64_VS_STOCKS` runs as a demo game type; use `SSB64_VS_STOCKS=<n>` when the run must reach the
-  results scene. The results scene itself renders white in that shortcut, with vanilla fighters too (checked with `res_0`), so its
-  visuals belong to ROADMAP T5.3.
+  (`grRemixGetStageDefaultTrack` subtracts 1). The winner music table holds code addresses (`add_victory_bgm`), whose
+  `ori a1` carries the id.
+- The sound test selector shows `id + 1`. Remix did not widen the number objects (vanilla has three digits); the port uses
+  four (`MNSOUNDTEST_NUMBER_DIGITS` in `mnsoundtest.c`).
+- A VS shortcut without `SSB64_VS_STOCKS` runs as a demo game type; use `SSB64_VS_STOCKS=<n>` when the run must reach the
+  results scene.
 
-## Limits of the checks
+## Limits of audio checks
 
-The dumps prove that sound is produced and that the requested ids are right, not that it sounds right (instruments, tempo,
-crackle). Clipping was counted in four dumps: 3, 17, 0 and 0 samples at full scale out of 1.5 million, all at the opening burst
-of a match, so there is no sustained distortion. A listening pass by the user is part of ROADMAP M9.
+A WAV dump proves that sound is produced and that the requested FGM ids are right, not that it sounds right (instruments,
+tempo, crackle). Clipping counted on four dumps stayed at a few samples at full scale out of 1.5 million, all in the opening
+burst of a match.
 
 ## Harness
 
-`SSB64_AUDIO_DUMP_PATH`, `SSB64_AUDIO_DUMP_SECONDS`, `SSB64_AUDIO_FGM_LOG=1`, `SSB64_VS_STOCKS`; `vs.sh` writes `<run>/audio.wav`;
-`scripts/wavstat.py` prints RMS per second. Sound test scene: `SSB64_START_SCENE=59` with `inputs/soundtest_*.txt`.
+`SSB64_AUDIO_DUMP_PATH`, `SSB64_AUDIO_DUMP_SECONDS`, `SSB64_AUDIO_FGM_LOG=1` (logs `[fgm] play id=<n>`; ids >= 695 are Remix
+sounds), `SSB64_VS_STOCKS`. `vs.sh` writes `<run>/audio.wav`;
+`.toolchain/host/venv/bin/python -I .claude/skills/remix-smoke-tests/scripts/wavstat.py <run>` prints RMS per second. The
+sound test scene is `SSB64_START_SCENE=59` with `inputs/soundtest_browse.txt` or `soundtest_wrap.txt`.
 
-## Open
-
-BGM volume hook, FGM volume hook, Japanese voices, `entry_stereo_fix`, menu music choice: toggles (M4). `SFXReplace.asm`
-(footsteps and landing) and the Pokemon announcer (T2.5) are still to do.
+Open gaps: `docs/remix/patch_audit.md`, group g9.

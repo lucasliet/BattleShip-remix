@@ -20,6 +20,7 @@ SRC = ROOT / ".toolchain/pkgs/smashremix-src/src"
 FT_REMIX = ROOT / "decomp/src/ft/ftremix"
 IT_REMIX = ROOT / "decomp/src/it/itremix"
 OUTPUT = ROOT / "docs/remix/parity.md"
+FEATURES = ROOT / "tools/remix_asm_features.tsv"
 
 SKIP_DIRS = {"Moveset", "costumes", "css", "Req", "stages", "Random", "gfx", "music", "sounds", "Sounds", "1p"}
 
@@ -38,7 +39,7 @@ AREAS = ["fighters", "items", "stages", "audio", "menus_modes", "ai", "infra"]
 # file -> (area, status, port location / note). Status: ported | adapted | partial | todo | n/a.
 # adapted = the feature exists for the player through a documented port deviation; it counts as done.
 STATUS = {
-    "Character.asm": ("fighters", "ported", "port/remix/remix_roster.cpp, ftremix*"),
+    "Character.asm": ("fighters", "partial", "port/remix/remix_roster.cpp, ftremix*; jab 3 / rapid jab tables open (patch_audit.md GP-1)"),
     "Action.asm": ("fighters", "ported", "ftremixvanillaprocs.c, remix_action_layout.h"),
     "moveset.asm": ("fighters", "ported", "ftremixcommand.c"),
     "command.asm": ("fighters", "partial", "ftremixcommand.c"),
@@ -55,7 +56,7 @@ STATUS = {
     "samusshared.asm": ("fighters", "partial", "ftremixsamusshared.c, ftremixsamusshared2.c"),
     "yoshishared.asm": ("fighters", "partial", "ftremixyoshishared.c"),
     "CustomGrabAction.asm": ("fighters", "partial", "ftremixpianoshared.c, fighter_registry custom_capture_*"),
-    "DragonKingHUD.asm": ("fighters", "partial", "ftremixdragonkingdrainflash.c"),
+    "DragonKingHUD.asm": ("stages", "todo", "Dragon King HUD not ported (patch_audit.md ST)"),
     "KirbyHats.asm": ("fighters", "partial", "ftremixkirbycopy.c, ftremixkirbyhats.c, ftremixkirbypower.c"),
     "Size.asm": ("fighters", "partial", "ftremixsize*.c (phases a, b, c partial)"),
     "GFX.asm": ("fighters", "ported", "lbremixgfx.c, ftparam.c"),
@@ -95,7 +96,7 @@ STATUS = {
     "MagnifyingGlass.asm": ("items", "partial", "gmremixmagnify.c (not seen: needs a fighter off screen)"),
     "Stages.asm": ("stages", "partial", "grremixstage.c, mnmaps.c"),
     "Hazards.asm": ("stages", "partial", "grremixhazards_*.c, grremixgating.c"),
-    "FD.asm": ("stages", "ported", "scvsbattle.c (FD music), port stage page"),
+    "FD.asm": ("audio", "partial", "scvsbattle.c (FD music); intro timer and FD clones open (patch_audit.md MS)"),
     "Surface.asm": ("stages", "partial", "grremixsurface.c"),
     "Blastzone.asm": ("stages", "partial", "grremixblastzone.c"),
     "Spawn.asm": ("stages", "partial", "grremixspawn.c"),
@@ -108,19 +109,19 @@ STATUS = {
     "Render.asm": ("infra", "n/a", "replaced by the port's GObj/SObj calls"),
     "File.asm": ("infra", "ported", "Torch yamls/remix, RelocFactory"),
     "Color.asm": ("infra", "n/a", "constants"),
-    "Joypad.asm": ("infra", "n/a", "replaced by the port's controller code"),
+    "Joypad.asm": ("infra", "ported", "ftremixtauntbutton.c (Taunt Button mask and jump guard)"),
     "PAL.asm": ("infra", "n/a", "N64 TV type"),
-    "Boot.asm": ("infra", "n/a", "N64 boot"),
+    "Boot.asm": ("menus_modes", "partial", "title logo in mntitle.c; splash after the N64 logo open (patch_audit.md MS)"),
     "SRAM.asm": ("menus_modes", "partial", "lbBackup records + port config for toggles (T4.1); Remix save blocks not mapped yet"),
     "Widescreen.asm": ("infra", "n/a", "out of scope (4:3)"),
-    "FPS.asm": ("infra", "n/a", "N64 frame counter"),
+    "FPS.asm": ("infra", "adapted", "FPS Display toggle, port/remix/remix_display_settings.cpp"),
     "CharacterSelect.asm": ("menus_modes", "partial", "CSS port (port/css_*, mnplayers*)"),
     "AI.asm": ("ai", "partial", "ftremixai*.c, ftcomputer.c hooks (ROADMAP T7.1, leftovers in T8.2)"),
     "VanillaLv10Attacks.asm": ("ai", "partial", "ftremixailv10.c (PREVENT routines of vanilla fighters in T8.2)"),
     "AA.asm": ("menus_modes", "ported", "remix_display_settings.cpp (MSAA)"),
     "ComboMeter.asm": ("menus_modes", "ported", "ifremixcombometer.c, ifremixcombohits.c"),
     "InputDelay.asm": ("menus_modes", "ported", "ftremixinputdelay.c"),
-    "TimedStock.asm": ("menus_modes", "ported", "gmremixtimedstock*.c"),
+    "TimedStock.asm": ("menus_modes", "partial", "gmremixtimedstock*.c; results exit wait 370 instead of 410 (patch_audit.md OP)"),
     "Stereo.asm": ("audio", "ported", "lbcommon.c fix_sfx_pan_"),
     "FGM.asm": ("audio", "ported", "Torch RemixAudioFactory"),
     "midi.asm": ("audio", "ported", "Torch RemixAudioFactory, audio_bridge.cpp"),
@@ -151,7 +152,7 @@ STATUS = {
     "VsStats.asm": ("menus_modes", "partial", "mnremixvsstats.c (page and trackers open)"),
     "PokemonAnnouncer.asm": ("fighters", "ported", "ifremixannouncer.c, ifremixhitannouncer.c (throw announcement open in ftcommonthrow.c)"),
     "OnHit.asm": ("fighters", "ported", "ftremixchartables.c ftRemixRunOnHit"),
-    "SinglePlayerMenus.asm": ("menus_modes", "ported", "mnremix1pmode.c"),
+    "SinglePlayerMenus.asm": ("menus_modes", "partial", "mnremix1pmode.c; CSS header, announcer and tally items open (patch_audit.md OP)"),
     "VsRemixMenu.asm": ("menus_modes", "ported", "mnremixvsmode.c"),
     "Menu.asm": ("infra", "n/a", "replaced by the port menu (ROADMAP T4.1 deviation)"),
     "Walljump.asm": ("infra", "n/a", "all patches are commented out in the Remix 2.0.1 build"),
@@ -161,12 +162,12 @@ STATUS = {
     "Skeleton.asm": ("fighters", "ported", "ftremixskeleton.c (per-port force)"),
     "AerialAttackFastFall.asm": ("fighters", "ported", "ftremixaerialfastfall.c"),
     "DKMode.asm": ("fighters", "ported", "ftremixdkmode.c (port variable: the RAM image is read-only)"),
-    "Cheats.asm": ("menus_modes", "partial", "unlock all and music are port toggles; stock threshold, Pupupu nop, BGM store, AA open (M11 Fase 4)"),
+    "Cheats.asm": ("menus_modes", "ported", "only the unlock word is live in the asm (Cheats.asm:19-37 is commented out); unlock all is a port toggle"),
     "Crash.asm": ("infra", "adapted", "N64 crash debugger; the port crash handler logs the backtrace without the button sequence"),
     "VsDemo.asm": ("menus_modes", "partial", "scremixvsdemo.c (Remix name in the demo and the port 3 rule open)"),
-    "timeouts.asm": ("menus_modes", "partial", "mnremixtimeouts.c (not seen on screen, M11 Fase 4)"),
-    "Settings.asm": ("menus_modes", "partial", "scremixtournament.c (tournament rules, not seen in the menu, M11 Fase 4)"),
-    "SinglePlayerEnemy.asm": ("menus_modes", "partial", "CPU hooks checked (f14_sbm_enemy_audit.md); 7 groups open (M11 Fase 4)"),
+    "timeouts.asm": ("menus_modes", "ported", "mnremixtimeouts.c"),
+    "Settings.asm": ("menus_modes", "ported", "scremixtournament.c (tournament rules)"),
+    "SinglePlayerEnemy.asm": ("menus_modes", "ported", "sc1premixenemy*.c (all seven groups)"),
 }
 
 
@@ -223,7 +224,7 @@ def collect_rows() -> list:
 
 
 def summary_lines(rows: list) -> list:
-    lines = ["| Área | ported | adapted | partial | todo | n/a | progresso |", "|---|---|---|---|---|---|---|"]
+    lines = ["| Area | ported | adapted | partial | todo | n/a | progress |", "|---|---|---|---|---|---|---|"]
     for area in AREAS:
         counts = {key: sum(1 for row in rows if row[1] == area and row[2] == key)
                   for key in ("ported", "adapted", "partial", "todo", "n/a")}
@@ -235,13 +236,28 @@ def summary_lines(rows: list) -> list:
     return lines
 
 
+def load_features() -> dict:
+    """One-line feature summary per Remix .asm path (FEATURES, tab separated), so each parity row says what the file adds."""
+    features = {}
+    for number, line in enumerate(FEATURES.read_text().splitlines(), 1):
+        if not line.strip():
+            continue
+        path, sep, summary = line.partition("\t")
+        if not sep:
+            sys.exit(f"{FEATURES.relative_to(ROOT)}:{number}: expected '<asm path><TAB><summary>', got {line!r}")
+        features[path] = summary.strip()
+    return features
+
+
 def main() -> None:
     rows = collect_rows()
-    out = ["# Paridade do Smash Remix 2.0.1 (gerado por tools/gen_remix_parity.py; não editar à mão)", "",
-           "Uma linha por `.asm` do Remix. Atualize `STATUS` no script quando uma task do `ROADMAP.md` fechar.", ""]
+    features = load_features()
+    out = ["# Smash Remix 2.0.1 parity (generated by tools/gen_remix_parity.py; do not edit by hand)", "",
+           "One row per Remix `.asm`. Update `STATUS` in the script when a `ROADMAP.md` item closes. The patch-level view,",
+           "with every open item, is `patch_audit.md`.", ""]
     out += summary_lines(rows)
-    out += ["", "| Arquivo | Área | Status | Port |", "|---|---|---|---|"]
-    out += [f"| `{path}` | {area} | {status} | {where} |" for path, area, status, where in rows]
+    out += ["", "| File | Feature | Area | Status | Port |", "|---|---|---|---|---|"]
+    out += [f"| `{path}` | {features.get(path, '')} | {area} | {status} | {where} |" for path, area, status, where in rows]
     OUTPUT.write_text("\n".join(out) + "\n")
     print(f"{len(rows)} rows -> {OUTPUT.relative_to(ROOT)}")
 

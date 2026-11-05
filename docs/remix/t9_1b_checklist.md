@@ -1,102 +1,82 @@
-# T9.1b: lista da passada de escuta e jogo
+# Manual pass: listening and play checklist
 
-O lead não ouve. Esta lista diz o que abrir, o que esperar e o que anotar. Para cada item, responda "ok" ou descreva o defeito
-(onde, o que se ouviu ou viu, o que o Remix faz).
+Covers the checks that need a person at the controls: what to open, what to expect, what to note. Automated checks are in `.claude/skills/remix-smoke-tests/`; the
+audio background is in `docs/remix/audio.md`. The game runs from `build/` with `BattleShip-Remix.o2r` and `f3d.o2r` present. For each item answer "ok" or describe the defect (where, what was heard or seen, what the Remix does).
 
-## Pronto antes de você começar
-
-Capturas de 20 s de áudio de oito estágios (Kirby e Mario CPU, sem entrada), todas com som em todos os segundos (RMS entre 1500 e
-8700), estão em `build/agent-shots/vs/t91b_stage_<id>/audio.wav`. Isso prova que a música toca; quem diz se é a faixa certa é você.
-
-| Estágio | Id | Pasta |
-|---|---|---|
-| Dream Land | 6 | `t91b_stage_6` |
-| Deku Tree | 41 | `t91b_stage_41` |
-| Pokémon Stadium | 45 | `t91b_stage_45` |
-| Taltal | 46 | `t91b_stage_46` |
-| Glacial | 47 | `t91b_stage_47` |
-| WarioWare | 48 | `t91b_stage_48` |
-| Battlefield | 49 | `t91b_stage_49` |
-| Dr. Mario | 51 | `t91b_stage_51` |
-
-Uma partida do Taltal caiu uma vez (rc 139, sem marca do flake do Metal) numa execução com quatro jogos em paralelo; passou nas
-cinco execuções seguintes (uma sozinha e quatro em paralelo). Fica registrada como não reproduzida.
-
-## Como abrir o jogo
-
-Dentro de `build/`, com `BattleShip-Remix.o2r` e `f3d.o2r` presentes:
+## How to open the game
 
 ```
 cd build && ./BattleShip-Remix
 ```
 
-Atalhos para ir direto ao ponto (variáveis de ambiente antes do comando):
+Shortcuts to go straight to the point (environment variables before the command):
 
-| Objetivo | Comando |
+| Goal | Command |
 |---|---|
-| Partida VS num estágio | `SSB64_START_SCENE=22 SSB64_VS_FKINDS=0,8 SSB64_VS_STAGE=<id> ./BattleShip-Remix` (P1 humano) |
+| VS match on a stage | `SSB64_START_SCENE=22 SSB64_VS_FKINDS=0,8 SSB64_VS_STAGE=<id> ./BattleShip-Remix` (P1 human) |
 | Sound Test | `SSB64_START_SCENE=59 ./BattleShip-Remix` |
-| Training sem CSS | `SSB64_TRAIN_FKINDS=<humano>,<cpu> SSB64_VS_STAGE=<id> ./BattleShip-Remix` |
-| Training com opções do menu | acrescente `SSB64_REMIX_TRAINING="ShieldBreak=1;Oos=3;Tech=4"` |
-| DK Mode | `SSB64_DK_MODE=<modo> ./BattleShip-Remix` (o easter egg do CSS ainda não existe) |
+| Training without the CSS | `SSB64_TRAIN_FKINDS=<human>,<cpu> SSB64_VS_STAGE=<id> ./BattleShip-Remix` |
+| Training with menu options | add `SSB64_REMIX_TRAINING="ShieldBreak=1;Oos=3;Tech=4"` |
+| DK Mode (test shortcut for the portrait easter egg) | `SSB64_DK_MODE=<0 off, 1 DK, 2 Lanky> ./BattleShip-Remix` |
 
-Teclado (padrão do libultraship, igual ao BattleShip original): **WASD é o analógico e as setas são os C-buttons**, e um toque
-em C-button faz o lutador pular. Para andar use WASD (X = A, C = B, Z = Z, E = L, R = R, Espaço = Start).
+Keyboard (libultraship default, same as the original BattleShip): **WASD is the analog stick and the arrow keys are the C buttons**, and a tap on a C button makes
+the fighter jump. To walk use WASD (X = A, C = B, Z = Z, E = L, R = R, Space = Start).
 
-Ids de lutador do Remix são iguais ao fkind do port (Crash 72, Marina 63, Young Link 31, Lanky 76, Marth 58).
+Remix fighter ids equal the port fkind (Crash 72, Marina 63, Young Link 31, Lanky 76, Marth 58).
 
-## 1. Música e estágios
+## Expected music per stage
 
-- [ ] Para cada estágio da tabela: a faixa é a do Remix para aquele estágio e não pula nem engasga nos primeiros 20 s.
-  **Como saber qual é a faixa certa:** com o toggle "Music Title at Match Start" ligado (é o padrão), o título "faixa - jogo" aparece na tela durante a contagem de 3, 2, 1. Conferido por mim no log (`music title: bgm N "..."`) contra a tabela de música padrão do Remix de cada estágio, as oito batem (a música alternativa sorteia 35% das vezes, então um título diferente do abaixo pode ser legítimo):
+| Stage | Id | Expected title |
+|---|---|---|
+| Dream Land | 6 | Dream Land - Kirby Super Star |
+| Deku Tree | 41 | Kokiri Forest - The Legend of Zelda: Ocarina of Time |
+| Pokemon Stadium | 45 | Trainer Battle - Pokemon Red & Blue |
+| Taltal | 46 | Link's Awakening Medley - The Legend of Zelda: Link's Awakening |
+| Glacial | 47 | River Stage - Marvel vs. Capcom 2 |
+| WarioWare | 48 | WarioWare, Inc. - WarioWare, Inc.: Mega Microgame$! |
+| Battlefield | 49 | Battlefield - Super Smash Bros. Brawl |
+| Dr. Mario | 51 | Fever - Dr. Mario |
 
-  | Estágio | Título esperado |
-  |---|---|
-  | Dream Land (6) | Dream Land - Kirby Super Star |
-  | Deku Tree (41) | Kokiri Forest - The Legend of Zelda: Ocarina of Time |
-  | Pokémon Stadium (45) | Trainer Battle - Pokemon Red & Blue |
-  | Taltal (46) | Link's Awakening Medley - The Legend of Zelda: Link's Awakening |
-  | Glacial (47) | River Stage - Marvel vs. Capcom 2 |
-  | WarioWare (48) | WarioWare, Inc. - WarioWare, Inc.: Mega Microgame$! |
-  | Battlefield (49) | Battlefield - Super Smash Bros. Brawl |
-  | Dr. Mario (51) | Fever - Dr. Mario |
+With the toggle "Music Title at Match Start" on (the default) the title "track - game" appears on screen during the 3, 2, 1 count, and the log prints
+`music title: bgm N "..."`. The alternative music is drawn 35% of the time, so a different title can be legitimate.
 
-  Você só precisa dizer se o título na tela é esse e se o som da faixa é o dessa música (o que eu não consigo ouvir).
-- [ ] Peach's Castle II (id 68): abre como o Peach's Castle original (sem Banzai Bill, é código morto no Remix).
-- [ ] Música de vitória de um lutador Remix (termine uma partida com Crash, Marina ou Marth) e a tela de resultados.
-- [ ] Sound Test: navegar, tocar uma faixa Remix e uma vanilla, voltar à primeira ao dar a volta na lista.
+## 1. Music and stages
 
-## 2. Vozes e SFX
+- [ ] For each stage of the table above: the track is the Remix one for that stage and does not skip or stutter in the first 20 s; the title on screen is the expected one and
+  the sound is that piece of music.
+- [ ] Peach's Castle II (id 68): opens like the original Peach's Castle (no Banzai Bill, which is dead code in the Remix).
+- [ ] Victory music of a Remix fighter (end a match with Crash, Marina or Marth) and the results screen.
+- [ ] Sound Test: browse, play one Remix track and one vanilla track, wrap back to the first at the end of the list.
 
-- [ ] Golpes de lutadores Remix (Crash, Marina, Marth e outros à escolha): o som acompanha o golpe, sem silêncio nem som repetido.
-- [ ] Vozes do J (versão japonesa) no estágio e nos lutadores onde o Remix troca o som.
-- [ ] Conhecido aberto: sons J da bomba e do bumerangue do Link ainda não existem; anote se incomodar.
+## 2. Voices and SFX
 
-## 3. Menus e gráficos
+- [ ] Hits of Remix fighters (Crash, Marina, Marth and others of your choice): the sound follows the hit, with no silence and no repeated sound.
+- [ ] J (Japanese) voices on the stage and fighters where the Remix swaps the sound.
 
-- [ ] Título, CSS (grade de 24 retratos do 12CB não existe; confira o CSS padrão do port) e seleção de estágio.
-- [x] Pausa: legendas "R: Legend" na posição certa e sem sobrepor "1P PAUSE" (visto por mim em 2026-11-02, `menu_pause`: "1P PAUSE", a linha A+B+Z+R: RESET e "R: Legend" no canto, sem sobreposição).
-- [x] Resultados do KOTH e do Smashketball: linhas extras na tela de fim (KOTH e Smashketball vistos no CP8; a tela de uma partida stock com KOs, TKO, Pts, Place e "Press A for Match Stats" revista por mim em 2026-11-02, `menu_results`).
+## 3. Menus and graphics
+
+- [ ] Title, CSS (the port's default CSS) and stage select.
+- [x] Pause: "R: Legend" labels in the right position, not overlapping "1P PAUSE" (the "1P PAUSE" title, the A+B+Z+R: RESET line and "R: Legend" in the corner).
+- [x] KOTH and Smashketball results: extra lines on the end screen; a stock match end screen shows KOs, TKO, Pts, Place and "Press A for Match Stats".
 
 ## 4. Training
 
-- [ ] Menu do port, Remix > Training: cada entrada muda o comportamento (Shield Break Infinite segura a CPU no escudo; Spam Practice
-  repete o golpe no intervalo; Percent aplica o valor ao criar a partida; Stage BG troca o fundo).
-- [ ] Music do Training (Remix > Training > Music): escolher uma faixa troca a música da partida na hora e o martelo e a estrela
-  mantêm o tema próprio; ao acabar, a faixa escolhida volta. Visto por script só ao abrir a partida (`Music=7` toca Final Destination).
-- [x] OOS contra escudo real: visto em 2026-11-02 por script (Grab saindo do escudo, ver T9.1 do ROADMAP).
-- [ ] Aviso: as opções por porta (Type, Character, Costume, Spawn) ficam salvas entre sessões, como as outras de Remix > Training; **Auto** é "o que o CSS escolheu" e qualquer outro valor vale em toda partida até você trocar de volta. Se um Training aparecer cheio de CPUs, confira primeiro os P1 a P4 Type; "Reset the Training options" limpa tudo.
-- [ ] Cadeia por porta (Remix > Training, P1 a P4 Type, Character, Costume, Spawn): mudar e apertar D-pad esquerda (reset) refaz a partida com os lutadores escolhidos (visto por script com Pikachu e Falco extras, Fox de traje 3 e spawn trocado; falta só a sua conferência pelo menu).
-- [x] Tech do menu: visto em 2026-11-02 por script (fsmash da plataforma a 30%, a CPU toca o chão e rola: status 73 para Roll Left, 74 para Roll Right, 81 para In Place).
-- [ ] Ainda não visto em jogo: DI da CPU (`DiType=3;DiStrength=1;DiDirection=1;DiFirstHit=1`).
+- [ ] Port menu, Remix > Training: each entry changes the behaviour (Shield Break Infinite holds the CPU in shield; Spam Practice repeats the move at the interval; Percent applies
+  the value when the match is created; Stage BG swaps the background).
+- [ ] Training music (Remix > Training > Music): choosing a track changes the match music immediately, and the hammer and the star keep their own theme; when they end, the chosen
+  track returns.
+- [x] OOS against a real shield (Grab out of shield).
+- [ ] The per-port options (Type, Character, Costume, Spawn) are saved between sessions, like the other Remix > Training ones; **Auto** is "what the CSS picked" and any other value holds in
+  every match until set back. If a Training match shows up full of CPUs, check the P1 to P4 Type options first; "Reset the Training options" clears everything.
+- [ ] Per-port chain (Remix > Training, P1 to P4 Type, Character, Costume, Spawn): change and press D-pad left (reset) to rebuild the match with the chosen fighters.
+- [x] Menu Tech: fsmash from the platform at 30%, the CPU touches the floor and rolls: status 73 for Roll Left, 74 for Roll Right, 81 for In Place.
+- [ ] CPU DI (`DiType=3;DiStrength=1;DiDirection=1;DiFirstHit=1`).
 
-## 5. Conferências do T9.1 que ainda são só minhas
+## 5. Other checks
 
-Esteira de Surface, bury e plunge, Game Speed no Training, volta do Lightning ao tamanho do modo, Full Results e Salty Runback:
-feitas em 2026-11-01 (detalhes no T9.1 do ROADMAP). O Salty Runback tinha um defeito, já corrigido: ao testar, segure exatamente
-A+B+Z+R+START (ou A+B+Z+R+D-Left com a opção alternativa) enquanto a partida termina, sem outros botões.
+- [x] Surface conveyor, bury and plunge, Game Speed in Training, return of Lightning to the mode size, Full Results and Salty Runback. Salty Runback: hold exactly A+B+Z+R+START (or
+  A+B+Z+R+D-Left with the alternative option) while the match ends, with no other buttons.
 
-## Como devolver
+## Reporting
 
-Uma lista curta por seção, no formato "seção, item, ok ou defeito". Cada defeito vira uma linha no ROADMAP e uma correção com
-teste, antes do T9.3.
+A short list per section, in the form "section, item, ok or defect". Each defect is fixed with a regression test.

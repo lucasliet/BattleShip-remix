@@ -10,7 +10,7 @@ Outputs (in --out):
   vanilla_fighters.json every fighter in the vanilla struct table
   validation.json       vanilla values vs decomp/src/ft/ftdata.c, and Remix vs vanilla diffs
 
-Usage: python3 tools/remix_dump_fighters.py [--out DIR] [--remix ROM] [--vanilla ROM]
+Usage: .toolchain/host/venv/bin/python -I tools/remix_dump_fighters.py [--out DIR] [--remix ROM] [--vanilla ROM]
 """
 
 import argparse

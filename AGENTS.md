@@ -16,7 +16,7 @@ Detailed reference material lives under `docs/`. Read the file that matches the 
 | IDO BE bitfield layout audit (compile + rabbitizer disasm to verify port struct bit positions) | `docs/debug_ido_bitfield_layout.md` |
 | Resolved bugs (index + per-bug root cause / fix write-ups) | `docs/bugs/README.md` |
 | **Smash Remix port: the only active plan (follow it task by task)** | `docs/remix/ROADMAP.md` |
-| Smash Remix reference docs, worker briefs and notes (index) | `docs/remix/README.md` |
+| Smash Remix reference docs, open-item ledger (`patch_audit.md`) and index | `docs/remix/README.md` |
 
 Ongoing investigations and handoff notes are loose `.md` files at the top level of `docs/` — check there before starting work on rendering, collision, or animation issues so you don't duplicate prior effort.
 

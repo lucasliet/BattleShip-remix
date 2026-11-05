@@ -1,387 +1,388 @@
-# Smash Remix: menu and UI side (CSS, Remix menus, new screens, title)
+# Smash Remix menus and screens
 
-Source: `.toolchain/pkgs/smashremix-src/src/` (MIPS asm, bass/armips-style macros). Line numbers below are from that tree.
-Decomp side: `decomp/src/mn/**`. Address matches come from `// 0xADDR` comments in the decomp.
+Covers the menu side of the Remix (`Menu.asm`, `Toggles.asm`, `SRAM.asm`, `Settings.asm`, `VsRemixMenu.asm`, `SinglePlayerMenus.asm`,
+`Stages.asm`, `CharacterDataScreen.asm`, `Credits.asm`, `Gallery.asm`, `VsStats.asm`, `resultsscreen.asm`, `Transitions.asm`, `Boot.asm`,
+`BGM.asm` menu music, `timeouts.asm`, `VsDemo.asm`) and how the port implements it. Port code: `decomp/src/mn/**` (`mncommon`, `mnvsmode`,
+`mn1pmode`, `mnmaps`, `mndata`, `mnplayers`), `decomp/src/sc/sccommon/` (credits, demo), `decomp/src/gm/gmremix*menumusic*`,
+`port/remix/remix_toggles.*`, `port/gui/PortMenu.cpp`. The character select is in `docs/remix/css_reference.md`, the CSS panel in
+`docs/remix/panel.md`. Asm lines refer to `.toolchain/pkgs/smashremix-src/src/`.
 
-**Caveat on address matching.** Remix hooks are RAM addresses inside overlays, and the same RAM range is reused by different overlays at different times. The decomp `// 0x` comments are per overlay. Many matches below are therefore wrong overlay, for example `0x80133E78` (VS game-mode button code) resolves to a staff-roll function. Rows are marked **ok** when the decomp function matches the screen the hook belongs to, and **collision** otherwise. Treat collisions as unresolved until checked against the overlay table.
+Tests: `tests/remix/` (`test_gallery_rules.c`, `test_vsstats_rules.c`, `test_gameend_rows_rules.c`, `test_group_display_rules.c`,
+`test_stage_grid_rules.c`, `test_stage_select_rules.c`, `test_sprite_rules.c`, `test_sprite_bitmap_row.c`, ...), and the per-section recipes, which run
+with `SSB64_START_SCENE=<id>` through `.claude/skills/remix-smoke-tests/`.
 
----
-
-## 1. Character Select (CSS) expansion
-
-### 1.1 Grid and slots
-- Constants: `NUM_ROWS(3)`, `NUM_COLUMNS(10)`, `NUM_PORTRAITS = 30`, `BOOKEND_BONUS_PORTRAIT = 30`, `BOOKEND_RANDOM_PORTRAIT = 31` (`CharacterSelect.asm:3570-3574`). `START_X(29)`, `START_Y(34)`, `PORTRAIT_WIDTH(24)` px, `PORTRAIT_SCALE` 0.8125 (`:3575-3590`).
-- `NUM_SLOTS(30)` (`:3599`). `scope layout` defines 30 slots, 3 rows of 10 (`:3600-3635`):
-  - row 1: MARINA, DRM, LUIGI, MARIO, DONKEY, LINK, SAMUS, CAPTAIN, GND, SONIC
-  - row 2: DEDEDE, YLINK, NESS, YOSHI, KIRBY, FOX, PIKACHU, JIGGLYPUFF, FALCO, SHEIK
-  - row 3: GOEMON, CRASH, WARIO, PEACH, BOWSER, WOLF, CONKER, MTWO, MARTH, BANJO
-- Bonus bookend: `bonus_chars` (10 entries, `:23-35`, `NUM_BONUS_CHARS(10)`): DSAMUS, LUCAS, PEPPY, SLIPPY, ROY, DRL, LANKY, DRAGONKING, EBI, PIANO. Per-port scroll index per mode (`bonus_char_index_vs/1p/training/bonus`, `:44-61`).
-- Slide-in: `portrait_x_position` (10 columns + 2 bookends, `:~3890`), `portrait_velocity` (12 floats, `:~3905-3918`).
-- Layout tables built with `while` loops over `NUM_SLOTS`:
-  - `id_table` (portrait index -> `Character.id`), `:~3921-3927`
-  - `portrait_offset_table` (portrait index -> file offset of portrait texture), `:~3936-3942`
-  - `portrait_id_table` (`Character.id` -> portrait index, with `NMARIO`/`NDONKEY` special cases), `:~3995-4020`
-  - `name_texture_table`, `series_logo_offset_table`, `selection_action_table`, `white_circle_size_table`, `fgm_table` are indexed by `Character.id` and padded to `Character.NUM_CHARACTERS * 4` (`:2998, 3033, 3069, 3433, 3565`).
-- Character count: `Character.NUM_CHARACTERS = 27 + 2 + 68 = 97` (`Character.asm:15-27`). Only 30 + 10 bonus + random are on the grid. The rest load through `load_additional_characters_` and token placement.
-
-### 1.2 Cursor and token behaviour
-- Cursor/token position, not hand position, selects the character: `get_character_id_` (`:449-480`), one hook per mode (VS, Training, 1P, BTT/BTP). Reads char id from the per-mode CSS player struct (`CSS_PLAYER_STRUCT` 0x8013BA88, `_TRAINING` 0x80138558, `_1P` 0x80138EC0, `_BONUS` 0x80137620; `:16-19`).
-- Column and row from index: `index = row * NUM_COLUMNS + column` (`:547-554`), and `portrait_id % NUM_COLUMNS`, `/ NUM_COLUMNS` (`:710-791`), with 12CB using `TwelveCharBattle.NUM_COLUMNS` on its own page.
-- Token auto-position and boundaries: `token_autoposition_` (`:646-760`), `fix_right_boundary_check_`, `fix_bottom_boundary_check_` (`:947-980`). Extra y-range for the bottom panel menu at `:990`.
-- Scaled-token and variant overlap fixes at `:765-1080`.
-
-### 1.3 Random select
-- `get_random_char_id_` (`:1128-1140`): VS hook at ROM 0x136AD8 replaces the vanilla random call (`jal 0x80018A30 / a0=0xC`, commented out) with `get_random_char_id_`. Training and 1P/BTT have the same pattern (`:1138`).
-- Random pool: `NUM_SLOTS` plus bonus chars (`:1155-1165`), so Remix characters are eligible.
-- Anti-repeat: `recent_randoms_table` holds `RRL_NUM_SLOTS(6)` recent picks per port, 8 bytes per port with the write index at +7 (`:1320-1342`, `:1395`). `_recent_randoms_lookup` rerolls on a repeat. Skipped when the pick is for the placeholder '?' (`placeholder_port`, `:1328-1330`).
-- Random Select toggle (`Toggles.asm` `entry_variant_random`, string table `string_table_random_variants`, options: default / bonus / variants / vanilla) decides the pool.
-- Hooks: VS `0x80138858` maps to `mnPlayersVSRandFighterKind` (`mnplayersvs.c:3900`), **ok**. Training `0x80137AB0` and others are **collision**.
-
-### 1.4 Costumes
-- `NUM_COSTUMES` is declared per character in `costumes/*.asm` (for example Mario 5, Peach 7, Banjo 7, NMario 6, Pikachu 4+2, Jigglypuff 5+1). Mewtwo has `NUM_COSTUMES(6)` at `costumes/Mewtwo.asm:12`.
-- `get_default_costume_` hooks at `:1945-1985` (ROM 0x678F4, 0x6790C, 0x67920) patch the c-button and team costume lookups to read `Character.default_costume.table`.
-- `check_variant_input_` (`:2365-2390`): D-pad/Z input during the CSS selects variants.
-
-### 1.5 Mapping fighter id to slot, and load path
-- Slot -> `Character.id`: `id_table`. `Character.id` -> portrait index: `portrait_id_table`. Name texture: `name_texture_table[Character.id]`.
-- Extra character loading: `load_additional_characters_` (`:1985-2005`), `dynamically_load_character_` (`:2130`), heap slots `dynamic_css.heap_slot_0..` (`:4081-4290`).
-- Model load for CSS uses an alternate req list: `load_character_model_` (`:77-113`) and `alt_req_table` / `alt_malloc_table` (`:195-310`), with `.req` files in `src/Req/` (82 files, for example `NMARIO_MODEL.req`, `SAMUS_MODEL.req`).
-- VS character-select hook sites: `0x8013B1C0` -> `mnPlayersVSFuncStart` (`mnplayersvs.c:5439`), **ok**. `0x8013B1D8` same.
-
-### 1.6 CSS panel menu (per-port debug panel)
-- Gated by the "CSS Panel Menu" toggle (`Toggles.asm:2381`).
-- Items are defined in `src/css/*.asm` (each has `define LABEL("...")`), included through `CharacterSelectDebugMenu.asm:2657-2710`:
-  Initial Damage, Dpad ctrl, Dpad map, Handicap, Delay, Input HUD, Kirby Hat, Knockback, Model, Player Tag, Poison Dmg, Practice, Shield, Size, Skeleton, Start With, Stock, Taunt Btn., Taunt Itm., Visibility.
+Open gaps: `docs/remix/patch_audit.md`, groups g2 (menus, Character Data, results, player tag), g8 (results screen) and g9 (gallery,
+VS demo, credits, boot).
 
 ---
 
-## 2. Remix menu system (Menu.asm, Settings.asm, Toggles.asm, SRAM.asm)
+## 1. Settings menu and toggles
 
-### 2.1 Generic menu framework (`Menu.asm`)
-- Types (`Menu.asm:14-28`): TITLE, MAX1, BOOL, MAX3 ... MAX1023, INPUT (text entry), INT (size chosen on save).
-- `Menu.info` macro (`:37-60`): head pointer, ulx/uly, room, group, width, cursor/label/value colors, scale, row height, max rows per page (default 12), blur, dpad flag. Default macro uses `Render.FONTSIZE_DEFAULT`, row height 0x0E.
-- `Menu.entry` macro (`:66-110`): linked list node. Fields: 0x00 type, 0x04 current value, 0x08 min, 0x0C max, 0x10 a_function, 0x14 string table, 0x18 copy address, 0x1C next, 0x20 label object, 0x24 extra, 0x28 title text.
-- Drawing: `Menu.draw_` (`:530`) calls `draw_entry_` (`:327`), `Render.draw_string_` (`:377`, `:428`), `Render.draw_rectangle_` (`:676`, `:693`), `Render.apply_max_width_`. Cursor: `update_cursor_` (`:722`).
-- Input: `Menu.update_` (`:772`) uses `Joypad.check_stick_` and `Joypad.check_buttons_all_`, sounds via `FGM.play_`. Keyboard char input for INPUT entries (`:117-270`, `:951-1080`).
-- So the Remix menus **do not** reuse vanilla option drawing. They use their own generic menu, built on Render and Joypad. Vanilla is only reused for the VS/1P mode-select buttons (see section 3).
-- SRAM export/import: `Menu.export_` (`:1569`) and `Menu.import_` (`:1655`). Values are bit-packed into 32-bit words in declaration order. Titles are skipped. INPUT entries are handled separately. Words start at block+0x10.
+### 1.1 Remix
 
-### 2.2 Toggles: structure and storage (`Toggles.asm`)
-- Root "super menu" (`Menu.info(head_super_menu, 30, 50, 3, 0, 32, ...)`, `:986`), with groups (`:2367-2374`):
-  Remix Settings, Gameplay Settings, Music Settings, Stage Settings, Pokemon Settings, Player Tags, Other Screens, and "Load Profile" at the top.
-- Each toggle is one `Menu.entry`. Its value lives at `Toggles.<name> + 0x4`, read with the macro `Toggles.read(name, reg)` (`:3235-3237`).
-- Storage: one SRAM block per group, sized by `block_size` bit packing (`update_block_size`, `:1004-1014`): block_remix (`:2852`), block_gameplay (`:2854`), block_music (`:2856`), block_stages (`:2858`), block_pokemon (`:2860`), block_tags = `MAX_TAGS(20) * 20` bytes (`:2862`).
-- Save/load: `Toggles.save_` (`:846`) calls `Menu.export_` then `SRAM.save_` for each block. `Toggles.load_` (`:890`) is the reverse.
-- SRAM base and revision (`SRAM.asm`): `SRAM.ADDRESS = 0x05F0`, `REVISION = 0x00F7` (bump on any toggle, stage or MIDI change or order change). Save/load patched to use only the first 0x5EC bytes (`SRAM.asm:35-47`). Header check `check_saved_` (`:103`).
-- Profiles: `profile.CE(0)`, `TE(1)`, `NE(2)`, `JP(3)`, `CUSTOM(4)` (`Toggles.asm:1103-1108`). Names: Community, Tournament, Netplay, Japanese, Custom, plus a string "Semi-Competitive" (`:1112-1118`). Defaults for each toggle are per profile, written by `write_defaults_for(profile)` (`:1095`). `load_profile_` (`:3089`), `get_current_profile_` (`:3156`).
-- `normal_options` flag (`:166`) gates disabling the OPTION screen when custom toggles are active (`disable_options_functionality_`, `:88`).
+- **Menu framework** (`Menu.asm`): types TITLE, MAX1, BOOL, MAX3 .. MAX1023, INPUT (text entry) and INT. `Menu.info` (`:37-60`) holds the
+  head pointer, position, group, colours, row height and rows per page (12); `Menu.entry` (`:66-110`) is a linked node (0x00 type, 0x04
+  value, 0x08 min, 0x0C max, 0x10 function, 0x14 string table, 0x18 copy address, 0x1C next, 0x20 label, 0x24 extra, 0x28 title). It draws
+  with `Render` and `Joypad` helpers and does not reuse vanilla option drawing. `Menu.export_`/`import_` (`:1569`, `:1655`) bit-pack the values
+  into 32-bit words in declaration order (titles skipped, INPUT separate).
+- **Toggles** (`Toggles.asm`): a root menu with groups Remix Settings, Gameplay Settings, Music Settings, Stage Settings, Pokemon Settings,
+  Player Tags, Other Screens and "Load Profile". A toggle's value lives at `Toggles.<name> + 0x4`, read with `Toggles.read(name, reg)`.
+  One SRAM block per group (`block_remix`, `block_gameplay`, `block_music`, `block_stages`, `block_pokemon`, `block_tags` = 20 x 20 bytes);
+  `Toggles.save_`/`load_` call `Menu.export_`/`import_` and `SRAM.save_`/`load_`. `SRAM.ADDRESS` 0x05F0, `REVISION` 0x00F7; the vanilla
+  save/load is restricted to the first 0x5EC bytes (`SRAM.asm:35-58`).
+- **Profiles**: Community (CE 0), Tournament (TE 1), Netplay (NE 2), Japanese (JP 3), Custom (4). `write_defaults_for(profile)` writes the
+  per-profile defaults, `load_profile_` (`:3089`) applies one. `normal_options` gates disabling the OPTION screen while custom toggles are
+  active (`disable_options_functionality_`, `:88`).
+- **Settings.asm**: one live hook at ROM 0x40898 (RAM 0x800A1B48, `scManagerInit`) jumps to `set_vs_settings_`, which writes the Tournament VS
+  defaults to `Global.vs`: game_mode 3 (time and stock), time 8, stocks 3, team_attack 1, item_frequency 0. The asm comment says "should not
+  be called" but the patch is live.
+- **Mode Select** (`Toggles.asm:109-376`): a 5th "Settings" button (index 4) with the others rescaled (`rescale_mode_select_buttons_`);
+  `mode_select_screen_change_` (`:271`) opens the super menu, clears `singleplayer_mode_flag` and the input masks. Holding L on the CSS or
+  stage select opens the menu (`settings_shortcut`, `:3260`).
 
-### 2.3 Settings.asm
-- Only one hook: at ROM 0x40898 (RAM `0x800A1B48`, `Settings.asm:26`) it jumps to `set_vs_settings_`, which writes Tournament defaults into `Global.vs.*`: game_mode=3, time=8, stocks=3, team_attack=1, item_frequency=0 (`:9-13`, `:29-50`). The comment says "should not be called", but the patch is live. Verify before relying on it.
+### 1.2 Port
 
-### 2.4 Full toggle list
-Default values are listed as CE / TE / NE / JP (`OS.TRUE`=1). INT ranges are max values. Source line in `Toggles.asm`.
+- The settings menu is the ImGui menu, not a replica of `Menu.asm`: `PortMenu.cpp` `AddMenuRemix` builds Remix > profile buttons and one
+  widget per toggle (checkbox, combobox or integer slider), plus Player Panel, Player Tags, Modes (Smashketball type, Tag Team queue) and
+  Training pages. The OPTION screen stays vanilla; the 5th Mode Select button, the L shortcut and the Other Screens entries (Debug, View Intro,
+  How to Play, Credits, Gallery) do not exist in it.
+- `port/remix/remix_toggles.{h,cpp}`: the registry is built at start-up from the `Menu.entry` nodes of the Remix RAM image (value, range,
+  string table, title) and the four `Toggles.profile_defaults_*`. A value is the CVar `gRemix.Toggle.<index>`. Environment:
+  `SSB64_REMIX_PROFILE=<0..3>`, `SSB64_REMIX_TOGGLES="<title>=<value>;..."`. Match code reads a toggle with `gmRemixToggle(name)`
+  (`gm/gmremixtoggle.c`); `gmRemixToggleModeIsGuarded()` is true in the Bonus and 1P Game modes.
+- There is no SRAM image: the vanilla save goes through `port_save.cpp`/`lbBackup`, Remix toggles and panels through CVars.
+- `Settings.asm`: `scRemixTournamentApplyVSDefaults` (`decomp/src/sc/scremixtournament.c`) writes `game_rules` = time | stock, `time_limit` 8,
+  `stocks` 3, `is_team_attack` TRUE and `item_appearance_rate` = none into `gSCManagerTransferBattleState` (what `Global.vs` maps to),
+  called from `scManagerInit` right after the default copy (`scmanager.c`).
+- `timeouts.asm` (11 patches): each patch turns the `bne` of the 18000-frame idle counter (5 minutes) into `b`, so no screen returns to the
+  title by idling. Port: `mnremixtimeouts.{c,h}` (`MenuReturns`, `VSReturns`, `CSSReturns` over a core that returns FALSE under
+  `REGION_REMIX`) is used by `mnmodeselect.c`, `mn1pmode.c`, `mnoption.c`, `mndata.c`, `mnmaps.c`, `mnvsmode.c`, `mnvsoptions.c` and the four CSS.
+  The counters still count and re-arm on input; only the screen change is gone. In the VS CSS the `#ifdef PORT` Classic Co-op idle exit also
+  stops.
+- `Cheats.asm`: only the word at 0x42B3A is live; every other instruction in the file is commented out, so nothing is ported. The port keeps
+  its own `gCheats.UnlockAll` (`lb/lbbackup.c`).
 
-**Remix Settings** (`:2376-2412`, 32 entries)
+### 1.3 Toggle list
 
-| Toggle | Type (max) | CE | TE | NE | JP |
-|---|---|---|---|---|---|
-| Skip Results Screen | INT (2) | 0 | 0 | 1 | 0 |
-| Hold To Pause | bool | 0 | 1 | 1 | 0 |
-| CSS Panel Menu | bool | 1 | 0 | 1 | 1 |
-| Color Overlays | bool | 0 | 0 | 0 | 0 |
-| Cinematic Entry | INT (2) | 0 | 0 | 0 | 0 |
-| Flash On Z-Cancel | bool | 0 | 0 | 0 | 0 |
-| FPS Display *BETA | INT (2) | 0 | 0 | 0 | 0 |
-| Model Display | INT (2) | 0 | 0 | 1 | 0 |
-| Special Model Display | INT (3) | 0 | 0 | 0 | 0 |
-| Advanced Hurtbox Display | bool | 0 | 0 | 0 | 0 |
-| Hold To Exit Training | bool | 0 | 1 | 0 | 0 |
-| Improved Combo Meter | bool | 1 | 0 | 1 | 1 |
-| Tech Chase Combo Meter | bool | 1 | 0 | 1 | 1 |
-| Combo Meter | bool | 1 | 0 | 1 | 1 |
-| 1v1 Combo Meter Swap | bool | 0 | 0 | 0 | 0 |
-| Neutral Spawns | bool | 1 | 1 | 1 | 1 |
-| Salty Runback | INT (2) | 1 | 0 | 1 | 1 |
-| Widescreen | bool | 0 | 0 | 0 | 0 |
-| Stereo Fix for Hit SFX | bool | 1 | 1 | 1 | 1 |
-| Random Select | INT (3) | 0 | 0 | 0 | 0 |
-| Disable HUD | INT (2) | 0 | 0 | 0 | 0 |
-| Disable Anti-Aliasing | bool | 0 | 0 | 0 | 0 |
-| Always Show Full Results | bool | 1 | 1 | 1 | 1 |
-| Skip Start Cheer | INT (2) | 0 | 0 | 0 | 0 |
-| Default CPU LVL (V.S.) | INT (10) | 0 | 10 | 0 | 0 |
-| Jigglypuff Sing GFX Anims | bool | 0 | 0 | 0 | 0 |
-| 'L' Selects Random Character | bool | 0 | 0 | 0 | 0 |
-| Dpad CSS Cursor Control | bool | 0 | 0 | 0 | 0 |
-| PK Thunder Reflect Crash Fix | bool | 1 | 1 | 1 | 1 |
-| Flash Guard | bool | 0 | 0 | 0 | 0 |
-| Screenshake | INT (2) | 0 | 0 | 0 | 0 |
-| BlastZone GFX | INT (2) | 0 | 0 | 0 | 0 |
+Columns are the defaults CE / TE / NE / JP; INT entries show the maximum value.
 
-**Gameplay Settings** (`:2413-2453`, 31 entries)
+**Remix Settings** (`Toggles.asm:2376-2412`):
 
-| Toggle | Type (max) | CE | TE | NE | JP |
-|---|---|---|---|---|---|
-| Hitstun | INT (1) | 0 | 0 | 0 | 0 |
-| Hitlag | INT (4) | 0 | 0 | 0 | 1 |
-| DI | INT (2) | 0 | 0 | 0 | 1 |
-| Japanese Sounds | INT (2) | 0 | 0 | 0 | 1 |
-| Japanese Stun/Sleep | bool | 0 | 0 | 0 | 1 |
-| Momentum Slide | bool | 0 | 0 | 0 | 1 |
-| Shield Stun | INT (4) | 0 | 0 | 0 | 1 |
-| Z-Cancel | INT (4) | 0 | 0 | 0 | 0 |
-| Punish Failed Z-Cancel | INT (11) | 0 | 0 | 0 | 0 |
-| Improved AI | bool | 1 | 0 | 1 | 1 |
-| Tripping | INT (3) | 0 | 0 | 0 | 0 |
-| Rage | INT (4) | 0 | 0 | 0 | 0 |
-| Footstool Jumping | bool | 0 | 0 | 0 | 0 |
-| Air Dodging | INT (3) | 0 | 0 | 0 | 0 |
-| Jab Locking | bool | 0 | 0 | 0 | 0 |
-| Edge C-Jumping | bool | 0 | 0 | 0 | 0 |
-| Perfect Shielding | bool | 0 | 0 | 0 | 0 |
-| Parrying (BETA) | bool | 0 | 0 | 0 | 0 |
-| Spot Dodging | bool | 0 | 0 | 0 | 0 |
-| Fast Fall Aerials | bool | 0 | 0 | 0 | 0 |
-| Ledge Trumping | bool | 0 | 0 | 0 | 0 |
-| Wall Teching | bool | 0 | 0 | 0 | 0 |
-| Charge Smashes | INT (2) | 0 | 0 | 0 | 0 |
-| Item Containers | INT (3) | 0 | 0 | 0 | 0 |
-| Game Speed | INT (12) | 0 | 0 | 0 | 0 |
-| Special Zoom (BETA) | INT (2) | 0 | 0 | 0 | 0 |
-| BlastZone Warp (BETA) | INT (3) | 0 | 0 | 0 | 0 |
-| Single Button Mode | INT (6) | 0 | 0 | 0 | 0 |
-| All Items R Drop (Aerial) | bool | 0 | 0 | 0 | 0 |
-| Move Staling | INT (6) | 0 | 0 | 0 | 0 |
-| Stopwatch Item | INT (4) | 0 | 0 | 0 | 0 |
+| Toggle | CE/TE/NE/JP | Toggle | CE/TE/NE/JP |
+|---|---|---|---|
+| Skip Results Screen (INT 2) | 0/0/1/0 | Salty Runback (INT 2) | 1/0/1/1 |
+| Hold To Pause | 0/1/1/0 | Widescreen | 0/0/0/0 |
+| CSS Panel Menu | 1/0/1/1 | Stereo Fix for Hit SFX | 1/1/1/1 |
+| Color Overlays | 0/0/0/0 | Random Select (INT 3) | 0/0/0/0 |
+| Cinematic Entry (INT 2) | 0/0/0/0 | Disable HUD (INT 2) | 0/0/0/0 |
+| Flash On Z-Cancel | 0/0/0/0 | Disable Anti-Aliasing | 0/0/0/0 |
+| FPS Display (INT 2) | 0/0/0/0 | Always Show Full Results | 1/1/1/1 |
+| Model Display (INT 2) | 0/0/1/0 | Skip Start Cheer (INT 2) | 0/0/0/0 |
+| Special Model Display (INT 3) | 0/0/0/0 | Default CPU LVL (V.S.) (INT 10) | 0/10/0/0 |
+| Advanced Hurtbox Display | 0/0/0/0 | Jigglypuff Sing GFX Anims | 0/0/0/0 |
+| Hold To Exit Training | 0/1/0/0 | 'L' Selects Random Character | 0/0/0/0 |
+| Improved Combo Meter | 1/0/1/1 | Dpad CSS Cursor Control | 0/0/0/0 |
+| Tech Chase Combo Meter | 1/0/1/1 | PK Thunder Reflect Crash Fix | 1/1/1/1 |
+| Combo Meter | 1/0/1/1 | Flash Guard | 0/0/0/0 |
+| 1v1 Combo Meter Swap | 0/0/0/0 | Screenshake (INT 2) | 0/0/0/0 |
+| Neutral Spawns | 1/1/1/1 | BlastZone GFX (INT 2) | 0/0/0/0 |
 
-**Music Settings** (`:2454-2546`)
-- Play Music: 1/1/1/1. Random Music: 0/0/1/0. Salty Runback Preserves Song: 0/0/0/0. Menu Music INT (`menu_music.MAX_VALUE`): 0/0/1/0. Music Title at Match Start: 1/0/1/1. BGM Volume INT (10): 10 in all. SFX Volume INT (10): 10 in all.
-- Random Music Toggles (bools, default 1/1/1/1 for every track): Bonus, Congo Jungle, Credits, Data, Dream Land, Duel Zone, Final Destination, How To Play, Hyrule Castle, Meta Crystal, Mushroom Kingdom, Peach's Castle, Planet Zebes, Saffron City, Sector Z, Yoshi's Island (`:2468-2490`).
-- Custom MIDI tracks are generated from `MIDI.MIDI_*_TOGGLE`, sorted by `MIDI.MIDI_*_ORDER` (`:2495-2545`). Default 1 in all profiles.
-- "Load Profile" is an INT (0-3) with defaults 0/0/0/0 and calls `load_sub_profile_`.
+**Gameplay Settings** (`:2413-2453`): Hitstun (INT 1) 0/0/0/0; Hitlag (INT 4) 0/0/0/1; DI (INT 2) 0/0/0/1; Japanese Sounds (INT 2) 0/0/0/1;
+Japanese Stun/Sleep 0/0/0/1; Momentum Slide 0/0/0/1; Shield Stun (INT 4) 0/0/0/1; Z-Cancel (INT 4), Punish Failed Z-Cancel (INT 11), Tripping
+(INT 3), Rage (INT 4), Air Dodging (INT 3), Charge Smashes (INT 2), Item Containers (INT 3), Game Speed (INT 12), Special Zoom (INT 2),
+BlastZone Warp (INT 3), Single Button Mode (INT 6), Move Staling (INT 6), Stopwatch Item (INT 4) all 0 in every profile; Improved AI 1/0/1/1;
+Footstool Jumping, Jab Locking, Edge C-Jumping, Perfect Shielding, Parrying, Spot Dodging, Fast Fall Aerials, Ledge Trumping, Wall Teching,
+All Items R Drop (Aerial) all off in every profile.
 
-**Stage Settings** (`:2561-2615`)
-- Load Profile INT (2): 0/1/2/0.
-- Stage Select Layout INT (1): 0 normal / 1 tournament (`string_table_sss_layout`, `:1480-1481`). Defaults 0/1/0/0.
-- Hazard Mode INT (3): 0 in all. Whispy Mode INT (3): 0/0/0/JAPANESE. Saffron Pokemon Rate INT (3): 0.
-- Pokemon Announcer INT (2): POKEMON / OFF / POKEMON / OFF. Dragon King HUD INT (2): DEFAULT / OFF / DEFAULT / DEFAULT. Camera Mode INT (3): NORMAL in all. Yoshi's Island Cloud Anims bool: 0.
-- Random Stage Toggles (bools, CE/TE/NE/JP):
-  - Congo Jungle 1/0/1/1
-  - Dream Land 1/1/1/1
-  - Dream Land Beta 1 0/0/0/0
-  - Dream Land Beta 2 0/0/0/0
-  - Duel Zone 1/0/0/1
-  - Final Destination 1/0/0/1
-  - How to Play 0/0/0/0
-  - Hyrule Castle 1/0/1/1
-  - Meta Crystal 1/0/1/1
-  - Mushroom Kingdom 1/0/0/1
-  - Peach's Castle 1/0/1/1
-  - Planet Zebes 1/0/0/1
-  - Saffron City 1/0/1/1
-  - Sector Z 1/0/0/1
-  - Yoshi's Island 1/0/0/1
-  - Mini Yoshi's Island 1/0/1/1
-  - plus custom stages (`Stages.STAGE_*_TOGGLE`, `:2597-2612`)
+**Music Settings** (`:2454-2546`): Play Music 1/1/1/1; Random Music 0/0/1/0; Salty Runback Preserves Song 0; Menu Music (INT) 0/0/1/0; Music
+Title at Match Start 1/0/1/1; BGM Volume and SFX Volume (INT 10) 10; Random Music toggles (one per stage/menu track, 1 everywhere); one
+toggle and one order entry per custom MIDI (`MIDI.MIDI_*_TOGGLE`, `*_ORDER`), default 1. "Load Profile" (INT 0-3) calls `load_sub_profile_`.
 
-**Pokemon Settings** (`:2624-2643`)
-- Pokemon SFX INT (2): 0/0/0/1. Toggle All.
-- Onix, Snorlax, Goldeen, Meowth, Charizard, Beedrill, Blastoise, Chansey, Starmie, Hitmonlee, Koffing, Clefairy, Mew: bools 1/1/1/1. Psyduck, Shellder, Staryu are commented out (`:2639-2641`).
+**Stage Settings** (`:2561-2615`): Stage Select Layout (INT 1; `sss.NORMAL`/`TOURNAMENT`) 0/1/0/0; Hazard Mode (INT 3) 0; Whispy Mode (INT 3)
+0/0/0/Japanese; Saffron Pokemon Rate (INT 3) 0; Pokemon Announcer (INT 2) Pokemon/Off/Pokemon/Off; Dragon King HUD (INT 2) Default/Off/Default/
+Default; Camera Mode (INT 3) Normal; Yoshi's Island Cloud Anims 0; Random Stage toggles (bool, CE/TE/NE/JP): Congo Jungle 1/0/1/1, Dream Land
+1/1/1/1, Dream Land Beta 1 and 2 0, Duel Zone 1/0/0/1, Final Destination 1/0/0/1, How to Play 0, Hyrule Castle 1/0/1/1, Meta Crystal
+1/0/1/1, Mushroom Kingdom 1/0/0/1, Peach's Castle 1/0/1/1, Planet Zebes 1/0/0/1, Saffron City 1/0/1/1, Sector Z 1/0/0/1, Yoshi's Island
+1/0/0/1, Mini Yoshi's Island 1/0/1/1, plus one per custom stage (`Stages.STAGE_*_TOGGLE`).
 
-**Player Tags** (`:2650-2660`): 20 INPUT entries, `toggle_edit_mode_`.
-
-**Other Screens** (`:2665-2680`): Debug (view_screen_ 0x03), View Intro (0x1C), View How to Play (0x3C), View Credits (view_credits_ 0x38), View Gallery (`view_gallery`, `:2330`).
-
-### 2.5 Mode-select and VS-menu integration (Toggles hooks)
-- `add_mode_select_remix_button_` (`:109`) and `set_settings_button_display_` (`:202`) add a 5th "Settings" button (index 4) on the Mode Select screen. Hooks at ROM `0x11D942`, `0x11D962`, `0x11D866`, `0x11D984`, `0x11D89C` (RAM `0x801329B2`, `0x801329D2`, `0x801328D6`, `0x801329F4`, `0x8013290C`, `Toggles.asm:111-229`). Uses `sMNModeSelectOption` at RAM 0x80132C88 (`mnmodeselect.c:116`) to find the selected button.
-- `rescale_mode_select_buttons_` (`:221`) shrinks the buttons and text to fit.
-- `mode_select_screen_change_` (`:271`, hook ROM `0x11D668` / RAM `0x801326D8`, `:272`) opens the super menu (`show_super_menu_`), clears the single-player flag and shortcut state, and clears input masks so How to Play does not read as Title. The decomp symbol at that address is `mnTitleProcUpdate` (`mntitle.c:771`), which is a **collision**. The RAM variable use points to the mode-select overlay (`mnmodeselect.c`).
-- `settings_shortcut` (`:3260`): holding L on CSS or SSS opens the settings menu, with the return screen stored in `shortcut_stored_screens` (`:3260` area, `:~3240`).
-- Per-frame run: `run_` (`:563`) calls `Menu.update_` every frame and handles B/back to the super menu.
-
-### 2.6 Drawing routines reused from vanilla
-- Remix menus: own generic routines (section 2.1). Vanilla is reused only through `Render.*` helpers and the mode-select button code (section 3).
+**Pokemon Settings** (`:2624-2643`): Pokemon SFX (INT 2) 0/0/0/1, Toggle All, Onix, Snorlax, Goldeen, Meowth, Charizard, Beedrill, Blastoise,
+Chansey, Starmie, Hitmonlee, Koffing, Clefairy, Mew (1 everywhere; Psyduck, Shellder, Staryu are commented out). **Player Tags**
+(`:2650-2660`): 20 INPUT entries. **Other Screens** (`:2665-2680`): Debug (0x03), View Intro (0x1C), View How to Play (0x3C), View Credits
+(0x38), View Gallery (`view_gallery`, `:2330`).
 
 ---
 
-## 3. New screens, modes and vanilla hooks
+## 2. Scene ids (`Global.asm:58-122`)
 
-### 3.1 Scene (screen) IDs (`Global.asm:58-122`)
-- Vanilla used: MODE_SELECT 0x07, VS_GAME_MODE_MENU 0x09, VS_OPTIONS 0x0A, VS_CSS 0x10, _1P_CSS 0x11, STAGE_SELECT 0x15, DATA_VS_RECORD 0x19, DATA_CHARACTERS 0x1A, OPTION 0x39, DATA_MENU 0x3A, DATA_SOUND_TEST 0x3B, HOW_TO_PLAY 0x3C, CONGRATULATIONS 0x37, STAFF_ROLL 0x38.
-- **Remix-added**: `REMIX_MODES(0x77)` (`Global.asm:122`): "Remix Modes (other than Remix 1P): All-star, Multiman, HRC". Used by the VS page-2 button (`VsRemixMenu.asm` `remix_menu_button_table`, `db 0x09` screen; page flag `page_flag`).
-- The **Gallery** does not have its own ID. It reuses CONGRATULATIONS (0x37): `Gallery.asm:1265-1280` forces that ID while the gallery is active, and `:1448`, `:1475` do the same. Gallery state: `status` struct (`Gallery.asm:19-35`), entry from the Other Screens menu.
-- Character Data (`CharacterDataScreen.asm`) keeps 0x1A but now handles all 97 characters: `character_id_to_data_screen_id_table`, `extend_*` tables (`:380-660`), `allow_infinite_characters_` (`:662`), `extend_index_` (`:982`).
-
-### 3.2 VS Game Mode menu: 5 + 4 buttons (`VsRemixMenu.asm`)
-- `mode` constants (`:12-19`): DEFAULT 0, TWELVE_CB 1, TAG_TEAM 2, KOTH 3, SMASHKETBALL 4, TUG_OF_WAR 5.
-- Globals saved before CSS (`:28-60`): game mode, time, stocks, teams, stage select, stage, stockmode table, stock count table.
-- `menu_button_table` (page 1, `:~88-96`): VS Start, Rule, Time Stock, VS Options, Remix Modes (db 0x09). `PAGE_1_MAX(4)`.
-- `remix_menu_button_table` (page 2): 12CB, Tag Team, King of the Hill, Smashketball, Tug of War. `PAGE_2_MAX(4)`.
-- Button table row format is documented in the comment at `:~85-90` (0x10 bytes: create routine, screen, vs_mode_flag, page_flag, 12cb flag, text X/Y floats, text texture offset).
-- `add_button_` (`:102-150`): patches the cursor wrap limits from 3 to 4 (`:104-120`), and adds a 5th pointer to `GObj** buttons[]` on the stack.
-- Button creation rewritten generically: `create_menu_button_` (`:159`), `create_button_generic_` (`:196`), replacing vanilla `0x80132154..0x80132238` and `0x80132EBC..0x80132FD8` (`:~147`, `:193`).
-- Vanilla hook matches: `0x80132154` -> `mnVSModeMakeVSStartButton` (`mnvsmode.c:318`), **ok**. `0x80132EBC` -> `mnVSModeMakeVSOptionsButton` (`mnvsmode.c:736`), **ok**.
-- Other VS-menu hooks (`:104-1047`, about 32 in total) have mixed matches. For example `0x80133E78` (`add_button_`) and `0x80133FE0` map to unrelated staff-roll functions (**collision**). Hooks such as `0x80136338` (`ftComputerCheckFindItem`) are also collisions. Only the rows marked above are verified.
-- Page 2 exit: `page_2_exit` (`:304`) returns to page 1 from Remix Modes (sets `page_flag`, returns to the VS menu, exits the function early at `0x801345B4`).
-- `save_global_settings_` (`:388`) stores current VS settings before CSS.
-- `control_match_start_` (`:684`), `check_match_end_` (`:721`), `set_cursor_index_` (`:809`), `change_time_options` (`:861`), `get/prev_value` (`:872-968`), `disable_mode_toggle_` (`:968`), `update_announcer_on_toggle_` (`:991`), `add_row_to_results_` (`:1007`).
-
-### 3.3 1P mode menu (`SinglePlayerMenus.asm`)
-- Rewritten generic button creation: `create_menu_button_` (`:103`), `render_menu_buttons_` (`:211`), `fix_cursor_wrap_` (`:251`), `set_cursor_index_` (`:290`), `page_2_exit` (`:341`), `fix_a_and_b_button_crashes_` (`:443`, hooks `0x11EB70`, `0x11ED7C`, which the fix reconnects to an exit). 34 hooks, several to vanilla mn1pmode (`mn1PModeMake1PGame` 0x80131E34, `mn1PModeInitVars` 0x80132910, match **ok**).
-- Stock/KO and time displays: `_ko_amount_or_feet` (`:460`), `load_bonus3_time` (`:508`), `total_kos_or_feet_` (`:571`), `draw_hrc_high_score_decimal_` (`:681`), HRC/Remix headers `header_graphic_remix_1p` (`:807`).
-
-### 3.4 VS stats (`VsStats.asm`)
-- Enables match stats on the results screen. Toggle gate `check_menu_toggle_` (`:675`). Stat tracking: `calculate_tracker_percentage_` (`:168`), `increment_special_tracker` (`:210`). Drawing: `draw_port_headers_` (`:542`), `draw_underline_` (`:288`), `draw_line_` (`:354`). Setup `setup_` (`:917`), per-frame `run_collect_` (`:1071`). Hooks on special-move interrupt routines (`ftCommonSpecial*CheckInterruptCommon`, `:216-246`) count moves, **ok** by name (decomp `ft/ftcommon/...`).
-
-### 3.5 Credits (`Credits.asm`)
-- Extended title, name, company and detail tables (`use_extended_*`, `:864-1160`). Added characters credited via `use_added_characters_` (`:1164`). Speed assist: `remix_credits_speed_assist_` (`:1310`). Credits screen entry: `view_credits_` (`Toggles.asm:2142`). Vanilla credit tables: `0x80136B10` (title info), `0x8013685C` (title strings), `:899, :928`.
-
-### 3.6 Transitions (`Transitions.asm`)
-- Restores unused VS-to-results transitions. Shrinks the original transition table to halfwords and moves pointers and strings to expansion RAM. Hooks in `lbTransitionMakeTransition` (decomp `lb/lbtransition.c:244`, RAM 0x800D4320..0x800D43AC, `:83-107`) and `lbTransitionSetupTransition` (`lbtransition.c:275`, `:65-77`), **ok**.
-
-### 3.7 Japan (`Japan.asm`)
-- Gameplay only (JP profile): hitlag, guard, brake, Fura Fura, motion events, items, weapons (`:30-532`). No menu screens. Settings sources are in Toggles (JP profile values above).
-
-### 3.8 Stage select (`Stages.asm`, 68 hooks)
-- Grid: `NUM_ROWS(3)`, `NUM_COLUMNS(6)`, `NUM_ICONS = 18`, `NUM_PAGES(5)` (`:542-545`), so 90 icons across 5 pages. `MAX_STAGE_ID(0xD7)` (`:243`).
-- Routines: `update_stage_icons_` (`:1275`), `get_index_` (`:1384`), `check_valid_page_` (`:1410`), `get_stage_id_` (`:1448`), `update_text_` (`:1546`), `update_cursor_color_` (`:1811`), directional handlers `right_`/`left_`/`up_`/`down_` (`:2152-2299`), `random_stage_roulette` (`:2349`, activated by C-Down on RANDOM), `add_stage_to_random_list_` (`:2567`).
-- Layout: `sss.NORMAL` / `sss.TOURNAMENT` (Toggles `:1483-1485`).
-- Screen patches (`:970-1010`, ported in `mnmaps.c` on 2026-11-04): "Stage Select" image y 122 to 128 (0x80132310), no yellow
-  name plate (0x80132354), blue bar y 134.5..140.5 (0x801321C4; the port fills 134..140), no plate shadow (0x801321D4), no
-  vanilla name sprite (0x80132738). The name is a string at (230, 209), centered, `FONTSIZE_DEFAULT`, blank over RANDOM
-  (`:2851`, `update_text_`), drawn by `mnremixstagepanel.c` in text slot 125.
-- Hooks for these are in the stage-select overlay. Most are **unverified** (the address match is outside the decomp's stage-select file).
-
-### 3.9 Random (`Random/Random.asm`)
-- Move-data only (Sheik-related actions and moveset includes, `:5-64`). It is not menu code.
-
-### 3.10 Boot and Settings
-- `Boot.asm` (10 hooks): intro and screen adjustments, some **collisions**.
-- `Settings.asm` patch: see section 2.3.
+Vanilla ids in use: MODE_SELECT 0x07, VS_GAME_MODE_MENU 0x09, VS_OPTIONS 0x0A, VS_CSS 0x10, _1P_CSS 0x11, STAGE_SELECT 0x15, DATA_VS_RECORD 0x19,
+DATA_CHARACTERS 0x1A, CONGRATULATIONS 0x37, STAFF_ROLL 0x38, OPTION 0x39, DATA_MENU 0x3A, DATA_SOUND_TEST 0x3B, HOW_TO_PLAY 0x3C. The
+Remix adds `REMIX_MODES` (0x77) for the non-1P Remix modes (All-Star, Multi-Man, HRC). The Gallery has no id of its own: while it is active
+it forces CONGRATULATIONS (`Gallery.asm:1265-1280, 1448, 1475`). The Character Data screen keeps 0x1A. Scene ids of the port are the `SCKind`
+enum of `decomp/src/sc/scdef.h` (for example 16 VS CSS, 18 Training CSS, 22 VS battle, 26 Character Data, 52 1P game, 56 staff roll,
+59 sound test, 61 auto-demo).
 
 ---
 
-## 4. Title screen
+## 3. VS Game Mode menu (`VsRemixMenu.asm`)
 
-- Remix does not add a separate title screen. The Title/mode-select flow is changed in these places:
-  1. Mode Select gets a 5th button (Settings) and shrinks the others (`Toggles.asm:109-270`).
-  2. `mode_select_screen_change_` opens the Settings super menu, clears the single-player flag, and clears the input masks (`:271-340`).
-  3. Holding L on CSS or SSS opens Settings (`settings_shortcut`, `:3260`).
-  4. Credits and SinglePlayerMenus hook `mnTitleFuncUpdate` (`Credits.asm:1171`, `0x80134098`), `mnTitleShowFire` (`Gallery.asm:1486`, `SinglePlayerMenus.asm:444`), `mnTitleLogoFireProcDisplay` (`SinglePlayerMenus.asm:578`), `mnTitleMakeActors` (`SinglePlayerMenus.asm:687`). Decomp `mntitle.c` names match these, but the overlay-collision caveat applies.
-- The Remix "Remix Modes" entry sits on VS page 2 (section 3.2), and on the 1P menu through `SinglePlayerMenus`.
+Remix: the VS menu has two pages. `menu_button_table` (page 1): VS Start, Rule, Time/Stock, VS Options, Remix Modes (db 0x09).
+`remix_menu_button_table` (page 2): 12-Character Battle, Tag Team, King of the Hill, Smashketball, Tug of War. `mode` constants:
+DEFAULT 0, TWELVE_CB 1, TAG_TEAM 2, KOTH 3, SMASHKETBALL 4, TUG_OF_WAR 5 (`:12-19`). A button row (`:~85-90`, 0x10 bytes) holds the create
+routine, screen, `vs_mode_flag`, `page_flag`, 12CB flag, text X/Y floats and text texture offset. `add_button_` (`:102-150`) patches
+the cursor wrap from 3 to 4 and a 5th pointer into `buttons[]`; button creation is rewritten generically (`create_menu_button_` :159,
+`create_button_generic_` :196). `page_2_exit` (`:304`) returns to page 1. The settings of the VS menu are saved before the CSS
+(`save_global_settings_` :388) and `set_cursor_index_` (`:810-848`) restores page 2 and the cursor on the played mode after the CSS.
+The rest of the file hooks the CSS and the match (`mode_specific_setup_`, `control_match_start_`, `check_match_end_`,
+`change_time_options`, `disable_mode_toggle_`, `update_announcer_on_toggle_`, `add_row_to_results_`).
 
----
+Port: `mn/mnvsmode/mnremixvsmode.{c,h}` owns `gMNVSModeRemixMode` and the row table (box and text position, text offset in the MNVSMode
+file; rows 0..4 are the page 2 modes, row 5 the page 1 "Remix Modes" button). `mnvsmode.c` adds the page state (`sMNVSModePage`,
+`sMNVSModeRemixButtonGObjs[5]`) and the helpers `mnVSModeMakePage1Buttons`, `mnVSModeMakeRemixButtons`, `mnVSModeSetPage`,
+`mnVSModeSelectRemixMode`: up/down wrap over 0..4 on both pages; A on "Remix Modes" switches to page 2 in place (the scene is not reloaded);
+B on page 2 returns to page 1 with the cursor on "Remix Modes"; A or START on a page 2 button stores the mode and leaves for the VS CSS
+exactly as VS Start (`mnVSModeSaveSettings()`, `scene_curr = nSCKindPlayersVS`). The text of the new buttons is a `Sprite` of the MNVSMode
+file read like the vanilla texts. Mode rules are in `gm/gmremixmodecss.c` (`gmRemixModeBeforeCSS` / `LeaveCSS` / `StartMatch`).
 
-## 5. Feasibility: data tables vs new C logic
+The mode flags the asm sets (`twelve_cb_flag`, `vs_mode_flag`) are replaced by `gm/gmremixmode.c` state. Open gap MN-14
+(`patch_audit.md`): the port reopens the menu on page 1 with VS Start, the asm on page 2 with the cursor on the mode played.
 
-**Can be data tables (port as constants or generated tables):**
-- Toggle defaults per profile, option ranges, string tables, titles, group membership (section 2.4). Remix has an `entry` macro, so the port can mirror it as a static table of `{title, type, defaults[4], min, max, next}`.
-- CSS slot layout (`layout.slot_1..30`), bonus character list, `portrait_id` and name texture tables, velocity and x-position tables.
-- VS menu button table (5 + 4 entries: position, screen, mode flag, page flag, text texture).
-- Stage grid constants (3 x 6, 5 pages) and stage toggle defaults.
-- Costume counts per character (`NUM_COSTUMES`).
-- SRAM block sizes (computed from entry count and max, as in `update_block_size`).
-
-**Needs new C logic (or fits into existing decomp C with changes):**
-- Generic menu framework (`Menu.info`/`Menu.entry`, draw, input, export/import bit packing). This is a sizeable module. The port's existing mn code uses different menu structs, so this would need a thin layer.
-- Toggle persistence: packing values into SRAM blocks with revision checks. Port likely needs its own save file layer; the bit-packing order must match the Remix revision if save compatibility matters.
-- CSS: the 30-slot grid with 10 bonus, random bookend, and the extra character loader (`load_additional_characters_`, heap slots). Token auto-positioning and boundary checks need changes in `mnplayersvs.c` (`mnPlayersVSPuckAdjustPortraitEdge` at 4269, `mnPlayersVSGetPortrait` at 377, `mnPlayersVSMakePortrait` at 468, `mnPlayersVSRandFighterKind` at 3900).
-- Random anti-repeat window (6 per port) and placeholder handling.
-- VS page 2 (Remix Modes) and the 5th mode-select button: needs changes to `mnvsmode.c` (button creation at 318 and 736, page logic) and `mnmodeselect.c` (option count and selection).
-- Gallery as a new state machine hosted on the Congratulations screen, plus the Data screen extension to all characters.
-- VS stats tracker (per-special counters, results drawing).
-- Credits extension (added titles and names).
-- Transitions table restoration.
-
-**Decomp functions to hook or replace in the port (best candidates, by the verified matches):**
-- `mnPlayersVSRandFighterKind` (`decomp/src/mn/mnplayers/mnplayersvs.c:3900`)
-- `mnPlayersVSGetPortrait` / `mnPlayersVSMakePortrait` (`mnplayersvs.c:377`, `:468`)
-- `mnVSModeMakeVSStartButton` / `mnVSModeMakeVSOptionsButton` (`decomp/src/mn/mnvsmode/mnvsmode.c:318`, `:736`)
-- `mnPlayersVSFuncStart` (`mnplayersvs.c:5439`, CSS load)
-- `lbTransitionMakeTransition` / `lbTransitionSetupTransition` (`decomp/src/lb/lbtransition.c:244`, `:275`)
-- `mnTitleProcUpdate` (`decomp/src/mn/mncommon/mntitle.c:771`), but confirm the overlay before using it for mode select. The mode-select state is in `decomp/src/mn/mncommon/mnmodeselect.c`.
-
-**Not verified:** Training and 1P CSS hook addresses, stage-select hooks, most VS-menu hooks, and the CSS panel `set_panel_display_` path. These need an overlay table (ROM offset -> overlay -> RAM) to resolve.
+Test: `SSB64_START_SCENE=9`, input `100 108 0 - 0 -80` (four downs from VS Start reach Remix Modes), A at 220 opens page 2, four more downs
+reach Tug of War, A at 380 leaves for the CSS; `gMNVSModeRemixMode` equals 1 + the button index.
 
 ---
 
-## Quick index of key files
-- `src/CharacterSelect.asm`: CSS grid, slots, random, costumes, hooks (about 7200 lines)
-- `src/css/*.asm`, `src/CharacterSelectDebugMenu.asm`: CSS panel items
-- `src/Menu.asm`: generic menu framework, SRAM export/import
-- `src/Toggles.asm`: all toggles, profiles, mode-select settings button, SRAM blocks
-- `src/Settings.asm`: VS tournament defaults hook
-- `src/SRAM.asm`: SRAM layout and revision
-- `src/VsRemixMenu.asm`: VS Game Mode buttons, Remix Modes page
-- `src/SinglePlayerMenus.asm`: 1P menu rewrite
-- `src/Stages.asm`: stage select grid, random roulette
-- `src/Gallery.asm`, `src/CharacterDataScreen.asm`, `src/VsStats.asm`, `src/Credits.asm`, `src/Transitions.asm`, `src/Japan.asm`, `src/Random/Random.asm`, `src/Boot.asm`
-- `src/Global.asm:58-122`: screen IDs
+## 4. 1P mode menu (`SinglePlayerMenus.asm`)
 
-## VS item switch extension (ported 2026-10-14)
+Remix: generic button creation (`create_menu_button_` :103, `render_menu_buttons_` :211, `fix_cursor_wrap_` :251, `set_cursor_index_`
+:290, `page_2_exit` :341), `fix_a_and_b_button_crashes_` (:443), 34 hooks, stock/KO and time displays (`_ko_amount_or_feet` :460,
+`load_bonus3_time` :508, `total_kos_or_feet_` :571, `draw_hrc_high_score_decimal_` :681), and the HRC/Remix headers
+(`header_graphic_remix_1p` :807). Port: `mn/mn1pmode/mnremix1pmode.{c,h}` (menu button tables and pages, called from `mn1pmode.c`); the
+mode logic is in `decomp/src/sc/sc1pmode/`.
 
-Port of `Item.asm extend_item_switch_bitmask_` + `item_switch_cursor_` on the vanilla
-VS Options Item Switch screen (`decomp/src/mn/mnvsmode/mnvsitemswitch.c`, scene 0x0B):
+---
 
-- **Pagination (R)**: page 0 = vanilla 15 rows; page 1 = the 13 Remix standard items.
-  Page flip ejects/rebuilds the grid (vanilla) or the custom strip GObj, clamps the
-  cursor to the page's row count and refreshes the toggle sprites.
-- **Toggle all (L)**: flips the page's first toggle and writes it to every row of the
-  page (15 vanilla / 13 custom), as `handle_r_l_._toggle_items_on_off`.
-- **Custom item storage**: rows 1-13 of page 1 read/write `item_toggles` bits
-  `nITKindCommonEnd+1+n` for n<12 and `gITRemixExtendedToggles` bit n-12 for n==12
-  (`GetItemSettings`/`SetItemSettings`). Any custom on forces the container/rate
-  bits exactly like the vanilla all-on rule. L/R physical buttons freed by trimming
-  L_TRIG/R_TRIG from the two input masks.
-- **Icon strip**: offset 0xBD70 of the decompressed Remix MNVSItemSwitch file is a
-  complete 68-byte `Sprite` (112x165, 3 bitmaps), drawn with the same
-  `lbCommonMakeSObjForGObj` path and position as the vanilla grid. The strip is
-  remix-variant only (us/jp o2r lack it).
-- **Lifecycle**: `itRemixSaveExtendedToggles` (menu exit) / `itRemixRestoreExtendedToggles`
-  (CSS entry, Render.asm `_css`); extended mask zeroed with `item_toggles` in the comp
-  ruleset no-items override, training mode, and reset to default by `lbBackupCorrectErrors`.
-  Vanilla 1P needs no code: gkind rows 0x13..0x1C are zero in the Remix rate table.
-- **Netplay**: `gITRemixExtendedToggles` is serialized next to `item_toggles`
-  (peer exchange + replay metadata + settings hash); replays recorded before the
-  field are rejected by the metadata-size gate.
+## 5. Stage select (`Stages.asm`)
 
-Verified headless: page flip, L toggle-all (ON→OFF and sprite refresh), return to
-page 0, no rendering anomalies. Known cosmetic gap: subtitle on page 1 still shows
-vanilla row names (faithful — Remix does not patch the subtitle either).
+Remix: grid `NUM_ROWS` 3 x `NUM_COLUMNS` 6, `NUM_ICONS` 18, `NUM_PAGES` 5 (90 icons), `MAX_STAGE_ID` 0xD7 (`:243, 542-545`). Routines:
+`update_stage_icons_`, `get_index_`, `check_valid_page_`, `get_stage_id_`, `update_text_`, `update_cursor_color_`, directional handlers
+(`:2152-2299`), `random_stage_roulette` (C-Down on RANDOM), `add_stage_to_random_list_`. Layouts `sss.NORMAL` and `sss.TOURNAMENT` (the
+latter a 3-page grid that turns variants and the L hazard toggle off and forces Hazard Mode to the hovered stage's value). Screen patches
+(`:970-1010`): "Stage Select" image y 122 to 128 (0x80132310), no yellow name plate (0x80132354), blue bar y 134.5..140.5 (0x801321C4), no
+plate shadow (0x801321D4), no vanilla name sprite (0x80132738); the name is a string at (230, 209), centred, blank over RANDOM
+(`update_text_`, `:2851`). Four lines under the preview ("Hazards (L):", "Movement (L):", "Layout (C-down):", "Roulette (C-down)") and a page
+strip (arrow, Z, "Page N", R, arrow) are drawn in `setup_` (`:2845-2856`).
 
-**Legend (M11 Fase 4, 2026-11-04)**: `item_switch_setup_` (`Item.asm:955-975`) also draws the pagination
-legend, ported in `mn/mnvsmode/mnremixitemswitchlegend.*`: the R button (file 0xC5, offset 0x0CF8, 272.0/38.25), the orange
-arrow (main menu images file 0x00, offset 0xDD90, 288.0/41.0, new sprite `IFREMIX_SPRITE_MENU_ARROW`), the L button
-(0x18C8, 202.0/38.25) and the text ": All On/Off" (214.0/39.5, colour 0xC0C0C0FF, scale 0.63, `remix_hud_text` slot 4).
-Sprites use the decal camera (dl link 4), the text is the overlay. Visible on both pages (the asm never hides it).
+Port (`decomp/src/mn/mnmaps/`): `mnremixstagegridrules.c` (pure grid), `mnremixstagepages.c` (pages read from the image tables
+`stage_table`, `stage_table_pages`, `stage_table_normal`, `stage_table_tournament`), `mnremixstagepager.c` (page strip), `mnremixstagepanel.c`
+(name and the four lines, text slot 125; the blue bar fills 134..140), `mnremixstagerandom.c` (+ generated `mnremixstagerandomtable.inc`) and
+`mnremixstageroulette.c`, `mnremixstagetournament.c`, `mnremixstagevariant.c` (C-down variant cycle over `Stages.variant_table`),
+`mnremixemblem.c` (series emblem on the wooden coin). Test: `SSB64_MAPS_START_GKIND=<gkind>` with `css.sh` and
+`stage_select_sweep.sh`; page 3 with `inputs/css_page3_stage.txt`.
 
-## Remix screens (M11 Fase 4, T8.2 "telas", 2026-11-04)
+---
 
-- **Title version** (`Boot.asm:155-169`): "Smash Remix v2.0.1", centred at 160.0/218.0, colour 0x888800FF, scale 0.9375
-  (`mn/mncommon/mnremixtitleversion.*`, `remix_hud_text` slot 3, put every frame by `mnTitleFuncRun`).
-- **Credits glyphs** (`Credits.asm:260-288`, `convert_string`): ids 0x50-0x61 (digits 0-9 as `ch + 0x20` except '4' which keeps the vanilla
-  0x37, then `_ ! - / * ( ) @ ~`) are now drawn. The textures are not in `File.REMIX_CREDITS` (0xDF1): they are appended to the
-  vanilla credits file 0xC3 (`SCStaffroll`, 0x89C8 bytes in the o2r, a 0x58 byte header before the asm offsets), so the
-  sprite table of `scstaffroll.c` gets the 18 `add_new_character` rows (width, height, offset) at indices 0x50-0x61 and the
-  display list table grows to 0x62 entries (ids 0x38-0x4F stay empty and are skipped). `tools/gen_remix_credits.py` now encodes
-  those characters and the staff table was regenerated (109 values changed, 18 distinct ids); the old note
-  `notes/f14_credits_left.md` looked at the wrong file.
-- **Credits speed assist** (`Credits.asm:1310-1349`, patch 0x801335C4, replaces the Start test of `scStaffrollFuncRun`): ported
-  (`scStaffrollIsStartPressed` in `scstaffroll.c`, rules in `sc/sc1pmode/sc1premixenemyafk*`). It simulates Start when the custom
-  player tag number 2 (`string_table + 8`; panel value 2, not the tag of port 2) is named exactly "afk" (word 0x61666B00, lines
-  1318-1321), `sSCStaffrollNameID` is 0x55 and the roll speed differs from the normal one; Start then returns the roll to the
-  normal speed, so it applies once. Turn it on with `SSB64_REMIX_TAG_NAMES="2=afk"`. The Start acceleration of 0.11
-  (`Credits.asm:20-23`) is ported too.
-- **Gallery** (`Gallery.asm:445-487`, `SinglePlayer.asm:2293-2378`): all 40 pages. `mn/mncommon/mnremixgalleryrules.*` holds the
-  `id_table` (Character.id per page; the port fkind is the same value, `REMIX_ID_TO_PORT_FKIND`) and the
-  `custom_victory_file_table` plus every `set_ending_image` call (Lanky's last call wins). `mncongra.c` uses it for every
-  Character.id from 12 (Boss, polygon fighters and Remix fighters), where it used to read the empty registry field
-  `remix_1p_ending_image_file_id` (that also fixes the Remix 1P ending, which would have aborted). Still open: the Data
-  menu button, music per picture (A), idle mode, drum kit and the fades (`notes/f10_menu_gallery.md`).
-- **RANDOM ALL** (Menu Music 21, `BGM.asm:635-668`): picks a track of the Random Music list ignoring the Random Music toggle
-  (`grRemixRandomMusicPickForced`), or one of four hidden GameBoy songs (BGM 0xA2-0xA5) when the list is empty. The list is the
-  16 stage and menu tracks; the custom MIDI entries have assembly-time ids and are not listed yet.
-- **Scene transition logos** (`Transitions.asm`): already in `lb/lbtransition.c` (Falling Shapes, Flip, Smash Logo file 0x1262, Remix
-  Logo file 0x1366; 15 transitions, the VS results screen picks `ARRAY_COUNT(dLBTransitionDescs)`). Test hook added:
-  `SSB64_TRANSITION_ID=<0-14>` forces the transition (13 Smash Logo, 14 Remix Logo).
+## 6. VS item switch extension (`Item.asm`)
+
+Remix: `extend_item_switch_bitmask_` and `item_switch_cursor_` on the vanilla Item Switch screen (scene 0x0B) add a second page with the 13
+Remix standard items (R flips the page, L toggles all items of the page); `item_switch_setup_` (`:955-975`) draws the legend. Port
+(`mn/mnvsmode/mnvsitemswitch.c`, `mnremixitemswitchlegend.c`):
+
+- Page 0 is the vanilla 15 rows, page 1 the 13 Remix items. A page flip ejects/rebuilds the grid or the custom strip GObj, clamps the
+  cursor and refreshes the toggle sprites. L flips the page's first toggle and writes it to every row of the page. L_TRIG/R_TRIG are
+  removed from the two input masks.
+- Storage: rows 1-13 of page 1 read/write `item_toggles` bits `nITKindCommonEnd + 1 + n` for n < 12 and `gITRemixExtendedToggles` bit n - 12 for
+  n == 12 (`GetItemSettings`/`SetItemSettings`); any custom item on forces the container/rate bits like the vanilla all-on rule.
+  `itRemixSaveExtendedToggles` (menu exit) and `itRemixRestoreExtendedToggles` (CSS entry, `Render.asm _css`); the extended mask is zeroed
+  with `item_toggles` in the competitive no-items override and in Training and reset by `lbBackupCorrectErrors`. Netplay serialises it next
+  to `item_toggles`.
+- Icon strip: offset 0xBD70 of the decompressed Remix MNVSItemSwitch file is a complete 68-byte `Sprite` (112x165, 3 bitmaps) drawn with
+  the same `lbCommonMakeSObjForGObj` path and position as the vanilla grid. The strip exists only in the Remix variant of the files.
+- Legend: the R button (file 0xC5 offset 0x0CF8, at 272.0/38.25), the orange arrow (main menu images file 0x00 offset 0xDD90, 288.0/41.0,
+  `IFREMIX_SPRITE_MENU_ARROW`), the L button (0x18C8, 202.0/38.25) and ": All On/Off" (214.0/39.5, colour `0xC0C0C0FF`, scale 0.63,
+  `remix_hud_text` slot 4); the sprites use the decal camera (dl link 4), the text is the overlay. Visible on both pages.
+- The subtitle on page 1 shows the vanilla row names, as the Remix does not patch it.
+
+---
+
+## 7. VS results screen
+
+### 7.1 Match stats (`VsStats.asm`)
+
+Remix: after the results timer, "Press A for Match Stats" appears (`check_menu_toggle_` :675, `STATS_TIME_UNTIL_ACTIVE`); A shows page 1
+(damage, combos), R page 2 (Z-Cancel, Tech, Ledge, Special Move Stats), B goes back. No setting gates it. The trackers: `calculate_tracker_percentage_`
+(:168), `increment_special_tracker` (:210) at the special-move dispatches, Z-cancel (`ZCancel.asm`), wall tech (`WallTeching.asm`), passive tech and
+roll, ledge grabs (`LedgeTrump.asm track_ledge_grabs_`, 0x800DE688), highest percent (`run_collect_` :1071, `collect_stats_midmatch`); drawing
+`draw_port_headers_` (:542), `draw_underline_` (:288), `draw_line_` (:354), `setup_` (:917). `prevent_timed_row_flash_` (:875) hides the
+normal results rows (group 0x16) while the page shows.
+
+Port: `mn/mnvsmode/mnremixvsstats.{c,h}` (counters), `mnremixvsstatsrules.{c,h}` (pure), `mnremixvsstatspages.{c,h}` (layout: label left
+aligned at X 24, one right-aligned cell per active port at X 184 + 35 * column, scale 0.8125), `mnremixvsstatsview.{c,h}` (prompt at
+(160, 218), input from `gSYControllerDevices[i].button_tap` of any controller, 15-frame press buffer, FGM 163/164),
+`mnremixvsstatsscene.{c,h}` (camera, dimmed background alpha 0xB0 on dl link 36 and button sprites on 37, `ifRemixSprite`).
+Hooks: `ftcommonspecial{hi,n,lw}.c` and `ftcommonspecialair.c` (specials), `ftremixzcancel.c` (`ftRemixZCancelCountResult`),
+`ftremixwalltech.c`, `ftcommonpassive.c` and `ftcommonpassivestand.c` (tech success), `mpcommon.c` (ledge grab, in
+`mpCommonRunFighterSpecialCollisions`), `ftparam.c` `ftParamUpdateDamage` (highest percent, after the 999 clamp), three lines in
+`mnvsresults.c`, reset in `scVSBattleStartBattle`. Damage per port pair is read from `gSCManagerTransferBattleState.players[]`. The
+group 0x16 hide is `gmRemixGroupDisplaySet` (Render.asm `toggle_group_display_` over `gGCCommonLinks`).
+
+Deviations: cells are centred and spaced with 6-character padding rather than aligned at fixed X; stripe parity restarts on page 2; the
+special-move percent uses truncation, the others round to nearest even like `cvt.w.s`. The A, B and R buttons are extension sprites
+(`ifRemixSpriteMake` in `mnremixvsstatsscene.c`); a CPU tech miss is counted by `ftremixaiteching.c` (`AI.asm` `random_teching_`).
+Test: `inputs/stats_view.txt`; play a 2-4 player match with a CPU to the results, wait for the prompt (do not press START), A, R, B.
+
+### 7.2 Extra rows, full results, winner
+
+- **Always Show Full Results** (`TimedStock.asm show_full_results_`, 0x801376E4): `gmRemixGameEndResultsDrawKind` maps StockRoyal to
+  TimeRoyal and StockTeam to TimeTeam when the toggle is on; used in `mnVSResultsMakeLabel`.
+- **Mode rows** (`VsRemixMenu.asm add_row_to_results_`, :1007-1047): King of the Hill adds a "Times" row (`M:SS`, tens digit forced) and
+  Smashketball an "FGs" row (baskets capped at 999) at y 124 (96 on a no contest at tic 100); the place line drops to 140 and appears 20
+  tics later; teams use the FFA routine. Port: `gm/gmremixgameendrowsrules.c` (constants, pure) and `gmremixgameendrows.c` (`gmRemixKothGetScore` /
+  `gGMRemixSmashketball.scores`), drawn in `mnVSResultsMakeKOs` (`mnvsresults.c`) with `mnVSResultsMakeNumber`, label offsets 0xE648 and 0xE9E0.
+- **resultsscreen.asm**: `vs_record_fix_` skips fkinds >= 12 in the records (`mnvsresults.c`), `fix_port_index_` (`desc.player = player`),
+  winner BGM `get_victory_bgm_` -> `mnRemixResultsGetWinBGM` (`mnremixwinbgm.c`: reads `Character.winner_bgm.table`, each Remix address points
+  at `add_victory_bgm(bgm)`, whose last instruction loads the BGM id; a vanilla address means the parent's music), the spinning series emblem
+  (`winner_logo_fix_`), "WINS!" position (`get_str_wins_lx_`), the winner name (`get_str_winner_info_`), the "&" glyph (`add_ampersand_`),
+  announcer voice (`get_winner_fgm_`) and C-button victory animations (`victory_animations_`, CR 3, CL 2, CU/CD 1).
+- **Header and Game N**: the mode title image (file 0x12 offset 0x2048 for 12CB, and the table of `docs/remix/css_reference.md` section 2.6) in
+  `mnVSResultsMakeLabel` (`mnvsresults.c`), and "Game N" at (32, 46) for the 12CB (`gmremixtwelvecbhud.c`).
+- **Transitions** (`Transitions.asm`): the restored VS-to-results transitions shrink the table to halfwords; 15 entries (Falling Shapes with file
+  0x27 offsets 0x3BC0/0x3D78, Flip with file 0x2F offsets 0x0F98/0x101C, Smash Logo file 0x1262 offsets 0x3C80/0x4138, Remix Logo file 0x1366
+  offsets 0xAB60/0xAF40, plus the vanilla ones). Port: `lb/lbtransition.c` `dLBTransitionDescs`, count `LB_TRANSITION_DESC_COUNT` 15 under
+  `REGION_REMIX` (11 otherwise); `mnvsresults.c` picks `syUtilsRandIntRange(ARRAY_COUNT(dLBTransitionDescs))`. `SSB64_TRANSITION_ID=<0-14>`
+  forces one (13 Smash Logo, 14 Remix Logo).
+- **Team results** (`Teams.asm`): see `docs/remix/css_reference.md` section 4.6.
+
+---
+
+## 8. Character Data screen (0x1A)
+
+Remix (`CharacterDataScreen.asm`): `set_char_order` (`:938-980`) lists 30 fighters (Mario, Luigi, Peach, Bowser, Dr. Mario, DK, Wario, Link, Young
+Link, Sheik, Ganondorf, Samus, Yoshi, Kirby, Dedede, Fox, Falco, Wolf, Pikachu, Jigglypuff, Mewtwo, Captain, Ness, Marth, Goemon, Sonic, Crash,
+Marina, Banjo, Conker); the scroll maximum is `new_characters + 11 = 29` (`extend_index_`). `add_char_to_data_screen` stores for each of the 18 added
+fighters the biography, works and name offsets (a top-byte flag selects the Remix extended file; addends +0x30, +0x10, +0x10) and the name X/Y;
+the extended files are 0x10F5 (bios) and 0x10F6 (images). Also: `extend_series_logo_offsets` (emblem from
+`ResultsScreen.series_logo_offset_table[fkind]`), `special_attack_offsets` (USP/NSP/DSP name images in file 0x10F6, `:594-611`, offsets 770-835),
+`special_action_table_n` and `jab_action_pointers` (`:267-300`, `set_action` lines 838-936; five fighters reuse Fox/Falcon/Link/Mario/Yoshi
+tables), `extend_name_border_check` (`:635`, the tall name tag for Falcon, Dr. Mario, Ganondorf, Banjo and Young Link) and the animation end
+check `<= 0.1` instead of 0 (`:996`, a fix for the "frozen" demo sequence). The records screen (0x19) is unchanged: 12 vanilla fighters.
+
+Port: `mn/mndata/mnremixchardata.{c,h}` (30-entry order, the 18 extended entries with raw asm values and the decoder that adds the addends and
+masks the offset to 24 bits, page lookup) and branches in `mncharacters.c`: `MNCHARACTERS_FIRST/LAST_PAGE` 0..29, `dMNCharactersFileIDs`
+appends 0x10F5 and 0x10F6, `mnCharactersMakeRemixStory`/`Works`/`Name` read the sprites from the extended files, `mnCharactersMakeFighter`
+calls `ftManagerSetupFilesAllKind`. The emblem (`mnCharactersMakeEmblem`) creates the GObj without a model for extended fighters, and
+`mnCharactersGetMotion` uses the common motion descriptors; `mnCharactersUpdateMotionName` returns before the special-move name sprite for
+them. Test: `SSB64_START_SCENE=26`; left and right wrap at both ends; the Remix `.o2r` must provide files 0x10F5/0x10F6.
+
+---
+
+## 9. Credits (`Credits.asm`)
+
+- **Tables** (`:864-1160`): extended title, name, details, company and section tables. Port: `tools/gen_remix_credits.py`
+  (`.toolchain/host/venv/bin/python -I tools/gen_remix_credits.py`) reads `decomp/src/credits/remix/remix_credits.txt` (20 titles, 309 names
+  with details and company, 1 company; `\d` is `"` and `\s` is `'`) and writes `decomp/src/credits/remix/{staff,titles,info,companies}.credits.
+  {encoded,metadata}`, `jobs.credits.inc` and `companyids.credits.inc` (84 + 309 = 393 names, 18 + 20 = 38 titles, 12 companies;
+  `nSCStaffrollCompanyRemix` = 11). `scstaffroll.c` includes them under `REGION_REMIX`; the vanilla `Presents` job ends at name 84 so the
+  Remix jobs are reachable; the loop end uses `ARRAY_COUNT(dSCStaffrollStaffRoleTextInfo)`.
+- **Glyphs** (`use_added_characters_`, `add_new_character` :260-288): ids 0x50-0x61 are digits 0-9 (`ch + 0x20`, '4' keeps the vanilla 0x37), then
+  `_ ! - / * ( ) @ ~`. The textures are not in `File.REMIX_CREDITS` (0xDF1) but appended to the vanilla credits file 0xC3 (`SCStaffroll`, 0x89C8
+  bytes in the `.o2r`, a 0x58-byte header before the asm offsets); `scstaffroll.c` adds the 18 sprite-table rows (width, height, offset) at
+  indices 0x50-0x61 and grows the display list table to 0x62 entries (ids 0x38-0x4F stay empty). The encoder maps the symbols to those ids.
+  Details keep `|` as the line break; an apostrophe maps to the vanilla 0x45 glyph and `!` in details becomes a space as in the asm.
+- **Speed assist** (`remix_credits_speed_assist_` :1310-1349, patch 0x801335C4 replaces the Start test of `scStaffrollFuncRun`): when the custom
+  player tag number 2 (`string_table + 8`, the panel value 2, not the tag of port 2) is exactly `afk` (word 0x61666B00), the name id is 0x55
+  and the roll speed differs from the normal one, Start is simulated once. Port: `scStaffrollIsStartPressed` (`scstaffroll.c`) with
+  `sc1PRemixAfkIsSpeedAssistActive` (`sc1premixenemyafk*`); enable with `SSB64_REMIX_TAG_NAMES="2=afk"`. The fast speed on Start is 0.11
+  (`:20-23`, `scstaffroll.c` 0.11F under `REGION_REMIX`, 0.05F otherwise).
+- Test: `SSB64_START_SCENE=56`; after "Presents" the Remix titles run from "Project Leader" to "Video Team"; names with digits and symbols
+  show their glyphs.
+
+---
+
+## 10. Gallery (`Gallery.asm`)
+
+Remix: one victory picture per entry (40: Mario, DK, Link, Samus, Yoshi, Kirby, Fox, Pikachu, Luigi, Captain, Ness, Jigglypuff, GND, YLink, DRM,
+Falco, Wario, Bowser, Wolf, Conker, MTwo, Marth, Sonic, Sheik, Marina, Dedede, Goemon, Banjo, Crash, Peach, DSamus, Lucas, Slippy, Roy, DRL, Lanky,
+Dragon King, Ebi, Piano, Boss; `id_table` :445-487) on the Congratulations scene. Pictures are the BOTTOM/TOP pairs of `File.asm` (vanilla
+characters) or `SinglePlayer.custom_victory_file_table` (`(char_id - 12) * 2`, `SinglePlayer.asm:2293-2378`); the offset in the file is 0x20718.
+State `Gallery.status` (`:19-35`: active, index, fade_length, music_index, idle, idle_index, idle_timer, previous_screen). Controls (`main_`
+:929-1186): stick X >= +-40 of any player or L/R/D-pad left/right change the picture (fades 45 normal, 4 quick, 100 idle), A changes the
+picture's song (`bgm_table`, `[count, bgm ids...]`; index 0 plays the Gallery BGM), START toggles idle mode (a shuffled `idle_table` of 40
+entries every `IDLE_TIME` 150 s with random music), L/R/Z play the 18-pair drum kit (`fgm_drum_kit`), B leaves (index saved in
+`Toggles.entry_view_gallery + 4`, back to `previous_screen`). Entry: a 4th "Gallery" button on the Data menu (`data_menu.add_button_` :1339,
+text X 80.0, button y 183.0, cursor wrap 4 positions), or Other Screens > View Gallery.
+
+Port: `mn/mncommon/mnremixgallery.{c,h}` (state, paging with L/R, D-pad and stick edge, B to the previous scene, scene reload per page) and
+`mnremixgalleryrules.{c,h}` (the `id_table` as Character.id = port fkind through `REMIX_ID_TO_PORT_FKIND`, `custom_victory_file_table` and every
+`set_ending_image` call, Lanky's last call wins); `mncongra.c` hands its input to the gallery and uses the rules for every Character.id from
+12 (Boss, polygons, Remix fighters; it also gives the Remix 1P ending its picture). Open with `SSB64_START_GALLERY=1` (return scene `nSCKindData`,
+`scmanager.c`). Open gaps MS-10 to MS-12 and MS-18 (`patch_audit.md`): the Data button and the menu entry, the per-picture music, A, idle
+mode and drum kit, the 45/4/100 fades and the Congratulations sound suppression.
+
+---
+
+## 11. Title, boot, music, demo
+
+- **Title version** (`Boot.asm:155-169`): "Smash Remix v2.0.1", centred at (160, 218), colour `0x888800FF`, scale 0.9375. Port:
+  `mn/mncommon/mnremixtitleversion.*`, `remix_hud_text` slot 3, put every frame by `mnTitleFuncRun`. The larger title logo rows (0x245C8, 0x3DC88)
+  are in `mntitle.c`. The Remix splash image after the N64 logo (`Boot.asm:18-53`) is not shown.
+- **Menu music** (`BGM.asm alt_menu_music_` :492 and `_prevent_stop`): helper `decomp/src/gm/gmremixmenumusic.{c,h}` and `sys/audio.c`
+  `syAudioGetBGMPlaying` (the port's `BGM.safe_id`).
+
+| Screen | Vanilla site | Hook |
+|---|---|---|
+| mode select, title entry | `mnModeSelectFuncStart` | `gmRemixMenuMusicPlay(ModeSelect, scene_prev == nSCKindTitle)` |
+| options, data, VS mode, 1P mode (back from sub-screens) | `mnOptionFuncStart`, `mnDataFuncStart`, `mnVSModeFuncStart`, `mn1PModeFuncStart` | `gmRemixMenuMusicPlay(ModeSelect, FALSE)` |
+| VS, 1P, Training, Bonus CSS | `mnPlayersVSFuncStart`, `mnPlayers1PGameFuncStart`, `...TrainingFuncStart`, `...BonusFuncStart` | `gmRemixMenuMusicPlay(BattleSelect, FALSE)` |
+| back from the four CSS (`_prevent_stop`) | the `...BackToVSMode` / `...BackTo1PMode` functions | `gmRemixMenuMusicStop()` |
+
+  Hooks were matched by screen and by the `syAudioPlayBGM`/`syAudioStopBGMAll` call the Remix hook replaces (RAM ranges collide between overlays,
+  so the decomp `// 0x` comments were not used). `gmRemixMenuMusicKeepsCurrent` is the "do not restart the playing track" rule (nothing is kept when
+  no track plays or a 64 track plays; RANDOM, RANDOM CLASSICS and RANDOM ALL keep any other track). Menu Music values include the Remix menu
+  tracks; RANDOM ALL (Menu Music 21, `BGM.asm:635-668`) picks from the Random Music list ignoring its toggle (`grRemixRandomMusicPickForced`),
+  or one of four hidden GameBoy songs (BGM 0xA2-0xA5) when the list is empty; the custom MIDI entries are not in that list. Not hooked (Remix
+  has no `alt_menu_music_` call there): sound test, results, Data characters/record, stage select, item switch. The Settings L shortcut
+  `handle_sss_shortcut` is not ported. Test: `SSB64_START_SCENE` of each screen with Menu Music set through `SSB64_REMIX_TOGGLES`; the track must
+  not restart when entering the CSS and returning.
+- **Music title at match start** (`BGM.asm show_music_title_`): at the GO lights (`ifCommonCountdownMakeInterface`, 0x8011268C) the asm draws a
+  translucent rectangle (1, 156, 320 x 28, `0x34343494`) with the track line (scale 1.0, note glyphs) and the game line (scale 0.75) in Kabel,
+  destroyed at the GO! text. Port: `gm/gmremixmusictitle.c` checks the `show_music_title` and `play_music` toggles, reads
+  `syAudioGetBGMPlaying(0)` and puts the rectangle (`remix_hud_text` rect slot 2) and both lines (slots 71 and 72, centred at (160, 158) and
+  (160, 172)) every frame; the rows (`port/remix/remix_music_titles_data.inc`, 308 of 375 BGM ids, generated by
+  `tools/gen_remix_music_titles.py` from `BGM.asm`, `Toggles.asm`, `midi.asm`) come from `remix_music_title.cpp`. Menu tracks and extra MIDIs have
+  no row, as in the asm. Test: a VS match with `SSB64_REMIX_TOGGLES='Music Title at Match Start=1'` shows "Dream Land / Kirby Super Star" at
+  the lights.
+- **VS demo** (`VsDemo.asm`): lets Remix fighters and stages appear in the auto-demo: `enable_focused_remix_chars_` (0x80131CDC, end of
+  `mnTitleSetDemoFighterKinds`), `enable_nonfocused_remix_chars_` (0x8018D928, `scAutoDemoGetFighterKind` for players >= 2),
+  `enable_remix_stages_` (0x8018DA20, `scAutoDemoInitDemo`) and a name table fix (`SinglePlayer.name_texture_table`, +0x10; 0x8018DBD4 and
+  0x8018DC08 in `scAutoDemoInitSObjs`). Port: `sc/sccommon/scremixvsdemo.{c,h}` (`scRemixVsDemoPickFocusFighters`: two distinct Remix fighters with
+  `variant_type == REMIX_VARIANT_NA` from `kRemixRoster`, unlock masks ignored; `scRemixVsDemoPickNonFocusedFighter`; `scRemixVsDemoPickStage`: a
+  random stage id in [0, 0xD7) of class BATTLE in `Stages.class_table`, never Rest Area 0x8B, `0xD7` itself never drawn as in the asm), called from
+  `mntitle.c:360`, `scautodemo.c`. The Remix pick overrides `SSB64_DEMO_FKINDS`. The name plates still use the parent fighter's vanilla name
+  (`scRemixVsDemoGetNameTextureOffset` exists and is not called).
+- **Sound test**: `mn/mndata/mnremixsoundtest.c` extends the music and voice lists (`MIDI.extended_music_map_table`,
+  `FGM.extended_voice_map_table`; `augment_sound_test_*`); inputs `soundtest_browse.txt` / `soundtest_wrap.txt` with `SSB64_START_SCENE=59`.
+- **Render groups**: `Render.asm toggle_group_display_` walks the list at `GROUP_TABLE[group]` (= `gGCCommonLinks` in the port) and writes `hide`
+  to every node; port `gm/gmremixgroupdisplay.{c,h}` (`gmRemixGroupDisplaySet`, `gmRemixGroupDisplayTempSet` for `SpecialZoom.asm
+  temp_toggle_group_display_`). Groups in use: 0x0D menu instructions, 0x0E HUD, 0x0F and 0x10 pause legend, 0x16 results rows. `Pause.asm
+  disable_hud_` runs `ifCommonBattlePauseMakeSObjsAll` then hides groups 0xE, 0xF and 0x10 when the Disable HUD setting is above 0.
+- **Button and extension sprites**: the Remix HUDs reuse the button images of the pause file 0xC5 (A 0x958 and B 0xA88 13x13 IA8 with stride 16, L
+  0x18C8 and R 0xCF8 16x12, Z 0xBD8 9x15, PLUS 0x4D8 8x8 I4, L_THIN 0x1B10, "Legend" 0x19F8 42x9 I4), file 0xA06 (D-pad 0x218 16x16 RGBA16, arrows 0x688,
+  0x1958, 0x1A88, 0x1BB8 13x13 IA8), the stock icons of file 0x19 (polygon icon 0x80) and file 0x14F3 (King of the Hill frame 0xAA8 64x16). Colour is
+  the vanilla SObj path: `TEXTURE_INIT_` is `lbCommonMakeSObjForGObj`, `TEXTURE_RENDER_` `lbCommonDrawSObjAttr`, the colour argument becomes PRIM
+  and the palette argument ENV (IA combiner `RGB = ENV + (PRIM - ENV) * I`); example, the Match Stats A button is tint `0x50A8FFFF`, palette
+  `0x0010FFFF`. Port: `if/ifremixsprite.{c,h}` and `ifremixspriterules.{c,h}` (offset and format table, pure) draw a native SObj with tint and
+  palette and hide/show it; no atlas. Files 0xA05/0xA06/0x14F3 are in the `.o2r` as `reloc_misc/file_2565`, `file_2566`, `file_5363`.
+
+---
+
+## 12. Standalone patches with a menu or setting
+
+| Asm | Behaviour | Port |
+|---|---|---|
+| `AerialAttackFastFall.asm` | five hooks at 0x80129E38-0x80129E88 swap the Proc Physics of AttackAir N/F/B/Hi/Lw (`ftPhysicsApplyAirVelDrift`) for `...FastFall` (0x800D9160) when `Fast Fall Aerials` is on (Gameplay Settings, default off) | `ft/ftremix/ftremixaerialfastfall.c` via `ftMainSetStatus`: swaps the physics only for those five statuses of `dFTCommonNullStatusDescs` and reads the toggle each frame |
+| `MagnifyingGlass.asm` | `apply_custom_zoom_` (0x80110E80) scales the magnified model by `Character.magnifying_glass_zoom` per character id (custom matrix per port) | `gm/gmremixmagnify.c`, wired at `ifcommon.c` |
+| `SFXReplace.asm` | on Flat Zone (0x32) and Flat Zone 2 (0x62), in VS (0x16), Training (0x36) and Remix modes (0x77), the footstep (23 ids), landing (12) and hard landing (7) sounds become gaw sounds 0x602, 0x603, 0x604 (no setting); the down bounce becomes 0x604 on those stages | `ftremixsfxreplace.c`: runs before `ftRemixJapaneseMotionSoundFgm` in the PlayFGM case (hook 0x800DF864 before 0x800DF86C); `ftCommonDownBounceUpdateEffects` for the bounce |
+| `Practice.asm overlay_colour_` | tints the fighter by state when `Color Overlays` is on: yellow when actionable (standing, turn, landing after the FAF), blue intangible, green invulnerable, red hitstun, cyan reflect/absorb; the Falcon turn check compares the wrong register so Falcon gets the slow FAF 5 (Remix behaviour kept) | `ftremixoverlay.c` (`ftRemixOverlayColour` at the start of `ftMainProcPhysicsMapDefault`), flags in two static arrays |
+| `Practice.asm flash_on_z_cancel_` | flash on a Z-cancel landing | `ftremixzcancel.c` `ftRemixZCancelFlashOnLanding` |
+
+Fighter-side panel options (Skeleton, Model, Size, Dpad, ...) are in `docs/remix/panel.md`.

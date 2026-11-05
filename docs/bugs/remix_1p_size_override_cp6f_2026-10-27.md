@@ -1,20 +1,29 @@
-# Remix 1P: tamanho forçado das CPUs sobrescrito pelo painel do CSS (CP6f)
+# Remix 1P: forced CPU size overwritten by the CSS panel
 
-## Sintoma
-`sc1PRemix1PSetupEnemy` gravava `FTREMIX_SIZE_STATE_GIANT`/`TINY` com `ftRemixSizeSetMatchState`, mas a CPU da fase gigante e as do Tiny Team
-entravam em partida com tamanho normal.
+Code: `decomp/src/ft/ftremix/ftremixsize.c`, `decomp/src/sc/sc1pmode/sc1premix1p.c`. Test: boot a Remix 1P stage with
+`SSB64_START_SCENE=52 SSB64_REMIX_1P_MODE=remix1p SSB64_SPGAME_STAGE=<row>` (`.claude/skills/remix-smoke-tests/SKILL.md`).
 
-## Causa
-`ftRemixSizeInitFighter` (chamada em `ftManagerInitFighter`) regrava o estado com `gmRemixPanel(SIZE, player)`. Nos modos 1P e Bonus
-o painel das portas que não são humanas vale 0 (`gmRemixPanelGet`, igual ao `clear_settings_for_1p_` do asm), então o estado voltava a normal.
+## Symptom
 
-## Correção
-`ftremixsize.c` guarda um estado forçado por porta (`ftRemixSizeForceMatchState`, `FTREMIX_SIZE_STATE_UNFORCED` = -1 devolve a porta ao painel).
-`ftRemixSizeInitFighter` usa o forçado quando existe. `sc1PRemix1PSetupEnemy` força Giant na linha 6 (Donkey) e Tiny na linha 9 (Samus),
-`sc1PRemix1PRandomize` e as demais fases limpam os estados forçados.
+`sc1PRemix1PSetupEnemy` stored `FTREMIX_SIZE_STATE_GIANT` / `TINY` with `ftRemixSizeSetMatchState`, but the CPU of the giant
+stage and the Tiny Team CPUs entered the match at normal size.
 
-## Verificação
-- `SSB64_SPGAME_STAGE=6`, Remix 1P: log com `player 3 fkind 29 state 1 multiplier 2.25` (log temporário, removido).
-- `SSB64_SPGAME_STAGE=9`: as três CPUs Dedede ficam menores que o Mario na captura.
-- `run_remix_mode_tests`: 187 checagens, 0 falhas; `ssb64` compila.
-- O valor de `SSB64_SPGAME_STAGE` é o índice da linha da tabela; o caminho muda a cada execução, então conferir o log da mesma rodada.
+## Root cause
+
+`ftRemixSizeInitFighter` (called from `ftManagerInitFighter`) rewrites the state from `gmRemixPanel(SIZE, player)`. In the 1P
+and Bonus modes the panel value of every non-human port is 0 (`gmRemixPanelGet`, the same as `clear_settings_for_1p_` in the
+asm), so the state went back to normal.
+
+## Fix
+
+`ftremixsize.c` keeps a forced state per port (`ftRemixSizeForceMatchState`; `FTREMIX_SIZE_STATE_UNFORCED` = -1 gives the
+port back to the panel). `ftRemixSizeInitFighter` uses the forced state when there is one. `sc1PRemix1PSetupEnemy` forces
+Giant on row 6 (Donkey) and Tiny on row 9 (Samus); `sc1PRemix1PRandomize` and `sc1PRemix1PSetupEnemy` on every other row
+clear the forced states.
+
+## Verification
+
+- Row 6 (`SSB64_SPGAME_STAGE=6`): the CPU runs with state 1 and multiplier 2.25. Row 9: the three Dedede CPUs are visibly
+  smaller than the Mario player.
+- `SSB64_SPGAME_STAGE` is the row index of the 1P stage table; the opponents change on every run, so check the log of the
+  same run.

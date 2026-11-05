@@ -1,35 +1,54 @@
-# Smash Remix: extração da tabela de fighters a partir da ROM
+# Smash Remix: extracting the fighter table from the ROM
 
-Protótipo: `tools/remix_dump_fighters.py` (stdlib, Python 3, sem `uv`). Gera JSON em `build/remix-dump/` (git-ignored). Nenhum dado derivado da ROM é versionado.
+Covers where the fighter (`FTData`) table sits in `baserom.remix.z64`, the RAM to ROM windows, and how it was validated against the decomp. Code:
+`tools/remix_dump_fighters.py` (stdlib only; the Torch factory `SSB64:REMIXFIGHTERS` produces the same table, `docs/remix/torch_factories.md`).
+The script writes JSON to `build/remix-dump/` (git-ignored); no ROM-derived data is versioned.
+Test: `.toolchain/host/venv/bin/python -I tools/test_remix_blobs.py --o2r <BattleShip-Remix.o2r>` compares the Torch blob with a reference built from this JSON.
+Open gaps: `docs/remix/patch_audit.md`, group g10.
 
-Comando: `python3 tools/remix_dump_fighters.py [--out DIR] [--remix ROM] [--vanilla ROM]`
+Command:
 
-Saídas: `remix_fighters.json` (97 fighters), `vanilla_fighters.json` (27), `validation.json`.
+```
+.toolchain/host/venv/bin/python -I tools/remix_dump_fighters.py [--out DIR] [--remix ROM] [--vanilla ROM]
+```
 
-## 1. Onde a tabela realmente está
+Outputs: `remix_fighters.json` (97 fighters), `vanilla_fighters.json` (27), `validation.json`.
 
-Verificado nos bytes das ROMs, não na documentação.
+## 1. Where the table is
 
-- **Struct table de FTData: ROM `0x92610` / RAM `0x80116E10`, in place.** A tabela não foi realocada. Ela cresce no lugar: as 27 entradas vanilla são seguidas de 70 entradas Remix, terminadas por NULL no índice 97. Dois fatos conferidos: a entrada 27 (RANDOM) aponta para `0x8049F470` (segmento expandido) e a entrada 28 (NONE) aponta para o struct de Mario (`0x80117810`), como indicado em `fighters.md` 1.1.
-- **Mapeamento RAM -> ROM confirmado:**
-  - dados vanilla `0x80084800`..: `ROM = RAM - 0x80084800` (confirmado pelo struct table e pelos arrays de param).
-  - segmento expandido `0x80400000`+: `ROM = RAM - 0x7D800000`.
-  - janela de overlay `0x80390000`..`0x80400000` (arrays de menu/submotion): `ROM = RAM - 0x80288A20`. Não estava na documentação. Foi encontrado porque o padrão do primeiro entry de `dFTMarioSubMotionDescs` aparece em ROM `0x108480`, e a mesma relação vale para todos os 27 fighters vanilla com contagem consistente.
-- **ACTION_ARRAY_TABLE foi movida no Remix.** `fighters.md` 2.1 cita ROM `0xA6F40`, que é a tabela vanilla. No Remix ela está em RAM `0x804A05D0` (ROM `0x2CA05D0`), com 97 entradas. Os 27 primeiros slots de `0xA6F40` ficaram intactos, mas os demais foram sobrescritos por dados do Remix. O endereço foi decodificado do hook `move_action_array_table_` (ROM `0x62BD0`: `lui t9` + `lw` com offset assinado), não do código-fonte.
-- **Layout de `FTData` (0x78 bytes):** confirmado contra `decomp/src/ft/fttypes.h`. Os 9 file ids ficam em `0x00..0x20`. `file_main_size` em `0x24`, `o_attributes` em `0x60`, `mainmotion` em `0x64` (count em `0x6C`), `submotion` em `0x68` com ponteiro para o count em `0x70`, e `file_anim_size` em `0x74`. Os ponteiros `0x28..0x48` são de runtime e não foram comparados.
-- **Entradas de motion:** 12 bytes, `(anim_file_id u32, command_offset u32, flags u32)`. Os 0x68/0x70 são o array de submotion no decomp, e o Remix usa esse campo para o array de menu de 0xF entradas (conferido: `ptr70 - ptr68 == count * 0xC` para 97 - 3 fighters).
-- **Fighters registrados:** 97 no Remix, 27 no vanilla. Os 97 foram lidos com sucesso.
+Checked on the ROM bytes, not on documentation.
 
-## 2. Validação contra o decomp
+- **FTData struct table: ROM `0x92610` / RAM `0x80116E10`, in place.** The table was not relocated: the 27 vanilla entries are followed by 70 Remix
+  entries, terminated by NULL at index 97. Entry 27 (RANDOM) points to `0x8049F470` (expanded segment) and entry 28 (NONE) points to Mario's struct
+  (`0x80117810`), as `docs/remix/fighters.md` 1.1 says.
+- **Confirmed RAM to ROM mapping:**
+  - vanilla data `0x80084800`..: `ROM = RAM - 0x80084800` (confirmed by the struct table and the param arrays).
+  - expanded segment `0x80400000`+: `ROM = RAM - 0x7D800000`.
+  - overlay window `0x80390000`..`0x80400000` (menu/submotion arrays): `ROM = RAM - 0x80288A20`. It was found because the pattern of the first entry
+    of `dFTMarioSubMotionDescs` appears at ROM `0x108480`, and the same relation holds for all 27 vanilla fighters with a consistent count.
+- **ACTION_ARRAY_TABLE was moved by the Remix.** `docs/remix/fighters.md` 2.1 lists vanilla ROM `0xA6F40`; in the Remix the table is at RAM `0x804A05D0`
+  (ROM `0x2CA05D0`) with 97 entries (`REMIX_ACTION_ARRAY_TABLE` in `port/remix/remix_action_layout.h`). The first 27 slots of `0xA6F40` are intact,
+  the others are overwritten by Remix data. The address was decoded from the `move_action_array_table_` hook (ROM `0x62BD0`: `lui t9` + `lw` with a
+  signed offset).
+- **`FTData` layout (0x78 bytes):** confirmed against `decomp/src/ft/fttypes.h`. The 9 file ids are at `0x00..0x20`, `file_main_size` at `0x24`,
+  `o_attributes` at `0x60`, `mainmotion` at `0x64` (count at `0x6C`), `submotion` at `0x68` with a pointer to the count at `0x70`, `file_anim_size` at
+  `0x74`. The pointers `0x28..0x48` are runtime values and were not compared.
+- **Motion entries:** 12 bytes, `(anim_file_id u32, command_offset u32, flags u32)`. The decomp's submotion array (0x68/0x70) is the Remix's 0xF entry
+  menu array (checked: `ptr70 - ptr68 == count * 0xC` for 97 - 3 fighters).
+- **Registered fighters:** 97 in the Remix, 27 in the vanilla ROM. All 97 were read successfully.
 
-Fonte: `decomp/src/ft/ftdata.c`, ramo `#ifdef PORT`, com símbolos resolvidos por `include/reloc_data.us.h`. A ordem fkind vem do array `dFTManagerDataFiles`.
+## 2. Validation against the decomp
 
-Resultado para fkinds 0..26 (vanilla ROM x decomp):
+Source: `decomp/src/ft/ftdata.c`, `#ifdef PORT` branch, with symbols resolved through `include/reloc_data.us.h`. The fkind order comes from the
+`dFTManagerDataFiles` array.
 
-- **Campos escalares: 0 divergências** em 27 fighters (9 file ids, `file_main_size`, `o_attributes`, contagem de mainmotion, `file_anim_size`).
-- **Arrays de motion: 0 divergências.** 5825 entradas de mainmotion e 386 de menu/submotion comparadas (anim id e flags; offsets são simbólicos no decomp e não foram comparados). Contagens batem em todos.
+Result for fkinds 0..26 (vanilla ROM against decomp):
 
-Os valores `o_attributes` pedidos para MMario, NMario, NFox e NKirby batem com a expectativa:
+- **Scalar fields: 0 differences** over 27 fighters (9 file ids, `file_main_size`, `o_attributes`, mainmotion count, `file_anim_size`).
+- **Motion arrays: 0 differences.** 5825 mainmotion entries and 386 menu/submotion entries compared (anim id and flags; offsets are symbolic in the
+  decomp and were not compared). The counts match everywhere.
+
+`o_attributes` values for MMario, NMario, NFox and NKirby match the expectation:
 
 | Fighter (fkind) | Vanilla | Remix |
 |---|---|---|
@@ -38,27 +57,34 @@ Os valores `o_attributes` pedidos para MMario, NMario, NFox e NKirby batem com a
 | NFox (15) | 0x2A4 | 0x2BC |
 | NKirby (22) | 0x2C0 | 0x2F8 |
 
-Todos os 13 fighters polygon/novos de 13 a 25 mudam `o_attributes` (vanilla -> Remix): NDK (16) 0x298 -> 0x2B0, NSamus (17) 0x3BC -> 0x3D4, NLuigi (18) 0x298 -> 0x2B8, NLink (19) 0x2D8 -> 0x2F0, NYoshi (20) 0x2B8 -> 0x2D0, NCaptain (21) 0x29C -> 0x2B4, NPikachu (23) 0x2A8 -> 0x2C0, NPurin (24) 0x2A0 -> 0x2E8, NNess (25) 0x2F0 -> 0x308. Mario (0), Fox (1), DK (2), Samus (3), Luigi (4), Yoshi (6), Captain (7), Pikachu (9), Purin (10), Ness (11), Boss (12) e GDonkey (26, 0x3C8) não mudam.
+All 13 polygon/new fighters from 13 to 25 change `o_attributes` (vanilla to Remix): NDK (16) 0x298 -> 0x2B0, NSamus (17) 0x3BC -> 0x3D4, NLuigi (18) 0x298 -> 0x2B8,
+NLink (19) 0x2D8 -> 0x2F0, NYoshi (20) 0x2B8 -> 0x2D0, NCaptain (21) 0x29C -> 0x2B4, NPikachu (23) 0x2A8 -> 0x2C0, NPurin (24) 0x2A0 -> 0x2E8, NNess (25) 0x2F0 -> 0x308.
+Mario (0), Fox (1), DK (2), Samus (3), Luigi (4), Yoshi (6), Captain (7), Pikachu (9), Purin (10), Ness (11), Boss (12) and GDonkey (26, 0x3C8) do not change.
+The port patches the vanilla rows 13 to 25 at load time (`patchVanillaAttributeOffsets` in `port/remix/remix_roster.cpp`).
 
-### Diferenças Remix x vanilla por fkind (0..26)
+### Remix against vanilla, per fkind (0..26)
 
-| fkind | Fighter | Campos diferentes |
+| fkind | Fighter | Different fields |
 |---|---|---|
-| 0 | MARIO | só ponteiro do array de param (`0x64`) mudou; entradas idênticas (array movido) |
-| 5 | LINK | `action_array` (ver ressalva 3) |
-| 8 | KIRBY | contagem de mainmotion (`0x6C`), ponteiro e entradas de mainmotion, `action_array` (extensão de 155 ações, esperada) |
-| 13-25 | MMario..NNess | `o_attributes` (`0x60`) e conteúdo do array de menu |
-| 18, 24 | NLuigi, NPurin | também o ponteiro de submotion/menu; o ponteiro do count (`0x70`) continua apontando para o valor vanilla |
-| 26 | GDONKEY | ponteiro de submotion/menu e conteúdo do menu |
+| 0 | MARIO | only the param array pointer (`0x64`) changed; the entries are identical (array moved) |
+| 5 | LINK | `action_array` (caveat 1) |
+| 8 | KIRBY | mainmotion count (`0x6C`), pointer and entries of mainmotion, `action_array` (155 action extension, expected) |
+| 13-25 | MMario..NNess | `o_attributes` (`0x60`) and the content of the menu array |
+| 18, 24 | NLuigi, NPurin | also the submotion/menu pointer; the count pointer (`0x70`) still points at the vanilla value |
+| 26 | GDONKEY | submotion/menu pointer and menu content |
 
-Idênticos ao vanilla: 1 FOX, 2 DONKEY, 3 SAMUS, 4 LUIGI, 6 YOSHI, 7 CAPTAIN, 9 PIKACHU, 10 PURIN, 11 NESS, 12 BOSS. Dos 27 fighters vanilla, 17 diferem.
+Identical to vanilla: 1 FOX, 2 DONKEY, 3 SAMUS, 4 LUIGI, 6 YOSHI, 7 CAPTAIN, 9 PIKACHU, 10 PURIN, 11 NESS, 12 BOSS. Of the 27 vanilla fighters, 17 differ.
 
-## 3. Ressalvas e não resolvido
+## 3. Caveats
 
-1. **Contagem de action arrays não é validada.** Não há contagem armazenada na struct e o decomp não tem essas tabelas. O script infere o tamanho pelo gap entre ponteiros distintos (`count_method: inferred_gap_unverified`). Isso falha: o Link (5) tem 17 entradas na vanilla e 100 no Remix a partir do mesmo ponteiro `0x8012A5AC`. Os conteúdos (`entries`) devem ser tratados como não confiáveis até haver uma contagem independente. Os dados brutos de cada entrada de 0x14 bytes são preservados.
-2. **Fighters sem action array próprio:** RANDOM (27) e NONE (28) têm ponteiro 0 na tabela Remix. O script registra `count: 0`.
-3. **Menu do Remix x vanilla:** para 13..26, o conteúdo do array de menu no Remix difere do vanilla. Na vanilla, a maioria das entradas é zero (`anim 0`, `cmd 0x80000000`). Não está claro se é Remix sobrescrevendo overlay ou população em runtime; não foi investigado.
-4. **Inconsistência de ponteiro em NLuigi (18), NPurin (24) e GDonkey (26):** o ponteiro do array de submotion mudou, mas o ponteiro do count continua o vanilla. O campo `consistent_with_count_pointer` do JSON marca isso como `false`.
-5. **Não comparados com o decomp:** offsets de motion (simbólicos no decomp), ponteiros de runtime e fighters Remix (97 - 27), que não têm referência no decomp.
-6. **Nomes de fighters Remix:** o JSON só tem ids numéricos; nomes estão em `src/Character.asm` do Remix (`define_character`), fora deste protótipo.
-7. **Consulta ao ai-memory:** o projeto não foi encontrado no ai-memory (workspace `JRickey` inexistente), então as regras de projeto não puderam ser carregadas. Regras globais foram lidas.
+1. **Action array counts are not stored in the struct** and the decomp has no such tables. The script infers a size from the gap between distinct pointers
+   (`count_method: inferred_gap_unverified`), which fails: Link (5) has 17 entries in vanilla and 100 in the Remix from the same pointer `0x8012A5AC`.
+   Treat the JSON `entries` as unreliable. The port gets per-id action counts from `port/remix/remix_action_layout.h`, generated by
+   `tools/gen_remix_actions.py` from the assembled Remix build.
+2. RANDOM (27) and NONE (28) have pointer 0 in the Remix action table; the script records `count: 0`.
+3. For 13..26 the content of the Remix menu array differs from vanilla, where most entries are zero (`anim 0`, `cmd 0x80000000`). The origin of the
+   difference (Remix overwriting the overlay, or runtime population) is not established.
+4. NLuigi (18), NPurin (24) and GDonkey (26): the submotion array pointer changed but the count pointer is still the vanilla one
+   (`consistent_with_count_pointer: false` in the JSON).
+5. Not compared with the decomp: motion offsets (symbolic in the decomp), runtime pointers, and the 70 Remix-only fighters (no decomp reference). Remix
+   fighter names are not in the JSON, only ids; names are in `src/Character.asm` (`define_character`, `docs/remix/fighters.md` 1.2).
