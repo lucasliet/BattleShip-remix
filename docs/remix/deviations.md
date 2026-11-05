@@ -367,6 +367,15 @@ Per item:
 |---|---|
 | Character Data emblem (`mnremixcharacters.c`) | The extended fighters' emblem reads the DObjDesc, MObjSub and MatAnimJoint offsets from `ResultsScreen.series_logo_offset/zoom/color_table[fkind]`. The asm (`extend_series_logo_offsets`) swaps only the DObjDesc and leaves the material and colour offsets at 0. The emblems match the reference capture (`build/ref-shots/chardata_lap`). |
 
+### 5.7 Stages and match flow
+
+| Area | Deviation |
+|---|---|
+| Ground knockback table (`grremixsurface.c`, ST-2) | `fgm_override_` reads the word at struct +0x1C of any `GRAttackColl`; stage hazard structs are 0x1C bytes, so the asm reads the next word of memory for them. The port applies the per-surface sound only to the rows of the Remix surface table and leaves the hazard structs on the vanilla sound switch. |
+| Yoshi's Story clouds (`grremixyoshiclouds.c`, ST-14) | The hazard check that drops the clouds runs only in VS and Training (`grRemixHazardsAreOn`); the asm reads `hazard_mode` on every screen, so a VS setting would also remove them in 1P. |
+| Platform movement (`grremixplatformrules.c`, ST-15) | The movement rule uses the hazard type of the match stage from `Stages.stage_hazard_table`; the asm reads `dont_freeze_stage`, a flag the stage select sets, which only differs after RANDOM or the tournament layout. |
+| Smashketball ball and barrels (`itremixbasketball.c`, IT-10) | The ball finds the barrels through the list kept by `grremixjunglebarrels.c`; the asm walks the ground obstacle array through `gobj+0x20`. Same barrels, same order. |
+
 ## 6. Tests
 
 - Headless unit tests of the pure rules (Blue Shell first-place rules, Stopwatch background, Sonic classic, Smashketball and others):

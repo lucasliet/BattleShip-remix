@@ -41,6 +41,11 @@ extern void remixTestAiPredictionRules(void);
 extern void remixTestAiRollRules(void);
 extern void remixTestAiSpecialsRules(void);
 extern void remixTestAiTeachingRules(void);
+extern void remixTestAiPostProcessRules(void);
+extern void remixTestAiCpuInputRules(void);
+extern void remixTestAiSharedRules(void);
+extern void remixTestAiRecoveryLogicRules(void);
+extern void remixTestAiDriftRules(void);
 extern void remixTestStopwatchBgRules(void);
 extern void remixTestTrainingRules(void);
 extern void remixTestTrainingPortRules(void);
@@ -73,7 +78,15 @@ extern void remixTestPracticeRules(void);
 extern void remixTestPartImageRules(void);
 extern void remixTestSpriteBitmapRow(void);
 extern void remixTestSonicClassicRules(void);
+extern void remixTestSurfaceRules(void);
 extern void remixTestTeamsRules(void);
+extern void remixTestStageVisualRules(void);
+extern void remixTestStageClassRules(void);
+extern void remixTestCountdownRules(void);
+extern void remixTestCameraPanRules(void);
+extern void remixTestDragonKingHudRules(void);
+extern void remixTestBarrelBonusRules(void);
+extern void remixTestSpawnRules(void);
 
 int main(void)
 {
@@ -111,6 +124,11 @@ int main(void)
     remixTestAiRollRules();
     remixTestAiSpecialsRules();
     remixTestAiTeachingRules();
+    remixTestAiPostProcessRules();
+    remixTestAiCpuInputRules();
+    remixTestAiSharedRules();
+    remixTestAiRecoveryLogicRules();
+    remixTestAiDriftRules();
     remixTestStopwatchBgRules();
     remixTestTrainingRules();
     remixTestTrainingPortRules();
@@ -143,7 +161,15 @@ int main(void)
     remixTestPartImageRules();
     remixTestSpriteBitmapRow();
     remixTestSonicClassicRules();
+    remixTestSurfaceRules();
     remixTestTeamsRules();
+    remixTestStageVisualRules();
+    remixTestStageClassRules();
+    remixTestCountdownRules();
+    remixTestCameraPanRules();
+    remixTestDragonKingHudRules();
+    remixTestBarrelBonusRules();
+    remixTestSpawnRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;

@@ -139,6 +139,74 @@ static void testTruncationSaturatesOutOfRange(void)
     CHECK_EQ(0x7FFFFFFF, ftRemixAiWeightRulesTruncFrames(3.0e9F));
 }
 
+static float customChance(int kind, int input_kind, int level, int target_status_id, float height_diff, float chance)
+{
+    FTRemixAiWeightCustomContext context = { input_kind, level, target_status_id, height_diff };
+
+    return ftRemixAiWeightRulesCustomChance(kind, &context, chance);
+}
+
+static void testCrashDropsNspAndDashNspAgainstAShieldAtAnyLevel(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CRASH, 0x09, 3, 0x99, 0.0F, 1.0F) == 0.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CRASH, 0x55, 3, 0x9B, 0.0F, 1.0F) == 0.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CRASH, 0x09, 3, 0x0A, 0.0F, 1.0F) == 1.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CRASH, 0x1B, 3, 0x99, 0.0F, 1.0F) == 1.0F);
+}
+
+static void testNspVsShieldRaisesNspToOneHundredAtLevelTen(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_NSP_VS_SHIELD, 0x09, 10, 0x98, 0.0F, 1.0F) == 100.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_NSP_VS_SHIELD, 0x09, 10, 0x0A, 0.0F, 1.0F) == 1.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_NSP_VS_SHIELD, 0x0D, 10, 0x98, 0.0F, 1.0F) == 1.0F);
+}
+
+static void testCustomRoutinesIgnoreLowerLevels(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_NSP_VS_SHIELD, 0x09, 9, 0x99, 0.0F, 1.0F) == 1.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_PUFF, 0x09, 9, 0x99, 0.0F, 1.0F) == 1.0F);
+}
+
+static void testPianoRaisesDspAgainstAShield(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_PIANO, 0x1B, 10, 0x9B, 0.0F, 1.0F) == 100.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_PIANO, 0x09, 10, 0x9B, 0.0F, 1.0F) == 1.0F);
+}
+
+static void testUspDropsWhenTheOpponentIsOneHundredBelow(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_USP_VS_BELOW, 0x0D, 10, 0x0A, -100.0F, 1.0F) == 1.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_USP_VS_BELOW, 0x0D, 10, 0x0A, -100.5F, 1.0F) == 0.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_USP_VS_BELOW, 0x0D, 10, 0x99, -500.0F, 1.0F) == 0.0F);
+}
+
+static void testUspIsRaisedAgainstAShieldWhenNotBelow(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_USP_VS_BELOW, 0x0D, 10, 0x99, 50.0F, 1.0F) == 100.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_USP_VS_BELOW, 0x1B, 10, 0x99, -500.0F, 1.0F) == 1.0F);
+}
+
+static void testCaptainDoublesUpSmashInputsAndTreatsUspLikeGanondorf(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CAPTAIN, 0x19, 10, 0x0A, 0.0F, 3.0F) == 6.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CAPTAIN, 0x45, 10, 0x0A, 0.0F, 3.0F) == 6.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CAPTAIN, 0x46, 10, 0x0A, 0.0F, 3.0F) == 6.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CAPTAIN, 0x0D, 10, 0x0A, -200.0F, 3.0F) == 0.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CAPTAIN, 0x0D, 10, 0x99, 0.0F, 3.0F) == 100.0F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_CAPTAIN, 0x09, 10, 0x99, 0.0F, 3.0F) == 3.0F);
+}
+
+static void testPuffScalesNspByOneSixteenth(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_PUFF, 0x09, 10, 0x0A, 0.0F, 1.0F) == 0.0625F);
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_PUFF, 0x1B, 10, 0x0A, 0.0F, 1.0F) == 1.0F);
+}
+
+static void testNoCustomKindKeepsTheChance(void)
+{
+    CHECK_TRUE(customChance(FTREMIX_AI_WEIGHT_CUSTOM_NONE, 0x09, 10, 0x99, 0.0F, 2.5F) == 2.5F);
+}
+
 void remixTestAiWeightRules(void)
 {
     printf("ai weight rules\n");
@@ -164,4 +232,13 @@ void remixTestAiWeightRules(void)
     RUN_TEST(testGrabAgainstShieldIsMultiplied);
     RUN_TEST(testNonGrabOrOpenOpponentKeepsTheChance);
     RUN_TEST(testTruncationSaturatesOutOfRange);
+    RUN_TEST(testCrashDropsNspAndDashNspAgainstAShieldAtAnyLevel);
+    RUN_TEST(testNspVsShieldRaisesNspToOneHundredAtLevelTen);
+    RUN_TEST(testCustomRoutinesIgnoreLowerLevels);
+    RUN_TEST(testPianoRaisesDspAgainstAShield);
+    RUN_TEST(testUspDropsWhenTheOpponentIsOneHundredBelow);
+    RUN_TEST(testUspIsRaisedAgainstAShieldWhenNotBelow);
+    RUN_TEST(testCaptainDoublesUpSmashInputsAndTreatsUspLikeGanondorf);
+    RUN_TEST(testPuffScalesNspByOneSixteenth);
+    RUN_TEST(testNoCustomKindKeepsTheChance);
 }

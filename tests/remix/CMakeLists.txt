@@ -37,6 +37,11 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_ai_roll_rules.c
     test_ai_specials_rules.c
     test_ai_teaching_rules.c
+    test_ai_postprocess_rules.c
+    test_ai_cpuinput_rules.c
+    test_ai_shared_rules.c
+    test_ai_recoverylogic_rules.c
+    test_ai_drift_rules.c
     test_stopwatch_bg_rules.c
     test_training_rules.c
     test_training_port_rules.c
@@ -68,7 +73,15 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_partimage_rules.c
     test_sprite_bitmap_row.c
     test_sonic_classic_rules.c
+    test_surface_rules.c
     test_teams_rules.c
+    test_stage_visual_rules.c
+    test_stage_class_rules.c
+    test_countdown_rules.c
+    test_camerapan_rules.c
+    test_dragonkinghud_rules.c
+    test_barrel_bonus_rules.c
+    test_spawn_rules.c
     ${CMAKE_SOURCE_DIR}/port/bridge/sprite_bitmap_row.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_decode.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_layout.c
@@ -114,6 +127,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadcontrolrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixpartimagerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/sonic/ftremixsonicclassicrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixsurfacerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixteamsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixpracticerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixstopwatchbgrules.c
@@ -127,6 +141,14 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgameendrowsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgameendinputrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipostsheikrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipostrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaicpuinputrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaisharedrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaistagerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoverylogicrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoverylogicsharedrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoverylogicfighterrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoverydriftrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnvsmode/mnremixvsstatsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaiteachingrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgroupdisplayrules.c
@@ -147,6 +169,17 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstageroulette.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagegridrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagerandomrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixsaffronrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixplatformrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixwallpaperrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixdisplaylinkrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixstagerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixbarrelrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixbonusrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixspawnrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixcountdownrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixcamerapanrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixdragonkinghudrules.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)
 target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src ${CMAKE_SOURCE_DIR}/port/remix ${CMAKE_SOURCE_DIR}/port)

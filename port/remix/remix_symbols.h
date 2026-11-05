@@ -4086,6 +4086,7 @@
 #define REMIX_SYM_SonicUSP__spring_stage_setting____projectile_branch 0x805604DCu
 #define REMIX_SYM_SonicUSPRefresh 0x80560200u
 #define REMIX_SYM_Spawn__neutral_table 0x80495438u
+#define REMIX_SYM_Spawn__original_table 0x80493938u
 #define REMIX_SYM_Stages__alternate_music_table 0x80458730u
 #define REMIX_SYM_Stages__background_table 0x804576D4u
 #define REMIX_SYM_Stages__bg_type 0x80455C0Cu

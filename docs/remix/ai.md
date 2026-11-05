@@ -4,13 +4,13 @@ How the Smash Remix 2.0.1 CPU works (read from `.toolchain/pkgs/smashremix-src/s
 `<Fighter>/AI/Attacks.asm`, the `*shared.asm` files, `Reflect.asm`, `KingOfTheHill.asm`, `Smashketball.asm`) and how the port
 reproduces it. Code: `decomp/src/ft/ftcomputer.c` (the vanilla CPU, with `#if defined(PORT) && defined(REGION_REMIX)` hook
 blocks), `decomp/src/ft/ftremix/ftremixai<topic>.{c,h}` (hook bodies; `ftremixai<topic>rules.{c,h}` hold pure int/float rules; topics: tables,
-commands, prevent, longrange, weight, prediction, size, movement, recovery, cloud, lv10, level, roll, combat, specials, teching, di,
-postprocess, postsheik),
+commands, prevent, longrange, weight, prediction, size, movement, recovery, recoverylogic, drift, shared, stage, cloud, lv10, level,
+roll, combat, specials, teching, di, postprocess, postsheik),
 `decomp/src/mn/mnplayers/mnremixcpulevel*.{c,h}` (CSS level 10), `decomp/src/gm/gmremixspawnsetup.c` (default level).
 Tests: rule tests `tests/remix/test_ai_*.c` (`cmake --build build --target run_remix_mode_tests`); in the game use
 `.claude/skills/remix-smoke-tests/scripts/vs.sh <fkinds> <input> <name>` (P1 human, the other ports CPU) with
 `SSB64_VS_CPU_LEVEL=<n>` (level of every CPU), `SSB64_REMIX_TOGGLES="Improved AI=1"` and `SSB64_VS_STAGE`. Log lines to grep:
-`ftRemix AI:` (attack lists), `Remix AI input` (scripts), `cpu di`, `ftRemixAiPreventAttack`, `ftRemixAiLongRangeSwitchKind`.
+`ftRemix AI:` (attack lists), `Remix AI input` (scripts), `cpu di`, `ftRemixAiPreventCandidate`, `ftRemixAiLongRangeSwitchKind`, `ftRemixAiRecoveryLogic`.
 
 ## 1. Pipeline and conventions
 
@@ -75,11 +75,11 @@ their parent's (`ai_behaviour`, `ai_aerial_chase`, `ai_long_range`).
 |---|---|---|---|
 | `ai_behaviour` | 0x8049A320 | pointer to the fighter's attack list (two groups, see section 5) | read by `ftRemixAiGetAttackList` (`ftremixaitables.c`) for Remix fighters; vanilla fighters use the registry list |
 | `lv10_ai_behaviour` | 0x8049D9C4 | attack list for level 10; filled for the 12 vanilla fighters by `VanillaLv10Attacks.asm`, 0 elsewhere | read by `ftRemixAiGetAttackList` for any fkind with an entry |
-| `ai_attack_prevent` | not in `remix_symbols.h` | per-fighter veto routine (`PREVENT_ATTACK.ROUTINE.*`), registered in each `AI/Attacks.asm` | not read; `ftRemixAiPreventAttack` switches on `fkind` (section 5) |
+| `ai_attack_prevent` | `REMIX_SYM_Character__ai_attack_prevent__table` | per-fighter routine (`PREVENT_ATTACK.ROUTINE.*`), registered in each `AI/Attacks.asm` | read by `ftRemixAiPreventCandidate` (`ftremixaiprevent.c`): a vanilla routine address is matched by value, a Remix one by the entry of the fighter that registers it (section 5) |
 | `ai_long_range` | 0x8049A7D0 | far-range routine: NSP_SHOOT 0x80138D24, PHYSICAL_SHOOT 0x80138CD4, NONE 0x80138ECC | read by `ftRemixAiLongRangeSwitchKind` |
 | `nsp_shoot_custom_move` | 0x8049E198 | command id that replaces the far-range NSP command (0 = none) | read by `ftRemixAiLongRangeCommand` |
 | `ai_aerial_chase` | 0x8049A640 | per fighter NORMAL 0x8013389C or CHASE 0x80133A14 (= skip the candidate): whether an NSP candidate is dropped against a Ness/Fox target | not read; the C `switch (fkind)` in `ftComputerCheckDetectTarget` (target Ness/Fox, level >= 5) keeps the vanilla ids only |
-| `recovery_logic` | 0x8049D538 | per-fighter recovery routine, called after the walk step | the dispatch exists in `ftComputerFollowObjectiveRecover` (`port_fighter_ai_recovery_routine`); no code fills that slot |
+| `recovery_logic` | 0x8049D538 | per-fighter recovery routine, called after the walk step | `ftRemixAiRecoveryLogicRunFighter` (`ftremixairecoverylogic.c`) matches the fighter's table entry with the entry of the fighter that registers it and runs the C port (`ftremixairecoverylogic*rules.c`); the registry slot `ai_recovery_routine` is gone |
 | `cpu_post_process` | 0x8049D6BC | per-fighter routine at the end of the frame's decisions | `ftRemixAiPostProcessFighter` switch on `fkind` (Sheik) |
 | `cpu_attack_weight` | not in `remix_symbols.h` | per-fighter routine that rescales a candidate's chance | dispatch exists in the accumulate loop (`port_fighter_ai_attack_weight_routine`); no code fills that slot |
 | `close_quarter_combat` | not in `remix_symbols.h` | per-fighter branch of `stop_roll_spam_`; every entry is `_continue`, the per-fighter patches (AI.asm 6311-6359) are commented out | none needed |
@@ -146,7 +146,7 @@ and the command is issued with `ftComputerSetCommandWaitShort`.
 | `skip_repeated_input_check` / `_skip` (5944, 5980) | same function | lv10 skips the repeated-input range adjustment and never reports "four in a row" (the counter resets) | `ftRemixAiSkipRepeatedInputCheck`, `ftRemixAiInputRepeatLimitHit` |
 | `no_attack_when_all_odds_eq_zero` (6016) | same function exit | when every chance is 0 no attack is picked (return FALSE) | the port returns FALSE on that fall-through for every level |
 | `extend_attack_check_range(_2)` (5136, 5158) | `ftComputerFollowObjectiveAttack` 0x801392C8 | the "target is close enough to attack" distance base is 2000 at lv10 (vanilla 1200) | `ftRemixAiPredictionAttackViewBase` |
-| `PREVENT_ATTACK` routines (2973-3260) | commit step 0x80133520 | per-fighter veto of the chosen input; TRUE aborts the selection of the frame | `ftRemixAiPreventAttack` |
+| `PREVENT_ATTACK` routines (2973-3260) | candidate loop of `ftComputerCheckDetectTarget` (jump at 0x801334D0) | per candidate attack: set `is_attempt_cliffcatch` (the ledge probe may drop it) or skip the candidate | `ftRemixAiPreventCandidate` (verdict ALLOW, CLIFF_CHECK or SKIP), replacing the vanilla `switch (fkind)` |
 | `AERIAL_CHASE.extend_polygon_check_` (2503) and `Reflect.AI.extend_reflect_absorb_character_check_` (0x80133850) | skip-NSP-against-Ness/Fox switch | the polygon exclusion also covers Remix polygons; the Ness/Fox test becomes the `fighter_reflect` table (Wolf, Falco, JFox, JNess, Lucas, NLucas, Marina, Dedede, Piano, Slippy) so CPUs do not shoot at reflectors/absorbers | none: the C switch knows the vanilla ids only |
 | `ai_ball_attack_range` (Smashketball 1211, 0x80133144) | picker, before the list pointer is used | with the Smashketball mode on, the ball replaces the target: hurtbox 200 x 200, ball position, velocity, gravity and fall speed | none |
 
@@ -178,11 +178,11 @@ the vanilla logic runs). Port: `ftRemixAiMovementTargetsOffstage`, `ftRemixAiMov
 
 | Patch (AI.asm) | Vanilla site | Behaviour | Port |
 |---|---|---|---|
-| `recovery_fix_` (133) | `ftComputerFollowObjectiveWalk` 0x8013557C | the "up-B already used" limit is skipped at lv10 / Remix 1P, and with Improved AI outside classic mode | `ftRemixAiRecoveryAllowsUpBRepeat` (level, classic mode and toggle; no Remix 1P term) |
+| `recovery_fix_` (133) | `ftComputerFollowObjectiveWalk` 0x8013557C | the "up-B already used" limit is skipped at lv10 / Remix 1P, and with Improved AI outside classic mode | `ftRemixAiRecoveryAllowsUpBRepeat` (Remix 1P, level, classic mode and toggle) |
 | `fix_target_pos_x` (182) | Walk 0x8013537C | Improved AI: the walk target X is clamped to the map bounds minus 200 (bounds are the ground data left/right halfwords) | `ftRemixAiRecoveryClampWalkTargetX` (`gMPCollisionGroundData->map_bound_left/right`) |
 | `fix_remix_recovery` (240) | `ftComputerFollowObjectiveRecover` 0x80137F4C | Pikachu family: vanilla block in classic mode or with Improved AI off, Remix recovery otherwise; Sheik (action 0xEE), DSamus (0xE7), Peppy (0xF2), Mewtwo (0xE2) press Z while charging NSP and skip walk and recovery logic; Wolf USP actions (0xE3, 0xE4, 0xE6, 0xE8) aim at X 0, Y 4000; Banjo Flight (0xEF) on frame 21 presses B and, with no floor line below, sends PRESS B and skips the recovery logic | `ftRemixAiRecoveryVanillaPikachuApplies`, `ftRemixAiRecoveryWolfTarget`, `ftRemixAiRecoverySpecialCase` |
-| `custom_recovery_logic` (384) | after the walk, 0x80137FBC | calls `recovery_logic[fkind]` | dispatch in `ftComputerFollowObjectiveRecover`, slot unfilled |
-| `_improve_recovery_drift` (4337) | Walk 0x80135400 | lv10, all jumps used, Recover behaviour, no floor line below: search the closest ledge (`_find_closest_ledge`, left then right, 300 padding) and aim the drift at it | none |
+| `custom_recovery_logic` (384) | after the walk, 0x80137FBC | calls `recovery_logic[fkind]` | `ftRemixAiRecoveryLogicRunFighter`, called in `ftComputerFollowObjectiveRecover` after `ftComputerFollowObjectiveWalk` (section 8b) |
+| `_improve_recovery_drift` (4337) | Walk 0x80135400, just before the `joint Y < target Y` compare | lv10 and (special fall, or all jumps used, or Recover objective with no floor line below): refresh `cliff_left_pos` / `cliff_right_pos` from the floor lines (`_find_closest_ledge`: left edges for direction 1, right edges for -1, edges 200 inside the blastzone, no ground 50 below, a ledge above counts 1.5 times its Y distance, grabbable = floor edge flag and nobody hangs there), pick the side from X + 200 * facing, then aim at the ledge: outside it (300), at its grab box when facing a grabbable ledge, inside it when above, special cases for the up special | `ftRemixAiRecoveryDrift` (`ftremixairecoverydrift.c`, rules in `ftremixairecoverydriftrules.c`), called at `block_52` of `ftComputerFollowObjectiveWalk` |
 | `fix_multi_doublejump_usage` (5448) | Walk jump status list | lv10 also accepts the aerial-jump procedure (`ftCommonJumpAerialProcUpdate`) as jump-ready so the CPU does not wait in Fall | `ftRemixAiCanJumpWhileFalling` |
 | `prevent_fastfall` (4799) | Walk "fast fall?" block 0x80135704 | lv10: no fast fall with all jumps used or an off-stage target; otherwise only when `floor_dist < -2000` | `ftRemixAiMovementFastfallPermitted` |
 | `shorthop_followup_attack` (4987) | Walk grounded branch 0x80135B18 | lv10: target above by <=300 point stick, <=600 SHORT_HOP_TOWARDS, <=900 FULL_C_JUMP_TOWARDS, else vanilla | `ftRemixAiMovementShorthopInput` |
@@ -191,7 +191,7 @@ the vanilla logic runs). Port: `ftRemixAiMovementTargetsOffstage`, `ftRemixAiMov
 | `_fix_weird_air_drift_right/left` (4007, 4033) | `ftComputerCheckSetTargetEdgeRight/Left` 0x80134000 / 0x80134368 | lv10 with upward Y speed does not retarget to itself +-500 X | `ftRemixAiSkipsUpwardDriftTarget` |
 | `usp_check_` (1342) | `ftComputerUpdateInputs` air branch 0x80132140 | the Fox USP branch covers Fox, JFox, Peppy, Falco; Goemon / Ebisumaru in a Magic Cloud action skip the `dist_y < 0` stick zeroing | `ftRemixAiUspIsFoxFamily`, `ftRemixAiUspIsCloudAction` |
 | `recovery_stick_y_fix` (1402) | after each command, 0x8013253C | Goemon / Ebisumaru Magic Cloud: stick up; Goemon presses Z, Ebisumaru A above a floor line (Cloud Escape clears Z) | `ftRemixAiCloudRecoveryInput` |
-| `evade_fix_` (94) | `ftComputerCheckEvadeDistance` 0x80132C00 | with Improved AI (or Remix 1P) the CPU does not evade while it is Starman (>= 112 frames left) or respawn-invincible (>= 20 frames) | `ftRemixAiCombatEvadeIsSuppressed` (toggle and timers; no Remix 1P term; the asm's 1P compare uses `v1` after loading 4 into `t6`, so it may never fire) |
+| `evade_fix_` (94) | `ftComputerCheckEvadeDistance` 0x80132C00 | with Improved AI (or Remix 1P) the CPU does not evade while it is Starman (>= 112 frames left) or respawn-invincible (>= 20 frames) | `ftRemixAiCombatEvadeIsSuppressed` (toggle and timers). The asm's Remix 1P compare uses `v1` after loading 4 into `t6`; at the only call site (0x801369EC) `v1` is -1, so the term never fires and is not ported |
 | `remix_ignore_projectiles_` (1299) | `ftComputerProcDefault` 0x801377E4 | MLuigi and GBowser (and anyone with the Franklin Badge) skip the projectile reaction | `ftRemixAiCombatProjectileIgnored` |
 | `charge_less_often` (871) | `ftComputerCheckTryChargeSpecialN` 0x80136A2C | lv10 starts a charge only on a 1/60 roll (rolled only at lv10) | `ftRemixAiCombatChargeIsSkipped` |
 | `improve_remix_specials` (924) | same, 0x80136A54 | charge decisions for Remix ids: Samus-like (Mewtwo, DSamus, ESamus, JSamus) share the Samus charge, JDK the DK one, Bowser/GBowser zero the stick X during a grounded USP (action 0xDE), Sheik/Peppy keep charging in their charge states, stop when shooting or in jumpsquat, and press B below 6 needles/shots | cases in `ftComputerCheckTryChargeSpecialN`, `ftRemixAiSpecialsBowserUspStickReset` |
@@ -202,6 +202,7 @@ the vanilla logic runs). Port: `ftRemixAiMovementTargetsOffstage`, `ftRemixAiMov
 | `taunt_replace_` (3690) | same, taunt case 0x80137754 | lv10 never taunts | `ftRemixAiTauntIsSuppressed` |
 | `force_objective_attack` (3892) | `ftComputerProcessTrait` 0x8013A718 | lv10 forces behaviour 0 (no RNG call) | `ftRemixAiTraitRoll` |
 | `stop_roll_spam_` (6040) | `func_ovl3_80138EE4` roll L/R, 0x80139294 | for lv10 CPUs (and GBowser at any level): in actions after TurnRun reset the stick; against an opponent in an advantage state (damage, down, stun, sleep) roll 16: 0 SHORT_HOP_IN_PLACE, 1 SHORT_HOP_TOWARDS, else skip; otherwise 0 the vanilla roll, 1 SHORT_HOP_IN_PLACE, 2 SHORT_HOP_TOWARDS, 3 SHORT_HOP_AWAY, 4-5 PIVOT_AWAY, else skip | `ftRemixAiStopRollSpam` |
+| `planet_zebes_acid_._ai_fix` (Hazards.asm 165-177, 234-254) | `ftComputerGetObjectiveStatus` acid check, 0x801374E8 | the CPU flees the rising acid on every stage whose `Stages.function_table` entry is the Planet Zebes maker (0x03, 0x5C, 0x74, 0x79, 0xA5), and only with the hazards on (stage 3 alone, hazards or not, before) | `ftRemixAiZebesAcidApplies` (`ftremixaistage.c`); the two vanilla checks in `ftComputerCheckSetTargetEdgeLeft/Right` stay vanilla, as in the asm |
 
 ## 7. Teching, Z-cancel and DI
 
@@ -242,11 +243,27 @@ Hooks in shared fighter files follow one pattern: they extend a vanilla `fkind` 
 | Patch | Vanilla site | Behaviour |
 |---|---|---|
 | `linkshared.cpu_pull_out_bombs_` (740) | `func_ovl3_80138AA8` 0x80138A04 | ELink, JLink, YLink, Peach pull bombs like Link; Marina when her charge is 2+. Port: cases in `func_ovl3_80138AA8` |
-| `dkshared.giant_punch_fix_1` (268), `cpu_fix_2` (288) | 0x80136C30, 0x80138F78 | JDK (and Marina for cargo) join the Giant Punch checks. Port: JDK cased in `ftComputerCheckTryChargeSpecialN` and `...CancelSpecialN` |
-| `nessshared.cpu_usp_usage_fix_` (795), `cpu_usp_control_fix_` (822), `cpu_pk_thunder_attack_` (1133), `improved_pk_thunder_` (1160), `save_cpu_recovery_location_` (1245) | 0x80134730, 0x80137160, 0x80138A0C, 0x801371FC, 0x80153CA8 | JNess and Lucas use the Ness USP/PK Thunder logic; Improved AI PK Thunder aiming replaces the vanilla Y offset when Ness targets himself; the PK Thunder target is stored per port |
-| `jigglypuffkirbyshared.kirby_cpu_inhale` 1-3 (513-570) | 0x80136C1C, 0x80138F08, 0x801370F0 | JKirby and Dedede take the Kirby inhale branches |
-| `jigglypuffkirbyshared.multi_jump_recovery_fix_` (813), `remix_skip_offensive_usp_air_` (860) | 0x80135198, 0x80133F70 | the Puff/Kirby recovery branch is extended to the slow-hop clones (Marina, Dedede and their N versions); Puff clones do not use USP against an aerial opponent |
-| `yoshishared.yoshi_cpu_fix_1` (278) | 0x8013558C | JYoshi takes the Yoshi recovery branch; Marina uses it to choose USP once her six jumps are used |
+| `dkshared.giant_punch_fix_1` (268), `cpu_fix_2` (288) | 0x80136C30, 0x80138F78 | JDK joins the Giant Punch checks (charge, cancel, evade); Marina and N Marina never evade while in Cargo (0xEB to 0xEF). Port: JDK cased in `ftComputerCheckTryChargeSpecialN`, `...CancelSpecialN` and `func_ovl3_80138EE4`; `ftRemixAiEvadeIsMarinaCargo` |
+| `nessshared.cpu_usp_usage_fix_` (795), `cpu_usp_control_fix_` (822), `cpu_pk_thunder_attack_` (1133), `improved_pk_thunder_` (1160), `save_cpu_recovery_location_` (1245) | 0x80134730, 0x80137160, 0x80138A0C, 0x801371FC, 0x80153CA8 | JNess and Lucas use the Ness USP range, PK Thunder steering and idle PK Thunder attack (cases in `func_ovl3_801346D4`, `ftComputerGetObjectiveStatus`, `func_ovl3_8013877C`). Level 10, Remix 1P or Improved AI outside classic mode: while the hold status is at most 0x3B tics old, the aim offset is `512 * atan2(ledge Y - own Y + 500, abs(ledge X - own X))` instead of 100 (`ftRemixAiPkThunderTargetY`). The ledge is the saved per-port `cliff_left_pos` (own X < 0) or `cliff_right_pos`, written by `ftRemixAiPkThunderSaveLedge` at the start of `ftNessSpecialHiMakePKThunder` |
+| `jigglypuffkirbyshared.kirby_cpu_inhale` 1-3 (513-570) | 0x80136C1C, 0x80138F08, 0x801370F0 | the copied-power selector is `copy_id` for Kirby and J Kirby (`ftRemixAiCopiedPowerKind`; Dedede has no copy word, the asm reads a minion pointer that matches nothing). In the inhale block of `ftComputerGetObjectiveStatus`, Kirby and J Kirby run the vanilla block unless the hat id (unsigned) is 0x20 or more; with that Dedede hat, and Dedede himself, the CPU presses B (routine 0x09) in NSP_IDLE_GROUND / NSP_FALL (Dedede 0xEC, 0xF4; Kirby hat 0x170, 0x178) |
+| `jigglypuffkirbyshared.multi_jump_recovery_fix_` (813), `remix_skip_offensive_usp_air_` (860) | 0x80135198, 0x80133F70 | the Puff/Kirby walk branch (`ftRemixAiWalkUsesMultiJumpBranch`) covers Kirby, Purin, JPuff, EPuff, Marina and Dedede; a Dedede in USP_MOVE (0xE5) leaves the walk objective. The asm also lists J Kirby (compared through `t6`, which holds the top joint pointer there), N Marina and N Dedede (compared through a register already overwritten): those never match and are not ported. JPuff and EPuff join the Purin USP skip (the vanilla 90 percent roll stays) |
+| `yoshishared.yoshi_cpu_fix_1` (278) | 0x8013558C | `ftRemixAiRecoveryMayUseUsp`: J Yoshi does not use the up special to recover; Marina uses it only when `jumps_used == 6` |
+
+### 8b. Character.recovery_logic routines
+
+`custom_recovery_logic` calls the fighter's `recovery_logic` entry after the walk step of the Recover objective. Port: `ftRemixAiRecoveryLogicRunFighter` reads the entry from the image, finds the registering fighter with the same entry (Mario, Pikachu, Jigglypuff, Yoshi, Ness, Captain, Link, Fox, Banjo, Wario, Marth, Crash, Dedede, Falco, Sheik, Marina, Sonic, Peach; clones copy the entry), fills `FTRemixAiRecoveryLogicState` and applies the `FTRemixAiRecoveryLogicResult` (target, stick, buttons, then `ftComputerSetCommandImmediate`; a result with `roll_modulus` applies only when a draw in [0, modulus) is 0). All routines read the nearest of `cliff_left_pos` / `cliff_right_pos` by X distance (left on a tie). Level 10 only: Mario family, Pikachu, Jigglypuff, Yoshi and Ness, Captain, Link, Fox; the others run at any level.
+
+| Family | Behaviour |
+|---|---|
+| Mario, Luigi, Dr. Mario (+J) | tornado in the air: mash B on odd screen frames, point the stick at the ledge until frame 50; 2000 above the ledge: NSP towards; tornado not yet used and farther than 2560 in X with the ledge above or level: DSP |
+| Pikachu | first aerial zip: aim 25 degrees above the line to the target (within 2000 point at it); second zip and end: point the stick at the target |
+| Jigglypuff, JPuff, EPuff | Pound in the air: hold up and toward the ledge; farther than 1000 and 2000 above the ledge, or in a mid jump (JumpAerialF, Jump2 to Jump5): NSP towards |
+| Yoshi, JYoshi, Ness, JNess, Lucas | after the double jump while rising: DSP when the grab box (attributes 0xB0 used for X and Y by the asm) misses the ledge |
+| Captain, JFalcon, Dragon King | Falcon Punch in the air: hold up and toward the ledge; right after the double jump at max air speed, farther than 4000 and 100 above the ledge: NSP towards |
+| Link, JLink, ELink | no item, farther than 2000 and 2000 above the ledge: DSP towards the ledge |
+| Fox, JFox | not in Fire Fox and falling: within 4000 (2000 with no jumps) of the ledge, a 1 in 20 roll presses DSP |
+| Banjo | not in FAIR or a jump command, facing the expected way, falling, farther than 1800 and not too far above the ledge: FTILT with stick Y 0 (any level) |
+| Wario, Marth and Roy, Crash, Dedede, Falco, Sheik, Marina, Sonic, Peach | see `ftremixairecoverylogicfighterrules.c` (any level) |
 
 ## 9. Reflect, absorb and the game modes
 
@@ -276,9 +293,12 @@ shield break) uses the tech and DI hooks of section 7.
 | `weight_attack_options` | the combo read at N64 0x40 is `hitlag_tics` | by `FTStruct` layout; the asm comment calls it the hitstun timer |
 | `_custom_weight_table` order | applied once in the accumulate loop, after the 0.25 repeat factor | equal for linear routines |
 | `extend_cliff_attack_` | keeps the always-CLIFF_LET_GO result of `rand(2) >> 1` | the asm's literal behaviour |
-| `ftRemixAiPreventAttack` | switch on `fkind`, not the `ai_attack_prevent` table | the routines are Remix code addresses; they are ported as C |
+| `ftRemixAiPreventCandidate` | the Remix routines are identified by matching table entries with their owners, not by symbol | the routines are Remix code addresses without symbols; they are ported as C |
 | WARIO PREVENT | vetoes ids 0x4D/0x4E (Wario's NSP_TOWARDS routines) | the asm literals 0x42/0x43 are the generic NSP_TOWARDS and FAIR scripts while its comments say Wario NSP towards; the port follows the comment |
 | Crash PREVENT | soft platform = `coll_data.floor_flags & MAP_VERTEX_COLL_PASS` | N64 surface halfword 0x00F6 bit 0x4000 |
+| `recovery_logic` hold-up routines | Jigglypuff Pound, Falcon Punch and Wario Body Slam hold toward the nearest ledge | the asm compares `f14 < f0` before either is computed (stale registers); the nearest ledge side is the evident intent |
+| `_find_closest_ledge` | with no candidate the ledge is (0, 0) and not grabbable | the asm leaves `is_grabbable` uninitialized |
+| `_improve_recovery_drift` flag byte | tests and clears all eight flags of byte 0x49 of the computer struct | the asm reads `lb` / `sb r0` of the whole byte, not just `is_attempt_specialhi_recovery` |
 | `CpuLevel9` enhancement | overrides level 10 when on | port-only convenience setting |
 
 Open gaps: `docs/remix/patch_audit.md`, groups g7 (CPU hooks of AI.asm and fighters), g5 (Reflect) and g8 (modes).

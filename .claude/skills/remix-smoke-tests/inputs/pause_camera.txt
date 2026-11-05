@@ -1,0 +1,9 @@
+# Pause at 500, then the Remix pause camera: C-Up, C-Left, B (zoom out), A (zoom in), Z+A (fov), stick at its limit.
+500 502 0 START
+560 620 0 CU
+640 700 0 CL
+720 800 0 B
+820 880 0 A
+900 960 0 Z+A
+980 1040 0 - 80 0
+1060 1120 0 - 0 80

@@ -75,22 +75,27 @@ static void testOtherFightersReactToProjectiles(void)
 
 static void testLevelTenAlwaysRepeatsUpB(void)
 {
-    CHECK_TRUE(ftRemixAiRecoveryUpBRepeatAllowed(10, 1, 0));
+    CHECK_TRUE(ftRemixAiRecoveryUpBRepeatAllowed(10, 1, 0, 0));
 }
 
 static void testClassicModeNeverRepeatsUpBBelowLevelTen(void)
 {
-    CHECK_EQ(0, ftRemixAiRecoveryUpBRepeatAllowed(9, 1, 1));
+    CHECK_EQ(0, ftRemixAiRecoveryUpBRepeatAllowed(9, 1, 1, 0));
 }
 
 static void testImprovedAiRepeatsUpBBelowLevelTen(void)
 {
-    CHECK_TRUE(ftRemixAiRecoveryUpBRepeatAllowed(5, 0, 1));
+    CHECK_TRUE(ftRemixAiRecoveryUpBRepeatAllowed(5, 0, 1, 0));
 }
 
 static void testVanillaAiKeepsUpBLimitBelowLevelTen(void)
 {
-    CHECK_EQ(0, ftRemixAiRecoveryUpBRepeatAllowed(5, 0, 0));
+    CHECK_EQ(0, ftRemixAiRecoveryUpBRepeatAllowed(5, 0, 0, 0));
+}
+
+static void testRemix1PRepeatsUpBEvenInClassicMode(void)
+{
+    CHECK_TRUE(ftRemixAiRecoveryUpBRepeatAllowed(3, 1, 0, 1));
 }
 
 static void testTargetInsideBlastzoneIsKept(void)
@@ -163,6 +168,7 @@ void remixTestAiCombatRules(void)
     RUN_TEST(testClassicModeNeverRepeatsUpBBelowLevelTen);
     RUN_TEST(testImprovedAiRepeatsUpBBelowLevelTen);
     RUN_TEST(testVanillaAiKeepsUpBLimitBelowLevelTen);
+    RUN_TEST(testRemix1PRepeatsUpBEvenInClassicMode);
     RUN_TEST(testTargetInsideBlastzoneIsKept);
     RUN_TEST(testTargetNearLeftEdgeIsClampedToPaddedLeft);
     RUN_TEST(testTargetNearRightEdgeIsClampedToPaddedRight);

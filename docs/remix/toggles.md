@@ -114,7 +114,7 @@ Deviation: entries that carry an A-press function in `Toggles.asm` are not liste
 
 - **Neutral Spawns** (`neutral_spawns`; 0 off, 1 on; default 1)  
   Asm: Spawn.asm `load_spawn_`: VS matches start from `Spawn.neutral_table` slots (valid setups for singles and teams; no valid setup keeps the vanilla spawn; Smashketball is always neutral).  
-  Port: `gmRemixNeutralSpawnApply` (gm/gmremixspawnsetup.c:221) through `port_comp_ruleset_get_spawn` (sc/sccommon/scvsbattle.c). Stage row from `gSCManagerBattleState->gkind`. Deviation: the table is ported for stages 0x00-0x10 only; Remix stages use the stage's own spawn points. The Training branch is separate (sc/sc1pmode/sc1ptrainingmode.c).
+  Port: `gmRemixNeutralSpawnApply` (gm/gmremixspawnsetup.c:221) through `port_comp_ruleset_get_spawn` (sc/sccommon/scvsbattle.c). Stage row from `gSCManagerBattleState->gkind`. The neutral rows of every stage id (0x00-0xD7) are read from the Remix image (`REMIX_SYM_Spawn__neutral_table`). Open: the asm also uses `Spawn.original_table` for the non-neutral spawn of every stage; the port keeps the stage's own spawn points there. The Training branch is separate (sc/sc1pmode/sc1ptrainingmode.c).
 
 - **Salty Runback** (`salty_runback`; 0 OFF, 1 A+B+Z+R+START, 2 A+B+Z+R+Dpad-Left; default 1/0/1/1)  
   Asm: GameEnd.asm `update_screen_`: holding the combo (A+B+Z+R+START, or A+B+Z+R+D-Pad Left) at the end of a VS match restarts it at once on the same stage without results (Great Bay plays FGM 0x566). R or L held shows the results instead.  
@@ -367,7 +367,7 @@ Stage BGM path: `grRemixGetStageBGM` picks the alternate song (chances 65/16/10/
 
 - **Dragon King HUD** (`dragon_king_hud`; 0 DRAGON KING, 1 ALL STAGES, 2 OFF; default 0/2/0/0)  
   Asm: DragonKingHUD.asm and the HUD placement of ComboMeter, KotH, Multi-Man, All-Star rest area and Bonus: DRAGON KING (default) and ALL STAGES use the lower Dragon King HUD layout, OFF never.  
-  Port: Read for the lowered combo meter, KotH HUD and the 1P placements (if/ifremixcombometer.c:99, gm/gmremixkothhud.c:73, sc/sc1pmode/sc1pbonusstage.c:1170, sc1premixallstarrest.c:33, sc1premixmultiman.c:79). The Dragon King damage number set, lowered VS timer and series-logo hiding are not implemented.
+  Port: Read for the lowered combo meter, KotH HUD and the 1P placements (if/ifremixcombometer.c:99, gm/gmremixkothhud.c:73, sc/sc1pmode/sc1pbonusstage.c:1170, sc1premixallstarrest.c:33, sc1premixmultiman.c:79). The Dragon King damage number set (file 0xA4 digits, Dragon King colours, y 38), the lowered timer (y 212), the hidden series logo, the instant KO digit fall and the 1P, bonus, Training, How to Play and VS demo placements are in `if/ifremixdragonkinghud.c` (`ifRemixDragonKingHudIsOn`, `ifRemixDragonKingHudPickY`).
 
 - **Camera Mode** (`camera_mode`; 0 NORMAL, 1 BONUS, 2 FIXED, 3 SCENE; default 0)  
   Asm: Camera.asm: BONUS routes default-camera stages to the Mushroom Kingdom camera and keeps the Bonus pause zoom, FIXED freezes the camera on a per-stage fixed view and disables pause analog control, SCENE uses the anim camera, hides the HUD at unpause and keeps the pause camera eye.  

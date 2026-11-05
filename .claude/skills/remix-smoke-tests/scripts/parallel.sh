@@ -20,7 +20,11 @@ case "$MODE" in
     done; done ;;
   stages)
     first="${1:-41}"; last="${2:-215}"
+    # BTT/BTP-class stages and the Rest Area run the bonus ground (Stages.asm bonus_fix_1_), whose item file only the
+    # bonus scene loads: they are not VS stages, test them through scene 52 with SSB64_SPGAME_STAGE=3|7 and their owner.
+    bonus_ids=" 77 78 79 81 82 83 84 86 89 100 101 122 123 127 129 135 137 138 139 160 161 168 170 172 175 178 183 185 194 197 203 206 207 "
     for s in $(seq "$first" "$last"); do
+      case "$bonus_ids" in *" $s "*) continue ;; esac
       echo "SSB64_VS_STAGE=$s SHOTS=450 bash $HERE/vs.sh 0,8 $HERE/../inputs/none.txt st_$s 480" >> "$LIST"
     done ;;
   items)

@@ -139,17 +139,6 @@ typedef struct FighterDescriptor {
     int                          action_string_table_count;
     int                          action_string_base_action_id;
 
-    /* SR Crash.asm:714-717: AI attack-prevent routine ptr. NULL = use
-     * parent's. Signature: int(*)(struct FTStruct*, int input_kind) -
-     * returns nonzero to skip committing that attack (SR sets t2=1). */
-    void                        *ai_attack_prevent_routine;
-
-    /* SR Crash/AI/Attacks.asm recovery_logic: per-fkind CPU recovery hook
-     * fired right after ftComputerFollowObjectiveWalk in the Recover
-     * objective (SR custom_recovery_logic @0x80137FBC). NULL = parent's.
-     * Signature: void(*)(struct FTStruct*). */
-    void                        *ai_recovery_routine;
-
     /* SR Crash/AI/Attacks.asm cpu_attack_weight: per-fkind hook to adjust
      * a candidate attack's selection weight (SR _custom_weight_table; f2 =
      * current weight in/out). NULL = parent's. Signature:
@@ -307,8 +296,6 @@ int                         port_kirby_get_copy_special_fkind(void);
 
 int                         port_fighter_crowd_chant_fgm(int fkind);
 const char                 *port_fighter_action_string(int fkind, int action_id);
-void                       *port_fighter_ai_attack_prevent_routine(int fkind);
-void                       *port_fighter_ai_recovery_routine(int fkind);
 void                       *port_fighter_ai_attack_weight_routine(int fkind);
 int                         port_fighter_remix_1p_end_bgm(int fkind);
 int                         port_fighter_remix_1p_ending_image_file_id(int fkind);

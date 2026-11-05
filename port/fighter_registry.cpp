@@ -260,18 +260,6 @@ const char *port_fighter_action_string(int fkind, int action_id)
     return r->action_string_table[idx];
 }
 
-void *port_fighter_ai_attack_prevent_routine(int fkind)
-{
-    if (const auto *r = get(fkind)) return r->ai_attack_prevent_routine;
-    return nullptr;
-}
-
-void *port_fighter_ai_recovery_routine(int fkind)
-{
-    if (const auto *r = get(fkind)) return r->ai_recovery_routine;
-    return nullptr;
-}
-
 void *port_fighter_ai_attack_weight_routine(int fkind)
 {
     if (const auto *r = get(fkind)) return r->ai_attack_weight_routine;

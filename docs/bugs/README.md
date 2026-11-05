@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-11-05 | [remix_vs_results_status_buffer](remix_vs_results_status_buffer_2026-11-05.md) | VS results screen aborted after a match with four Remix fighters: the vanilla 120/7-entry reloc status buffers overflowed with their extern dependencies; 256/64 under REGION_REMIX |
 | 2026-11-05 | [remix_chardata_dedede_crash](remix_chardata_dedede_crash_2026-11-05.md) | Character Data: a random Dedede crash (NULL FTParts in the figatree walk), the extended fighters' filler status indexing the opening table out of bounds (fixed), and a figatree size check in `ftMainSetStatus`; the exact path of the original crash is not proven |
 | 2026-11-05 | [remix_tugofwar_asm_deviations](remix_tugofwar_asm_deviations_2026-11-05.md) | Tug of War: last-hit index by team and teammate shield-break test are register slips in TugOfWar.asm; the port keeps the intended behaviour; stock cap of 127 |
 | 2026-11-04 | [remix_css_bookend_width_img](remix_css_bookend_width_img_2026-11-04.md) | VS CSS crashed on frame 4: the sprite fixup sized the bonus bookend texels by width_img (96, the real stride is 16) and byte-swapped past the end of file 0xA06 into the main GObj |

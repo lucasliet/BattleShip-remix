@@ -258,6 +258,16 @@ Closed phases:
     emblem, "B+↑ Fire Bird" and "B+↓ Reflector") and the full-lap reference.
   - [ ] **Lot 2, match flow and stages.** ST-1 opens the lot (every match on a Remix stage ends with FAILURE instead of
     GAME SET).
+    - Progress (2026-11-05): all packages coded, built and committed; done in the ledger with their runs: ST-1, ST-2, ST-3,
+      ST-4, ST-5, ST-6, ST-7, ST-8, ST-9, ST-13, ST-14, ST-16, ST-17, ST-20, ST-21, ST-22, ST-25, ST-26, IT-8, OP-37, MS-13,
+      MS-15, MS-17, MS-26 (new: `Spawn.original_table`). Fixed on the way: the VS results screen aborted after a
+      four-Remix-fighter match (`docs/bugs/remix_vs_results_status_buffer_2026-11-05.md`). Found: since Phase 5 the BTT/BTP
+      stages run the bonus ground (`bonus_fix_1_`), so the VS shortcut cannot load them; the stage sweep skips them and they
+      are run through the 1P path (SKILL.md).
+    - **Left (coded, not yet seen in game):** ST-10 (Peach BTT pipe), ST-11 (platform that vanishes under a hanging fighter),
+      ST-12 (Congo Falls barrel hitbox), ST-15 (Onett and Tal Tal follow the hazard toggle), ST-18 (hazard item draw order),
+      ST-19 (Rainbow Chomp past the bounds), ST-23 (Stage Select OFF random), ST-24 (Training background by parent stage),
+      IT-10 (ball into the Smashketball barrels). Each needs a scripted scenario or an lldb count in a long CPU match.
     - S1 match flow (owner of `ifcommon.c`, `ftcommondead.c`, `gmcamera.c`), serial: ST-1 with ST-26; ST-17 (countdown
       stoplight and FGM); ST-20 = MS-15 with ST-21 and IT-8 (pause camera, stick limits, close-up zoom); ST-4 with MS-13
       last (Dragon King HUD, input display under the timer; calls in `sc1pbonusstage.c` and `sc1ptrainingmode.c` after S3
@@ -343,22 +353,34 @@ Closed phases:
   **Acceptance:** `REMIX-TODO(AI)` at 0, every AI ledger item closed, recovery at level 9 not below the re-measured
   baseline, KOTH and Smashketball CPUs reach the hill and the ball, the reflect test with CPU Falco and Ness. Reference:
   [`ai.md`](ai.md).
-  1. Ledger IDs for the CPU-only scopes counted apart: dkshared `giant_punch_fix_1`, `cpu_fix_2`; jigglypuffkirbyshared
+  1. [x] (2026-11-05) Baseline with `ai_recovery.sh 10 4 14000` (`ai_rec_1` to `ai_rec_10`, level 9, 3 stocks, four CPUs): 712
+     recovery episodes, 631 ok (88.6%), 59 KO, 22 open at the frame limit. This is the reference for the Phase 6 acceptance
+     (the CP7 count of 181 of 222 used another episode definition). Two of the ten runs aborted on the VS results screen
+     (status buffer full after a four-Remix-fighter match), fixed in Phase 5b lot 2. Ledger IDs for the CPU-only scopes
+     counted apart: dkshared `giant_punch_fix_1`, `cpu_fix_2`; jigglypuffkirbyshared
      `kirby_cpu_inhale` 1 to 3, `multi_jump_recovery_fix_`, `remix_skip_offensive_usp_air_`; nessshared
      `cpu_usp_usage_fix_`, `cpu_usp_control_fix_`, `cpu_pk_thunder_attack_`, `improved_pk_thunder_`,
      `save_cpu_recovery_location_`; yoshishared `yoshi_cpu_fix_1`; the Zebes acid AI line; linkshared
      `cpu_pull_out_bombs_` checked (marked ported). `SSB64_REMIX_AI_LOG` and a measurement script (10 four-fighter matches,
      level 9, 3 stocks); the baseline re-measured with it before any change (181 of 222 episodes at CP7, measured with a temporary
      log since removed).
-  2. Rule files, in parallel: FT-6, FT-8 = CT-19, FT-12, FT-13 (decision in its row first), CT-17, CT-20, FT-9, FT-52,
+  2. [x] coded (2026-11-05): FT-6, FT-8 = CT-19, FT-9, FT-11, FT-12, FT-13, CT-17 (the PREVENT routines now act per
+     candidate in `ftComputerCheckDetectTarget`, as the asm does), CT-20, FT-52; unit tests. Rule files, in parallel: FT-6, FT-8 = CT-19, FT-12, FT-13 (decision in its row first), CT-17, CT-20, FT-9, FT-52,
      FT-11 (human handicap up to 40 and the icons above 9).
-  3. `ftcomputer.c`, serial: FT-1 = CT-18 (`custom_recovery_logic`, whose registry slot nothing fills), FT-2, FT-5, FT-3
+  3. First batch coded (2026-11-05): SH-16 to SH-27 (SH-20 and SH-21 narrower than the ledger, `ai.md`), ST-27, FT-1 = CT-18
+     (all 37 `recovery_logic` entries, `ftremixairecoverylogic*.c`), FT-2 (`_improve_recovery_drift`), FT-5; level-10 matches
+     `p6_lv10_a` to `_d` run the new routines without errors. Re-measure: 658 episodes, 568 ok (86.3%) against 631 of 712
+     (88.6%): the runs are deterministic, but any AI change alters every fighter's match, and KOs while recovering are mostly
+     hits taken off stage (vanilla fighters whose recovery code did not change show the same spread). Next: the AI log counts
+     self-destructs (KO with no hit taken during the episode), and that count is the acceptance metric. `ftcomputer.c`,
+     serial: FT-1 = CT-18 (`custom_recovery_logic`, whose registry slot nothing fills), FT-2, FT-5, FT-3
      with FT-36, FT-4 with FT-7, FT-10, GP-8 = CT-21 (reflect and absorb), MD-10 and MD-11 (Smashketball and KOTH
      targets), the CPU scopes of step 1, then the 2026-11-03 list: `cpu_post_process` per fighter, PUFF_DSP, the vanilla
      PREVENT rows, Banjo P06, Kirby P14, P11 of Sheik, Peppy, Bowser and Giga Bowser, the 30 `cpu_*` routines,
      `_improve_recovery_drift`, the Default CPU LVL refresh and the `CpuLevel9` conflict with level 10.
 - [ ] **Phase 7** open bugs, instrumentation and packages.
-  - [ ] Bugs: Poly Young Link missing on the CSS until the first reset; Metal Mario partly tiny in Training; Switch stutter
+  - [ ] Bugs: the vanilla-sized reloc status buffers of `sc1pintro.c`, `sc1pgame.c` and `sc1ptrainingmode.c` checked with
+    four Remix fighters (the VS results screen overflowed, `docs/bugs/remix_vs_results_status_buffer_2026-11-05.md`); Poly Young Link missing on the CSS until the first reset; Metal Mario partly tiny in Training; Switch stutter
     (`walked past registered DL range`, stale token 0x57EE); the rc 139 flake on Tal Tal.
   - [ ] Peach's Castle: blue quads with the roof-tile texture float in the sky when the camera zooms out (2026-11-05,
     `b11_pc_wide` in Remix and `b11_us_pc` in the vanilla build, both with P1 walking left; the reference emulator shows
@@ -376,7 +398,8 @@ Closed phases:
     first-run extraction works for the Remix (the game asks for the user's Remix ROM and builds `BattleShip-Remix.o2r`), as
     for the US build; `remix` in the `release.yml` matrix (`scripts/package-macos.sh` and `scripts/package-linux.sh` accept
     `SSB64_VERSION=remix`); install doc (which ROM: vanilla plus the Remix 2.0.1 patch, and how extraction works).
-- [ ] **Phase 8** final verification. Regression: 175 stages, special matrix 95 × 3, item sweep, 4 players in every mode
+- [ ] **Phase 8** final verification. Regression: 142 VS stages (`parallel.sh stages`) plus the 33 bonus-class stages through
+  the 1P path, special matrix 95 × 3, item sweep, 4 players in every mode
   through the CSS and Training, the vanilla build, unit tests. User passes: T9.1b (listening and visual), T10.2 (Switch).
   Reference comparison: emulator captures (I8) against the port on every mode screen, CSS, stage select, pause and results;
   each difference is fixed or documented as an adaptation. Close: `parity.md` only `ported` / `adapted` / the approved

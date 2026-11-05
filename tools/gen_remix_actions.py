@@ -163,6 +163,7 @@ EXTRA_SYMBOLS = [
     "BGM.random_count",
     "Toggles.itsatrap",
     "Spawn.neutral_table",
+    "Spawn.original_table",
     "MIDI.priority_override_table",
     "MIDI.bend_range_override_table",
     "MIDI.master_volume_override_table",
