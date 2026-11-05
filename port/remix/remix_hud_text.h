@@ -38,11 +38,16 @@ extern "C" {
  *           47..48 12CB stock number of the panels (mnplayersvs.c)
  *   48..127 results screen: Match Stats page texts, taken in draw order (mnremixvsstatspages.c)
  *   118..125 stage select: Hazards, Movement and Layout lines (label and value pairs 118/119, 120/121, 122/123), the Roulette
- *           label 124 and the stage name 125 (mnremixstagepanel.c)
+ *           label 124 and the stage name 125 (mnremixstagepanel.c); 126..127 stage select page strip: "Page" and its number
+ *           (mnremixstagepager.c)
  *   120..121 1P character select: "Enemy Player" and "Press Z" (mnremixenemylabel.c)
  *   78..104 Training Z menu (a scene without results screen, so it shares the Match Stats range): row labels 78..89, row values 90..101,
  *           pagination legend 102..104 (sc1ptrainingremixmenudraw.c)
- * Rect slots: 30..33 12CB Manual stock D-pad marks (mnremixtwelvecbstockmanual.c), 34..37 VS CSS D-pad variant marks (mnremixcssindicators.c), 40..45 12CB Custom legend squares, 0..1 battle pause legend squares, 2 match start banner, 24..27 Training D-pad legend squares, 28..29 Training Z menu cursor and underline, 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
+ *   56..83  character select panel menu (VS, 1P, Training, Bonus CSS; scenes with no battle or results text): 7 slots per panel, row
+ *           labels +0..2, row values +3..5, page number +6, panel p starts at 56 + 7 * p (mnremixcsspanelmenutext.c)
+ *   105..116 Training: Show Action rows (action names 105..108, frame counts 109..112), its legend 113..114 (sc1ptrainingremixaction.c),
+ *           Hold to Exit text 115..116 (sc1ptrainingremixexit.c)
+ * Rect slots: 30..33 12CB Manual stock D-pad marks (mnremixtwelvecbstockmanual.c), 34..37 VS CSS D-pad variant marks (mnremixcssindicators.c), 40..45 12CB Custom legend squares, 0..1 battle pause legend squares, 2 match start banner, 24..27 Training D-pad legend squares, 28..29 Training Z menu cursor and underline, 30 Training Hold to Exit bar, 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
  */
 #define REMIX_HUD_TEXT_SLOTS 128
 #define REMIX_HUD_BAR_SLOTS 16

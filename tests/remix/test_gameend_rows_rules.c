@@ -36,6 +36,15 @@ static void testTensDigitIsForcedOnlyOnTheKothTimeRow(void)
     CHECK_EQ(0, gmRemixGameEndRowsForcesTensDigit(0));
 }
 
+static void testRowSlotFollowsThePatchedRoutines(void)
+{
+    CHECK_EQ(290, gmRemixGameEndRowsRowTics(GMREMIX_GAMEEND_ROWS_LAYOUT_TIME));
+    CHECK_EQ(124, gmRemixGameEndRowsRowY(GMREMIX_GAMEEND_ROWS_LAYOUT_TIME));
+    CHECK_EQ(100, gmRemixGameEndRowsRowTics(GMREMIX_GAMEEND_ROWS_LAYOUT_NO_CONTEST));
+    CHECK_EQ(96, gmRemixGameEndRowsRowY(GMREMIX_GAMEEND_ROWS_LAYOUT_NO_CONTEST));
+    CHECK_EQ(GMREMIX_GAMEEND_ROWS_NO_ROW_TICS, gmRemixGameEndRowsRowTics(GMREMIX_GAMEEND_ROWS_LAYOUT_STOCK));
+}
+
 void remixTestGameEndRowsRules(void)
 {
     printf("results extra row rules\n");
@@ -43,4 +52,5 @@ void remixTestGameEndRowsRules(void)
     RUN_TEST(testGoalsAreCappedLikeTheKoColumn);
     RUN_TEST(testPlaceRowMovesDownOnlyWithTheExtraRow);
     RUN_TEST(testTensDigitIsForcedOnlyOnTheKothTimeRow);
+    RUN_TEST(testRowSlotFollowsThePatchedRoutines);
 }

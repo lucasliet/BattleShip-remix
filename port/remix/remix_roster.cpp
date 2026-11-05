@@ -43,7 +43,9 @@ constexpr size_t kHeaderSize = 16;
 constexpr size_t kRecordSize = 0x80;
 constexpr size_t kMotionDescSize = 12;
 constexpr size_t kRosterCount = std::size(kRemixRoster);
-constexpr int kFirstSynthRemixId = 0x1D;
+constexpr int kRandomRemixId = 0x1B;
+constexpr int kUnusedCloneRemixId = 0x1C;
+constexpr int kFirstSynthRemixId = kRandomRemixId;
 constexpr int kLastSynthRemixId = 0x60;
 constexpr uint8_t kVanillaFighterCount = 27;
 constexpr int kFirstRelocatedAttributesFkind = 13;
@@ -79,6 +81,7 @@ using FtDataPtr = std::unique_ptr<struct FTData, void (*)(struct FTData *)>;
 /* Owns one synth. The descriptor points at the FTData and the name, so the
  * SynthFighter must not move; it lives behind a unique_ptr in sSynthFighters. */
 struct SynthFighter {
+    int remix_id = 0;
     FtDataPtr ft_data{nullptr, port_fighter_synth_ft_destroy};
     std::string name;
     FighterDescriptor descriptor{};
@@ -311,6 +314,7 @@ SynthFighterPtr buildSynthFighter(const std::vector<uint8_t> &bytes, int remixId
 
     const PortSynthFtSpec spec = makeSpec(record, mainmotion, submotion);
     auto synth = std::make_unique<SynthFighter>();
+    synth->remix_id = remixId;
     synth->ft_data.reset(port_fighter_synth_ft_create(parentFkind, &spec));
     if (!synth->ft_data) {
         spdlog::error("remix_roster: could not build FTData for remix id 0x{:02X} (parent fkind {})",
@@ -331,9 +335,9 @@ SynthFighterPtr buildSynthFighter(const std::vector<uint8_t> &bytes, int remixId
     return synth;
 }
 
-void registerSynth(const SynthFighter &synth, int remixId)
+void registerSynth(const SynthFighter &synth)
 {
-    port_fighter_register(REMIX_ID_TO_PORT_FKIND(remixId), &synth.descriptor);
+    port_fighter_register(REMIX_ID_TO_PORT_FKIND(synth.remix_id), &synth.descriptor);
 }
 
 /* Remix rebuilt the main files of the polygon and Metal Mario fighters with the
@@ -410,6 +414,9 @@ bool remix_roster_load()
 
     std::vector<SynthFighterPtr> built;
     for (int remixId = kFirstSynthRemixId; remixId <= kLastSynthRemixId; ++remixId) {
+        if (remixId == kUnusedCloneRemixId) {
+            continue;
+        }
         auto synth = buildSynthFighter(blob->Data, remixId);
         if (!synth) {
             return false;
@@ -417,15 +424,15 @@ bool remix_roster_load()
         built.push_back(std::move(synth));
     }
 
-    for (size_t i = 0; i < built.size(); ++i) {
-        registerSynth(*built[i], kFirstSynthRemixId + static_cast<int>(i));
+    for (const SynthFighterPtr &synth : built) {
+        registerSynth(*synth);
     }
     sSynthFighters = std::move(built);
     if (!bindKirbyCopyActions(blob->Data)) {
         return false;
     }
-    spdlog::info("remix_roster: registered {} synth fighters (remix ids 0x{:02X}..0x{:02X})",
-                 sSynthFighters.size(), kFirstSynthRemixId, kLastSynthRemixId);
+    spdlog::info("remix_roster: registered {} synth fighters (remix ids 0x{:02X}..0x{:02X}, 0x{:02X} skipped)",
+                 sSynthFighters.size(), kFirstSynthRemixId, kLastSynthRemixId, kUnusedCloneRemixId);
     return true;
 }
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #define REMIX_SYM_AI__command_table 0x805192D0u
+#define REMIX_SYM_Action__shared_action_string_table 0x80402908u
 #define REMIX_SYM_Banjo__ATTACK_AIR_B 0x8057A2ACu
 #define REMIX_SYM_Banjo__ATTACK_AIR_D 0x8057A3B4u
 #define REMIX_SYM_Banjo__ATTACK_AIR_F 0x8057A1ECu
@@ -366,6 +367,7 @@
 #define REMIX_SYM_BowserUSP__ledge_grab_patch____bowser 0x8054E724u
 #define REMIX_SYM_BowserUSP__ledge_grab_patch____return 0x8015EC6Cu
 #define REMIX_SYM_BowserUSP__ledge_grab_patch____skip 0x8054E72Cu
+#define REMIX_SYM_Character__action_string__table 0x8049C700u
 #define REMIX_SYM_Character__ai_aerial_chase__table 0x8049A640u
 #define REMIX_SYM_Character__ai_behaviour__table 0x8049A320u
 #define REMIX_SYM_Character__ai_long_range__table 0x8049A7D0u
@@ -379,10 +381,12 @@
 #define REMIX_SYM_Character__magnifying_glass_zoom__table 0x8049E880u
 #define REMIX_SYM_Character__nsp_shoot_custom_move__table 0x8049E198u
 #define REMIX_SYM_Character__recovery_logic__table 0x8049D538u
+#define REMIX_SYM_Character__remix_1p_end_bgm__table 0x8049A250u
 #define REMIX_SYM_Character__singleplayer_vs_preview__table 0x8049BC10u
 #define REMIX_SYM_Character__variants__table 0x8049C9A0u
 #define REMIX_SYM_Character__winner_bgm__table 0x8049BA80u
 #define REMIX_SYM_CharacterSelect__fgm_table 0x80520214u
+#define REMIX_SYM_CharacterSelect__portrait_offset_by_character_table 0x80520EBCu
 #define REMIX_SYM_CharacterSelect__series_logo__table 0x805205E0u
 #define REMIX_SYM_Conker__Action__action_string_table 0x80559200u
 #define REMIX_SYM_Conker__Action__string_0x0E3 0x80559108u
@@ -531,6 +535,7 @@
 #define REMIX_SYM_ConkerUSP__main_air___no_hold 0x80556540u
 #define REMIX_SYM_Costumes__extra_costumes_table 0x80528830u
 #define REMIX_SYM_Costumes__select___num_costumes 0x805281D0u
+#define REMIX_SYM_Costumes__stock_icon_palette_array_table 0x805289B4u
 #define REMIX_SYM_Crash__ATTACK_AIR_B 0x805826E8u
 #define REMIX_SYM_Crash__ATTACK_AIR_D 0x805827C4u
 #define REMIX_SYM_Crash__ATTACK_AIR_F 0x80582678u
@@ -3684,6 +3689,8 @@
 #define REMIX_SYM_SheikUSP__move_main____end 0x805653B0u
 #define REMIX_SYM_SheikUSP__move_main____grounded 0x80565398u
 #define REMIX_SYM_SheikUSP__move_physics_ 0x805653C0u
+#define REMIX_SYM_Shield__alter_yoshi_egg_color___table_entry_palettes 0x804E0D04u
+#define REMIX_SYM_Shield__alter_yoshi_egg_color___table_palettes 0x804E0CC4u
 #define REMIX_SYM_SinglePlayer__name_delay_table 0x804E995Cu
 #define REMIX_SYM_SinglePlayer__name_texture_table 0x804E96B0u
 #define REMIX_SYM_SinglePlayerModes__ALLSTAR_MATCH_SETTINGS_PART1 0x804EF8B0u
@@ -3691,6 +3698,7 @@
 #define REMIX_SYM_SinglePlayerModes__MATCH_SETTINGS_PART1 0x804ECA9Cu
 #define REMIX_SYM_SinglePlayerModes__MATCH_SETTINGS_PART2 0x804EC910u
 #define REMIX_SYM_SinglePlayerModes__duo_pool 0x804ECFD0u
+#define REMIX_SYM_SinglePlayerModes__icon_offset_table 0x804EFCF4u
 #define REMIX_SYM_SinglePlayerModes__match_pool 0x804ECCA0u
 #define REMIX_SYM_SinglePlayerModes__match_slots 0x804ED0A5u
 #define REMIX_SYM_SinglePlayerModes__progress_icon_struct 0x804ED100u
@@ -4032,6 +4040,7 @@
 #define REMIX_SYM_Stages__custom_item_spawn_rate_table 0x804594B0u
 #define REMIX_SYM_Stages__default_music_track_table 0x8045B790u
 #define REMIX_SYM_Stages__function_table 0x8045693Cu
+#define REMIX_SYM_Stages__icon_offset_random 0x80456FFCu
 #define REMIX_SYM_Stages__icon_offset_table 0x80456C9Cu
 #define REMIX_SYM_Stages__position_table 0x80457374u
 #define REMIX_SYM_Stages__random_table 0x80455758u
@@ -4042,6 +4051,7 @@
 #define REMIX_SYM_Stages__stage_table_pages 0x80456700u
 #define REMIX_SYM_Stages__stage_table_tournament 0x804568E0u
 #define REMIX_SYM_Stages__string_table 0x804583D0u
+#define REMIX_SYM_Stages__tournament_hazard_mode_table 0x8045B1C0u
 #define REMIX_SYM_Stages__variant_table 0x80458DF0u
 #define REMIX_SYM_Stages__zoom_table 0x80457014u
 #define REMIX_SYM_Toggles__entry_1v1_combo_meter_swap 0x80461FB0u

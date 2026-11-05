@@ -379,3 +379,62 @@ Steps 4-8 and 13-15 are the largest. Split each one by function if a Haiku worke
 12. Not checked: the decomp side of the 1P menu hooks, and whether the Remix port already has any part of the 1P menu (menus.md 3.3 says a generic menu framework was rewritten, so existing code must be read before adding page 2 rows).
 13. `SinglePlayerMenus.asm` header and BTP/FGM hooks (0x149340, 0x14073C, 0x13EF30, 0x144E24, 0x14B808) were listed but not read.
 14. Text rendering: the header label "REMIX" and the HRC counter need the vanilla string path (`String.insert`) or the ImGui overlay. The port has no text path for these yet.
+
+---
+
+## 9. 1P leftovers (ROADMAP M11 Fase 5, 2026-11-05)
+
+Rules in `sc1premixbonus3rules.*`, `sc1premixendingrules.*` and `sc1premixallstarrestrules.*`, tests in `tests/remix/test_1p_leftover_rules.c`
+(44 checks, one mutation checked). Nothing here was run in the game; the syntax check of each file is the only verification so far.
+
+### 9.1 Bonus 3 (`sc1premixbonus3.*`)
+
+The mode is the Race to the Finish row (`nSC1PGameStageBonus3`) of the 1P game played alone. `stage_flag` (SinglePlayerModes.asm:2122) writes 0x0B
+(the row) into the scene data, so `sc1PRemixMultimanFirstStage` returns `nSC1PGameStageBonus3` for the mode. What the asm changes on that row:
+
+| Asm | Effect | Port |
+|---|---|---|
+| `_1p_stage` :375 | stage is `RACE_TO_THE_FINISH`, or `REMIX_RTTF` when `Bonus.mode` is Remix | `sc1PRemixBonus3SetupBattle` sets `gkind` |
+| `opponent_type` :277, `_opponent_number_1` :562, `_opponent_behavior` :1442 | three polygons, behaviour 8 | the vanilla row already has them |
+| `polygon_selection_match_rttf` :4079 | Remix course picks Remix polygons | `sc1PRemixBonus3UsesRemixPolygons` in the `Bonus3` case of `sc1PGameSetupStageAll` |
+| `_team_attack` :431, `_item_spawn` :487 | team attack on, no items | `SetupBattle` |
+| `load_1p_difficulty_*` :1959, `_opponent_cpu` :2002, `_opponent_knockback` :522 | Very Hard, CPU level 9, handicap 9 | `sc1PRemixBonus3EnemyLevel`, `SetupEnemy` (the Very Hard column of the table is 9 and 9 too) |
+| `load_player_stocks` :1913 | stock 0 | `SetupPlayer` |
+| `_time_limit` :671 | infinite time | `SetupBattle` |
+| `_load_timer` :989, `bonus3_timer` :1031 | count-up timer of the Bonus screens (Dragon King HUD: y 210 and 200) | `sc1PBonusStageMakeCountUpTimer` (the body of the old `sc1PBonusStageMakeTimer` branch), called from `sc1PGameInitTimeUpMessage` |
+| `_initial_screen_set` :864 | no title card | `sc1PManagerUpdateScene` skips `sc1PIntroStartScene` |
+| `_end_match_screen` :1172 | every end goes back to the Bonus 2 CSS, the reset button restarts | `sc1PRemixBonus3LeaveRun` (same as Multi-Man) |
+| `_time_save` :1296, `_new_record` :1398 | the finish time is the record of the fighter when it is empty or strictly faster; a beaten record plays New Record (0x1D0) instead of Complete (0x1CB); not saved when the Single Player Enemy port is on | `sc1PRemixBonus3OnComplete`, called from `grBonus3FinishProcUpdate`; fields `bonus3_time` and `bonus3_remix_time` added to `LBBackup1PRecord` |
+
+`TIME_SAVE_POINTER` (0x800A4B30) is `time_passed` of the battle, so the saved value is in ticks. `SinglePlayer.high_score_enabled` is always TRUE in the Remix.
+`SpawnStyle` (`_spawning_style` :764) and the music hooks end up in the vanilla Bonus 3 wait (`sc1PGameWaitStageBonus3Update`) and the vanilla music.
+
+Open: `Bonus.mode` (the Normal/Remix header toggle of the Bonus 2 CSS, Bonus.asm:227) is not in the port, so the course is Normal; `sc1PRemixBonus3SetCourse`
+takes the toggle once the CSS has it, and `SSB64_REMIX_BONUS3_COURSE=normal|remix` forces it in tests. The records are saved but the Bonus 2 CSS does not show them yet
+(`load_bonus3_time`, SinglePlayerMenus.asm:508, belongs to the CSS).
+
+### 9.2 Giga Bowser ending
+
+Everything the asm changes on the final stage was already ported (R5). The end of the stage is the vanilla boss defeat: `sc1PGameBossWallpaperProcUpdate` steps
+the background at 90 and 180 damage of the boss (`stock_damage_all` of `bossplayer`) and `SC1PGameBossWallpaper3ProcUpdate1` ends the fight. The Remix HP is 200 to 300, so
+the 180 step is always reached by a real fight; the earlier test with HP 1 never got there. New test hook `SSB64_REMIX_1P_BOSS_PRESET_DAMAGE=<n>` (`sc1PRemix1PPresetBossDamage`) starts the boss with n percent.
+
+### 9.3 Title cards
+
+Not changed. Remix Team (one Marina), Mad Piano (large, cut by the 0x7070 camera) and the scrambled Metal Mario Bros texture need the running game to compare against the
+emulator; the asm side (`remix_yoshi_card` :5300, `title_card_model_scale` :4800, `metal_bros_magic` :4952) is already ported.
+
+### 9.4 All-Star
+
+| Asm | State |
+|---|---|
+| `rest_area_setup` icons, :7413-7625 | `sc1PRemixAllstarRestMakeIcons` (file 0xD8B, `icon_offset_table`, ten to a row at x 30 + 9n, y 30 + 11 row). Inert until the generator exports `SinglePlayerModes.icon_offset_table` (0x804EFCF4) |
+| `rest_area_setup` portraits, :7627-7690 | not made: world-space textures (`Render.draw_stage_texture_`, file 0xA05, x -200/-600/-1000, y 1000, z -20, alpha 0xA0) need a stage texture object; symbol `CharacterSelect.portrait_offset_by_character_table` is missing as well |
+| `skip_go` :7218, `instant_spawn` :7172, `_time_limit` :671 | Rest Area uses the race wait (no GO, no damage meters), spawns the player without the entry and has no time limit |
+| `match_begin_flag` | `sc1PRemixAllstarKeepsRunState`: a re-entry of `sc1PManagerUpdateScene` in a run that already had a Rest Area keeps stocks, score and total damage (`stock_prevent`, `prevent_erase`, `damage_prevent`). The port enters the function once per run, so there is no visible change |
+| `costume_fix` :8179 | deviation: the hook sits in the Yoshi team costume loop (rom 0x10C350), a row All-Star never plays; the effect it was written for (at most 4 costumes for vanilla fighters of the final team) is `sc1PRemixAllstarPrepareFinal` |
+| `pause_exit` :7988 | All-Star: leaving by A+B+R+Z already goes to the 1P menu through `is_reset`; Remix 1P: `sc1PRemix1POnPauseExit` clears the size of the player (`Size.clear_settings_for_1p_`) |
+| own ending, BGM.asm:1353 | `sc1PRemixEndingGetCreditsSong` (hook in `scStaffrollFuncStart`): Remix 1P and All-Star play `Character.remix_1p_end_bgm.table[fkind]`. Inert until the generator exports that table (0x8049A250) |
+
+Missing symbols for the generator (`tools/gen_remix_actions.py`): `SinglePlayerModes.icon_offset_table`, `Character.remix_1p_end_bgm.table`, `CharacterSelect.portrait_offset_by_character_table`.
+Hooks in files outside the 1P folder: `gr/grbonus/grbonus3.c` (one call, Bonus 3 finish), `sc/sccommon/scstaffroll.c` (one call, credits song), `lb/lbtypes.h` (two record fields).

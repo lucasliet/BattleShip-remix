@@ -11,6 +11,53 @@ The pause Z key now opens the Remix Z menu itself (`sc1ptrainingremixmenu*.c`, `
 `Menu.asm` navigation. It reads and writes the same registry below, so the port menu (**Remix > Training**) and
 `SSB64_REMIX_TRAINING` still work. Seen in run `v3_trzmenu` (ROADMAP Fase 2). The decision below is kept as history.
 
+## Update 2026-11-05: Fase 5 leftovers (Training.asm)
+
+1. **Custom spawn on the respawn after a KO: the asm does not do it, the port matches.** `init_character_` (Training.asm 399-463) is the hook
+   at 0x800D7A1C inside `ftManagerInitFighter` and tests `ra` (stack slot 0x34, `lw t0, 0x34(sp)`) against 0x800D86B4. That address is the
+   return of `jal ftManagerInitFighter` at 0x800D86AC in `ftManagerMakeFighter` (checked with `tools/remix_disasm_rom.py`), so the facing,
+   the ledge clipping id and "Reset Sets Percent" apply only when a fighter is created (match start, quick reset, Reset). The halo
+   respawn (`ftCommonRebirthDownSetStatus`) calls `ftManagerInitFighter` from its own address, takes `_end`, and uses the stage halo
+   position and 0% (`Spawn.asm load_respawn_point_` 18-60 only fixes the beta stages). The comment "skip if respawning" and the older
+   notes ("respawn call site") name the creation path. Nothing to port: the KO respawn keeps the halo, as in Remix.
+2. **Per-port dummy behaviour.** Shield Break, OOS, Spam, DI Practice, Percent, CPU DI and CPU Teching were already per fighter (state
+   arrays indexed by `fp->player`, menu values global, applied to every CPU like `AI.asm` 525-545 and 6540-6650 read them). What followed a
+   single CPU was the CP option of the vanilla pause menu (Stand, Walk, Evade, Jump, Default): `obey_cp_state_` (506-544) loops the four
+   ports and calls the vanilla routine for every port whose type is CPU, so `sc1PTrainingModeUpdateDummyBehavior` now sets the behaviour
+   of every CPU fighter. `disable_during_pause_` and `enable_during_unpause_` (548-622) lock and unlock every port that is not N/A, now
+   `sc1PTrainingModeSetPortsLocked` (the owner keeps the held-B rule of `sc1PTrainingModeCheckLeaveMenu`). The dummy port still drives the
+   COMBO and damage displays like the vanilla HUD.
+3. **Live music change.** Already working: the Music entry of the Z menu is a COMMIT entry; A runs `sc1PTrainingRemixPlayMusic`, the
+   `play_bgm_` port (3823-3857): it stores the track as the stage track (`gMPCollisionBGMDefault`), plays it unless the current track is
+   the hammer or the star, and keeps the pause volume (`syAudioPlayBGM` does not touch the BGM volume, the resume sets 0x7800). The
+   `gmremixbgm*` helpers (`gmRemixBgmChange`) are not used on purpose: they also update `BGM.current_track`, which `play_bgm_` does not
+   write. Still open: the 17 entries of the port are the fixed part of the table; the Remix list appends the toggleable MIDI tracks
+   (assembler loop at 3774-3785 and 3809-3817, no symbol), so the track count of a full Remix build is longer than 17.
+4. **L legend "Show Action" and "(Hold --)".** New `sc1ptrainingremixaction.*` and `sc1ptrainingremixexit.*`, pure rules in
+   `sc1ptrainingleftoverrules.*` (`tests/remix/test_training_leftover_rules.c`).
+   - Show Action (`run_` 1969-1978, `create_action_strings_` 1475-1565, `update_frame_counts_` 2097-2152, `update_actions_` 2156-2277): L
+     in the pause flips the flag (it persists across resets like the asm word). Per fighter, the action name at (20, 55 + 26 * port) and
+     the frame count at (20, 66 + 26 * port), scale 0.75; the count is `frames outside hitlag + the first hitlag frame`, restarts at 1
+     on an action change, and runs right after `gcRunAll`. Names come from the Remix RAM image: ids below 0xDC use
+     `Action.shared_action_string_table`, the rest `Character.action_string.table[fkind][id - 0xDC]` (null pointer = no text). Both
+     labels are **missing from `port/remix/remix_symbols.h`**: the file uses guarded fallback macros with the addresses of
+     `build/remixasm/remix.sym` (0x80402908 and 0x8049C700); add `"Action.shared_action_string_table"` and
+     `"Character.action_string.table"` to `EXTRA_SYMBOLS` in `tools/gen_remix_actions.py` and the guards become dead code.
+   - DEVIATION(overlay text): the asm draws the rows in room 0x39 under the translucent panel of the Z menu; the port overlay is always
+     on top, so the rows are hidden while the Z menu is open.
+   - L glyph at (20, 16) scale 0.875 with "Show" (20, 27.25) and "Action" (20, 38.5), group 0x15 like the Reset Count, shown with the pause.
+   - Hold to Exit (`hold_to_exit_` 751-809, `run_` 2002-2038, `setup_` 1590-1611): with `Toggles.entry_hold_to_exit_training` on, the
+     Exit option needs A held 33 frames on the pause owner's controller; the counter resets when the cursor leaves Exit
+     (`_reset`). Text "(Hold --)" at (169, 166) scale 0.875 with the A glyph at (202, 165), and the blue bar at (73, 179), 2 high, +2
+     wide per held frame up to 64, only with the cursor on Exit and the Z menu closed. The glyph group is 0x1C (the asm 0xF is the
+     battle pause legend group in the port); the overlay text leaves out the dashes so the glyph is not crossed out.
+   - Text slots 105..116 and rect slot 30 are in the map of `remix_hud_text.h`.
+5. **Held item name.** The path is the one of the asm and was already complete: `sc1PTrainingModeItemDisplayProcDisplay` maps a held kind in
+   0x2D..0x39 to entry `kind - 0x2D` (`Item.asm` `_fix_item_id_check` 330-339 and `_get_custom_image` 347-365, table 0x330 of file
+   0xFE), now through `sc1PTrainingLeftoverRulesGetHeldItemEntry` with tests. The held name uses the HUD table, not the menu table
+   that was seen. A new log line `training item hud: held entry N sprite WxH` is written when the sprite is set; a zero size or a
+   missing line points to the table or to the held kind.
+
 ## Decision (superseded): the menu is the port menu
 
 The Remix Z menu is drawn by the Remix menu framework (`Menu.asm`), which the port does not redraw (same decision as the Tag Team queue and the

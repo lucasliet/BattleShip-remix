@@ -26,8 +26,9 @@ Default value 0 returns FALSE before any side effect, so the hazard path is byte
 - Heal is not blocked by the cloak: in `PoisonDmg.asm` the Heal branch (`_anti_venom`) is taken before the Cloaking
   Device check, which only guards the damage types. The brief said cloaked fighters are skipped; the port follows the asm.
   Lead to confirm.
-- Heal lands on the next frame, not the same frame: the asm jumps into the healing portion immediately, the port sets
-  `damage_heal` and the vanilla heal block applies it on the following frame (the heal block runs before the poison call).
+- ~~Heal lands on the next frame~~ (fixed 2026-11-04): `ftMainProcUpdateInterrupt` now calls `ftRemixPoisonUpdate` before
+  its heal block when `damage_heal` is 0, so the CSS Heal enters the heal block on the same frame like `_anti_venom`
+  (`j 0x800E1828` with v1 = 2).
 - Timer: the asm reads the match elapsed tic (`match_info + 0x18`), the port uses `gSCManagerBattleState->time_passed`
   ("Current match tic"). The hazard path keeps its own 0x801313F8 timer.
 - Game speed: reads `gmRemixToggle(game_speed)` directly like the asm (Toggles entry_game_speed), not the stopwatch-aware
@@ -35,8 +36,8 @@ Default value 0 returns FALSE before any side effect, so the hazard path is byte
 
 ## Left
 
-- `REMIX-TODO(Stamina)`: the stamina clamp at `Stamina.TOTAL_HP` and the skip of defeated stocks. `Stamina.VS_MODE` has no
-  port. The hazard path keeps its own TODO.
+- ~~`REMIX-TODO(Stamina)`~~ (done): the percent is capped at the Stamina total HP and a defeated Stamina fighter is skipped
+  (`ftRemixPoisonStaminaCap`, `ftRemixPoisonIsStaminaDefeated`).
 
 ## Verification
 

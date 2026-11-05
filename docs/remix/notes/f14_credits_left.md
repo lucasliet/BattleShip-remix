@@ -2,8 +2,9 @@
 
 **Update 2026-11-04 (M11 Fase 4):** both items are closed. The glyph textures are in the vanilla credits file 0xC3
 (`SCStaffroll`, with a 0x58 byte header before the asm offsets), not in `File.REMIX_CREDITS`, so the blocker below was a
-wrong file; glyphs are ported. The speed assist is n/a (needs the "afk" player tag). See `docs/remix/menus.md`,
-"Remix screens". The text below is the original analysis.
+wrong file; glyphs are ported. **Update 2026-11-04 (tag names):** the speed assist is ported now that the player tag names exist
+(`remix_panel_tag_name(2)` == "afk"): `scStaffrollIsStartPressed` in `scstaffroll.c`, rules in `sc1premixenemyafkrules.c`. See
+`docs/remix/menus.md`, "Remix screens". The text below is the original analysis.
 
 Status: both markers stay `REMIX-TODO` because neither has a verified port path yet. Nothing was changed in the behaviour of the staff roll.
 

@@ -11,6 +11,8 @@ extern void remixTestTwelveCBRules(void);
 extern void remixTest1PModeNames(void);
 extern void remixTest1PModeRules(void);
 extern void remixTest1PEnemyRules(void);
+extern void remixTest1PAfkRules(void);
+extern void remixTest1PLeftoverRules(void);
 extern void remixTest1PHrcRules(void);
 extern void remixTest1PHrcSigns(void);
 extern void remixTest1PHrcTravel(void);
@@ -39,6 +41,7 @@ extern void remixTestAiTeachingRules(void);
 extern void remixTestStopwatchBgRules(void);
 extern void remixTestTrainingRules(void);
 extern void remixTestTrainingPortRules(void);
+extern void remixTestTrainingLeftoverRules(void);
 extern void remixTestTrainingMenuRules(void);
 extern void remixTestTrainingMenuEntries(void);
 extern void remixTestAiDiRules(void);
@@ -56,10 +59,14 @@ extern void remixTestGalleryRules(void);
 extern void remixTestTwelveCBLayout(void);
 extern void remixTestTwelveCBCustom(void);
 extern void remixTestStageSelectRules(void);
+extern void remixTestStageGridRules(void);
 extern void remixTestDpadMapRules(void);
 extern void remixTestDpadControlRules(void);
 extern void remixTestCssRules(void);
+extern void remixTestCssCpuCostumeRules(void);
+extern void remixTestCssPanelMenuRules(void);
 extern void remixTestPracticeRules(void);
+extern void remixTestPartImageRules(void);
 extern void remixTestSpriteBitmapRow(void);
 
 int main(void)
@@ -68,6 +75,8 @@ int main(void)
     remixTest1PModeNames();
     remixTest1PModeRules();
     remixTest1PEnemyRules();
+    remixTest1PAfkRules();
+    remixTest1PLeftoverRules();
     remixTest1PHrcRules();
     remixTest1PHrcSigns();
     remixTest1PHrcTravel();
@@ -96,6 +105,7 @@ int main(void)
     remixTestStopwatchBgRules();
     remixTestTrainingRules();
     remixTestTrainingPortRules();
+    remixTestTrainingLeftoverRules();
     remixTestTrainingMenuRules();
     remixTestTrainingMenuEntries();
     remixTestAiDiRules();
@@ -113,10 +123,14 @@ int main(void)
     remixTestTwelveCBLayout();
     remixTestTwelveCBCustom();
     remixTestStageSelectRules();
+    remixTestStageGridRules();
     remixTestDpadMapRules();
     remixTestDpadControlRules();
     remixTestCssRules();
+    remixTestCssCpuCostumeRules();
+    remixTestCssPanelMenuRules();
     remixTestPracticeRules();
+    remixTestPartImageRules();
     remixTestSpriteBitmapRow();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);

@@ -6,6 +6,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_1p_mode_names.c
     test_1p_mode_rules.c
     test_1p_enemy_rules.c
+    test_1p_afk_rules.c
+    test_1p_leftover_rules.c
     test_1p_hrc_rules.c
     test_1p_hrc_signs.c
     test_1p_hrc_travel.c
@@ -37,6 +39,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_training_port_rules.c
     test_training_menu_rules.c
     test_training_menu_entries.c
+    test_training_leftover_rules.c
     test_ai_di_rules.c
     test_blueshell_rules.c
     test_gameend_rows_rules.c
@@ -51,10 +54,14 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_twelvecb_layout.c
     test_twelvecb_custom.c
     test_stage_select_rules.c
+    test_stage_grid_rules.c
     test_dpad_map_rules.c
     test_dpad_control_rules.c
     test_css_rules.c
+    test_css_cpu_costume_rules.c
+    test_css_panel_menu_rules.c
     test_practice_rules.c
+    test_partimage_rules.c
     test_sprite_bitmap_row.c
     ${CMAKE_SOURCE_DIR}/port/bridge/sprite_bitmap_row.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_decode.c
@@ -63,11 +70,15 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixenemyrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixenemyafkrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingsbmrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhrcrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhrcsignrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhrctravelrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premix1prules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixbonus3rules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixendingrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixallstarrestrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtimedstockrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixkothrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtugofwarrules.c
@@ -91,12 +102,14 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaispecialsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadmaprules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadcontrolrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixpartimagerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixpracticerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixstopwatchbgrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingportrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingmenurules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingmenuentries.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingleftoverrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaidirules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixblueshellrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgameendrowsrules.c
@@ -111,9 +124,12 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecblayout.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecbcustom.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcssrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcsspanelmenurules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagepanelrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagetournamentrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstageroulette.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagegridrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagerandomrules.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)
 target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src ${CMAKE_SOURCE_DIR}/port/remix ${CMAKE_SOURCE_DIR}/port)

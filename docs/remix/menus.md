@@ -367,10 +367,12 @@ Sprites use the decal camera (dl link 4), the text is the overlay. Visible on bo
   display list table grows to 0x62 entries (ids 0x38-0x4F stay empty and are skipped). `tools/gen_remix_credits.py` now encodes
   those characters and the staff table was regenerated (109 values changed, 18 distinct ids); the old note
   `notes/f14_credits_left.md` looked at the wrong file.
-- **Credits speed assist: n/a** (approved). `remix_credits_speed_assist_` (`Credits.asm:1310-1349`) only simulates Start when the
-  second player tag string is "afk" (`string_table + 8` against 0x61666B00, lines 1318-1321) and the name id is 0x55. The port keeps
-  no custom player tags (`if/ifremixplayertag.c`), so the condition cannot hold; the Start acceleration of 0.11
-  (`Credits.asm:20-23`) is ported (`scstaffroll.c`).
+- **Credits speed assist** (`Credits.asm:1310-1349`, patch 0x801335C4, replaces the Start test of `scStaffrollFuncRun`): ported
+  (`scStaffrollIsStartPressed` in `scstaffroll.c`, rules in `sc/sc1pmode/sc1premixenemyafk*`). It simulates Start when the custom
+  player tag number 2 (`string_table + 8`; panel value 2, not the tag of port 2) is named exactly "afk" (word 0x61666B00, lines
+  1318-1321), `sSCStaffrollNameID` is 0x55 and the roll speed differs from the normal one; Start then returns the roll to the
+  normal speed, so it applies once. Turn it on with `SSB64_REMIX_TAG_NAMES="2=afk"`. The Start acceleration of 0.11
+  (`Credits.asm:20-23`) is ported too.
 - **Gallery** (`Gallery.asm:445-487`, `SinglePlayer.asm:2293-2378`): all 40 pages. `mn/mncommon/mnremixgalleryrules.*` holds the
   `id_table` (Character.id per page; the port fkind is the same value, `REMIX_ID_TO_PORT_FKIND`) and the
   `custom_victory_file_table` plus every `set_ending_image` call (Lanky's last call wins). `mncongra.c` uses it for every

@@ -28,8 +28,10 @@ enum RemixSoundType {
     REMIX_SOUND_J = 0x01,
 };
 
-/* Port fkind for a Remix fighter id: identity. Ids 0x1B (RANDOM) and 0x1C stay
- * unregistered so 28 (nFTKindNull) never names a fighter. */
+/* Port fkind for a Remix fighter id: identity. Id 0x1B (RANDOM) is registered by
+ * remix_roster_load (the "?" model of the Random bookend of the VS character
+ * select, never fought); id 0x1C stays unregistered so 28 (nFTKindNull) never
+ * names a fighter. */
 #define REMIX_ID_TO_PORT_FKIND(id) (id)
 
 typedef struct RemixRosterEntry {

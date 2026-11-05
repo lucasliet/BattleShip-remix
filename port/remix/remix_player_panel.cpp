@@ -230,6 +230,20 @@ extern "C" void remix_panel_set(int option, int port, int value) {
     CVarSetInteger(CVarName(entry, port).c_str(), Clamp(entry, value));
 }
 
+extern "C" const char *remix_panel_value_name(int option, int value) {
+    using namespace remix_panel;
+
+    if ((option < 0) || (option >= REMIX_PANEL_COUNT)) {
+        return nullptr;
+    }
+    const Option &entry = kOptions[option];
+    const int index = value - entry.min;
+    if ((index < 0) || (index >= static_cast<int>(entry.strings.size()))) {
+        return nullptr;
+    }
+    return entry.strings[index].c_str();
+}
+
 extern "C" void remix_panel_reset(void) {
     using namespace remix_panel;
 

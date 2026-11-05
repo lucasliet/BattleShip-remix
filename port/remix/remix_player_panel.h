@@ -50,6 +50,12 @@ void remix_panel_set(int option, int port, int value);
 /** Sets every option of every port to its default. */
 void remix_panel_reset(void);
 
+/**
+ * Name of `value` of `option` (the css/X.asm value strings, for example "Giant" for Size 1). NULL when the option has no names
+ * (Player Tag, Input Delay, Initial Damage, Stock Count) or `value` is outside its range. The pointer stays valid for the run.
+ */
+const char *remix_panel_value_name(int option, int value);
+
 /** Reads the SSB64_REMIX_PANEL overrides. Call once at start-up. */
 void remix_panel_init(void);
 
