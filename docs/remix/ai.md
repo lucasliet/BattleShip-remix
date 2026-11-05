@@ -5,7 +5,7 @@ How the Smash Remix 2.0.1 CPU works (read from `.toolchain/pkgs/smashremix-src/s
 reproduces it. Code: `decomp/src/ft/ftcomputer.c` (the vanilla CPU, with `#if defined(PORT) && defined(REGION_REMIX)` hook
 blocks), `decomp/src/ft/ftremix/ftremixai<topic>.{c,h}` (hook bodies; `ftremixai<topic>rules.{c,h}` hold pure int/float rules; topics: tables,
 commands, prevent, longrange, weight, prediction, size, movement, recovery, recoverylogic, drift, shared, stage, cloud, lv10, level,
-roll, combat, specials, teching, di, postprocess, postsheik),
+roll, combat, specials, teching, di, postprocess, postsheik, reflect, modes),
 `decomp/src/mn/mnplayers/mnremixcpulevel*.{c,h}` (CSS level 10), `decomp/src/gm/gmremixspawnsetup.c` (default level).
 Tests: rule tests `tests/remix/test_ai_*.c` (`cmake --build build --target run_remix_mode_tests`); in the game use
 `.claude/skills/remix-smoke-tests/scripts/vs.sh <fkinds> <input> <name>` (P1 human, the other ports CPU) with
@@ -78,7 +78,7 @@ their parent's (`ai_behaviour`, `ai_aerial_chase`, `ai_long_range`).
 | `ai_attack_prevent` | `REMIX_SYM_Character__ai_attack_prevent__table` | per-fighter routine (`PREVENT_ATTACK.ROUTINE.*`), registered in each `AI/Attacks.asm` | read by `ftRemixAiPreventCandidate` (`ftremixaiprevent.c`): a vanilla routine address is matched by value, a Remix one by the entry of the fighter that registers it (section 5) |
 | `ai_long_range` | 0x8049A7D0 | far-range routine: NSP_SHOOT 0x80138D24, PHYSICAL_SHOOT 0x80138CD4, NONE 0x80138ECC | read by `ftRemixAiLongRangeSwitchKind` |
 | `nsp_shoot_custom_move` | 0x8049E198 | command id that replaces the far-range NSP command (0 = none) | read by `ftRemixAiLongRangeCommand` |
-| `ai_aerial_chase` | 0x8049A640 | per fighter NORMAL 0x8013389C or CHASE 0x80133A14 (= skip the candidate): whether an NSP candidate is dropped against a Ness/Fox target | not read; the C `switch (fkind)` in `ftComputerCheckDetectTarget` (target Ness/Fox, level >= 5) keeps the vanilla ids only |
+| `ai_aerial_chase` | 0x8049A640 | per fighter NORMAL 0x8013389C or CHASE 0x80133A14 (= skip the candidate): whether an NSP candidate is dropped against a Ness/Fox target | `ftRemixAiReflectSkipsNspCandidate` (`ftremixaireflect.c`): read for the own fighter (the copied power for a Kirby) in `ftComputerCheckDetectTarget`; polygon variants are always NORMAL |
 | `recovery_logic` | 0x8049D538 | per-fighter recovery routine, called after the walk step | `ftRemixAiRecoveryLogicRunFighter` (`ftremixairecoverylogic.c`) matches the fighter's table entry with the entry of the fighter that registers it and runs the C port (`ftremixairecoverylogic*rules.c`); the registry slot `ai_recovery_routine` is gone |
 | `cpu_post_process` | 0x8049D6BC | per-fighter routine at the end of the frame's decisions | `ftRemixAiPostProcessFighter` switch on `fkind` (Sheik) |
 | `cpu_attack_weight` | not in `remix_symbols.h` | per-fighter routine that rescales a candidate's chance | dispatch exists in the accumulate loop (`port_fighter_ai_attack_weight_routine`); no code fills that slot |
@@ -147,8 +147,8 @@ and the command is issued with `ftComputerSetCommandWaitShort`.
 | `no_attack_when_all_odds_eq_zero` (6016) | same function exit | when every chance is 0 no attack is picked (return FALSE) | the port returns FALSE on that fall-through for every level |
 | `extend_attack_check_range(_2)` (5136, 5158) | `ftComputerFollowObjectiveAttack` 0x801392C8 | the "target is close enough to attack" distance base is 2000 at lv10 (vanilla 1200) | `ftRemixAiPredictionAttackViewBase` |
 | `PREVENT_ATTACK` routines (2973-3260) | candidate loop of `ftComputerCheckDetectTarget` (jump at 0x801334D0) | per candidate attack: set `is_attempt_cliffcatch` (the ledge probe may drop it) or skip the candidate | `ftRemixAiPreventCandidate` (verdict ALLOW, CLIFF_CHECK or SKIP), replacing the vanilla `switch (fkind)` |
-| `AERIAL_CHASE.extend_polygon_check_` (2503) and `Reflect.AI.extend_reflect_absorb_character_check_` (0x80133850) | skip-NSP-against-Ness/Fox switch | the polygon exclusion also covers Remix polygons; the Ness/Fox test becomes the `fighter_reflect` table (Wolf, Falco, JFox, JNess, Lucas, NLucas, Marina, Dedede, Piano, Slippy) so CPUs do not shoot at reflectors/absorbers | none: the C switch knows the vanilla ids only |
-| `ai_ball_attack_range` (Smashketball 1211, 0x80133144) | picker, before the list pointer is used | with the Smashketball mode on, the ball replaces the target: hurtbox 200 x 200, ball position, velocity, gravity and fall speed | none |
+| `AERIAL_CHASE.extend_polygon_check_` (2503) and `Reflect.AI.extend_reflect_absorb_character_check_` (0x80133850) | skip-NSP-against-Ness/Fox switch | the polygon exclusion also covers Remix polygons; the Ness/Fox test becomes the `fighter_reflect` table (Wolf, Falco, JFox, JNess, Lucas, NLucas, Marina, Dedede, Piano, Slippy) so CPUs do not shoot at reflectors/absorbers | `ftRemixAiReflectSkipsNspCandidate`: target in `Character.fighter_reflect` and own `ai_aerial_chase` entry CHASE drops the AutoX B candidate (level >= 5), see section 10 |
+| `ai_ball_attack_range` (Smashketball 1211, 0x80133144) | picker, before the list pointer is used | with the Smashketball mode on, the ball replaces the target: hurtbox 200 x 200, ball position, velocity, gravity and fall speed | `ftRemixAiModesGetBallTarget` (`ftremixaimodes.c`) |
 
 PREVENT_ATTACK routines (by `fkind`, as registered): FALCO_NSP (Falco: NSP vetoed airborne, then the FOX_USP rule), FOX_USP (Fox,
 JFox, Slippy: USP vetoed at lv10), BOWSER_USP_DSP (Bowser: DSP and USP), GBOWSER (DSP), USP (Wolf, Dedede: USP), SONIC_DSP (Sonic,
@@ -172,7 +172,7 @@ opponents are targets) and `clamp_target_pos_to_stage` (4903; lv10 clamps the st
 and a Y floor), Smashketball `ai_ball_behavior_` (1153, 0x80132B44: target = ball position +-400 by team, distance recomputed) and
 KOTH `ai_hill_behavior_` (1712, 0x80134B84 at the start of `ftComputerCheckTargetItemOrTwister`: in KOTH the target is the hill
 indicator position minus 500 Y, `target_line_id` is the hill line, items and the tornado are ignored, TRUE is returned; if the indicator's clipping is off or it is hidden, `target_line_id` is set to -1 and
-the vanilla logic runs). Port: `ftRemixAiMovementTargetsOffstage`, `ftRemixAiMovementClampTarget`.
+the vanilla logic runs). Port: `ftRemixAiMovementTargetsOffstage`, `ftRemixAiMovementClampTarget`, `ftRemixAiModesSeekBall` (`ai_ball_behavior_`, end of `ftComputerCheckFindTarget`; the ball position comes from `itRemixBasketballGetPosition`, the home team from `gmRemixSmashketballGetHomeTeam`) and `ftRemixAiModesSeekHill` (`ai_hill_behavior_`, before the item loop of `ftComputerCheckTargetItemOrTwister`; the marker position from `gmRemixKothModelGetMarkerPosition`).
 
 ## 6. Movement, recovery and specials
 
@@ -192,12 +192,13 @@ the vanilla logic runs). Port: `ftRemixAiMovementTargetsOffstage`, `ftRemixAiMov
 | `usp_check_` (1342) | `ftComputerUpdateInputs` air branch 0x80132140 | the Fox USP branch covers Fox, JFox, Peppy, Falco; Goemon / Ebisumaru in a Magic Cloud action skip the `dist_y < 0` stick zeroing | `ftRemixAiUspIsFoxFamily`, `ftRemixAiUspIsCloudAction` |
 | `recovery_stick_y_fix` (1402) | after each command, 0x8013253C | Goemon / Ebisumaru Magic Cloud: stick up; Goemon presses Z, Ebisumaru A above a floor line (Cloud Escape clears Z) | `ftRemixAiCloudRecoveryInput` |
 | `evade_fix_` (94) | `ftComputerCheckEvadeDistance` 0x80132C00 | with Improved AI (or Remix 1P) the CPU does not evade while it is Starman (>= 112 frames left) or respawn-invincible (>= 20 frames) | `ftRemixAiCombatEvadeIsSuppressed` (toggle and timers). The asm's Remix 1P compare uses `v1` after loading 4 into `t6`; at the only call site (0x801369EC) `v1` is -1, so the term never fires and is not ported |
+| `metal_luigi_ai` (MLuigi.asm 104) | `ftComputerCheckFindTarget` 0x80132AA4 | Metal Luigi, like Metal Mario, only targets grounded opponents | `ftRemixAiIsMetalKind` |
 | `remix_ignore_projectiles_` (1299) | `ftComputerProcDefault` 0x801377E4 | MLuigi and GBowser (and anyone with the Franklin Badge) skip the projectile reaction | `ftRemixAiCombatProjectileIgnored` |
 | `charge_less_often` (871) | `ftComputerCheckTryChargeSpecialN` 0x80136A2C | lv10 starts a charge only on a 1/60 roll (rolled only at lv10) | `ftRemixAiCombatChargeIsSkipped` |
-| `improve_remix_specials` (924) | same, 0x80136A54 | charge decisions for Remix ids: Samus-like (Mewtwo, DSamus, ESamus, JSamus) share the Samus charge, JDK the DK one, Bowser/GBowser zero the stick X during a grounded USP (action 0xDE), Sheik/Peppy keep charging in their charge states, stop when shooting or in jumpsquat, and press B below 6 needles/shots | cases in `ftComputerCheckTryChargeSpecialN`, `ftRemixAiSpecialsBowserUspStickReset` |
+| `improve_remix_specials` (924) | same, 0x80136A54 | charge decisions for Remix ids: Samus-like (Mewtwo, DSamus, ESamus, JSamus) share the Samus charge, JDK the DK one, Bowser/GBowser zero the stick X during a grounded USP (action 0xDE), Sheik/Peppy keep charging in their charge states, stop when shooting or in jumpsquat, and press B below 6 needles/shots | cases in `ftComputerCheckTryChargeSpecialN`, `ftRemixAiSpecialsBowserUspStickReset`, `ftRemixAiSpecialsNeedleCharge` (Sheik falls through into the Peppy action checks, as the asm) |
 | `improve_remix_charged_NSP_1` (1031) | `ftComputerCheckTryCancelSpecialN` 0x80136C0C | DSamus, Sheik, Mewtwo (and Kirby copies) press Z while a charge can be cancelled; JDK is added to the DK case | `ftRemixAiSpecialsCancelChargeWithZ` |
 | `improve_remix_charged_NSP_2` (1130) | `func_ovl3_80138AA8` 0x80138C24 | a Samus-like NSP is not fired at Fox, Slippy, Wolf, Marina, Falco, Piano, JFox, nor at Ness, Lucas, JNess unless the shooter is Sheik | `ftRemixAiSamusNspIsBlocked` |
-| `improve_remix_charged_NSP_3` (1180) | same, 0x80138C44 | charge-shot / own-action exit for Kirby hats and Remix Samus ids (stop the long-range walk while charging) | none |
+| `improve_remix_charged_NSP_3` (1180) | same, 0x80138C44 | own-action exit for Sheik, Mewtwo, DSamus (and the Kirby copies of their actions) and the Samus action list for JSamus, ESamus, DSamus and Mewtwo (stop the long-range walk while charging). The Kirby hat half compares the copy word with 0x1E, 0x1B and 0x13, stale hat ids that match no copyable fighter, so Kirby keeps the Samus hat case only | `ftRemixAiSpecialsFarRangeIsCharging`, `ftRemixAiSpecialsFarRangeUsesSamusActions` in `func_ovl3_80138AA8` |
 | `extend_cliff_attack_` (3663) | `ftComputerGetObjectiveStatus` CliffWait 0x80136E04 | lv10: `get_random_int_(2) >> 1` is always 0, so the getup is always CLIFF_LET_GO | `ftRemixAiCliffGetupCommand` (still draws the RNG once) |
 | `taunt_replace_` (3690) | same, taunt case 0x80137754 | lv10 never taunts | `ftRemixAiTauntIsSuppressed` |
 | `force_objective_attack` (3892) | `ftComputerProcessTrait` 0x8013A718 | lv10 forces behaviour 0 (no RNG call) | `ftRemixAiTraitRoll` |
@@ -276,6 +277,8 @@ Marina's slow absorb uses radius 25 instead of 15), `extend_projectile_reflect_i
 (0x80138058; press the reflector or absorb special, keep holding it while its absorb actions 0xE5-0xED (Piano) or the Marina absorb range
 run).
 
+Port (`ftremixaireflect.c`, rules in `ftremixaireflectrules.c`, table reads from the RAM image): `ftRemixAiReflectDetectionFrames` (projectile window 15, Marina 25), `ftRemixAiReflectProjectileRaisesFlag` (Fox, N Fox and Ness always; JFox, Falco, Slippy, Wolf; JNess, Lucas, NLucas, Piano and N Ness unless the projectile is a Sheik needle 0x23 or Conker nut 0x24; Marina unless she holds an item or her charge is 4), `ftRemixAiReflectItemRaisesFlag` (Fox, N Fox and Ness, then the `fighter_reflect` table, Marina as above), `ftRemixAiReflectMaintainInput` (ProcDefault: release B while in the Fox or Ness down special scope, Piano actions 0xE5-0xED, Marina 0xFE-0x109) and `ftRemixAiReflectApplyInput` (CounterAttack: press the down special when outside that scope). `set_item_detection_radius_` (0x80135ED4) is a no-op: it loads 9.0 (the `/ 9.0F` chance divisor, not a radius) and compares the Marina id with `s7`, which is not the character id there.
+
 Mode targets are in section 5 (`ai_hill_behavior_`, `ai_ball_behavior_`, `ai_ball_attack_range`). Training-mode CPU behaviour (menu tech, DI, spam,
 shield break) uses the tech and DI hooks of section 7.
 
@@ -300,5 +303,9 @@ shield break) uses the tech and DI hooks of section 7.
 | `_find_closest_ledge` | with no candidate the ledge is (0, 0) and not grabbable | the asm leaves `is_grabbable` uninitialized |
 | `_improve_recovery_drift` flag byte | tests and clears all eight flags of byte 0x49 of the computer struct | the asm reads `lb` / `sb r0` of the whole byte, not just `is_attempt_specialhi_recovery` |
 | `CpuLevel9` enhancement | overrides level 10 when on | port-only convenience setting |
+| `extend_reflect_absorb_character_check_` | the port drops the AutoX B candidate when the target is in `fighter_reflect` and the own `ai_aerial_chase` entry is CHASE (the vanilla meaning with the table in place of Ness/Fox) | read literally, the asm jumps to 0x801338A0 (the continue path, identical to NORMAL) for a reflector and runs the own-fighter table for everyone else, which would invert the vanilla rule for the seven fighters whose entry is CHASE; the labels (`_dont_shoot`) and comments state the vanilla meaning. `ftRemixAiReflectRulesSkipsNspCandidate` is the one place to flip |
+| `apply_reflect_input_` | NLucas is not handled | the asm compares LUCAS twice where the second is labelled NLUCAS |
+| `ai_ball_behavior_` | the side offset uses the Smashketball home team | the asm compares the fighter team with `ITStruct` word 0x68, which is `vel_push.y` of the collision data (the comment says home team); that is 0 in practice, so the asm treats team 0 as the home team |
+| `ai_hill_behavior_` | the target Y is the marker Y minus 500 | the asm loads the Y of both joints from the X offset (0x1C twice), giving Y = X - 500; the port follows the commented intent |
 
 Open gaps: `docs/remix/patch_audit.md`, groups g7 (CPU hooks of AI.asm and fighters), g5 (Reflect) and g8 (modes).

@@ -36,6 +36,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_ai_prediction_rules.c
     test_ai_roll_rules.c
     test_ai_specials_rules.c
+    test_ai_reflect_rules.c
+    test_ai_modes_rules.c
     test_ai_teaching_rules.c
     test_ai_postprocess_rules.c
     test_ai_cpuinput_rules.c
@@ -64,6 +66,13 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_stage_select_rules.c
     test_stage_grid_rules.c
     test_dpad_map_rules.c
+    test_grounded_rules.c
+    test_ftmain_rules.c
+    test_chargeflash_rules.c
+    test_capturecargo_rules.c
+    test_alternatevoice_rules.c
+    test_slippy_hips_rules.c
+    test_kirbygun_rules.c
     test_dpad_control_rules.c
     test_css_rules.c
     test_css_cpu_costume_rules.c
@@ -71,6 +80,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_css_vsmodes_rules.c
     test_practice_rules.c
     test_partimage_rules.c
+    test_yoshishared_rules.c
     test_sprite_bitmap_row.c
     test_sonic_classic_rules.c
     test_surface_rules.c
@@ -82,6 +92,14 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_dragonkinghud_rules.c
     test_barrel_bonus_rules.c
     test_spawn_rules.c
+    test_pipeturn_rules.c
+    test_fighter_effects_rules.c
+    test_varianttune_rules.c
+    test_jab_rules.c
+    test_kirbyspawn_rules.c
+    test_bowserammo_rules.c
+    test_ness_rules.c
+    test_pika_rules.c
     ${CMAKE_SOURCE_DIR}/port/bridge/sprite_bitmap_row.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_decode.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_layout.c
@@ -123,9 +141,30 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipredictionrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairollrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaispecialsrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaireflectrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaimodesrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadmaprules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixgroundedrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixmainrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixsandbagrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixhitrecoilrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixmagichatrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixcommandrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixchargeflashrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixcapturecargorules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixalternatevoicerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/slippy/ftremixslippyhipsrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixkirbygunrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadcontrolrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixjabrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixkirbyspawnrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/bowser/ftremixbowserammorules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixnessrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixpikarules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixpartimagerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixyoshisharedrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixjumpaerialrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixthrownrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/sonic/ftremixsonicclassicrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixsurfacerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixteamsrules.c
@@ -177,6 +216,9 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixbarrelrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gr/grremix/grremixbonusrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixspawnrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixpipeturnrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixeffectsrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixvarianttunerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixcountdownrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixcamerapanrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixdragonkinghudrules.c

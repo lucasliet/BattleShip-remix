@@ -1,0 +1,17 @@
+# P1 presses A every 8 frames (jab 1, 2, 3 and the jab-3 timers), standing still, from frame 480 to 700.
+480 482 0 A
+488 490 0 A
+496 498 0 A
+504 506 0 A
+512 514 0 A
+520 522 0 A
+528 530 0 A
+536 538 0 A
+600 602 0 A
+608 610 0 A
+616 618 0 A
+624 626 0 A
+632 634 0 A
+640 642 0 A
+648 650 0 A
+656 658 0 A

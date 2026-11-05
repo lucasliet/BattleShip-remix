@@ -47,7 +47,7 @@ and `plunge_collision_`. The buried state is `fp->proc_update == ftRemixBuryMain
   `mpCommonProcFighterLanding`. A grounded fighter on a soft platform (`MAP_VERTEX_COLL_PASS`) is plunged and dropped 10 units. On a floor with a
   nonzero material (the damage floors) the fighter is not buried while Hazard Mode keeps hazards on (`mpCommonSetFighterWaitOrFall`).
 - Buried: status DownBounceU, FGM 0x11F, the processes `proc_update = ftRemixBuryMain`, `proc_accessory` empty, `proc_physics` NULL,
-  `proc_map = ftRemixBuryCollision`. The timer is `99 + (s32)(0.7 * percent)` in the per-port array `sFTRemixBuryTimer` (the asm word 0x26C).
+  `proc_map = ftRemixBuryCollision`. The timer is `99 + (s32)(0.7 * percent)` in `fp->breakout_wait` (the asm word 0x26C).
   Unbury is a short hop (`ftCommonJumpSetStatus` with the button source and `is_shorthop`); it also happens when the fighter moves into a wall or
   becomes aerial.
 - Deviations: (1) the asm decrements the word 0x26C (`fp->breakout_wait`) on mashing; `ftRemixBuryMain` calls the mash helper but keeps its own
@@ -85,7 +85,7 @@ through the three `load_command_` hooks in `ftmain.c`.
 | `apply_direction_` (0x800E446C) | `ftMainProcessHitCollisionStatsMain`, fighter branch | `ftRemixCommandApplyDamageDirection` |
 | `apply_fgm_` | `ftMainPlayHitSFX` | hook in ftmain.c |
 | `change_action_` (0x800E6F2C) | `ftMainSetStatus` | `ftRemixCommandResetStatus`: translation multiplier and env colour reset (the Kirby clone swap of section 6 sits at the top of the same function) |
-| `translation_multiplier_` `apply_ground_z_/x_`, `apply_air_z_/y_/x_` | `ftPhysicsApplyGroundVelTransN`, `ftPhysicsGetAirVelTransN` | `ftRemixCommandGetTranslationMultiplier` returns the command 0xD3 value. The asm also multiplies the translation by 0.59765625 when the Size multiplier is above 1.0 and by 1.59375 when it is below 1.0; the port does not apply that factor |
+| `translation_multiplier_` `apply_ground_z_/x_`, `apply_air_z_/y_/x_` | `ftPhysicsApplyGroundVelTransN`, `ftPhysicsGetAirVelTransN` | `ftRemixCommandGetTranslationMultiplier` returns the command 0xD3 value times the Size factor of the asm (0.59765625 when the Size multiplier is above 1.0, 1.59375 when it is below 1.0, `ftRemixCommandGetSizeFactor` in ftremixcommandrules.c) |
 
 Deviation: `respawn_with_item_` is hooked in `ftCommonRebirthStandSetStatus` (`ftRemixStartItemRespawn`); the asm tests `Action.Revive1`, which is
 `nFTCommonStatusRebirthDown` (0x007), one status earlier.

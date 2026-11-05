@@ -264,10 +264,11 @@ Closed phases:
       four-Remix-fighter match (`docs/bugs/remix_vs_results_status_buffer_2026-11-05.md`). Found: since Phase 5 the BTT/BTP
       stages run the bonus ground (`bonus_fix_1_`), so the VS shortcut cannot load them; the stage sweep skips them and they
       are run through the 1P path (SKILL.md).
+    - Also done after the commit: ST-12 and ST-15 (lldb counts in CPU matches).
     - **Left (coded, not yet seen in game):** ST-10 (Peach BTT pipe), ST-11 (platform that vanishes under a hanging fighter),
-      ST-12 (Congo Falls barrel hitbox), ST-15 (Onett and Tal Tal follow the hazard toggle), ST-18 (hazard item draw order),
-      ST-19 (Rainbow Chomp past the bounds), ST-23 (Stage Select OFF random), ST-24 (Training background by parent stage),
-      IT-10 (ball into the Smashketball barrels). Each needs a scripted scenario or an lldb count in a long CPU match.
+      ST-18 (hazard item draw order), ST-19 (Rainbow Chomp past the bounds: not reached in 6000 frames), ST-23 (Stage Select
+      OFF random), ST-24 (Training background by parent stage), IT-10 (ball into the Smashketball barrels: not reached in
+      8000 frames, nor with `SSB64_SMASH_BALL_X` over a barrel). Each needs a scripted scenario.
     - S1 match flow (owner of `ifcommon.c`, `ftcommondead.c`, `gmcamera.c`), serial: ST-1 with ST-26; ST-17 (countdown
       stoplight and FGM); ST-20 = MS-15 with ST-21 and IT-8 (pause camera, stick limits, close-up zoom); ST-4 with MS-13
       last (Dragon King HUD, input display under the timer; calls in `sc1pbonusstage.c` and `sc1ptrainingmode.c` after S3
@@ -282,7 +283,12 @@ Closed phases:
       Blue, Mute City (153) and Casino (159) against reference captures; barrels on Congo (2, 105), Smashketball (90),
       Falls (94); bonus with `scene.sh 53` and `SSB64_SPGAME_STAGE` (172, 140, 161); toggles with `SSB64_REMIX_TOGGLES`;
       `stage_sweep.sh` for ST-25; FGM log for ST-17.
-  - [ ] **Lot 3, fighters** (GP, SH, FT, CT outside AI). F5 and F6 are single owners of `efmanager.c` and `ftmain.c`; F5
+  - [ ] **Lot 3, fighters** (GP, SH, FT, CT outside AI). Progress (2026-11-05): all eight packages coded and built; roster special matrix (94 fighters × 3)
+    clean; unit tests 6062 checks. Done in the ledger with their runs: GP-1 = CT-14, FT-38, FT-43, OP-20, SH-10, FT-15, SH-1,
+    FT-50, SH-11, SH-12, IT-7, SH-4, GP-7 = CT-15; FT-19 `n/a`. The rest is ported and marked "in-game check pending" in the
+    ledger (one scripted check each, next). Open: GP-6 (Visibility per-part render modes: needs a renderer state for the
+    alpha render mode), GP-12 (GFX 0x64 user not found). Deviations in `deviations.md` 5.8.
+  F5 and F6 are single owners of `efmanager.c` and `ftmain.c`; F5
     starts after F2 and F3; the `ftcommonattackair.c` and `ftremixkirbypower.c` parts of FT-29 wait for F8 and F4.
     - F1 jab and smash (`ftcommonattack1.c`, `ftcommonattack100.c`, `ftcommonattacks4.c`): GP-1 = CT-14, FT-38, FT-43,
       SH-3, the attack part of SH-6.
@@ -367,7 +373,10 @@ Closed phases:
   2. [x] coded (2026-11-05): FT-6, FT-8 = CT-19, FT-9, FT-11, FT-12, FT-13, CT-17 (the PREVENT routines now act per
      candidate in `ftComputerCheckDetectTarget`, as the asm does), CT-20, FT-52; unit tests. Rule files, in parallel: FT-6, FT-8 = CT-19, FT-12, FT-13 (decision in its row first), CT-17, CT-20, FT-9, FT-52,
      FT-11 (human handicap up to 40 and the icons above 9).
-  3. First batch coded (2026-11-05): SH-16 to SH-27 (SH-20 and SH-21 narrower than the ledger, `ai.md`), ST-27, FT-1 = CT-18
+  3. Second batch coded (2026-11-05): FT-3 with FT-36, FT-4 with FT-7 (FT-10 was already ported), GP-8 = CT-21 (all seven
+     Reflect.asm AI patches), MD-10 and MD-11 (ball and hill targets), the self-destruct count in the AI log (`selfko` in
+     `ai_recovery.sh`); PUFF_DSP is commented out in the asm (nothing to port); the Default CPU LVL refresh and the `CpuLevel9`
+     conflict with level 10 are left (a design decision). Deviations in `deviations.md` 5.9. First batch coded (2026-11-05): SH-16 to SH-27 (SH-20 and SH-21 narrower than the ledger, `ai.md`), ST-27, FT-1 = CT-18
      (all 37 `recovery_logic` entries, `ftremixairecoverylogic*.c`), FT-2 (`_improve_recovery_drift`), FT-5; level-10 matches
      `p6_lv10_a` to `_d` run the new routines without errors. Re-measure: 658 episodes, 568 ok (86.3%) against 631 of 712
      (88.6%): the runs are deterministic, but any AI change alters every fighter's match, and KOs while recovering are mostly

@@ -376,6 +376,25 @@ Per item:
 | Platform movement (`grremixplatformrules.c`, ST-15) | The movement rule uses the hazard type of the match stage from `Stages.stage_hazard_table`; the asm reads `dont_freeze_stage`, a flag the stage select sets, which only differs after RANDOM or the tournament layout. |
 | Smashketball ball and barrels (`itremixbasketball.c`, IT-10) | The ball finds the barrels through the list kept by `grremixjunglebarrels.c`; the asm walks the ground obstacle array through `gobj+0x20`. Same barrels, same order. |
 
+### 5.8 Fighters (Phase 5b lot 3)
+
+| Area | Deviation |
+|---|---|
+| Jab 3 and rapid jab (`ftremixjab.c`) | A fighter whose `jab_3` gate is open but whose `jab_3_action` entry is DISABLED (Wario, N Wario, Piano, Marth, N Marth, Roy, Crash, N Crash), or whose `rapid_jab` gate is open but whose `rapid_jab_unknown` entry is DISABLED (Marth, Roy, Peach, N Peach), gets no jab 3 / rapid jab: on the N64 that path reads an uninitialised status. Mewtwo's rapid-jab end does not jump into the loop function's tail (it only matters for Kirby effects). |
+| Ness and Pikachu clones (`ftremixnessshared.c`, `ftremixpikashared.c`) | The J Ness / N Lucas PSI Magnet sphere, the E Pikachu Thunder Jolt and the clones' ground Thunder Jolt animation read the clone's own file (same data as the vanilla file) instead of the vanilla globals, so a match without Ness or Pikachu does not read a NULL file. The PSI Magnet effect uses `p_file_special1` for J Ness and Lucas for the same reason. The reflected PK Thunder trail takes its owner from the head's `pkthunder.parent_gobj`; the asm reads a fixed global. |
+| Kirby hat panel (`ftremixkirbyhats.c`) | The panel hat applies to Kirby and J Kirby only; the asm would also apply it to Polygon Kirby. The 1P game-over check of Random reads the port's stock count (the asm's `match_info+0x2B` has no port equivalent). Bowser's spawn also clears the recharge timer half of the ammo word (the asm writes only the ammo half). |
+| Sandbag (`ftremixsandbag.c`, FT-42) | The landing patch inside `ftCommonDownBounceCheckUpOrDown` that `ftcommonshieldbreakdown.c` reaches is not ported: the asm jumps into another function's frame there. |
+| Slippy hips (`ftremixslippyhips.c`, FT-44) | A status past the end of the hip table uses multiplier 1.0; the asm reads the memory after the table. |
+
+### 5.9 CPU AI (Phase 6)
+
+| Area | Deviation |
+|---|---|
+| Reflector check (`ftremixaireflect.c`, FT-3) | `extend_reflect_absorb_character_check_` jumps to 0x801338A0 for a reflecting target: in the vanilla layout (ROM disassembly 0x80133850-0x801338A0) that address is the path that keeps the candidate, and 0x8013387C, taken for non-reflectors, is the projectile-user switch that drops it, so the asm inverts its own labels (`_dont_shoot`). The port keeps the intent: a projectile user does not pick its neutral special against a reflecting target. |
+| Smashketball ball (`ftremixaimodes.c`, MD-10) | The asm compares the fighter's team with an item word that is `vel_push.y` (always 0), so team 0 counts as home; the port uses the real home team. Same result when P1 is team 0. |
+| KOTH hill (`ftremixaimodes.c`, MD-11) | The asm reads the hill X twice, so the target Y is X - 500; the port uses the marker Y - 500, as its comments intend. |
+| Kirby hat specials (FT-4) | The Kirby-hat half of the charge exit compares the copy word with ids 0x1E, 0x1B, 0x13 that match no copyable power, so it never fires; not ported. `set_item_detection_radius_` compares the Marina id with a register that does not hold the fighter id: no effect, not ported. |
+
 ## 6. Tests
 
 - Headless unit tests of the pure rules (Blue Shell first-place rules, Stopwatch background, Sonic classic, Smashketball and others):

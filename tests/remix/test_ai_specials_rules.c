@@ -86,9 +86,75 @@ static void testOtherOpponentDoesNotBlockSamusNsp(void)
     CHECK_EQ(0, ftRemixAiSamusNspOpponentBlocks(0, 0, 0));
 }
 
+static void testSheikBeginAndGroundChargeKeepCharging(void)
+{
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_KEEP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x0EA, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_KEEP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x0ED, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_KEEP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x0EB, 0));
+}
+
+static void testSheikShootAirChargeAndJumpSquatStop(void)
+{
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_STOP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x0EC, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_STOP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x0EF, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_STOP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x0EE, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_STOP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x014, 0));
+}
+
+static void testSheikPressesBelowFullAmmo(void)
+{
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_PRESS, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x00A, 5));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_STOP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x00A, 6));
+}
+
+static void testSheikFallsThroughToPeppyActionChecks(void)
+{
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_KEEP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x0E1, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_STOP, ftRemixAiSpecialsNeedleChargeOutcome(1, 0x0F3, 0));
+}
+
+static void testPeppyUsesItsOwnActionIds(void)
+{
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_KEEP, ftRemixAiSpecialsNeedleChargeOutcome(0, 0x0E1, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_KEEP, ftRemixAiSpecialsNeedleChargeOutcome(0, 0x0EE, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_KEEP, ftRemixAiSpecialsNeedleChargeOutcome(0, 0x0E2, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_STOP, ftRemixAiSpecialsNeedleChargeOutcome(0, 0x0F2, 0));
+    CHECK_EQ(FTREMIX_AI_SPECIALS_NEEDLE_PRESS, ftRemixAiSpecialsNeedleChargeOutcome(0, 0x0EB, 2));
+}
+
+static void testChargeShotActiveForSheikMewtwoAndDSamus(void)
+{
+    CHECK_TRUE(ftRemixAiSpecialsChargeShotActive(0x3E, 0x0EA));
+    CHECK_TRUE(ftRemixAiSpecialsChargeShotActive(0x3E, 0x16B));
+    CHECK_EQ(0, ftRemixAiSpecialsChargeShotActive(0x3E, 0x0E9));
+    CHECK_TRUE(ftRemixAiSpecialsChargeShotActive(0x39, 0x0E0));
+    CHECK_TRUE(ftRemixAiSpecialsChargeShotActive(0x39, 0x14D));
+    CHECK_EQ(0, ftRemixAiSpecialsChargeShotActive(0x39, 0x0E1));
+    CHECK_TRUE(ftRemixAiSpecialsChargeShotActive(0x22, 0x133));
+    CHECK_EQ(0, ftRemixAiSpecialsChargeShotActive(0x22, 0x0DF));
+    CHECK_EQ(0, ftRemixAiSpecialsChargeShotActive(0x03, 0x133));
+}
+
+static void testSamusActionListCoversTheSamusLikeFighters(void)
+{
+    CHECK_TRUE(ftRemixAiSpecialsUsesSamusActionList(0x03));
+    CHECK_TRUE(ftRemixAiSpecialsUsesSamusActionList(0x24));
+    CHECK_TRUE(ftRemixAiSpecialsUsesSamusActionList(0x33));
+    CHECK_TRUE(ftRemixAiSpecialsUsesSamusActionList(0x22));
+    CHECK_TRUE(ftRemixAiSpecialsUsesSamusActionList(0x39));
+    CHECK_EQ(0, ftRemixAiSpecialsUsesSamusActionList(0x3E));
+}
+
 void remixTestAiSpecialsRules(void)
 {
     printf("ai specials rules\n");
+    RUN_TEST(testSheikBeginAndGroundChargeKeepCharging);
+    RUN_TEST(testSheikShootAirChargeAndJumpSquatStop);
+    RUN_TEST(testSheikPressesBelowFullAmmo);
+    RUN_TEST(testSheikFallsThroughToPeppyActionChecks);
+    RUN_TEST(testPeppyUsesItsOwnActionIds);
+    RUN_TEST(testChargeShotActiveForSheikMewtwoAndDSamus);
+    RUN_TEST(testSamusActionListCoversTheSamusLikeFighters);
     RUN_TEST(testDSamusChargeShotCancels);
     RUN_TEST(testDSamusKirbyAirChargeCancels);
     RUN_TEST(testDSamusKirbyDSChargingCancels);

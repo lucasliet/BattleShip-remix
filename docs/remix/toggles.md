@@ -166,7 +166,7 @@ Deviation: entries that carry an A-press function in `Toggles.asm` are not liste
 
 - **PK Thunder Reflect Crash Fix** (`pk_thunder_reflect_crash_fix`; 0 off, 1 on; default 1)  
   Asm: nessshared.asm: marks the PK Thunder trail objects as discarded when the head is reflected and fixes the trail rotation.  
-  Port: No reader; the decomp keeps the vanilla reflect code (wp/wpness/wpnesspkthunder.c:562).
+  Port: `gmRemixToggle(pk_thunder_reflect_crash_fix)` in `wpNessPKReflectHeadProcReflector` (wp/wpness/wpnesspkthunder.c): the reflected head destroys its trails and the reflected trail rotation is `atan2(vel.y, vel.x) - 90°` (SH-5).
 
 - **Flash Guard** (`flash_guard`; 0 off, 1 on; default 0)  
   Asm: Accessibility.asm `flash_guard` and the Flashbang, Deku Nut, Lightning and Special Zoom checks: no white screen flashes.  

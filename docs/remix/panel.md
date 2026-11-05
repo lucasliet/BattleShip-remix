@@ -112,8 +112,7 @@ centre every frame, one layer, no black outline copy). Tag number 2 named `afk` 
 
 **Visibility.** `initialize_override_table_` (0x800D7CBC) sets the env colour override of the port; `update_player_indicator_alpha_`
 (0x80111B3C) gives the tag the override alpha. None is `0xFFFFFF01` (the asm comment says `...00`, the instruction is `addiu t9, r0,
--0x00FF`), Dark `0x000000FF`; Cloaked writes a fixed value through a path the asm marks "I don't know how to do that yet" and the port keeps
-the Normal state for it. How to Play and Auto-Demo clear the override. Port: `ftRemixVisibilityInitFighter` (after
+-0x00FF`), Dark `0x000000FF`; Cloaked maps to the Cloaking Device state (override `0xFFFFFF10`), as the asm's fixed value does (GP-5). How to Play and Auto-Demo clear the override. Port: `ftRemixVisibilityInitFighter` (after
 `ftRemixSizeInitFighter`) and `ftRemixVisibilityPlayerTagSetAlpha`; the override beats the moveset overrides (Sheik, Mewtwo, Super Sonic), as
 in the asm; the existing `ftRemixEnvColorGetOverride` hook in `ftDisplayMain` draws it. The asm uses a translucent render mode below alpha
 0xFF; the port only sets the env colour and sky fog alpha.
@@ -174,9 +173,11 @@ exactly the taunt button; Single Button Mode keeps the vanilla mask. Port: `ftRe
 `ftCommonJumpAerialMultiCheckJumpButtonHold` (0x8014012C). With a custom button the shield answers L and Z (`ftRemixDpadControlSetButtonMasks`).
 
 **Kirby Hat.** The value maps to a fighter whose copy hat Kirby wears at spawn; 41 is the magic hat (the None row, hat 0x25), 42 Random. Port
-(`ftRemixKirbyHatPanelModelPart`): applies to Kirby and J Kirby when they spawn with no copy power; Random rolls `syUtilsRandIntRange(40)` (same
-distribution, not the same sequence); the hat file loads lazily the first time a modelpart >= 0x0F resolves. The magic hat sets only the hat (the
-asm `clear_magic_hat_charge` and the Size magic-hat flag, `Size.asm:364`, are not set); hat loss is in `ftremixkirbypower.c`.
+(`ftRemixKirbyHatSpawnInit` in `ftremixkirbyhats.c`, called from `ftManagerInitFighter`): for Kirby and J Kirby the panel fighter replaces the
+spawn power, as `kirby_hat_select_` does, and the hat comes from the copy table (Polygon Kirby keeps its own, a deviation); Random rolls once and
+shows plain Kirby on the menus, CSS, results and 1P game over. `ftRemixKirbyPowerInitFighter` sets the magic-hat flag (spawn power NONE or panel
+41, which also clears the stored hat charges, `ftRemixKirbyMagicHatClearCharge`) and the taunt power loss (panel None only); the magic hat rolls a
+random power per neutral special and restores itself (`ftremixmagichat.c`).
 
 **Dpad ctrl.** `ftRemixDpadControlController` (after the input delay, as the asm order 0x4BF8 then 0x4C00) returns a synthetic `SYController` per
 port. R becomes A+L instead of A+Z in modes 1..4. Stick Swap (1, 3): the stick becomes D-pad bits (dead zone X 40, Y 30) and the physical D-pad
@@ -222,7 +223,7 @@ could zero it); a retry replays the stage with no continue, level drop or stage 
 - `SinglePlayer.high_score_enabled` does not exist in the port; the Gameplay/Pokemon toggle checks and the enemy-port check of
   `check_high_scores_enabled` (2396-2417) are not in the refreshed value.
 - Stock Count is a port option; Input HUD is an overlay with port colours and layout.
-- Visibility Cloaked does nothing; Skeleton needs a skeleton entry 1; the Handicap value reaches only the knockback table.
+- Visibility Cloaked uses the cloaking state; the per-part render-mode lists of `CharEnvColor.custom_display_lists_*` are open (GP-6); Skeleton needs a skeleton entry 1; the Handicap value reaches only the knockback table.
 
 ---
 

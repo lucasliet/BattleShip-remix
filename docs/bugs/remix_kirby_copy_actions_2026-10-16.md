@@ -46,8 +46,8 @@ the copied fighter's own routines instead of Kirby's. For Dedede the hat (ids 32
 - `ftremixkirbypower.c`: `magic_hat_on` and `taunt_loses_power` per port (`set_absorbed_`, `set_absorbed_hat_`,
   `hat_loss_prevent_`, `kirby_power_loss_prevent_`). With the menu setting off they behave like the game: no magic hat, power
   lost.
-- Start-with-hat (`spawn_with_hat`): the hat chosen in the panel is applied through `ftRemixKirbyHatPanelModelPart` in
-  `ftManagerInitFighter`.
+- Start-with-hat (`spawn_with_hat`): the hat chosen in the panel is applied in `ftManagerInitFighter`
+  (since 2026-11-05 through `ftRemixKirbyHatSpawnInit`, `ftremixkirbyhats.c`; the panel fighter replaces the spawn power).
 
 ## Findings worth keeping
 

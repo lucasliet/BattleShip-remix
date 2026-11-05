@@ -93,5 +93,5 @@ Asm line = `PokemonAnnouncer.asm` label; every site is a short `if (ifRemixAnnou
 - Sleep: the asm checks the sleep request only on frames where the global timer was non-zero before it counted down; the port checks every frame.
 - Close match: the asm tests `Global.vs.game_mode < 2`; the port tests the stock bit (0x2) of `game_rules`. Elapsed and remaining times map to `time_passed` and `time_remain` of `SCBattleState`.
 - The Gym Leader Castle opening draws `random(2)` over a one-entry table in the asm (index 1 reads the first opening call, 0x4B7); the port uses the table length.
-- `opening_comment` (random FGM 0x479-0x47B on the "2" of the countdown, `Hazards.asm:6271`) and the Captain Falcon `firepunch_announcement_` (`captainshared.asm:207`) have no call site; their tables exist.
+- `opening_comment` (random FGM 0x479-0x47B on the "2" of the countdown, `Hazards.asm:6271`) is played from the countdown (`if/ifremixcountdown.c`); the Captain Falcon `firepunch_announcement_` (`captainshared.asm:207`) plays from `efManagerCaptainFalconPunchMakeEffect` for every punch power except Ganondorf, Wolf and Mewtwo (`ftremixdkcaptainshared.c`, SH-8).
 - `IFREMIX_ANNOUNCER_TIME_UP_FGM` is defined twice in `if/ifremixannouncer.c` (0x4A1 near the top for the one-minute call, 0x04AE later for the time-up swap); each use sees the value defined before it.

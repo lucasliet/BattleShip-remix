@@ -4,7 +4,8 @@
 #   jobs:   game instances at once (default 4)
 #   frames: SSB64_MAX_FRAMES per match (default 14000, long enough for a 3-stock match at level 9)
 # Every match is level 9, 3 stocks, all four ports CPU (SSB64_VS_ALL_CPU=1), with SSB64_REMIX_AI_LOG=1.
-# Output: one line per run (episodes ok ko open) and the total `episodes=<n> ok=<n> ko=<n> open=<n>`.
+# Output: one line per run (episodes ok ko selfko open) and the total `episodes=<n> ok=<n> ko=<n> selfko=<n> open=<n>`.
+# selfko = KO episodes with hit=0 (the CPU's percent did not rise during the episode: a self-destruct).
 # open = episodes without a recover_end (still airborne at the end of the run, or a lost end event).
 # Env: STAGES="6 0 3 ..." replaces the stage list; VS_TIMEOUT=<seconds> per match (default 900).
 set -u
@@ -42,14 +43,16 @@ done
 bash "$HERE/parallel.sh" "$JOBS" custom "$JOBFILE"
 rm -f "$JOBFILE"
 
-total_begin=0; total_ok=0; total_ko=0
+total_begin=0; total_ok=0; total_ko=0; total_selfko=0
 for i in $(seq 1 "$RUNS"); do
   log="$ROOT/build/agent-shots/vs/ai_rec_$i/ssb64.log"
   begin=$(grep -c "\[remix-ai\] recover_begin" "$log" 2>/dev/null)
   ok=$(grep -c "\[remix-ai\] recover_end .*result=ok" "$log" 2>/dev/null)
   ko=$(grep -c "\[remix-ai\] recover_end .*result=ko" "$log" 2>/dev/null)
-  begin=${begin:-0}; ok=${ok:-0}; ko=${ko:-0}
-  echo "ai_rec_$i episodes=$begin ok=$ok ko=$ko open=$(( begin - ok - ko ))"
+  selfko=$(grep -c "\[remix-ai\] recover_end .*result=ko hit=0" "$log" 2>/dev/null)
+  begin=${begin:-0}; ok=${ok:-0}; ko=${ko:-0}; selfko=${selfko:-0}
+  echo "ai_rec_$i episodes=$begin ok=$ok ko=$ko selfko=$selfko open=$(( begin - ok - ko ))"
   total_begin=$(( total_begin + begin )); total_ok=$(( total_ok + ok )); total_ko=$(( total_ko + ko ))
+  total_selfko=$(( total_selfko + selfko ))
 done
-echo "episodes=$total_begin ok=$total_ok ko=$total_ko open=$(( total_begin - total_ok - total_ko ))"
+echo "episodes=$total_begin ok=$total_ok ko=$total_ko selfko=$total_selfko open=$(( total_begin - total_ok - total_ko ))"
