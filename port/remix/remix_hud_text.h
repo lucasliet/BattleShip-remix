@@ -34,7 +34,9 @@ extern "C" {
  *           (gmremixtwelvecbhud.c); 44..46 12CB Character Set title and the set name of each player,
  *           47..48 12CB stock number of the panels (mnplayersvs.c)
  *   48..127 results screen: Match Stats page texts, taken in draw order (mnremixvsstatspages.c)
- * Rect slots: 30..33 12CB Manual stock D-pad marks (mnremixtwelvecbstockmanual.c), 40..45 12CB Custom legend squares, 0..1 battle pause legend squares, 2 match start banner, 24..27 Training D-pad legend squares, 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
+ *   78..104 Training Z menu (a scene without results screen, so it shares the Match Stats range): row labels 78..89, row values 90..101,
+ *           pagination legend 102..104 (sc1ptrainingremixmenudraw.c)
+ * Rect slots: 30..33 12CB Manual stock D-pad marks (mnremixtwelvecbstockmanual.c), 40..45 12CB Custom legend squares, 0..1 battle pause legend squares, 2 match start banner, 24..27 Training D-pad legend squares, 28..29 Training Z menu cursor and underline, 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
  */
 #define REMIX_HUD_TEXT_SLOTS 128
 #define REMIX_HUD_BAR_SLOTS 16

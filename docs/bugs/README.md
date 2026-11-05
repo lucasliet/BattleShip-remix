@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-11-04 | [remix_zcancel_egg_lp64](remix_zcancel_egg_lp64_2026-11-04.md) | Z-cancel Egg punishment: the egg file was not loaded and a 32-bit clear of the 8-byte capture effect pointer crashed the egg update |
 | 2026-10-29 | [remix_routine_gobjs_on_effect_link](remix_routine_gobjs_on_effect_link_2026-10-29.md) | Cloaking Device and Super Mushroom routine GObjs lived on the effect link, so a shield release read an FTStruct as an EFStruct and crashed |
 | 2026-10-29 | [remix_tagteam_icons_and_link_boomerang](remix_tagteam_icons_and_link_boomerang_2026-10-29.md) | Tag Team: queue stock icons needed the stock sprite fixup, and a Remix Link variant on a recycled FTStruct crashed on a stale boomerang pointer |
 | 2026-10-27 | [remix_1p_size_override_cp6f](remix_1p_size_override_cp6f_2026-10-27.md) | Checkpoint CP6f — tamanho Giant/Tiny das CPUs do Remix 1P era sobrescrito pelo painel do CSS |

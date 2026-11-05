@@ -229,7 +229,7 @@ Passos:
 | I2 | Sprites dos arquivos de extensão do Remix (0xC5, 0xA06, 0xFE, 0x12+0x2048, 0x153, 0x19, 0x14F3) por SObj nativo (decidido no R2) | botão A; glifos de botão; ícones do handicap; bandeiras J/E e D-pad do CSS; nome do item no Training; título do 12CB; ovo do Cruel Z-Cancel; moldura do KOTH |
 | I3 | Texto Kabel completo (regra do `draw_string_`, altura do glifo, `apply_max_width_`, 128 ou mais slots) | todos os chamadores do T8.3 |
 | I4 | Estado de BGM em runtime (atual, padrão, vanilla) e troca com fade | BGM do Time Twister; música alternativa da pausa; troca ao vivo no Training; Menu Music 17 e 18 |
-| I5 | Ferramenta endereço N64 para símbolo (`remix.sym` mais mapa US), com teste | 0x80131580 (KO do chefe do 1P); 0x80131AD8 (risada do BBH); 0x80132704 (rotação do zoom); 0x800F9C8C/0x800F9CC4 (lag do DragonKing); 0x8014A24C (fthrow do Bowser); floats 0x8019C230 da Marina |
+| I5 | Ferramenta endereço N64 para símbolo (`remix.sym` mais mapa US), com teste | 0x80131580 (KO do chefe do 1P); 0x80131AD8 (risada do BBH); 0x80132704 (rotação do zoom); 0x800E9C8C/0x800E9CC4 (lag do DragonKing; o asm escreve `lui 0x800F` com low half com sinal); 0x8014A24C (fthrow do Bowser); floats 0x8018C230 da Marina (mesmo motivo) |
 | I6 | Grupo 2 do estágio (wallpaper e objeto de fundo) e troca de rotina de câmera (`zoom_to_max_`) | T1.5b do Time Twister e do Scuttle Town |
 | I7 | Troca de imagem ou paleta por parte de modelo (`MODEL_PART_IMAGE_INIT_`) | costumes além de `num_costumes`; cor do ovo do Yoshi no escudo; Sonic clássico |
 | I8 | Emulador de referência (decisão 2), detalhado abaixo | comparação visual do T8.3 e da Fase 8; valores que hoje só saem da leitura do asm |

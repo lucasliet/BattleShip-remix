@@ -4,7 +4,14 @@ Source: `.toolchain/pkgs/smashremix-src/src/Training.asm` (entries 3899-3913, `s
 `spam_practice_` 2496, `spam_practice_timer_` 2600, OOS tables 3014-3042) and `AI.asm` (`cpu_di_` 6533, `di_input` 2039, tech table 443-660,
 Spam scripts 1917-2010).
 
-## Decision: the menu is the port menu
+## Update 2026-11-04: the Z menu is ported
+
+The pause Z key now opens the Remix Z menu itself (`sc1ptrainingremixmenu*.c`, `sc1ptrainingmenurules.*`,
+`sc1ptrainingmenuentries.*`, `sc1ptrainingremixspawn.*`): 23 entries on 2 pages with the `Training.asm` layout and the
+`Menu.asm` navigation. It reads and writes the same registry below, so the port menu (**Remix > Training**) and
+`SSB64_REMIX_TRAINING` still work. Seen in run `v3_trzmenu` (ROADMAP Fase 2). The decision below is kept as history.
+
+## Decision (superseded): the menu is the port menu
 
 The Remix Z menu is drawn by the Remix menu framework (`Menu.asm`), which the port does not redraw (same decision as the Tag Team queue and the
 per-port CSS panel). The entries are a registry stored as CVars `gRemix.Training.<Key>` and edited in the port menu, **Remix > Training**

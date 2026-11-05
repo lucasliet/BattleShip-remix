@@ -33,6 +33,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_stopwatch_bg_rules.c
     test_training_rules.c
     test_training_port_rules.c
+    test_training_menu_rules.c
+    test_training_menu_entries.c
     test_ai_di_rules.c
     test_blueshell_rules.c
     test_gameend_rows_rules.c
@@ -79,6 +81,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixstopwatchbgrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingportrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingmenurules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingmenuentries.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaidirules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixblueshellrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgameendrowsrules.c
@@ -93,7 +97,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecbcustom.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)
-target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src ${CMAKE_SOURCE_DIR}/port/remix)
+target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src ${CMAKE_SOURCE_DIR}/port/remix ${CMAKE_SOURCE_DIR}/port)
 set_target_properties(remix_mode_tests PROPERTIES C_STANDARD 11)
 
 add_custom_target(run_remix_mode_tests
