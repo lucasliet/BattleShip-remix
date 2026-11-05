@@ -33,6 +33,8 @@ Verification by running the real game headless with environment overrides, scree
 | `parallel.sh <jobs> matrix\|stages\|items\|hazards\|custom <args>` | The sweeps above with several game instances at once (own log and save per run through `SSB64_LOG_PATH` / `SSB64_SAVE_PATH`). 6 jobs ran 6 matrix runs in 19 s, against 19 s per run serially; 8 jobs gave no further gain on 11 cores. Windows still open in front, so keep the machine free. |
 | `parallel.sh <jobs> custom <file>` | One shell command per line of `<file>` (each a `vs.sh` or `css.sh` call with its own env), run `<jobs>` at a time, e.g. the Kirby copy batch. A run with `shots=0 metal_flake=1` is the Metal flake: rerun it alone. |
 | `css.sh <input> <name> [frames]` | Character select (scene 16) flow driven by an input script. |
+| `ai_recovery.sh [runs] [jobs] [frames]` | Level-9 CPU recovery measurement (Phase 6 baseline): `runs` four-CPU matches, 3 stocks, `SSB64_REMIX_AI_LOG`; prints `episodes= ok= ko= open=` per run and in total. Run with `bash`. |
+| `scene.sh <scene> <input> <name> [frames] [timeout_s]` | Boots any scene of the `SCKind` enum (`decomp/src/sc/scdef.h`): 9 VS mode menu, 16 VS CSS, 17 1P CSS, 18 Training CSS, 19/20 Bonus CSS, 24 VS results, 27 N64 logo, 52 1P game, 53 bonus stage, 54 Training, 55 Congratulations, 56 credits, 58 Data menu, 59 Sound Test, 61 Auto-Demo. Run it with `bash` (the skill folder is not writable from Bash, so no `chmod`). `inputs/chardata_lap.txt` with scene 58: A on Characters, then R through the fighters (Dedede at about frame 700). |
 | `sheet.py <name> [--step N] [--max N] [--crop x0,y0,x1,y1]` | Contact sheet `build/agent-shots/vs/<name>/sheet.png` (run with `.toolchain/host/venv/bin/python -I`). |
 
 Outputs: `build/agent-shots/vs/<name>/` with `frame_<n>.png`, `stdout.log`, `ssb64.log`, `save.bin`.
@@ -63,6 +65,13 @@ locked in its jab combo; use the CPU item sweep instead.
 | `SSB64_REMIX_FORCE_ITEM=<kind>` | Every stage-spawned item becomes `<kind>`, with a 60-tick spawn wait |
 | `SSB64_REMIX_FORCE_ITEM_AT_P1=1` | The forced item drops on player 1 instead of a random item point |
 | `SSB64_REMIX_ITEM_LOG=1` | Logs `[remix-item] spawn|hold|consume|touch|drop|throw|bullet kind=0x..` |
+| `SSB64_REMIX_FIGHTER_LOG=1` | Logs `[remix-fighter] status|hit|ammo` (status changes, damage with percent and knockback, fire-breath ammo of Bowser and of Kirby with the Bowser hat) and `[remix-weapon] end kind= lifetime=` (frames since the weapon was made); every line has the battle tic `t=` |
+| `SSB64_BGM_LOG=1` | Logs `[bgm] play t= track= player=` and `[bgm] stop t= player=` at every BGM start and stop; the track is the one actually played, after the Remix and shuffle substitutions |
+| `SSB64_PORT_MENU_OPEN=1` | The port ImGui menu is open from boot (not saved to the config), for screenshots of the port menu |
+| `SSB64_REMIX_CHARDATA_MOTIONS=<k1,k2,...>` | Character Data screen: the demo motions cycle through these `MNCharactersMotionKind` values (decimal: SpecialHi 0, SpecialN 1, SpecialLw 2, Wait 14, Attack1 18, AttackAirF 27, Win1..Win4 33..36) instead of the random pick |
+| `SSB64_REMIX_AI_LOG=1` | Logs `[remix-ai] recover_begin t= port= fkind= lvl= x= y=` when a CPU enters the recover objective and `recover_end t= port= result=ok|ko` when it lands or catches a ledge, or is KO'd |
+| `SSB64_VS_ALL_CPU=1` | The VS shortcut makes P1 a CPU too (level from `SSB64_VS_CPU_LEVEL`) |
+| `VS_TIMEOUT=<s>` | Timeout of one `vs.sh` run (default 300 s) |
 | `SSB64_INPUT_SCRIPT=<file>` | Controller script (format above) |
 | `SSB64_MAX_FRAMES=<n>` | Quit after n frames |
 | `SSB64_SCREENSHOT_FRAMES=a,b,...` / `SSB64_SCREENSHOT_DIR` | Screenshots (the scripts set them from `SHOTS`) |

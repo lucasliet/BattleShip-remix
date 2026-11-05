@@ -361,6 +361,12 @@ Per item:
 | Conker grenade | Vanilla id 0x15, spawned only through its own descriptor. |
 | Hazard items | Klap Trap, Robot Bee, Scuttle Minion, Bullet Bill and Cacodemon write `multi`, `can_rehit_shield`, `is_allow_knockback` and the `attack_pos[1].pos_prev` clears (N64 0x1D0, 0x1D4, 0x35C) as named fields. The Car keeps its spawn position in `sITRemixCarSpawnPos` (DEVIATION in code): the asm stores the spawn y in `item_vars+4` and nothing reads it back. The Scuttle Minion factory passes NULL as parent where the asm passes object id 0x03F5 (DEVIATION in `grremixscuttleminion.c`); unreachable in Remix 2.0.1 because `Hazards.asm` 7338 skips the minion setup. |
 
+### 5.6 Menus and screens
+
+| Screen | Deviation |
+|---|---|
+| Character Data emblem (`mnremixcharacters.c`) | The extended fighters' emblem reads the DObjDesc, MObjSub and MatAnimJoint offsets from `ResultsScreen.series_logo_offset/zoom/color_table[fkind]`. The asm (`extend_series_logo_offsets`) swaps only the DObjDesc and leaves the material and colour offsets at 0. The emblems match the reference capture (`build/ref-shots/chardata_lap`). |
+
 ## 6. Tests
 
 - Headless unit tests of the pure rules (Blue Shell first-place rules, Stopwatch background, Sonic classic, Smashketball and others):

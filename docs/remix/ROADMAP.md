@@ -15,8 +15,9 @@ documentation is indexed in [`README.md`](README.md).
    decomp and in the main repository **without attribution trailers**, update of **Current position** below and of the
    user's checkpoint memory (`project_remix_port_checkpoint.md`, outside the repository). It is also a checkpoint when the
    user writes "checkpoint".
-5. Workers (Agent) run in parallel, one small item per worker, with a brief written for the item (not kept in the
-   repository). They write code or research; the lead builds, runs the game and signs off.
+5. Workers (Agent) run in parallel, one package of the current lot per worker (the lot lists its packages and which files
+   each owns), with a brief written for it (not kept in the repository). They write code or research; the lead builds,
+   runs the game and signs off. A lot closes with its own commit.
 6. A significant bug fixed becomes `docs/bugs/<topic>_<YYYY-MM-DD>.md` with a row in `docs/bugs/README.md`.
 7. Reply to the user in Portuguese; everything written in the repository is in English. Report "Remix playable" (T9.3)
    only after Phase 8.
@@ -50,7 +51,8 @@ is Phase 1 (rest of I7) and Phases 5b to 8 of M11, at the end of this file. The 
 | M0 to M10 | closed; open leftovers: T9.1b and T10.2 (user), T9.3 (after Phase 8) |
 | **M11 Finalization** | Phases R, 2, 3, 4 and 5 done; Phase 1 done except the rest of I7; Phases 5b, 6, 7 and 8 open |
 
-- **Next step:** Phase 5b, lot by lot, then Phase 6 (AI) and Phases 7 and 8, with the rest of I7 in Phase 7.
+- **Next step:** Phase 5b lot 0 (groundwork), then lots 1 to 8 in order, with Phase 6 (AI) running beside lots 1 to 7;
+  then Phases 7 and 8. The rest of I7 is in lot 3 (package F2).
 - **Depends on the user:** T9.1b (listening and visual pass) and T10.2 (Switch hardware). "Remix playable" (T9.3) is only
   reported after Phase 8.
 - **Last checkpoint:** CP12 (2026-11-05, Phases 4 and 5 closed; outer `e8faa57`, decomp `be259fe8b`).
@@ -186,46 +188,175 @@ Closed phases:
 - [x] **Phase 5** (modes): CSS mode headers, announcers, GOAL/Time picker, Tag Team queue drawn in the CSS (`css_reference.md`, `mnremixcssmoderules`); Classic Sonic (`CSONIC_MAIN`, `deviations.md`); yellow team (`css_reference.md`); Tag Team/Last/Tug of War/Stamina (`modes/tagteam.md`, `modes/stamina.md`, `modes/tugofwar.md`; `docs/bugs/remix_tugofwar_asm_deviations_2026-11-05.md`); KOTH and Smashketball visuals (`modes/koth.md`, `modes/smashketball.md`); 1P leftovers (`modes/singleplayer.md`: records, Remix BTT/BTP, Bonus 3, Rest Area, Giga Bowser end); result extra row (`gmRemixGameEndRowsRowTics/RowY`); Training Show Action, Hold to Exit. Deviations: 12CB announces the vanilla voice instead of "Player N Wins" (reopened: MD-4); yellow "WINS!" x = 175.0 as the Remix reads it outside the array (the per-fighter x is MD-14); team card shows one Dedede (one-frame pose; checked against the emulator in Phase 5b lot 6); the Training Custom spawn on respawn does not exist in the asm.
 
 - [ ] **Phase 1, rest of I7** (model part image or palette swap, `MODEL_PART_IMAGE_INIT_`; `notes/i7_part_image.md`): the
-  Yoshi egg colour when the egg is thrown, laid and at the entry. Costumes beyond `num_costumes` in the match and on the
-  CSS, and the shield and escape egg, are done.
-- [ ] **Phase 5b** gaps found by the patch audit (2026-11-05, before Phase 6). The ledger is
+  Yoshi egg colour when the egg is thrown, laid and at the entry. Done in Phase 5b lot 3 (package F2, with CT-9). Costumes
+  beyond `num_costumes` in the match and on the CSS, and the shield and escape egg, are done.
+- [ ] **Phase 5b** gaps found by the patch audit (2026-11-05, plan approved the same day). The ledger is
   [`patch_audit.md`](patch_audit.md): one ID per item (prefix per group), asm location, decomp function, what the player
-  misses, hook site, effort; the per-scope map is [`patch_audit_scopes.md`](patch_audit_scopes.md). **Acceptance per item:**
-  ported and seen in game (a capture compared with the reference emulator when it is visual), or `n/a` with the reason
-  checked in the asm; its state set in the ledger. **Acceptance of the phase:** no open ledger item outside the AI ones
-  (Phase 6), `tools/audit_remix_patches.py` re-run, `parity.md` consistent with the ledger. Lots, most visible first:
-  - [ ] Lot 1, Character Data screen: emblem of the 18 extra fighters (`extend_series_logo_offsets`, 0x80131F2C in
-    `mnCharactersMakeEmblem`: `ResultsScreen.series_logo_offset_table` and the zoom and colour tables), special-move names
-    (`extend_special_attack_offsets` 0x80132E24 and `extend_special_attacks_file` in `mnCharactersUpdateMotionName`; closes
-    `REMIX-TODO(chardata-motion-names)`), special-move animations (`special_action_pointers`; the extras use
-    `dMNCharactersCommonMotionDescs` today), jab combo (`jab_action_pointers`, 0x801326E4), MN-16 and MN-17, and the crash
-    seen in `b12_chardata3` (scene 58, A on Characters, R up to Dedede: SIGSEGV after about 17 s in
-    `lbCommonAddFighterPartsFigatree` from `ftMainSetStatus` from `mnCharactersFighterProcUpdate`). Reference capture:
-    `build/ref-shots/chardata2` (Dedede with the Kirby emblem and "B Inhale"; Falco with the Star Fox emblem, "B+↑ Fire
-    Bird" and "B+↓ Reflector").
-  - [ ] Lot 2, match flow and stages: ST-1 first (every match on a Remix stage ends with FAILURE instead of GAME SET),
-    then the other ST items (the Remix ground knockback table ST-2 drives the Z-cancel punishments, LAVA and the stage
-    surfaces) and the MS pause camera, spawn and stage items.
-  - [ ] Lot 3, fighters: GP-1 (jab 3 and rapid jab of the Remix fighters: the parent-kind and rapid-jab events have no
-    listener), the SH shared patches (J Yoshi, the Ness and Pikachu families, pipe turn for 11 fighters, Falcon punch
-    owners), the FT rows outside AI.asm (Lucas has 12 of 14 patches missing), the CT per-fighter tables and the other GP
-    items.
-  - [ ] Lot 4, items and Size: the IT items (Remix items never come out of containers, IT-2, first).
-  - [ ] Lot 5, CSS, menus and screens: the MN items and the MS screen items (Remix splash after the N64 logo, Gallery
-    entry and controls, "Other Screens" in the port menu, VS demo name plates).
-  - [ ] Lot 6, modes: the MD and OP items, plus the 1P title cards checked against the reference emulator (one Marina pose
-    for the Marina team, Mad Piano size, Metal Mario Bros texture: reported by earlier 1P work, no capture yet).
-  - [ ] Lot 7, audio: the MS BGM, FD theme, MIDI and FGM items (per-song volume and priority overrides, alt and random
-    music outside VS, the 30-second hurry swap by track).
-  - [ ] Lot 8, `parity.md` generated from the ledger states (`tools/gen_remix_parity.py`), so a file with open items is
-    never `ported`.
-- [ ] **Phase 6** AI. **Acceptance:** `REMIX-TODO(AI)` at 0, every AI item of the ledger closed (the FT rows of AI.asm,
-  including `custom_recovery_logic`, whose registry slot nothing fills; the SH CPU hooks; GP-8 reflect and absorb; the MD
-  KOTH and Smashketball CPU targets; FT-11 human handicap up to 40 and the icons above 9), recovery at level 9 without
-  regression (base 181/222). Also from the 2026-11-03 plan: `cpu_post_process` per fighter, `auto_jab_grab_`, AERIAL_CHASE,
-  PUFF_DSP, the vanilla PREVENT rows, Banjo P06, Kirby P14, P11 of Sheik, Peppy, Bowser and Giga Bowser, the 30 `cpu_*`
-  routines, `_improve_recovery_drift`, the Default CPU LVL refresh and the `CpuLevel9` conflict with level 10. Reference:
+  misses, hook site, effort; the per-scope map is [`patch_audit_scopes.md`](patch_audit_scopes.md). Every open ledger item
+  (251 at the audit) is placed below; lot 8 and the Phase 6 list close the count. The CPU-only scopes got the rows SH-15 to
+  SH-27 and ST-27 on 2026-11-05 (Phase 6 step 1; 263 open items since).
+  - **Acceptance per item:** read the asm scope, port under `#if defined(PORT) && defined(REGION_REMIX)`
+    (`porting_guide.md`), a unit test in `tests/remix/` when the item is a pure rule, the in-game test of its lot, then its
+    ledger state `done (<run name, evidence>)` or `n/a (<reason checked in the asm>)`. A visual item is compared with a
+    reference-emulator capture.
+  - **Acceptance of the phase:** no open ledger item outside the AI ones (Phase 6), `tools/audit_remix_patches.py` re-run,
+    `parity.md` consistent with the ledger.
+  - **Placement by file:** an item sits in the lot and package that own the file it edits, so some IDs leave their prefix's
+    lot (results screen MD-12..17 in lot 5, OP-37, IT-8 and IT-10 in lot 2, IT-7 and MS-14 in lot 3, IT-1 in lot 6, the MS
+    screen items in lot 5). Lots run one after the other.
+  - **One owner per file:** packages of a lot run in parallel (one worker each) only when their files are disjoint; a
+    shared file is serialized as each lot states.
+  - **Duplicate IDs close together:** GP-1 = CT-14 (with the rapid-jab part of FT-38 and FT-43), SH-7 = CT-2, SH-2 = CT-8,
+    GP-7 = CT-15, GP-8 = CT-21, FT-1 = CT-18, FT-8 = CT-19, MS-14 = CT-3, MS-15 = ST-20, the double-jump part of FT-28 =
+    SH-1.
+  - **Lot close:** build, `run_remix_mode_tests`, the lot's smoke runs, a regression mini-set (special matrix of the
+    touched fighters, three VS matches on Remix stages, the VS CSS flow, the vanilla build compiles), then the decomp
+    commit and the outer commit (submodule bump, ledger states, this file).
+
+  - [x] **Lot 0, groundwork** (2026-11-05): 46 symbols exported (`REMIX_SYM_ResultsScreen__*`, `CharacterDataScreen__*`, the
+    `Character.*.table` list, `MIDI`, `BGM`, `Spawn`, `Slippy.hip_translation*`; the MN-6, MD-21, GP-6 and MD-23 labels are left to their lots, they name code scopes and
+    the data those items need is found there); `scene.sh`; the logs `SSB64_REMIX_FIGHTER_LOG`
+    (`ftremixtestlog.c`), `SSB64_BGM_LOG` (`gmremixbgmlog.c`), `SSB64_PORT_MENU_OPEN`, `SSB64_REMIX_AI_LOG` (`ftremixailog.c`), checked in
+    `l0_logs` and `l0_ai`; the Character Data reference lap `build/ref-shots/chardata_lap` (input
+    `scripts/ref-emu/inputs/chardata_lap.txt`); ledger corrections. The other input scripts and reference inputs below are
+    written at the start of the lot that uses them (they need in-game timing).
+    1. Symbols: add to `EXTRA_SYMBOLS` in `tools/gen_remix_actions.py` and regenerate `port/remix/remix_symbols.h` (every
+       label is in `build/remixasm/remix.sym`): `ResultsScreen.series_logo_offset_table`, `.series_logo_zoom_table`,
+       `.series_logo_color_table`; the `CharacterDataScreen.extend_*` tables; `Character.*.table` for `crowd_chant_fgm`,
+       `yoshi_egg`, `winner_fgm`, `str_wins_lx`, `str_winner_ptr/lx/scale`, `label_height`, `sound_type`,
+       `costume_shield_color`, `ness_jump`, `pipe_turn`, `fighter_reflect`, `jab_3*`, `rapid_jab*`, `ai_attack_prevent`,
+       `cpu_attack_weight`; `TwelveCharBattle.defeated_array`; the `CharacterSelect` random and bookend labels (MN-6); the
+       Training magnifier background (MD-21); `custom_display_lists_*` (GP-6); the `DKMode` portrait pattern (MD-23);
+       `CharEnvColor.override_table` (MN-20); `BGM.random_table`, `BGM.random_count` (MS-3); `Toggles.itsatrap` (MS-4);
+       `Spawn.neutral_table` (MS-17); `MIDI.priority_override_table`, `.bend_range_override_table`,
+       `.master_volume_override_table` (MS-22, MS-23). Check: build passes, each define matches `remix.sym`.
+    2. Test tooling (`.claude/skills/remix-smoke-tests/`): `scene.sh <scene> <input> <name> [frames] [timeout]` (scene ids
+       of the `SCKind` enum, `decomp/src/sc/scdef.h`: VS mode menu 9, CSS 16 VS, 17 1P, 18 Training, 19 and 20 Bonus, VS
+       results 24, Character Data 26, N64 logo 27, 1P game 52, bonus stage 53, Training 54, Congratulations 55, credits 56,
+       Data menu 58, Sound Test 59, Auto-Demo 61); input scripts for the Character Data lap, jab 3 and rapid jab, fsmash,
+       dair, grab and throw, shield hold, bury mash, pipe, held charge, Dedede inhale, cargo, results with C held, practice
+       with L on GAME SET, 1P pause with L, D-pad on the CSS, All-Star Rest Area wait, 12CB entry, pause with C/A/B and the
+       stick at its limit, hit on a surface, Casino bumper, Puff sing, Super Sonic up-special after a hit, Congo Falls
+       barrel exit, hanging on a platform that disappears.
+    3. Env-gated logs in the port (off by default): `SSB64_REMIX_FIGHTER_LOG` (status, percent, ammo halfword, knockback,
+       projectile lifetime), `SSB64_BGM_LOG` (track id at every BGM change), `SSB64_PORT_MENU_OPEN` (port menu open at
+       boot), `SSB64_REMIX_AI_LOG` (CPU recovery attempts and outcomes).
+    4. Reference inputs for `scripts/ref-emu/capture.sh`: Character Data lap over the 18 extras, 1P CSS, results with a
+       Remix winner, 1P title cards.
+    5. Ledger corrections found while planning: ids are in `port/remix/remix_roster_data.h`; hook path of FT-7 and GP-11;
+       the FT-29 hook (`ftCommonAttackAirCheckInterruptCommon` not found); the "hip" labels of FT-44; subfolder paths of
+       ST-1, ST-16, ST-22, IT-2, MS-14; the MS-22 hook site.
+  - [x] **Lot 1, Character Data screen** (2026-11-05: MN-16 to MN-19 done; `l1_lap` against `ref-shots/chardata_lap`,
+    `l1_dedede_forced`, stress runs `l1_stress_all`/`_rand`/`_dedede` without a crash; the crash write-up is
+    `docs/bugs/remix_chardata_dedede_crash_2026-11-05.md`; emblem deviation in `deviations.md` 5.6) (`mn/mndata/mncharacters.c`, one worker), in order: the crash of `b12_chardata3`
+    (scene 58, A on Characters, R up to Dedede: SIGSEGV after about 17 s in `lbCommonAddFighterPartsFigatree` from
+    `ftMainSetStatus` from `mnCharactersFighterProcUpdate`); MN-16 and MN-17; MN-18, the emblem of the 18 extra fighters
+    (`extend_series_logo_offsets` 0x80131F2C: `series_logo_offset_table` and the zoom and colour tables); MN-19, special
+    actions, jab combo (`jab_action_pointers` 0x801326E4) and special-move names (`extend_special_attack_offsets`
+    0x80132E24, file 0x10F6; closes `REMIX-TODO(chardata-motion-names)`). Test: the lap through every fighter without a
+    crash, compared with `build/ref-shots/chardata2` (Dedede with the Kirby emblem and "B Inhale"; Falco with the Star Fox
+    emblem, "B+↑ Fire Bird" and "B+↓ Reflector") and the full-lap reference.
+  - [ ] **Lot 2, match flow and stages.** ST-1 opens the lot (every match on a Remix stage ends with FAILURE instead of
+    GAME SET).
+    - S1 match flow (owner of `ifcommon.c`, `ftcommondead.c`, `gmcamera.c`), serial: ST-1 with ST-26; ST-17 (countdown
+      stoplight and FGM); ST-20 = MS-15 with ST-21 and IT-8 (pause camera, stick limits, close-up zoom); ST-4 with MS-13
+      last (Dragon King HUD, input display under the timer; calls in `sc1pbonusstage.c` and `sc1ptrainingmode.c` after S3
+      and S4).
+    - S2 surfaces (owner of `ftmain.c`): ST-2 (ground knockback table: Z-cancel punishments, LAVA, surfaces), ST-3, the
+      `ftmain.c` part of ST-6, ST-22.
+    - S3 barrels and bonus (`grjungle.c`, `ftcommontarucann.c`, `sc1pbonusstage.c`, `grcastle.c`): ST-5 with ST-6, ST-7
+      with ST-9, ST-12, ST-8, ST-10, IT-10.
+    - S4 stage visuals and options: ST-11, ST-13, ST-14, ST-15, ST-16, ST-18, ST-19, ST-23, ST-24 (after ST-1: both edit
+      `grremixstage.c`), ST-25 with OP-37, MS-17.
+    - Tests: `vs.sh` with `SSB64_VS_STOCKS=1` on Remix stages; `SSB64_KOTH_GOAL` / `SSB64_SMASH_GOAL`; surfaces on Big
+      Blue, Mute City (153) and Casino (159) against reference captures; barrels on Congo (2, 105), Smashketball (90),
+      Falls (94); bonus with `scene.sh 53` and `SSB64_SPGAME_STAGE` (172, 140, 161); toggles with `SSB64_REMIX_TOGGLES`;
+      `stage_sweep.sh` for ST-25; FGM log for ST-17.
+  - [ ] **Lot 3, fighters** (GP, SH, FT, CT outside AI). F5 and F6 are single owners of `efmanager.c` and `ftmain.c`; F5
+    starts after F2 and F3; the `ftcommonattackair.c` and `ftremixkirbypower.c` parts of FT-29 wait for F8 and F4.
+    - F1 jab and smash (`ftcommonattack1.c`, `ftcommonattack100.c`, `ftcommonattacks4.c`): GP-1 = CT-14, FT-38, FT-43,
+      SH-3, the attack part of SH-6.
+    - F2 jump and Yoshi (`ftcommonjumpaerial.c`, `ftcommoncaptureyoshi.c`, `ftcommonthrown1.c`, guard and catch files,
+      `ftremixyoshishared.c`, `ftremixpartimage*`): SH-1, SH-2 = CT-8, FT-28, FT-14, CT-9, the rest of I7, GP-11.
+    - F3 Ness, Lucas, Pikachu (`wpness*`, `itnesspkfire.c`, `ftness*`, `ftpikachu*`, `wppikachu*`,
+      `ftremixpianoshared.c`): SH-4, SH-5, the thunder part of SH-6, FT-27, FT-30, FT-31, FT-33, FT-34, FT-35.
+    - F4 Kirby, Bowser, Samus (`ftmanager.c`, `ftremixkirby*`, Samus charge files, `ftremixbind.c`, `ftremixbowser.c`,
+      `ftcommondead.c`): SH-10, SH-11, SH-12 with IT-7, SH-13 (hats part), FT-18, FT-19, FT-39, FT-40, CT-6, CT-12, FT-51,
+      OP-20.
+    - F5 effects (`efmanager.c`, `ftremixdkcaptainshared.c`, `ifremixannouncer.c`, `ftcommoncapturekirby.c`): SH-8,
+      FT-20, FT-21, FT-32, FT-50, the `efmanager.c` parts of SH-4, SH-6, CT-9.
+    - F6 `ftmain.c` by function: `ftMainSetStatus` GP-10, FT-29, FT-37; `ftMainProcPhysicsMap` SH-9, FT-15, FT-42; hit
+      FT-47, FT-48; then GP-2 (`ftremixcommand.c`, `ftphysics.c`).
+    - F7 tables (`ftparam.c` owner, `ftremixchartables.c`, `mpcommon.c`, `ftremixshieldcostume.c`, `ftremixdeschooks.c`,
+      `sys/controller.c`, `ftcommoncapture.c`): CT-3 = MS-14, CT-4, CT-5, CT-7, CT-10, CT-11, FT-24, FT-44, FT-49, the
+      `ftparam.c` parts of SH-1 and SH-13.
+    - F8 others: GP-3..6, GP-7 = CT-15, GP-9, GP-12, GP-13, SH-7 = CT-2, SH-14, FT-16, FT-17, FT-22, FT-23, FT-25, FT-26,
+      FT-41, FT-45, FT-46.
+    - Tests: `special_matrix.sh` for every touched fighter, `vs.sh` with the new inputs, the Kirby copy test for F4,
+      `SSB64_REMIX_FIGHTER_LOG` for ammo, knockback, heal and lifetime, reference captures for egg colour, Visibility and
+      fireball.
+  - [ ] **Lot 4, items and Size.** I1 (`itbox.c`, `itmain.c`, `ftremixstartitem.c`): IT-2 first (Remix items never come
+    out of containers), IT-3. I2 (`ftshadow.c`, `ftremixsize.c`): IT-5, IT-6. I3: IT-4, IT-9, IT-11. Tests:
+    `SSB64_FORCE_CONTAINER_DROP` with `SSB64_REMIX_ITEM_LOG` and `item_cpu_sweep.sh`; `SSB64_REMIX_PANEL` (Start With,
+    Size, Visibility) against the reference; two matches in a row for IT-4; `SSB64_REMIX_FORCE_ITEM` for IT-11.
+  - [ ] **Lot 5, CSS, menus and screens.**
+    - C1 CSS common (owner of `mnplayersvs.c`, `mnplayers1pgame.c`, `mnplayers1pbonus.c`, `mnplayers1ptraining.c`): MN-1,
+      MN-2, MN-3, MN-4, MN-5, MN-11, MD-3, MD-22.
+    - C2 CSS per mode (after C1, same files, `mnremixvariants.c`, `mnremixvsstamina.c`): MN-6, MN-7, MN-9, MN-10, MN-12,
+      OP-29, OP-30, OP-31, OP-32, OP-33, OP-40, OP-41, MD-20, the CSS part of MN-8.
+    - C3 results (owner of `mnvsresults.c`, `mnremixemblem.c`, `remix_roster.cpp`, `ftport.c`): MN-13, the results part of
+      MN-8, MD-12, MD-13, MD-14, MD-15, MD-16, MD-17, CT-13, CT-1.
+    - C4 CSS options and menus (`mnvsmode.c`, `ftremixdpad.c`, `mnremixcsspanelmenu*`): MN-14, MN-15, MN-20.
+    - C5 screens (`mnstartup.c`, `mncongra.c`, `mnremixgallery.c`, `mndata.c`, `port/gui/PortMenu.cpp`, `scautodemo.c`,
+      `scremixvsdemo.c`, `mnsoundtest.c`, `scstaffroll.c`, `mnremix1pmode.c`): MS-1, MS-2 (Remix splash after the N64
+      logo), MS-10, MS-11, MS-12 (Gallery), MS-18, MS-24 ("Other Screens" in the port menu), MS-20, MS-21 (VS demo name
+      plates), MS-7, MS-9, MS-19.
+    - Tests: `scene.sh` on scenes 16 to 20 and 9, 27, 55, 56, 58, 59, 61 against reference captures;
+      `SSB64_PORT_MENU_OPEN`; unit tests `test_css_rules`, `test_tagteam_rules`, `test_teams_rules`, `test_stamina_rules`,
+      `test_dpad_control_rules`; results with `SSB64_VS_STOCKS` and Remix winners, the C-held input, the FGM log and
+      `wavstat.py`.
+  - [ ] **Lot 6, modes** (MD and OP).
+    - M1 1P game (owner of `sc1pgame.c`), three serial batches: (a) OP-4, OP-5, OP-6, OP-7, OP-8, OP-15; (b) OP-11, OP-12,
+      OP-13 (trait and level only), IT-1; (c) OP-18, OP-19, OP-24, OP-25, OP-26, OP-45 and the `sc1pgame.c` part of OP-10.
+      The `sc1pgame.c` parts of OP-17, OP-34 and OP-23 come after (c).
+    - M2 1P overlays (owner of `ifcommon.c`, `sc1premixbonusexit.c`, `sc1premix1p.c`, `sc1pmanager.c`): OP-1, OP-2, OP-3,
+      OP-9, MD-18, OP-17, OP-34.
+    - M3 bonus stage (`sc1pbonusstage.c`, after M2 for OP-34/OP-35): OP-10, OP-35, OP-38, OP-39.
+    - M4 1P intro (`sc1pintro.c`): OP-21, OP-27, OP-42, OP-43, OP-44, and the 1P title cards against the reference (one
+      Marina pose for the Marina team, Mad Piano size, Metal Mario Bros texture).
+    - M5 All-Star, stock, 12CB: OP-22, OP-28, OP-23 with MD-1, MD-8, MD-4, MD-5, MD-6, MD-7, MD-23.
+    - M6 others: OP-14, OP-16, OP-36, OP-46, OP-47, MD-2, MD-19, MD-9, MD-21.
+    - Tests: `SSB64_REMIX_1P_MODE`, `SSB64_START_SCENE=52`, the practice, pause and 12CB inputs; unit tests
+      `test_1p_mode_rules`, `test_1p_enemy_rules`, `test_1p_bonus_remix_rules`, `test_css_cpu_costume_rules`,
+      `test_gameend_rows_rules`, `test_stockmode_rules`, `test_twelvecb_rules`, `test_twelvecb_custom`; `SSB64_BGM_LOG`;
+      reference captures of the 1P cards, the Rest Area and the 12CB screens.
+  - [ ] **Lot 7, audio.** A1 BGM: MS-3 with MS-6 (alt and random music by C button and scene, FD theme), MS-4, MS-5 (the
+    30-second hurry swap by track). A2 FGM and MIDI: MS-8, MS-22 with MS-23 (per-song priority, bend range and volume
+    overrides; hook site confirmed first), MS-16 with MS-25 (Crash DSP voices and the announcer lines). Tests:
+    `SSB64_BGM_LOG` with `test_bgm_rules` extended, the FGM log and `wavstat.py`, the audio dump against the reference
+    RMS per track; each item added to the T9.1b listening list.
+  - [ ] **Lot 8, `parity.md` from the ledger:** `tools/gen_remix_parity.py` reads the ledger states, so a file with an open
+    item is `partial`; `tools/audit_remix_patches.py` re-run, no unhooked patch without a ledger ID.
+- [ ] **Phase 6** AI, run beside Phase 5b lots 1 to 7 (user decision, 2026-11-05). One worker at a time owns
+  `ft/ftcomputer.c`; the others work in `ft/ftremix/ftremixai*.c`, `ftcommoncatch1.c`, `ftcommondash.c` and
+  `mnremixcpulevel.c`, which no Phase 5b package edits; registry edits (`port/fighter_registry.h`) are merged by the lead.
+  **Acceptance:** `REMIX-TODO(AI)` at 0, every AI ledger item closed, recovery at level 9 not below the re-measured
+  baseline, KOTH and Smashketball CPUs reach the hill and the ball, the reflect test with CPU Falco and Ness. Reference:
   [`ai.md`](ai.md).
+  1. Ledger IDs for the CPU-only scopes counted apart: dkshared `giant_punch_fix_1`, `cpu_fix_2`; jigglypuffkirbyshared
+     `kirby_cpu_inhale` 1 to 3, `multi_jump_recovery_fix_`, `remix_skip_offensive_usp_air_`; nessshared
+     `cpu_usp_usage_fix_`, `cpu_usp_control_fix_`, `cpu_pk_thunder_attack_`, `improved_pk_thunder_`,
+     `save_cpu_recovery_location_`; yoshishared `yoshi_cpu_fix_1`; the Zebes acid AI line; linkshared
+     `cpu_pull_out_bombs_` checked (marked ported). `SSB64_REMIX_AI_LOG` and a measurement script (10 four-fighter matches,
+     level 9, 3 stocks); the baseline re-measured with it before any change (181 of 222 episodes at CP7, measured with a temporary
+     log since removed).
+  2. Rule files, in parallel: FT-6, FT-8 = CT-19, FT-12, FT-13 (decision in its row first), CT-17, CT-20, FT-9, FT-52,
+     FT-11 (human handicap up to 40 and the icons above 9).
+  3. `ftcomputer.c`, serial: FT-1 = CT-18 (`custom_recovery_logic`, whose registry slot nothing fills), FT-2, FT-5, FT-3
+     with FT-36, FT-4 with FT-7, FT-10, GP-8 = CT-21 (reflect and absorb), MD-10 and MD-11 (Smashketball and KOTH
+     targets), the CPU scopes of step 1, then the 2026-11-03 list: `cpu_post_process` per fighter, PUFF_DSP, the vanilla
+     PREVENT rows, Banjo P06, Kirby P14, P11 of Sheik, Peppy, Bowser and Giga Bowser, the 30 `cpu_*` routines,
+     `_improve_recovery_drift`, the Default CPU LVL refresh and the `CpuLevel9` conflict with level 10.
 - [ ] **Phase 7** open bugs, instrumentation and packages.
   - [ ] Bugs: Poly Young Link missing on the CSS until the first reset; Metal Mario partly tiny in Training; Switch stutter
     (`walked past registered DL range`, stale token 0x57EE); the rc 139 flake on Tal Tal.

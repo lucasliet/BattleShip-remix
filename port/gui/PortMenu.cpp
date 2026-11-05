@@ -5,6 +5,7 @@
 //   https://github.com/HarbourMasters/Shipwright
 // Licensed under the MIT License; see LICENSE at repository root.
 
+#include "remix/remix_debug.h"
 #include "remix/remix_modes.h"
 #include "remix/remix_player_panel.h"
 #include "remix/remix_training.h"
@@ -796,6 +797,10 @@ WidgetInfo& PortMenu::AddWidget(WidgetPath& pathInfo, std::string widgetName, Wi
 
 PortMenu::PortMenu()
     : Menu("gOpenPortMenu", "Port Menu", 0, UIWidgets::Colors::LightBlue) {
+    // Not SetVisibility(): it saves gOpenPortMenu to the config, so the test override would leak into later runs.
+    if (remix_debug_env_int("SSB64_PORT_MENU_OPEN", 0) != 0) {
+        mIsVisible = true;
+    }
 }
 
 void PortMenu::AddMenuSettings() {

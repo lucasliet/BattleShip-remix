@@ -269,9 +269,14 @@ check `<= 0.1` instead of 0 (`:996`, a fix for the "frozen" demo sequence). The 
 Port: `mn/mndata/mnremixchardata.{c,h}` (30-entry order, the 18 extended entries with raw asm values and the decoder that adds the addends and
 masks the offset to 24 bits, page lookup) and branches in `mncharacters.c`: `MNCHARACTERS_FIRST/LAST_PAGE` 0..29, `dMNCharactersFileIDs`
 appends 0x10F5 and 0x10F6, `mnCharactersMakeRemixStory`/`Works`/`Name` read the sprites from the extended files, `mnCharactersMakeFighter`
-calls `ftManagerSetupFilesAllKind`. The emblem (`mnCharactersMakeEmblem`) creates the GObj without a model for extended fighters, and
-`mnCharactersGetMotion` uses the common motion descriptors; `mnCharactersUpdateMotionName` returns before the special-move name sprite for
-them. Test: `SSB64_START_SCENE=26`; left and right wrap at both ends; the Remix `.o2r` must provide files 0x10F5/0x10F6.
+calls `ftManagerSetupFilesAllKind`. `mn/mndata/mnremixcharacters.{c,h}` reads the Remix tables from the RAM image: the emblem
+(`mnCharactersMakeRemixEmblem`: DObjDesc, MObjSub and MatAnimJoint offsets from `ResultsScreen.series_logo_offset/zoom/color_table[fkind]`; the
+asm reads only the first and leaves the other two at 0, the port reads the whole triple), the special actions and jab combo
+(`special_action_pointers`, `jab_action_pointers`; a pointer into the vanilla overlay selects the port's own vanilla table, `mnCharactersGetRemixMotion`),
+the special-move name sprites (`special_attack_offsets`, file 0x10F6) and the tall name tag (`mnRemixCharactersHasTallNameTag`). The animation end
+check is `<= 0.100098` under `REGION_REMIX`. The random motion pick skips the kinds whose status the synth fighter cannot run
+(`mnCharactersCheckRemixMotionKindPlayable`). Test: `scene.sh 58` with `inputs/chardata_lap.txt` (A on Characters, then R; booting scene 26 directly gives the demo mode); left and right wrap at both ends; the Remix `.o2r` must provide files
+0x10F5/0x10F6. `SSB64_REMIX_CHARDATA_MOTIONS=<k1,k2,...>` (decimal `MNCharactersMotionKind` values) replaces the random pick by that list, cycling.
 
 ---
 

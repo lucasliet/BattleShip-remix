@@ -333,9 +333,9 @@ Format: asm file:line, scope, verdict, evidence.
 - :98 mushroom_kingdom_pow_ PORTED grinishie.c:529.
 - :109 mushroom_kingdom_piranha_plants_ STUB #16.
 - :120 mk_clone_hazard_removal_ STUB #16.
-- :153 planet_zebes_acid_ (no hazards) PORTED grzebes.c:277; :159 (no movement) PORTED grzebes.c:246; :165 (AI) GAP known (Fase 6).
+- :153 planet_zebes_acid_ (no hazards) PORTED grzebes.c:277; :159 (no movement) PORTED grzebes.c:246; :165 (AI) GAP known (Phase 6).
 - :260 hyrule_castle_tornadoes_ PORTED grhyrule.c:368.
-- :271 ai_extend_hyrule_tornado_check GAP known (Fase 6).
+- :271 ai_extend_hyrule_tornado_check GAP known (Phase 6).
 - :299 congo_jungle_barrel_ GAP #5.
 - :384 saffron_city_pokemon_ PORTED gryamabuki.c:253.
 - :431 saffron_city_pokemon_rate_init GAP #13. :477 saffron_city_pokemon_rate GAP #13.
@@ -353,7 +353,7 @@ Format: asm file:line, scope, verdict, evidence.
 - :2980 dreamland_downtime_initially_ PORTED grremixdreamland.c:56. :3009 dreamland_downtime_ PORTED :64. :3038 dreamland_wind_speed_multiplier_ PORTED :99 (Super and Hyper share 0.0006 in the asm; Japanese 0.0003; 1P keeps vanilla). :3092 dreamland_wind_speed_max_ PORTED :80 (the Super-gets-30 quirk is kept). :3130 dream_land_wind_parameters PORTED :132 (Dream Greens edges +-3811, top 1000, bottom -10 equal the vanilla constants; Super 1.09375 and Hyper 1.1953125 box scale).
 - :3201/3232/3257/3279 dream_greens_hardcoding_1-4 PORTED grpupupu.c:771 block. :3303/3325/3349/3373 dream_greens_hardcoding_animation_1-4 PORTED grpupupu.c:638-723 (offsets 0x00, 0x20, 0x60, 0x78 match the asm).
 - :3397/3419/3441 mk_remix_hardcoding_1-3 PORTED (dead behind #16): grinishie.c:377, 394, 273. :3463 mk_remix_hardcoding_4 PORTED grinishie.c:606. :3485/3507/3531 mk_remix_hardcoding_5-7 PORTED (dead behind #16): itpakkun.c:184, 185, 295. :3555 mk_remix_hardcoding_8 PORTED itpowerblock.c:117.
-- :3580 mk_remix_hardcoding_9 GAP known (Fase 6).
+- :3580 mk_remix_hardcoding_9 GAP known (Phase 6).
 - :4356 sonic_btp_setup GAP #9.
 - :4437 casino_night_side_bumper_bounce PORTED ftcommonwalldamage.c:47 + grremixcasino.c:36 (0.8 -> 1.1, FGM 0x3D6, surface > 0x16 check).
 - :4481 casino_night_side_bumper_knockback GAP #3.
@@ -545,7 +545,7 @@ Format: asm file:line, scope, verdict, evidence.
 ##### Character.asm (hooks)
 - Character.asm:1727 get_fireball_struct_ STUB ftmariospecialn.c:43 (gap 7)
 - Character.asm:1749 get_kirby_fireball_struct_ ADAPTED ftkirbycopymariospecialn.c:51 (same index function)
-- Character.asm:1772 get_ai_behaviour_struct_ (also 1780, ai_attack_prevent 1791, ai_aerial_chase 1810, ai_long_range 1828) ADAPTED, Fase 6: ftremixaitables.c, ftremixaiprevent.c, ftremixailongrange.c; aerial chase is a known AI gap (ROADMAP T7.1c)
+- Character.asm:1772 get_ai_behaviour_struct_ (also 1780, ai_attack_prevent 1791, ai_aerial_chase 1810, ai_long_range 1828) ADAPTED, Phase 6: ftremixaitables.c, ftremixaiprevent.c, ftremixailongrange.c; aerial chase is a known AI gap (ROADMAP T7.1c)
 - Character.asm:1848 menu_zoom_patches (9 sites, mislabelled get_ai_long_range_table_) ADAPTED port/remix/remix_roster.cpp:329, :365 -> `port_fighter_scale` in mnvsresults.c:1061, mn1pcontinue.c:330, mncharacters.c:1911, CSS files
 - Character.asm:1897 thrown_redirect_fix_ ADAPTED ft/ftmain.c:648 (`port_fighter_parent_fkind`; the Remix id table is parent-only: Character.asm:302)
 - Character.asm:1925 f_thrown_action_fix_ and 1949 b_thrown_action_fix_ ADAPTED ft/ftcommon/ftcommonthrow.c:100 (clamp to Mario row, deviation noted above)
@@ -637,8 +637,8 @@ Character.asm (45):
 - 1603, 1606 (0x59C08, 0x59C14: electric_hit table) ADAPTED: ftremixdamage.c / ftcommondamage.c element handling.
 - 1621, 1640 (0x65148, 0x65300: down_bound_fgm, crowd_chant_fgm) ADAPTED: registry fields.
 - 1660 (0xBEEA0: yoshi_egg table) ADAPTED: ftremixyoshiegg.c (shield), rest known I7.
-- 1680 (0xDF56C), 1697 (0xC7840), 1708 (0x7E89C), 1715 (0x7E8E4: AI/other tables and Kirby inhale hooks) ADAPTED: see get_extended_inhale_struct_ above and Fase 6 AI tables.
-- 1791, 1810, 1828 (0xADF10, 0xAE2C8, 0xB3700: ai_attack_prevent, ai_aerial_chase, ai_long_range) ADAPTED: Fase 6 AI (aerial chase = known gap).
+- 1680 (0xDF56C), 1697 (0xC7840), 1708 (0x7E89C), 1715 (0x7E8E4: AI/other tables and Kirby inhale hooks) ADAPTED: see get_extended_inhale_struct_ above and Phase 6 AI tables.
+- 1791, 1810, 1828 (0xADF10, 0xAE2C8, 0xB3700: ai_attack_prevent, ai_aerial_chase, ai_long_range) ADAPTED: Phase 6 AI (aerial chase = known gap).
 - 3592 (0x97A4C+0x68, GDONKEY menu array copy) NA: N64 menu action array layout.
 - Others in the list (1727/1749 etc.) are `patch_start` hooks, covered in section 4.
 
@@ -687,8 +687,8 @@ asm file:line | scope | verdict | evidence
 - dkshared.asm:203 | fully_charged_check_ | PORTED (1 patch) | decomp/src/ft/ftparam.c:2196 (case REMIX_ID_JDK)
 - dkshared.asm:225 | kirby_power_check_flash_ | PORTED (1 patch) | decomp/src/ft/ftparam.c:1534 (copy_id == REMIX_ID_JDK)
 - dkshared.asm:246 | kirby_power_change_ | PORTED (1 patch) | decomp/src/ft/ftchar/ftkirby/ftkirbyspecialn.c:105
-- dkshared.asm:268 | giant_punch_fix_1 | AI (1 patch) | AI hook (Fase 6); JDK is cased in decomp/src/ft/ftcomputer.c:6035 and :6156
-- dkshared.asm:289 | cpu_fix_2 | AI (1 patch) | AI hook (Fase 6), not checked (func_ovl3_80138EE4, ftcomputer.c:7344); Marina cargo branch not found
+- dkshared.asm:268 | giant_punch_fix_1 | AI (1 patch) | AI hook (Phase 6); JDK is cased in decomp/src/ft/ftcomputer.c:6035 and :6156
+- dkshared.asm:289 | cpu_fix_2 | AI (1 patch) | AI hook (Phase 6), not checked (func_ovl3_80138EE4, ftcomputer.c:7344); Marina cargo branch not found
 - dkshared.asm:335 | barrel_alternate | ADAPTED (1 patch) | decomp/src/ft/ftremix/ftremixentry.c:391-401 + ftremixentrydata.c:49-51 (Sonic right/left, Lanky). The SSONIC branch is dead: SSonic.asm:340 skips the entry script. The asm also clears fp->lr (0x44) there; the port keys on entry.lr
 - jigglypuffkirbyshared.asm:12 | jump_fix_1 | PORTED (1 patch) | decomp/src/ft/ftcommon/ftcommonjumpaerial.c:217-229
 - jigglypuffkirbyshared.asm:44 | jump_fix_2 | PORTED (1 patch) | decomp/src/ft/ftcommon/ftcommonjumpaerial.c:266-285 (Dedede table 68/58/52 = Dedede.asm:735-741, ftremixpuffkirbyshared.c)
@@ -707,9 +707,9 @@ asm file:line | scope | verdict | evidence
 - jigglypuffkirbyshared.asm:429 | pokemon_spawn_fix | PORTED (1 patch) | decomp/src/ft/ftcommon/ftcommonentry.c:106
 - jigglypuffkirbyshared.asm:460 | pokemon_hat_fix_1 | PORTED (1 patch) | decomp/src/ft/ftdisplaymain.c:868 (the TSV function mpCollisionGetVertexPositionID is wrong)
 - jigglypuffkirbyshared.asm:487 | pokemon_hat_fix_2 | PORTED (1 patch) | decomp/src/ft/ftdisplaymain.c:815 and :859
-- jigglypuffkirbyshared.asm:514 | kirby_cpu_inhale | AI (1 patch) | AI hook (Fase 6), not ported (no JKIRBY/DEDEDE in ftcomputer.c)
-- jigglypuffkirbyshared.asm:540 | kirby_cpu_inhale_2 | AI (1 patch) | AI hook (Fase 6), not ported
-- jigglypuffkirbyshared.asm:562 | kirby_cpu_inhale_3 | AI (1 patch) | AI hook (Fase 6), not ported
+- jigglypuffkirbyshared.asm:514 | kirby_cpu_inhale | AI (1 patch) | AI hook (Phase 6), not ported (no JKIRBY/DEDEDE in ftcomputer.c)
+- jigglypuffkirbyshared.asm:540 | kirby_cpu_inhale_2 | AI (1 patch) | AI hook (Phase 6), not ported
+- jigglypuffkirbyshared.asm:562 | kirby_cpu_inhale_3 | AI (1 patch) | AI hook (Phase 6), not ported
 - jigglypuffkirbyshared.asm:618 | kirby_cpu_inhale_4 | GAP (1 patch) | NOT AI despite the name: 0x800E23E8 is the 'fkind == Kirby' test of ftParamKirbyTryMakeMapStarEffect inside ftMainProcPhysicsMap (ft/ftmain.c:2145). See table
 - jigglypuffkirbyshared.asm:644 | fully_charged_check_ | PORTED (1 patch) | decomp/src/ft/ftparam.c:2196 (case REMIX_ID_JKIRBY next to nFTKindKirby)
 - jigglypuffkirbyshared.asm:665 | kirby_power_steal_check_ | PORTED (1 patch) | decomp/src/ft/ftchar/ftkirby/ftkirbyspecialn.c:230
@@ -719,8 +719,8 @@ asm file:line | scope | verdict | evidence
 - jigglypuffkirbyshared.asm:750 | kirby_rock | PORTED (1 patch) | decomp/src/ft/ftchar/ftkirby/ftkirbyspeciallw.c:58
 - jigglypuffkirbyshared.asm:771 | kirby_rock_2 | PORTED (1 patch) | decomp/src/ft/ftchar/ftkirby/ftkirbyspeciallw.c:25
 - jigglypuffkirbyshared.asm:792 | kirby_rock_3 | PORTED (1 patch) | decomp/src/ft/ftchar/ftkirby/ftkirbyspeciallw.c:98
-- jigglypuffkirbyshared.asm:813 | multi_jump_recovery_fix_ | AI (1 patch) | AI hook (Fase 6), not ported
-- jigglypuffkirbyshared.asm:860 | remix_skip_offensive_usp_air_ | AI (1 patch) | AI hook (Fase 6), not ported
+- jigglypuffkirbyshared.asm:813 | multi_jump_recovery_fix_ | AI (1 patch) | AI hook (Phase 6), not ported
+- jigglypuffkirbyshared.asm:860 | remix_skip_offensive_usp_air_ | AI (1 patch) | AI hook (Phase 6), not ported
 - linkshared.asm:175 | get_entry_anim_struct_1 | ADAPTED (1 patch) | decomp/src/ft/ftremix/ftremixentry.c:343-358 + ftremixentrydata.c:21-42 (Young Link, Marth, Roy, Marina, Goemon/Ebi skip, Banjo swapped bases)
 - linkshared.asm:232 | get_entry_anim_struct_2 | ADAPTED (1 patch) | same rows, nFTRemixEntryEffectLinkBeam
 - linkshared.asm:288 | create_bomb_ | STUB (4 patches) | decomp/src/it/itfighter/itlinkbomb.c:628-664 ported: per-owner file, owner id in coll_data.cliff_id, Young Link bombchu blast zone/FGM. Missing: asm render_routine_ (0x801865DC) changes the first gcAddXObjForDObjFixed kind 0x2E to 0x48 for YLINK; port keeps 0x2E (itlinkbomb.c:643)
@@ -759,17 +759,17 @@ asm file:line | scope | verdict | evidence
 - nessshared.asm:682 | get_pkthunder_special_struct2_ | GAP (1 patch) | no JNESS/LUCAS (or Kirby-copy) selection in wp/wpness, it/itfighter/itnesspkfire.c or ef/efmanager.c; Ness weapon/effect descs keep &gFTNessFileSpecial1/2 (wpnesspkfire.c:14, wpnesspkthunder.c)
 - nessshared.asm:717 | get_pkthunder_reflect_struct1_ | GAP (1 patch) | no JNESS/LUCAS (or Kirby-copy) selection in wp/wpness, it/itfighter/itnesspkfire.c or ef/efmanager.c; Ness weapon/effect descs keep &gFTNessFileSpecial1/2 (wpnesspkfire.c:14, wpnesspkthunder.c)
 - nessshared.asm:759 | get_pkthunder_reflect_struct2_ | GAP (1 patch) | no JNESS/LUCAS (or Kirby-copy) selection in wp/wpness, it/itfighter/itnesspkfire.c or ef/efmanager.c; Ness weapon/effect descs keep &gFTNessFileSpecial1/2 (wpnesspkfire.c:14, wpnesspkthunder.c)
-- nessshared.asm:796 | cpu_usp_usage_fix_ | AI (1 patch) | AI hook (Fase 6), not ported
-- nessshared.asm:823 | cpu_usp_control_fix_ | AI (1 patch) | AI hook (Fase 6), not ported
+- nessshared.asm:796 | cpu_usp_usage_fix_ | AI (1 patch) | AI hook (Phase 6), not ported
+- nessshared.asm:823 | cpu_usp_control_fix_ | AI (1 patch) | AI hook (Phase 6), not ported
 - nessshared.asm:990 | get_pkthunder_playerstruct1_ | GAP (1 patch) | no JNESS/LUCAS (or Kirby-copy) selection in wp/wpness, it/itfighter/itnesspkfire.c or ef/efmanager.c; Ness weapon/effect descs keep &gFTNessFileSpecial1/2 (wpnesspkfire.c:14, wpnesspkthunder.c)
 - nessshared.asm:1008 | get_pkthunder_playerstruct2_ | GAP (1 patch) | no JNESS/LUCAS (or Kirby-copy) selection in wp/wpness, it/itfighter/itnesspkfire.c or ef/efmanager.c; Ness weapon/effect descs keep &gFTNessFileSpecial1/2 (wpnesspkfire.c:14, wpnesspkthunder.c)
 - nessshared.asm:1023 | get_pkthunder_playerstruct3_ | GAP (1 patch) | no JNESS/LUCAS (or Kirby-copy) selection in wp/wpness, it/itfighter/itnesspkfire.c or ef/efmanager.c; Ness weapon/effect descs keep &gFTNessFileSpecial1/2 (wpnesspkfire.c:14, wpnesspkthunder.c)
 - nessshared.asm:1042 | reflect_fix_1_ | GAP (1 patch) | ft/ftcommon/ftcommonattacks4.c:55,105,123 and attackhi3/lw3 use nFTKindNess/NNess only: JNESS, LUCAS, NLUCAS get no fsmash reflector (special_coll never set)
 - nessshared.asm:1073 | reflect_fix_2_ | GAP (1 patch) | ft/ftcommon/ftcommonattacks4.c:55,105,123 and attackhi3/lw3 use nFTKindNess/NNess only: JNESS, LUCAS, NLUCAS get no fsmash reflector (special_coll never set)
 - nessshared.asm:1104 | reflect_fix_3_ | GAP (1 patch) | ft/ftcommon/ftcommonattacks4.c:55,105,123 and attackhi3/lw3 use nFTKindNess/NNess only: JNESS, LUCAS, NLUCAS get no fsmash reflector (special_coll never set)
-- nessshared.asm:1134 | cpu_pk_thunder_attack_ | AI (1 patch) | AI hook (Fase 6), not ported
-- nessshared.asm:1160 | improved_pk_thunder_ | AI (1 patch) | AI hook (Fase 6), not ported
-- nessshared.asm:1246 | save_cpu_recovery_location_ | AI (1 patch) | AI hook (Fase 6), not ported
+- nessshared.asm:1134 | cpu_pk_thunder_attack_ | AI (1 patch) | AI hook (Phase 6), not ported
+- nessshared.asm:1160 | improved_pk_thunder_ | AI (1 patch) | AI hook (Phase 6), not ported
+- nessshared.asm:1246 | save_cpu_recovery_location_ | AI (1 patch) | AI hook (Phase 6), not ported
 - pikashared.asm:199 | rapid_jab_fix_1 | GAP (1 patch) | ft/ftcommon/ftcommonattack1.c:55 and :108 test only Pikachu/NPikachu: EPIKA/JPIKA go to Attack12 (second jab) instead of the repeating jab
 - pikashared.asm:221 | rapid_jab_fix_2 | GAP (1 patch) | ft/ftcommon/ftcommonattack1.c:55 and :108 test only Pikachu/NPikachu: EPIKA/JPIKA go to Attack12 (second jab) instead of the repeating jab
 - pikashared.asm:243 | forward_smash_fix_1 | GAP (1 patch) | ft/ftcommon/ftcommonattacks4.c:19,99,115 test only Pikachu/NPikachu: no Thunder Shock effect/table for EPIKA/JPIKA fsmash
@@ -804,7 +804,7 @@ asm file:line | scope | verdict | evidence
 - yoshishared.asm:209 | yoshi_grab_fix_1 | GAP (1 patch) | ft/ftcommon/ftcommoncatch2.c:91 tests only Yoshi/NYoshi (tongue part 7,1)
 - yoshishared.asm:231 | yoshi_grab_fix_2 | GAP (1 patch) | ft/ftcommon/ftcommoncapturewait.c:53 (victim invisible for Yoshi grabbers)
 - yoshishared.asm:254 | yoshi_throw_fix_1 | GAP (1 patch) | ft/ftcommon/ftcommonthrown1.c:102 (ThrownSetStatusImmediate); asm adds JYOSHI and PIANO (Mad Piano throw)
-- yoshishared.asm:279 | yoshi_cpu_fix_1 | AI (1 patch) | AI hook (Fase 6), not ported
+- yoshishared.asm:279 | yoshi_cpu_fix_1 | AI (1 patch) | AI hook (Phase 6), not ported
 - yoshishared.asm:310 | up_special_struct_fix | PORTED (1 patch) | decomp/src/wp/wpyoshi/wpyoshieggthrow.c:269 (ftRemixYoshiEggWeaponDesc)
 - yoshishared.asm:341 | down_special_struct_fix | PORTED (1 patch) | decomp/src/wp/wpyoshi/wpyoshistar.c:183 (JYOSHI main file, DEDEDE file 7)
 
@@ -1052,7 +1052,7 @@ Format: asm file:first line, `scope`, xN patches, verdict, evidence.
 - Smashketball.asm:502 `camera_follow` x1 - PORTED - gmcamera.c:475 -> gmremixsmashketballcamera.c:14 + gmRemixSmashketballRulesFollowBall (1000 padding, floor -1000)
 - Smashketball.asm:1109 `play_end_buzzer_` x1 - PORTED - ifcommon.c:3056 queues FGM 0x431 (gmremixsmashketball.h:21)
 - Smashketball.asm:1131 `force_chant_` x1 - PORTED - ftpublic.c:83/ftPublicTryStartCall is_forced; caller gmremixsmashketballscore.c:70 ftPublicRemixForceCall
-- Smashketball.asm:1153 `ai_ball_behavior_` x1 - GAP - GAP: CPUs do not seek the ball (target = ball x +-400 by team). Known open (Fase 6 AI), f19:48
+- Smashketball.asm:1153 `ai_ball_behavior_` x1 - GAP - GAP: CPUs do not seek the ball (target = ball x +-400 by team). Known open (Phase 6 AI), f19:48
 - Smashketball.asm:1211 `ai_ball_attack_range` x1 - GAP - GAP: attack-range prediction against the ball (hurtbox 200, ball vel/gravity) missing. Same as above
 - Smashketball.asm:1268 `allow_overtime_` x1 - GAP - GAP: Remix keeps the main battle state in overtime; port copies TransferBattleState into VSBattleState (gmremixsmashketball.c:207), so the match stats are lost
 - Smashketball.asm:1286 `no_initial_damage_` x1 - PORTED - scvsbattle.c:664 gmRemixSmashketballGetSuddenDeathDamage -> 0
@@ -1139,7 +1139,7 @@ Format: asm file:first line, `scope`, xN patches, verdict, evidence.
 - TwelveCharBattle.asm:620 `skip_rendering_panels_3_and_4_` x3 - ADAPTED - mnplayersvs.c:6886 mnPlayersVSTwelveCBFrameUpdate, :6852
 - TwelveCharBattle.asm:696 `change_2p_panel_position_` x19 - PORTED - mnplayersvs.c:129 mnPlayersVSGetPanelIndex used at all 19 sites (lines 1226-6191)
 - TwelveCharBattle.asm:1665 `force_ffa_and_stock_` x1 - ADAPTED - gmremixmodecss.c profile (FFA + stock) + gmremixtwelvecb.c BeginMatch; portrait restore in port state
-- TwelveCharBattle.asm:1748 `update_announcer_on_entry_` x2 - GAP - GAP: when the battle is COMPLETE the asm plays PLAYER_1/PLAYER_2 (FGM 503/504) and WINS (533) at CSS frame 0x34; mnremixcssmode.c:36 returns FALSE and the vanilla voice plays (ROADMAP Fase 5 deviation, real gap). 1016 announcer for the unfinished battle is ported
+- TwelveCharBattle.asm:1748 `update_announcer_on_entry_` x2 - GAP - GAP: when the battle is COMPLETE the asm plays PLAYER_1/PLAYER_2 (FGM 503/504) and WINS (533) at CSS frame 0x34; mnremixcssmode.c:36 returns FALSE and the vanilla voice plays (ROADMAP Phase 5 deviation, real gap). 1016 announcer for the unfinished battle is ported
 - TwelveCharBattle.asm:1867 `update_css_header_` x2 - PORTED - mnremixcssmode.c:30 title offset; mnvsresults.c:2589; "Game N" gmremixtwelvecbhud.c
 - TwelveCharBattle.asm:1958 `handle_stock_count_change_` x2 - STUB - STUB: 12CB part ported (mnplayersvs.c:944-957, lock after start). Missing: Tag Team stock range 2..6 and Tug of War 1..25 (_squad_strike_/_tug_of_war_ wrap); port arrows (mnplayersvs.c:5292,5328) always allow 1..99
 - TwelveCharBattle.asm:2090 `handle_stock_change_fgm_` x2 - PORTED - mnplayersvs.c:952 nSYAudioFGMMenuDenied (FGM 165)
@@ -1369,8 +1369,8 @@ Format: `table (rows) | asm anchor | verdict | evidence`.
 - `crowd_chant_fgm` (48) | `Character.asm:1677` | GAP | gap 1
 - `menu_zoom` (46) | `CharacterSelect.asm:4029-4045` and the per-fighter files | ADAPTED | roster field, `tools/gen_remix_roster.py:317-354` (CharacterSelect.asm read first because Sheik/NSheik files come later in `main.asm:130,228,245`), applied at `remix_roster.cpp:329` and `:355-369` (vanilla ids 0x0C..0x1A)
 - `kirby_inhale_struct` (44) | `Character.asm:2684`, readers `:2023-2060` | ADAPTED | image read, `ft/ftremix/ftremixkirbycopy.c:35` (0xC byte rows, hat id and scale)
-- `ai_behaviour` (42), `lv10_ai_behaviour` (12), `ai_long_range` (25), `nsp_shoot_custom_move` (3) | `Character.asm:1769-1830`, `:2959` | ADAPTED (Fase 6) | image read, see AI table
-- `ai_attack_prevent` (40), `recovery_logic` (37), `cpu_post_process` (33), `cpu_attack_weight` (15), `fighter_reflect` (10) | | AI, Fase 6 | not read, see AI table
+- `ai_behaviour` (42), `lv10_ai_behaviour` (12), `ai_long_range` (25), `nsp_shoot_custom_move` (3) | `Character.asm:1769-1830`, `:2959` | ADAPTED (Phase 6) | image read, see AI table
+- `ai_attack_prevent` (40), `recovery_logic` (37), `cpu_post_process` (33), `cpu_attack_weight` (15), `fighter_reflect` (10) | | AI, Phase 6 | not read, see AI table
 - `fighter_DK_mode` (32) | `Character.asm:3213` | ADAPTED | image read, `ft/ftremix/ftremixdkmode.c:61-72` (own entry, else table base, as `DKMode.asm` `_loop_initial`)
 - `air_usp` (32), `ground_nsp` (31), `air_nsp` (30), `ground_usp` (29), `ground_dsp` (28), `air_dsp` (28) | `Character.asm:1412-1540` | ADAPTED | `ftremixbind.c:208-232` reads `REMIX_SPECIAL_TABLE_*` per id from the image and resolves each address through the vanilla or ported proc tables. Checked all 217 explicit entries of the 8 special tables: the symbol `REMIX_SYM_<Scope>__<label>` of every entry is a `{ sym, fn }` row of `decomp/src/ft/ftremix/**`. Vanilla `0x80xxxxxx` targets resolve via `ftremixvanillaprocs.c` or fall back to the parent's handler (logged). Wolf `ground_nsp` row is commented out (`Wolf.asm:276`): parent Fox's NSP, same as asm. Sample of 5 fighters traced (Banjo USP, Crash DSP, Peppy NSP, Sonic NSP, Marth USP): same routine as the asm, no divergence found
 - `entry_script` (28) | `Character.asm:1563` | ADAPTED | hand table `ftremixentry.c:49-90` (`dFTRemixEntryScripts`); compared with the 28 rows plus parent inheritance: all effective scripts match (polygons skip because `polygon_setup` is later in the file than e.g. `NCrash.asm:288`; Ness has no vanilla entry effect)
