@@ -1,0 +1,2 @@
+# P1 holds the shield (Z) from frame 480 to 620 (Shield option screenshots at 540).
+480 620 0 Z 0 0

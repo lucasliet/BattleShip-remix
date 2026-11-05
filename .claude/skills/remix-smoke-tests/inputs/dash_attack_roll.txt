@@ -1,0 +1,9 @@
+# P1 runs right and dash attacks, shields and rolls right, then the same to the left (animation-driven translation: Size factor of ftRemixCommandGetTranslationMultiplier).
+460 488 0 - 80 0
+489 491 0 A 80 0
+520 529 0 Z 0 0
+530 533 0 Z 80 0
+580 608 0 - -80 0
+609 611 0 A -80 0
+640 649 0 Z 0 0
+650 653 0 Z -80 0

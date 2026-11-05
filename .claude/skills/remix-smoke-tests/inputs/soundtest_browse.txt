@@ -1,0 +1,11 @@
+# Sound test: R browses by 50 (Remix), A plays; then Voice option
+100 103 0 R
+160 163 0 R
+220 223 0 R
+280 283 0 R
+320 323 0 A
+420 423 0 DD
+460 463 0 DD
+500 503 0 R
+540 543 0 R
+580 583 0 A

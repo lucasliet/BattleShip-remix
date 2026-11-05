@@ -1,0 +1,36 @@
+# Bury from a failed Z-cancel (run with SSB64_REMIX_TOGGLES="Punish Failed Z-Cancel=6", SSB64_VS_P2_HUMAN=1 so nobody hits P1).
+# Cycle 1 (t about 20..): jump, neutral air, land during the attack lag with no Z: buried for 99 tics, no mashing.
+470 474 0 - 0 80
+482 484 0 A 0 0
+# Cycle 2: same, then A and stick left/right are mashed from frame 760 on (breakout_wait shortens the bury).
+700 704 0 - 0 80
+712 714 0 A 0 0
+760 761 0 A 0 0
+763 764 0 - 80 0
+766 767 0 A 0 0
+769 770 0 - -80 0
+772 773 0 A 0 0
+775 776 0 - 80 0
+778 779 0 A 0 0
+781 782 0 - -80 0
+784 785 0 A 0 0
+787 788 0 - 80 0
+790 791 0 A 0 0
+793 794 0 - -80 0
+796 797 0 A 0 0
+799 800 0 - 80 0
+802 803 0 A 0 0
+805 806 0 - -80 0
+808 809 0 A 0 0
+811 812 0 - 80 0
+814 815 0 A 0 0
+817 818 0 - -80 0
+820 821 0 A 0 0
+823 824 0 - 80 0
+826 827 0 A 0 0
+829 830 0 - -80 0
+832 833 0 A 0 0
+835 836 0 - 80 0
+838 839 0 A 0 0
+841 842 0 - -80 0
+844 845 0 A 0 0

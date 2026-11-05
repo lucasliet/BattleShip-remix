@@ -1,0 +1,5 @@
+# P1 jumps, then presses Z (shield) in the air to air dodge; repeats after landing
+400 404 0 - 0 80
+430 433 0 Z
+520 524 0 - 0 80
+550 553 0 Z

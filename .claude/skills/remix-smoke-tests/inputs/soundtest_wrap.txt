@@ -1,0 +1,7 @@
+# Sound test: L wraps Music to the last song (375), then Voice to the last voice (1094, four digits)
+100 103 0 DL
+160 163 0 A
+300 303 0 DD
+340 343 0 DD
+400 403 0 DL
+460 463 0 A

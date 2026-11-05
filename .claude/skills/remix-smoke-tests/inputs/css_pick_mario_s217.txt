@@ -1,0 +1,9 @@
+# css_pick_mario.txt with START at frame 217 (a different RNG state when Stage Select is OFF picks the random stage).
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+100 119 1 - 0 80
+120 127 1 - 80 0
+150 152 1 A
+217 219 0 START
+317 319 0 A

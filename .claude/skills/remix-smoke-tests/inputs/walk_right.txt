@@ -1,0 +1,2 @@
+# P1 walks right off the stage edge
+460 900 0 - 80 0

@@ -1,0 +1,4 @@
+# copy happens at frame 330 (harness), then Kirby uses NSP three times
+400 402 0 B 0 0
+470 472 0 B 0 0
+540 542 0 B 0 0

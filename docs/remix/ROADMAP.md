@@ -286,7 +286,9 @@ Closed phases:
   - [ ] **Lot 3, fighters** (GP, SH, FT, CT outside AI). Progress (2026-11-05): all eight packages coded and built; roster special matrix (94 fighters × 3)
     clean; unit tests 6062 checks. Done in the ledger with their runs: GP-1 = CT-14, FT-38, FT-43, OP-20, SH-10, FT-15, SH-1,
     FT-50, SH-11, SH-12, IT-7, SH-4, GP-7 = CT-15; FT-19 `n/a`. The rest is ported and marked "in-game check pending" in the
-    ledger (one scripted check each, next). Open: GP-6 (Visibility per-part render modes: needs a renderer state for the
+    ledger. Verification batch (2026-11-05, 184 runs `pc_*`, scenarios with `lldb_count.sh`/`lldb_first.sh`): 41 more items done
+    across lots 2 to 4 (ledger evidence); FT-49 failed (the L-held voice 0x300 never plays); 27 items still need a scenario
+    that triggers them. Open: GP-6 (Visibility per-part render modes: needs a renderer state for the
     alpha render mode), GP-12 (GFX 0x64 user not found). Deviations in `deviations.md` 5.8.
   F5 and F6 are single owners of `efmanager.c` and `ftmain.c`; F5
     starts after F2 and F3; the `ftcommonattackair.c` and `ftremixkirbypower.c` parts of FT-29 wait for F8 and F4.
