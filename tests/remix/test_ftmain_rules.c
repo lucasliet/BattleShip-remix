@@ -2,7 +2,8 @@
  * test_ftmain_rules.c - unit tests of the pure rules behind the ftMainSetStatus and ftMainProcPhysicsMap Remix hooks:
  * map star fighters, Marina thrown animation (ft/ftremix/ftremixmainrules.c), Sandbag landing
  * (ftremixsandbagrules.c), hit recoil (ftremixhitrecoilrules.c), Magic Kirby Hat (ftremixmagichatrules.c) and the
- * translation Size factor (ftremixcommandrules.c).
+ * translation Size factor (ftremixcommandrules.c) and the weapon hit direction with the Waddle Doo beam rule
+ * (ftremixmainrules.c).
  */
 
 #include "test_check.h"
@@ -207,6 +208,27 @@ static void testCommandSizeFactor(void)
     CHECK_EQ(1, ftRemixCommandGetSizeFactor(0.0F) == FTREMIXCOMMAND_POISON_MULT);
 }
 
+static void testWeaponHitDirectionUsesVelocityOverFive(void)
+{
+    CHECK_EQ(-1, ftRemixMainWeaponHitLr(0x01, 1, 6.0F));
+    CHECK_EQ(+1, ftRemixMainWeaponHitLr(0x01, 1, -6.0F));
+    CHECK_EQ(0, ftRemixMainWeaponHitLr(0x01, 1, 4.9F));
+    CHECK_EQ(0, ftRemixMainWeaponHitLr(0x01, -1, -4.9F));
+}
+
+static void testWaddleDooBeamHitDirectionUsesItsOwnLr(void)
+{
+    CHECK_EQ(-1, ftRemixMainWeaponHitLr(FTREMIXMAIN_WPKIND_WADDLEDOO_BEAM, 1, 0.0F));
+    CHECK_EQ(+1, ftRemixMainWeaponHitLr(FTREMIXMAIN_WPKIND_WADDLEDOO_BEAM, -1, 0.0F));
+    CHECK_EQ(-1, ftRemixMainWeaponHitLr(FTREMIXMAIN_WPKIND_WADDLEDOO_BEAM, 1, -30.0F));
+    CHECK_EQ(+1, ftRemixMainWeaponHitLr(FTREMIXMAIN_WPKIND_WADDLEDOO_BEAM, -1, 30.0F));
+}
+
+static void testWaddleDooBeamWithoutLrFallsBackToPositions(void)
+{
+    CHECK_EQ(0, ftRemixMainWeaponHitLr(FTREMIXMAIN_WPKIND_WADDLEDOO_BEAM, 0, 30.0F));
+}
+
 void remixTestFtMainRules(void)
 {
     printf("ftmain rules\n");
@@ -233,4 +255,7 @@ void remixTestFtMainRules(void)
     RUN_TEST(testMagicHatChargeLivesInTheAmmoWord);
     RUN_TEST(testMagicHatRollTable);
     RUN_TEST(testCommandSizeFactor);
+    RUN_TEST(testWeaponHitDirectionUsesVelocityOverFive);
+    RUN_TEST(testWaddleDooBeamHitDirectionUsesItsOwnLr);
+    RUN_TEST(testWaddleDooBeamWithoutLrFallsBackToPositions);
 }
