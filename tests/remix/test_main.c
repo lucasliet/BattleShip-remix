@@ -10,6 +10,7 @@ int gRemixTestChecks = 0;
 extern void remixTestTwelveCBRules(void);
 extern void remixTest1PModeNames(void);
 extern void remixTest1PModeRules(void);
+extern void remixTest1PEnemyRules(void);
 extern void remixTest1PHrcRules(void);
 extern void remixTest1PHrcSigns(void);
 extern void remixTest1PHrcTravel(void);
@@ -51,14 +52,22 @@ extern void remixTestGroupDisplayRules(void);
 extern void remixTestSpriteRules(void);
 extern void remixTestFontLayout(void);
 extern void remixTestBgmRules(void);
+extern void remixTestGalleryRules(void);
 extern void remixTestTwelveCBLayout(void);
 extern void remixTestTwelveCBCustom(void);
+extern void remixTestStageSelectRules(void);
+extern void remixTestDpadMapRules(void);
+extern void remixTestDpadControlRules(void);
+extern void remixTestCssRules(void);
+extern void remixTestPracticeRules(void);
+extern void remixTestSpriteBitmapRow(void);
 
 int main(void)
 {
     remixTestTwelveCBRules();
     remixTest1PModeNames();
     remixTest1PModeRules();
+    remixTest1PEnemyRules();
     remixTest1PHrcRules();
     remixTest1PHrcSigns();
     remixTest1PHrcTravel();
@@ -100,8 +109,15 @@ int main(void)
     remixTestSpriteRules();
     remixTestFontLayout();
     remixTestBgmRules();
+    remixTestGalleryRules();
     remixTestTwelveCBLayout();
     remixTestTwelveCBCustom();
+    remixTestStageSelectRules();
+    remixTestDpadMapRules();
+    remixTestDpadControlRules();
+    remixTestCssRules();
+    remixTestPracticeRules();
+    remixTestSpriteBitmapRow();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;

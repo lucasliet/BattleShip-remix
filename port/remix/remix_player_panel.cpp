@@ -89,6 +89,9 @@ const std::vector<Option> kOptions = {
     { REMIX_PANEL_STOCK_COUNT, "StockCount", "Stock Count (Manual)", 0, 99, 3, {} },
 };
 
+std::array<std::string, REMIX_PANEL_TAG_COUNT> sTagNameOverrides;
+std::array<bool, REMIX_PANEL_TAG_COUNT> sIsTagNameOverridden;
+std::array<std::string, REMIX_PANEL_TAG_COUNT> sTagNameBuffers;
 std::array<std::array<int, REMIX_PANEL_PORTS>, REMIX_PANEL_COUNT> sOverrides;
 std::array<std::array<bool, REMIX_PANEL_PORTS>, REMIX_PANEL_COUNT> sIsOverridden;
 
@@ -125,6 +128,29 @@ void ApplyOverride(const std::string &item) {
     spdlog::warn("remix_panel: SSB64_REMIX_PANEL item '{}' names no option or a port outside 1..4", item);
 }
 
+/** Applies one "<tag 1..20>=<name>" item of SSB64_REMIX_TAG_NAMES. */
+void ApplyTagNameOverride(const std::string &item) {
+    const size_t equals = item.find('=');
+    const int tag = (equals == std::string::npos) ? 0 : std::atoi(item.substr(0, equals).c_str());
+    if ((tag < 1) || (tag > REMIX_PANEL_TAG_COUNT)) {
+        spdlog::warn("remix_panel: SSB64_REMIX_TAG_NAMES item '{}' is not <tag 1..{}>=<name>", item, REMIX_PANEL_TAG_COUNT);
+        return;
+    }
+    sTagNameOverrides[tag - 1] = item.substr(equals + 1);
+    sIsTagNameOverridden[tag - 1] = true;
+}
+
+/** Splits a ';' list and gives each item to apply. */
+void ForEachListItem(const std::string &list, void (*apply)(const std::string &)) {
+    size_t start = 0;
+    while (start < list.size()) {
+        size_t end = list.find(';', start);
+        end = (end == std::string::npos) ? list.size() : end;
+        apply(list.substr(start, end - start));
+        start = end + 1;
+    }
+}
+
 } // namespace
 
 const std::vector<Option> &All() {
@@ -133,6 +159,10 @@ const std::vector<Option> &All() {
 
 std::string CVarName(const Option &option, int port) {
     return std::string("gRemix.Panel.") + option.key + ".P" + std::to_string(port + 1);
+}
+
+std::string TagNameCVarName(int tag) {
+    return std::string("gRemix.Panel.TagName.") + std::to_string(tag);
 }
 
 std::map<int32_t, const char *> ComboMap(const Option &option) {
@@ -151,19 +181,29 @@ extern "C" void remix_panel_init(void) {
     for (auto &row : sIsOverridden) {
         row.fill(false);
     }
+    sIsTagNameOverridden.fill(false);
+    const char *tag_names = std::getenv("SSB64_REMIX_TAG_NAMES");
+    if (tag_names != nullptr) {
+        ForEachListItem(tag_names, ApplyTagNameOverride);
+        port_log("SSB64: remix_panel: tag names from SSB64_REMIX_TAG_NAMES applied\n");
+    }
     const char *list = std::getenv("SSB64_REMIX_PANEL");
     if (list == nullptr) {
         return;
     }
-    const std::string rest(list);
-    size_t start = 0;
-    while (start < rest.size()) {
-        size_t end = rest.find(';', start);
-        end = (end == std::string::npos) ? rest.size() : end;
-        ApplyOverride(rest.substr(start, end - start));
-        start = end + 1;
-    }
+    ForEachListItem(list, ApplyOverride);
     port_log("SSB64: remix_panel: overrides from SSB64_REMIX_PANEL applied\n");
+}
+
+extern "C" const char *remix_panel_tag_name(int tag) {
+    using namespace remix_panel;
+
+    if ((tag < 1) || (tag > REMIX_PANEL_TAG_COUNT)) {
+        return "";
+    }
+    std::string &buffer = sTagNameBuffers[tag - 1];
+    buffer = sIsTagNameOverridden[tag - 1] ? sTagNameOverrides[tag - 1] : CVarGetString(TagNameCVarName(tag).c_str(), "");
+    return buffer.c_str();
 }
 
 extern "C" int remix_panel_get(int option, int port) {

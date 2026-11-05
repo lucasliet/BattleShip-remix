@@ -100,6 +100,22 @@ static void testMultimanHudMovesDownOnlyOnTheAlwaysSetting(void)
     CHECK_EQ(18, (int)counter_y);
 }
 
+static void testBonusStartCheerIsSkippedOnlyWhenTheToggleIsBonus(void)
+{
+    CHECK_EQ(0, sc1PRemixModeSkipsBonusStartCheer(0, SC1PREMIX_MODE_HRC, 1));
+    CHECK_EQ(0, sc1PRemixModeSkipsBonusStartCheer(1, SC1PREMIX_MODE_BONUS3, 1));
+    CHECK_EQ(1, sc1PRemixModeSkipsBonusStartCheer(2, SC1PREMIX_MODE_BONUS3, 0));
+    CHECK_EQ(1, sc1PRemixModeSkipsBonusStartCheer(2, SC1PREMIX_MODE_HRC, 0));
+}
+
+static void testBonusStartCheerFollowsThePreviousScreen(void)
+{
+    CHECK_EQ(1, sc1PRemixModeSkipsBonusStartCheer(2, SC1PREMIX_MODE_STANDARD, 1));
+    CHECK_EQ(1, sc1PRemixModeSkipsBonusStartCheer(2, SC1PREMIX_MODE_MULTIMAN, 1));
+    CHECK_EQ(0, sc1PRemixModeSkipsBonusStartCheer(2, SC1PREMIX_MODE_STANDARD, 0));
+    CHECK_EQ(0, sc1PRemixModeSkipsBonusStartCheer(2, SC1PREMIX_MODE_REMIX_1P, 0));
+}
+
 void remixTest1PModeRules(void)
 {
     printf("1p mode rules\n");
@@ -112,4 +128,6 @@ void remixTest1PModeRules(void)
     RUN_TEST(testResetClearsTheKosAndThePlayerKo);
     RUN_TEST(testOnlyTheResetButtonRestartsTheRun);
     RUN_TEST(testMultimanHudMovesDownOnlyOnTheAlwaysSetting);
+    RUN_TEST(testBonusStartCheerIsSkippedOnlyWhenTheToggleIsBonus);
+    RUN_TEST(testBonusStartCheerFollowsThePreviousScreen);
 }

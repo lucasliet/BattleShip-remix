@@ -247,6 +247,10 @@ Default values are listed as CE / TE / NE / JP (`OS.TRUE`=1). INT ranges are max
 - Grid: `NUM_ROWS(3)`, `NUM_COLUMNS(6)`, `NUM_ICONS = 18`, `NUM_PAGES(5)` (`:542-545`), so 90 icons across 5 pages. `MAX_STAGE_ID(0xD7)` (`:243`).
 - Routines: `update_stage_icons_` (`:1275`), `get_index_` (`:1384`), `check_valid_page_` (`:1410`), `get_stage_id_` (`:1448`), `update_text_` (`:1546`), `update_cursor_color_` (`:1811`), directional handlers `right_`/`left_`/`up_`/`down_` (`:2152-2299`), `random_stage_roulette` (`:2349`, activated by C-Down on RANDOM), `add_stage_to_random_list_` (`:2567`).
 - Layout: `sss.NORMAL` / `sss.TOURNAMENT` (Toggles `:1483-1485`).
+- Screen patches (`:970-1010`, ported in `mnmaps.c` on 2026-11-04): "Stage Select" image y 122 to 128 (0x80132310), no yellow
+  name plate (0x80132354), blue bar y 134.5..140.5 (0x801321C4; the port fills 134..140), no plate shadow (0x801321D4), no
+  vanilla name sprite (0x80132738). The name is a string at (230, 209), centered, `FONTSIZE_DEFAULT`, blank over RANDOM
+  (`:2851`, `update_text_`), drawn by `mnremixstagepanel.c` in text slot 125.
 - Hooks for these are in the stage-select overlay. Most are **unverified** (the address match is outside the decomp's stage-select file).
 
 ### 3.9 Random (`Random/Random.asm`)
@@ -343,6 +347,39 @@ VS Options Item Switch screen (`decomp/src/mn/mnvsmode/mnvsitemswitch.c`, scene 
   field are rejected by the metadata-size gate.
 
 Verified headless: page flip, L toggle-all (ON→OFF and sprite refresh), return to
-page 0, no rendering anomalies. Known cosmetic gaps: no R/L legend text (Remix draws
-it in `item_switch_setup_`), subtitle on page 1 still shows vanilla row names
-(faithful — Remix does not patch the subtitle either).
+page 0, no rendering anomalies. Known cosmetic gap: subtitle on page 1 still shows
+vanilla row names (faithful — Remix does not patch the subtitle either).
+
+**Legend (M11 Fase 4, 2026-11-04)**: `item_switch_setup_` (`Item.asm:955-975`) also draws the pagination
+legend, ported in `mn/mnvsmode/mnremixitemswitchlegend.*`: the R button (file 0xC5, offset 0x0CF8, 272.0/38.25), the orange
+arrow (main menu images file 0x00, offset 0xDD90, 288.0/41.0, new sprite `IFREMIX_SPRITE_MENU_ARROW`), the L button
+(0x18C8, 202.0/38.25) and the text ": All On/Off" (214.0/39.5, colour 0xC0C0C0FF, scale 0.63, `remix_hud_text` slot 4).
+Sprites use the decal camera (dl link 4), the text is the overlay. Visible on both pages (the asm never hides it).
+
+## Remix screens (M11 Fase 4, T8.2 "telas", 2026-11-04)
+
+- **Title version** (`Boot.asm:155-169`): "Smash Remix v2.0.1", centred at 160.0/218.0, colour 0x888800FF, scale 0.9375
+  (`mn/mncommon/mnremixtitleversion.*`, `remix_hud_text` slot 3, put every frame by `mnTitleFuncRun`).
+- **Credits glyphs** (`Credits.asm:260-288`, `convert_string`): ids 0x50-0x61 (digits 0-9 as `ch + 0x20` except '4' which keeps the vanilla
+  0x37, then `_ ! - / * ( ) @ ~`) are now drawn. The textures are not in `File.REMIX_CREDITS` (0xDF1): they are appended to the
+  vanilla credits file 0xC3 (`SCStaffroll`, 0x89C8 bytes in the o2r, a 0x58 byte header before the asm offsets), so the
+  sprite table of `scstaffroll.c` gets the 18 `add_new_character` rows (width, height, offset) at indices 0x50-0x61 and the
+  display list table grows to 0x62 entries (ids 0x38-0x4F stay empty and are skipped). `tools/gen_remix_credits.py` now encodes
+  those characters and the staff table was regenerated (109 values changed, 18 distinct ids); the old note
+  `notes/f14_credits_left.md` looked at the wrong file.
+- **Credits speed assist: n/a** (approved). `remix_credits_speed_assist_` (`Credits.asm:1310-1349`) only simulates Start when the
+  second player tag string is "afk" (`string_table + 8` against 0x61666B00, lines 1318-1321) and the name id is 0x55. The port keeps
+  no custom player tags (`if/ifremixplayertag.c`), so the condition cannot hold; the Start acceleration of 0.11
+  (`Credits.asm:20-23`) is ported (`scstaffroll.c`).
+- **Gallery** (`Gallery.asm:445-487`, `SinglePlayer.asm:2293-2378`): all 40 pages. `mn/mncommon/mnremixgalleryrules.*` holds the
+  `id_table` (Character.id per page; the port fkind is the same value, `REMIX_ID_TO_PORT_FKIND`) and the
+  `custom_victory_file_table` plus every `set_ending_image` call (Lanky's last call wins). `mncongra.c` uses it for every
+  Character.id from 12 (Boss, polygon fighters and Remix fighters), where it used to read the empty registry field
+  `remix_1p_ending_image_file_id` (that also fixes the Remix 1P ending, which would have aborted). Still open: the Data
+  menu button, music per picture (A), idle mode, drum kit and the fades (`notes/f10_menu_gallery.md`).
+- **RANDOM ALL** (Menu Music 21, `BGM.asm:635-668`): picks a track of the Random Music list ignoring the Random Music toggle
+  (`grRemixRandomMusicPickForced`), or one of four hidden GameBoy songs (BGM 0xA2-0xA5) when the list is empty. The list is the
+  16 stage and menu tracks; the custom MIDI entries have assembly-time ids and are not listed yet.
+- **Scene transition logos** (`Transitions.asm`): already in `lb/lbtransition.c` (Falling Shapes, Flip, Smash Logo file 0x1262, Remix
+  Logo file 0x1366; 15 transitions, the VS results screen picks `ARRAY_COUNT(dLBTransitionDescs)`). Test hook added:
+  `SSB64_TRANSITION_ID=<0-14>` forces the transition (13 Smash Logo, 14 Remix Logo).

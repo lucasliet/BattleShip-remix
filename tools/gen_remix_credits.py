@@ -19,7 +19,21 @@ SOURCE_PATH = REMIX_DIR / "remix_credits.txt"
 WHITESPACE = 0xFFFFFFDF
 LINE_BREAK = 0xFFFFFFC9
 
-SCROLL_SYMBOLS = {".": 0x34, ",": 0x35, "4": 0x37}
+SCROLL_SYMBOLS = {
+    ".": 0x34,
+    ",": 0x35,
+    "4": 0x37,
+    "_": 0x54,
+    "!": 0x5A,
+    "-": 0x5B,
+    "/": 0x5C,
+    "*": 0x5D,
+    "(": 0x5E,
+    ")": 0x5F,
+    "@": 0x60,
+    "~": 0x61,
+}
+SCROLL_DIGIT_OFFSET = 0x20
 DETAILS_SYMBOLS = {
     ":": 0x34,
     "(": 0x47,
@@ -81,6 +95,8 @@ def encode_scroll_char(char: str) -> int:
         return ord(char) - ord("a") + 26
     if char in SCROLL_SYMBOLS:
         return SCROLL_SYMBOLS[char]
+    if "0" <= char <= "9":
+        return ord(char) + SCROLL_DIGIT_OFFSET
     if char != " ":
         unmapped_scroll_glyphs.add(char)
     return WHITESPACE
@@ -183,7 +199,7 @@ def main() -> None:
     write_job_lines(job_lines)
     write_company_id_lines(company_id_lines)
     print(f"sections {len(source.sections)}, names {len(company_id_lines)}")
-    print(f"scroll glyphs without a vanilla sprite (REMIX-TODO credits-glyphs): {''.join(sorted(unmapped_scroll_glyphs))!r}")
+    print(f"scroll glyphs the Remix asm also drops to a space: {''.join(sorted(unmapped_scroll_glyphs))!r}")
     print(f"details glyphs the Remix asm also drops to a space: {''.join(sorted(unmapped_details_glyphs))!r}")
 
 

@@ -17,6 +17,7 @@
  */
 
 #include "bridge/lbreloc_byteswap.h"
+#include "bridge/sprite_bitmap_row.h"
 #include "resource/RelocPointerTable.h"
 #include "resource/RelocFileTable.h"
 
@@ -1948,6 +1949,22 @@ extern "C" void portFixupBitmapArray(void *bitmaps, unsigned int count)
 //
 // Sizes match decomp Sprite/Bitmap structs after portFixupSprite/portFixupBitmap
 // have run (i.e. fields readable as native LE).
+
+// Bytes of `wanted` that fit between `buf` and the end of the reloc file holding
+// it. The texel fixups rewrite in place, so they must not reach the heap after
+// the file.
+static size_t portClampToContainingFile(const void *buf, size_t wanted)
+{
+	uintptr_t base = 0;
+	size_t size = 0;
+
+	if (!portRelocFindContainingFile(buf, &base, &size))
+		return wanted;
+
+	size_t available = (size_t)(base + size - reinterpret_cast<uintptr_t>(buf));
+	return (wanted > available) ? available : wanted;
+}
+
 extern "C" void portFixupSpriteBitmapData(void *sprite_v, void *bitmaps_v)
 {
 	if (sprite_v == NULL || bitmaps_v == NULL)
@@ -2008,6 +2025,8 @@ extern "C" void portFixupSpriteBitmapData(void *sprite_v, void *bitmaps_v)
 		if (buf == NULL || width_img <= 0 || actualHeight <= 0)
 			continue;
 
+		size_t row_texels = portSpriteBitmapRowTexels(bm_width, width_img, bpp);
+
 		// Idempotency for the BSWAP32 pass: skip if pass2 (or a prior
 		// sprite fixup call) already restored the byte order.
 		uintptr_t key = reinterpret_cast<uintptr_t>(buf);
@@ -2016,11 +2035,12 @@ extern "C" void portFixupSpriteBitmapData(void *sprite_v, void *bitmaps_v)
 		{
 			sStructU16Fixups.insert(key);
 
-			size_t num_texels = static_cast<size_t>(width_img) *
+			size_t num_texels = row_texels *
 			                    static_cast<size_t>(actualHeight);
 			size_t tex_bytes = (num_texels * bpp + 7) / 8;
 			// Word-align so we can iterate as u32
 			tex_bytes = (tex_bytes + 3) & ~size_t{3};
+			tex_bytes = portClampToContainingFile(buf, tex_bytes);
 
 			uint32_t *words = static_cast<uint32_t *>(buf);
 			size_t num_words = tex_bytes / 4;
@@ -2102,7 +2122,8 @@ extern "C" void portFixupSpriteBitmapData(void *sprite_v, void *bitmaps_v)
 			size_t half       = group_size / 2;
 
 			// row_bytes = DRAM bytes per pixel row.
-			size_t row_bytes = ((size_t)width_img * (size_t)bpp + 7) / 8;
+			size_t row_bytes = (row_texels * (size_t)bpp + 7) / 8;
+			size_t rows_in_file = portClampToContainingFile(buf, row_bytes * (size_t)actualHeight) / row_bytes;
 
 			// Require the row to hold at least one full group. The inner
 			// loop only processes complete groups (`g + group_size <=
@@ -2111,7 +2132,7 @@ extern "C" void portFixupSpriteBitmapData(void *sprite_v, void *bitmaps_v)
 			if (row_bytes >= group_size)
 			{
 				uint8_t *bytes = static_cast<uint8_t *>(buf);
-				for (int row = 1; row < actualHeight; row += 2)
+				for (int row = 1; (size_t)row < rows_in_file; row += 2)
 				{
 					uint8_t *row_p = bytes + (size_t)row * row_bytes;
 					for (size_t g = 0; g + group_size <= row_bytes; g += group_size)

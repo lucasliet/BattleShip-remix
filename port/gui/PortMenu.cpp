@@ -1507,6 +1507,22 @@ void PortMenu::AddMenuRemixPlayerPanel() {
                 .Options(IntSliderOptions().Min(option.min).Max(option.max).DefaultValue(option.fallback));
         }
     }
+
+    AddSidebarEntry("Remix", "Player Tags", 2);
+    WidgetPath tagPath = { "Remix", "Player Tags", SECTION_COLUMN_1 };
+    AddWidget(tagPath, "Player Tags", WIDGET_SEPARATOR_TEXT);
+    AddWidget(tagPath, "Names of the 20 custom player tags. A port shows its name when its Player Tag option is set to that tag.",
+              WIDGET_TEXT);
+    for (int tag = 1; tag <= REMIX_PANEL_TAG_COUNT; tag++) {
+        tagPath.column = (tag % 2 == 1) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
+        const std::string label = "Tag " + std::to_string(tag);
+        const std::string cvar = remix_panel::TagNameCVarName(tag);
+        AddWidget(tagPath, label, WIDGET_CUSTOM)
+            .RaceDisable(false)
+            .CustomFunction([label, cvar](WidgetInfo &) {
+                UIWidgets::CVarInputString(label.c_str(), cvar.c_str(), UIWidgets::InputOptions());
+            });
+    }
 }
 #endif
 

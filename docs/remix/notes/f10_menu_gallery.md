@@ -87,6 +87,9 @@ do brief: quem roda é o lead). Os dois avisos `fb16`/`fb32` em `mncongra.c` já
 
 ## O que falta (REMIX-TODO)
 
+**Atualização 2026-11-04:** `gallery-remix-fighters` está feito (40 entradas, `mnremixgalleryrules.*`, imagens pela
+`custom_victory_file_table`). Seguem abertos os itens abaixo, exceto o primeiro.
+
 - `REMIX-TODO(gallery-remix-fighters)`: 28 das 40 entradas (índices 12..39, personagens remix, fighter kinds 13+).
   Falta o mapeamento Character.id -> fkind da Remix (`port_fighter_remix_1p_ending_image_file_id` é indexado por fkind).
   Opção: ler `SinglePlayer.custom_victory_file_table` do RAM image (exige símbolo em `EXTRA_SYMBOLS` de

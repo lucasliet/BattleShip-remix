@@ -1,5 +1,10 @@
 # F14 credits: REMIX-TODO left open (scstaffroll.c)
 
+**Update 2026-11-04 (M11 Fase 4):** both items are closed. The glyph textures are in the vanilla credits file 0xC3
+(`SCStaffroll`, with a 0x58 byte header before the asm offsets), not in `File.REMIX_CREDITS`, so the blocker below was a
+wrong file; glyphs are ported. The speed assist is n/a (needs the "afk" player tag). See `docs/remix/menus.md`,
+"Remix screens". The text below is the original analysis.
+
 Status: both markers stay `REMIX-TODO` because neither has a verified port path yet. Nothing was changed in the behaviour of the staff roll.
 
 ## credits-glyphs (scstaffroll.c:20)

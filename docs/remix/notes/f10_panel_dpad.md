@@ -33,22 +33,23 @@ Swap, 2 Stickless, 3 Stick Swap J, 4 Stickless J. DpadFunctions 0 Off, 1 Smash, 
   macro (`DpadFunctions.asm` `_dpad_move_*`). O port usa sempre valor cheio, o que faz o andar por toque ficar mais rápido que
   no asm. Precisa do estado do timer por porta e de ids de ação do lutador (Walk2, Walk3, Turn, Action.FOX.*, etc.), que não
   estão expostos no decomp desta escopo. Também não há o acréscimo de +40 no ar (`_dpad_move_check_up`).
-- Pulo e dash attack dos modos J: `check_jump_type_idle_` (0x8013F48C, dentro de `ftCommonKneeBendCheckButtonTap`
-  0x8013F450), `check_jump_type_running_` (0x8013F554) e `dash_attack_check_` (0x8014F730, perto de
-  `ftCommonAttackDashSetStatus` 0x8014F670). São lógica de ação do lutador, não transformação do controle. Sem eles, no
-  modo padrão (1, 2) o stick para cima ainda pode pular, e o dash attack não é bloqueado com cima.
-- `set_shield_mask_` (0x800D84F0): com DpadControl ligado, o escudo passa para L (ou L+Z com taunt personalizado), e o taunt
-  padrão passa para Z. Isso mexe nas máscaras de criação do lutador, em conflito com `ftRemixTauntButtonMaskFor`
-  (`f10_panel_tauntbutton.md`). Não portado. Com o port atual, o escudo fica no Z, como no vanilla.
 - CSS (`css_cursor_and_dpad_controls_` nas telas de seleção, D-pad como cursor): fora do escopo de partida.
 - Pausa de treino (`_training_pause_control`): não portado.
 
-## DpadFunctions (D-pad Map): não feito
+## Feito (T8.2, M11 Fase 4): D-pad Map e ações do DpadControl
 
-Não portado. Os macros (Smash, Tilt, Special) dependem do id da ação atual do lutador (Action.Dash, Run, JumpSquat, Shield,
-ShieldOn, Roll, Turn, etc.), do estado segurado do frame anterior e de sobrescritas do stick em valor parcial. Esses ids não
-estão no decomp desta escopo, e um port parcial daria comportamento errado. Próximo passo: expor os ids em um header, depois
-portar `dpad_macro_check_` (Special primeiro, por ser o mais simples) e `dpad_macro_check_held_`.
+- D-pad Map (`DpadFunctions.asm` `dpad_macro_check_` e `dpad_macro_check_held_`): `ftremixdpadmaprules.*` (regras puras, 74
+  checagens em `tests/remix/test_dpad_map_rules.c`) e `ftremixdpadmap.c` (cola). Dois ganchos em `ftMainProcUpdateInterrupt`
+  (caso `nFTPlayerKindMan`): `ftRemixDpadMapApplyPress` depois da máscara de toque (gancho 0x800E1330: troca o toque, pode
+  escrever o stick e põe A no segurado) e `ftRemixDpadMapHeldButtons` antes de guardar o segurado (gancho 0x800E1378: Special
+  segura B, Smash segura A com Charged Smashes ligado). Desligado com Stickless, Single Button Mode (só no toque) e no Training
+  com "D-pad Controls" diferente de OFF.
+- Os modos J não têm código próprio: no asm, `check_jump_type_idle_`, `check_jump_type_running_` e `dash_attack_check_` só agem
+  nos valores 1 e 2 (`slti at, at, 3`), os J (3 e 4) seguem o vanilla. A nota antiga dizia o contrário. Portado em
+  `ftremixdpad.c` (`ftRemixDpadControlDisablesStickJump`, `ftRemixDpadControlHandlesRunStickUp`,
+  `ftRemixDpadControlSkipsDashAttackOf`) com ganchos em `ftcommonkneebend.c`, `ftcommonrun.c` e `ftcommonattackdash.c`.
+- `set_shield_mask_`: `ftRemixDpadControlSetButtonMasks` (chamado em `ftManagerMakeFighter` depois da máscara de taunt): escudo
+  em L, taunt padrão em Z; com Taunt Button personalizado o escudo responde a L e Z.
 
 ## Verificação
 

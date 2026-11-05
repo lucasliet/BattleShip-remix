@@ -5,11 +5,13 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_twelvecb_rules.c
     test_1p_mode_names.c
     test_1p_mode_rules.c
+    test_1p_enemy_rules.c
     test_1p_hrc_rules.c
     test_1p_hrc_signs.c
     test_1p_hrc_travel.c
     test_1p_remix_rules.c
     test_timedstock_rules.c
+    test_gallery_rules.c
     test_koth_rules.c
     test_tugofwar_rules.c
     test_tagteam_rules.c
@@ -48,11 +50,20 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_bgm_rules.c
     test_twelvecb_layout.c
     test_twelvecb_custom.c
+    test_stage_select_rules.c
+    test_dpad_map_rules.c
+    test_dpad_control_rules.c
+    test_css_rules.c
+    test_practice_rules.c
+    test_sprite_bitmap_row.c
+    ${CMAKE_SOURCE_DIR}/port/bridge/sprite_bitmap_row.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_decode.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_layout.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixenemyrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingsbmrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhrcrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhrcsignrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhrctravelrules.c
@@ -78,6 +89,9 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaipredictionrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairollrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaispecialsrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadmaprules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadcontrolrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixpracticerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixstopwatchbgrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingportrules.c
@@ -93,8 +107,13 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgroupdisplayrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixspriterules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixbgmrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mncommon/mnremixgalleryrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecblayout.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecbcustom.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcssrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagepanelrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagetournamentrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstageroulette.c
 )
 target_compile_definitions(remix_mode_tests PRIVATE PORT=1 REGION_REMIX=1)
 target_include_directories(remix_mode_tests PRIVATE ${CMAKE_SOURCE_DIR}/decomp/src ${CMAKE_SOURCE_DIR}/port/remix ${CMAKE_SOURCE_DIR}/port)

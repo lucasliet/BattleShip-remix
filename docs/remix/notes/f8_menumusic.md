@@ -32,8 +32,9 @@ To test: `SSB64_REMIX_TOGGLES="Menu Music=<value>"` (Music Title: `"Music Title 
   - Values 17 and 18 (BOMBERMAN, SONIC R): `REMIX-TODO(MIDI ids)`, the vanilla BGM. Their ids are assembly-time
     values (`insert_extra_midi(STAGESELBM64)`, `insert_extra_midi(SONIC_R)`, MIDI.asm 681-683), with no symbol in
     `remix_symbols.h`.
-  - Value 21 (RANDOM ALL): `REMIX-TODO(random list)`, the vanilla BGM. The asm picks from `random_music_` without the
-    Random Music gate, and `grRemixRandomMusicPick` returns early when Random Music is off.
+  - Value 21 (RANDOM ALL): ported 2026-11-04. Picks from the Random Music list ignoring the Random Music gate
+    (`grRemixRandomMusicPickForced`), or a hidden GameBoy song (BGM 0xA2 + 0..3) when the list is empty. The custom MIDI
+    entries of the list are not listed (assembly-time ids).
 - Random picks use `syUtilsRandIntRange`, the port's existing random source.
 
 ## Patch applied

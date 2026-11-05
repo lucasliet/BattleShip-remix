@@ -38,8 +38,9 @@ o contrato dos blobs foi para `docs/remix/torch_factories.md`). Widescreen/aspec
 
 ## Posição atual
 
-**Em andamento: M11 Finalização, Fase 2 (visual dos modos).** O que falta para "Remix jogável" está na lista da Fase 2 e
-nas Fases 3 a 8 do M11 (no fim deste arquivo); os milestones antigos ficam como histórico e detalhe de cada task.
+**Em andamento: M11 Finalização, Fase 4 (CSS, stage select, painel, telas).** O que falta para "Remix jogável" está nas
+sobras das Fases 1, 2 e 4 e nas Fases 5 a 8 do M11 (no fim deste arquivo); os milestones antigos ficam como histórico e
+detalhe de cada task.
 
 | Milestone | Estado |
 |---|---|
@@ -50,10 +51,9 @@ nas Fases 3 a 8 do M11 (no fim deste arquivo); os milestones antigos ficam como 
 | M8 restante da paridade | substituído pelas fases do M11 |
 | M9 verificação final no desktop | adiado para a Fase 8; T9.1b (escuta) é do usuário |
 | M10 Switch | T10.1 feito (`.nro` e pacote); T10.2 (hardware) é do usuário, com 6 rodadas de achados corrigidos |
-| **M11 Finalização** | Fase R e Fase 1 feitas (exceto I7); Fase 2 em andamento; Fases 3 a 8 abertas |
+| **M11 Finalização** | Fases R e 3 feitas; Fase 1 feita exceto I7; Fase 2 feita exceto duas linhas; Fase 4 em andamento (lote 3 visto em partida); Fases 5 a 8 abertas |
 
-- **Próximo passo:** terminar a Fase 2 (itens abertos listados no M11) e seguir pelas fases em ordem, com checkpoint e commit
-  por fase.
+- **Próximo passo:** sobras da Fase 4 (lista no M11), depois as Fases 5 a 8 em ordem, com checkpoint e commit por fase.
 - **Depende do usuário:** T9.1b (passagem de escuta e visual) e T10.2 (validação na Switch). "Remix jogável" (T9.3) só é
   reportado depois da Fase 8.
 - **Último checkpoint:** CP10a (2026-11-02); o M11 registra o avanço de 2026-11-03 por task. Índice dos docs: `docs/remix/README.md`.
@@ -625,12 +625,23 @@ T8.2, T8.3, T9.1 e T9.3 acima.
   - [x] Banner do título da música (retângulo 0x34343494 em (1,156) 320x28, faixa "♪ título ♪" em (160,158) e jogo a 0,75 em (160,172), Kabel, do início da contagem até o GO!; o toast do LUS e `remix_overlay.*` foram removidos). Visto em partida: `music_banner` e `music_banner2` (banner com o retângulo e as duas linhas na contagem, some com o GO!).
   - [x] Match Stats: ícone de personagem (stock icon com a paleta do traje) nos cabeçalhos 1P/2P, em X 158 + 35 por coluna e Y 16 (`mnRemixVSStatsSceneMakeHeaderIcons`, chamado no fim de `mnVSResultsMakeHeader` quando os lutadores já existem; grupo das páginas). Visto em partida (`stats_icons`: ícones do Mario e do Kirby ao lado de "1P" e "2P").
   - [x] Pausa: close-up do lutador. É a câmera de pausa original do jogo e o port a mantém: visto em partida (`pause_cmp`: Mario de perto, "1P PAUSE" e a linha RESET/LEGEND). A legenda completa só aparece depois do R (o script da referência aperta R em 3700, por isso a captura dela mostra o bloco de música).
-  - [ ] Emblema Smash dos painéis sem lutador (CSS geral; faz parte da Fase 4).
-- [ ] **Fase 3** estágios e gameplay (T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0 (eram 52 linhas no total, 10 de IA; em 2026-11-04 são 23: 14 de IA e 9 de menu, todas das Fases 4 e 5 ou dos `n/a` aprovados: glifos e speed assist dos créditos, goal do KOTH, Gallery, emblema e nomes de golpes do Character Data, CSS de 24 do 12CB, linhas de modo nos resultados).
+  - [ ] Emblema Smash dos painéis sem lutador (CSS geral; faz parte da Fase 4). **2026-11-04:** nenhum patch do Remix desenha
+    emblema com o lutador NONE (`series_logo_offset_table[0x1C]` é 0) e o vanilla esconde nome e emblema no painel vazio; o
+    cartão com a logo Smash que existe é a porta do painel N/A (`panel_doors`). Falta uma captura de referência (emulador, I8)
+    para saber o que foi visto.
+- [x] **Fase 3** estágios e gameplay (T2.9b, T2.11). **Aceite:** `REMIX-TODO` fora de IA em 0 (eram 52 linhas no total, 10 de IA; em 2026-11-04 são 20: 15 de IA e 5 fora de IA, nenhuma da Fase 3: goal do KOTH e linhas de modo nos resultados são da Fase 5, CSS de 24 do 12CB da Fase 4, emblema e nomes de golpes do Character Data são `n/a` aprovados; os glifos dos créditos e a Gallery saíram no lote 3 da Fase 4).
   - [x] **Lote 1 (2026-11-03, 4 workers Haiku, diff e partida conferidos por mim; 1511 checagens sem falha):** Size do Ness DSP/USP (`ftremixsizeness.{h,c}`, escala do joint e do translate nos efeitos, ligados em `efmanager.c`; visto em partida com `Size.1=1`, `sz_11_dsp`: o hexágono do Psychic Magnet cresce com o Ness gigante; `sz_11_usp` sem erro), Banjo USP (onda de impacto do wall splat com o ângulo da parede e Size, `m_68_usp`/`sz_68_usp` rc 0), nuvem do Goemon (ECB x Size e `proc_display` próprio, `m_65_usp` rc 0), tabela `stage_hazard_table` das nuvens do Yoshi (41 entradas, estágio sem bit MOVEMENT sempre se move como no asm; `hz_5` e `hz_6` sem erro), rolo do som do Rainbow Chomp (FGM 0x401), id de tela do Dream Land (conferido, era só verificação) e TODO obsoleto do Golden Gun removido. Pirate Land (`hz_158`): bolas de canhão caem e explodem. Os três outros special matrix (Pikachu `m_9_*`) rc 0.
   - [x] **Z-cancel cruel e zoom (2026-11-04, feito por mim):** gate do KO instantâneo no chefe do 1P (`ZCancel.asm` 150-180: cena 1P, fase `nSC1PGameStageBoss`, byte 0x80131580 = `gIFCommonPlayerInterface.is_magnify_display`); `ZCancel.setup_` carrega o arquivo do ovo (339 = 0x153, `gFTDataYoshiSpecial3`) em `ftManagerAllocFighter` das batalhas com punição Egg ou Random; o `_egg` limpava só 32 bits do `effect_gobj` (LP64) e caía em `ftCommonYoshiEggProcUpdate` (SIGSEGV em `zc_m`/`zc_k`), agora limpa o ponteiro inteiro. Visto em partida sem Yoshi (`zc_m` Mario, `zc_k` Kirby, `Punish Failed Z-Cancel=8`): o ovo aparece no pouso do aéreo, o lutador sai dele, rc 0. Zoom especial: 0x80132704 em batalha é código do ftcomputer (delta 0x800855C0), palavra 0x10000007, rotação 0 (`gmremixspecialzoomwallpaper.c`, `n64_address_resolutions.md`).
   - [x] **Sobras do lote 1 (2026-11-04):** Pikachu (`efManagerThunderAmpMakeEffect(pos, fighter_gobj)` escala x/y; chamadores em `ftparam.c` e `itremixlightning.c`; não visto em partida), escala da animação do cloud do Goemon (`itRemixCloudScaleAnimValue` nos casos ScaX/Y/Z de `gcPlayDObjAnimJoint`; visto em `v3_size_cloud`, nuvem grande com o Goemon Giant), `SKIPPED(Size)` removido, laser do Metallic (união `flag_word` sob `PORT` em `fttypes.h`, layout do `FTStruct` conferido com clang; comparação contra os dois padrões do asm; `v3_mmadness` rc 0, imunidade não vista), canhão do Pirate (a velocidade não existe no asm: `cannonball_properties_struct` é dado morto, o movimento vem da animação; a explosão chama `wpSamusBombExplodeInitVars` como os bytes 0xE396C/0xE39A8, raio 360 e 15 quadros; `v3_pirate` com 13 explosões no log), slots de hitbox do Rainbow Chomp (contador de 25 quadros por registro, 3 slots como o asm; conferido só no código: o spawn é 1 em 810 por quadro nas janelas e não ocorreu em 6000 quadros com lldb).
-  - [ ] `grRemixDreamLandWindSpeedMax` sem o ramo 1P do Whispy Super/Hyper; T2.9b (guarda do TransN).
+  - [x] **Whispy e T2.9b (2026-11-04, worker Sonnet, lldb e partida por mim):** o ramo 1P citado aqui não existe em
+    `grRemixDreamLandWindSpeedMax` (refutado); o que faltava era a caixa de vento de `Hazards.asm` 3141-3204, agora em
+    `grRemixDreamLandGetWindBox` (Dream Greens ±3811 com origem 0, Super ×1,09375 e Hyper ×1,1953125 na esquerda, direita e
+    topo, 1P com a caixa vanilla) e usada por `grPupupuWhispySetWindPush`. Visto com lldb no ponto de uso: Dream Land normal
+    (-2325, 2275, 1000, -10, -525), Hyper (-2779,1, 2719,3, 1195,3, -10, -525), Dream Greens (-3811, 3811, 1000, -10, 0).
+    T2.9b provado: as linhas de motion dos polígonos nos status de entrada têm flags 0 no ROM do Remix; o 0x40000000 vem de
+    `ftPortParentHiddenJointFlags` (`ftport.c`), que herda as juntas ocultas do pai. A guarda em `ftmain.c` limpa XRotN, TransN
+    e YRotN nesses status. Visto (`b4_poly81`, `b4_poly77`, `b4_poly80`, `b4_poly91`): NDrMario, NWario, NWolf e NYoungLink em
+    pé na entrada, sem erro no log.
   - [x] **Lote 2 (2026-11-04, 6 workers Sonnet, build, partida e sign-off por mim; 1874 checagens sem falha):**
     - D-pad Control (`ftremixdpad.c`, DpadFunctions.asm 265-523: toque duplo, meia faixa, modo vertical por personagem, plataforma macia, Turn Tap; status conferidos com `_Static_assert`). Visto (`v3_dpad_s`/`v3_dpad_d` contra `v3_stick_half`/`v3_stick_full`, Stickless na porta 1): um toque anda como meio stick, dois toques dão dash como o stick cheio.
     - Stages: Corneria (laser do Great Fox com os atributos em 0x130 do arquivo 2270; `v3_corneria` com 14 FGM 0x109), Big Boo's Haunt (agenda da risada; `v3_bbh` 17000 quadros, 3 risadas FGM 0x527; o Boo do fundo segue sem sprite, o sistema `bg_animation_` não está portado), Spawned Fear (limpa o overlay no KO; `v3_fear` rc 0, KO a 666% não visto), Zebes e Japes resolvidos como não portáveis com prova no comentário (campo sobrescrito antes de ser lido; `f20` sem dono, fica 0.0 como escolha explícita). `v3_japes`, `v3_zebes`, `v3_rainbow` rc 0.
@@ -641,6 +652,38 @@ T8.2, T8.3, T9.1 e T9.3 acima.
     - Regressão com o binário final: `v3_reg_vanilla`, `v3_reg_remix` (itens ligados) e `v3_reg_training` rc 0, sem erro no log.
 - [ ] **Fase 4** CSS, stage select, painel por porta, telas (T8.1, T8.2): costumes extras, D-pad e bandeiras J/E, ícones do
   handicap, roulette do Random, painel por porta, "Smash Remix v2.0.1" no título, glifos dos créditos, Gallery com 40.
+  - [x] **Lote 3 (2026-11-04, 5 workers Sonnet, build, partida e sign-off por mim; 3195 checagens sem falha):**
+    - Telas: "Smash Remix v2.0.1" no título (`mnremixtitleversion.*`; `b4_title`), glifos 0x50-0x61 dos créditos (`b4_credits`,
+      `b4_credits2`: "Ashley!", "Dogs_Johnson", "João \*Johnnyz\* Buaes", "Dentelle (D. Stphanie)", "erik@vbe.com"), Gallery com
+      40 páginas e a tabela de vitória (`mnremixgalleryrules.*`; `b4_gallery`: Mario, Ganondorf, Crash, Piano, Boss e a volta),
+      legenda "L: All On/Off R" do item switch (`b4_itemsw`, duas páginas), RANDOM ALL do Menu Music (lldb em `syAudioPlayBGM`:
+      BGM 6 de estágio no lugar da 10 da CSS), logos Smash e Remix das transições (`SSB64_TRANSITION_ID`; `b4_tr14d`, `b6_tr13`).
+    - Stage select: linhas Hazards/Movement com o L, cursor pela cor do modo, "On (J)" do Whispy, texto do Layout, Roulette
+      do RANDOM (gira, para com B, escolhe com A), layout tournament com o modo de hazard por cópia (`b5_ss_*`, `b6_ss_roul`).
+      Layout do `Stages.asm` (0x80132310, 0x80132354, 0x801321C4, 0x801321D4, 0x80132738) portado por mim: sem a placa
+      amarela, nome em texto branco em (230, 209), "Stage Select" e a barra azul mais baixos; a seta do Roulette foi para
+      x 248,5. Desvios: o Roulette ignora direções e sorteia entre os estágios liberados da página; a lista Random do
+      tournament não foi portada; `tournament_hazard_mode_table` está fixo em 0x8045B1C0 (falta no gerador de símbolos).
+    - Painel por porta: D-pad Map Smash/Tilt/Special (`b4_dmap_*`), DpadControl com escudo no L e Z sem escudo
+      (`b4_dctl_l`, `b4_dctl_z`), nomes de tag (`SSB64_REMIX_TAG_NAMES`, menu Remix > Player Tags; `b4_tag` com "Lucas"),
+      Start With no VS e no Training (`b4_startvs`, `b4_starttr`), Practice 1P sem relógio e com "L: RETRY" na pausa
+      (`b6_practice`; o retry depois do KO não foi visto).
+    - 1P e sons: Skip Start Cheer no 1P e nos bônus (`b4_cheer2` 0 FGM 626 contra 1 em `b4_cheer0`), inimigo 1 controlado por
+      outra porta ("Enemy Player / Press Z", "2P" azul, FGM 493; `b4_enemy`; a luta controlada não foi vista), sons JP do
+      Link (`b4_linkj` 4 ids J e 0 U, `b4_linku` o inverso).
+    - CSS do VS: bookend de bônus com scroll Z/R (`b4_css_bonus`: Dark Samus, Lucas, Peppy), ícones de variante em volta do
+      D-pad, marca da direção e bandeira J/E (`b4_css_dpad`), C troca traje e tom em Team Battle (`b4_css_team`), offsets dos
+      309 sprites conferidos no `.o2r` (`tools/test_remix_css_offsets.py`). Bug achado na validação: a CSS caía no 4º quadro,
+      `docs/bugs/remix_css_bookend_width_img_2026-11-04.md`.
+    - Regressão com o binário final: `b7_reg_vanilla`, `b7_reg_remix` (itens ligados), `b7_reg_training` e os 85 stage
+      selects (`b7ss_*`, sem tela em branco) com rc 0 e sem erro no log; o build vanilla (`build-us`) compila depois de guardar
+      `mnremixgallery.c` sob `REGION_REMIX` e joga CSS, stage select com a placa vanilla e partida (`b7_us_css`, `b7_us_vs`).
+  - [ ] Sobras: costumes além de `num_costumes` (I7); `cpu_costumes_` (C sobre o painel da CPU); bookend Random e
+    `recent_randoms` (pedem registrar o lutador RANDOM 0x1B, decisão de roster); ícones do handicap só aparecem com as setas
+    acima de 9 (Fase 6); speed assist dos créditos e AFK do inimigo do 1P agora são portáveis com os nomes de tag; CSS de 24
+    slots do 12CB; emblema dos painéis vazios (linha da Fase 2); grade do stage select: o Remix desenha 3 x 6 ícones de
+    40 x 30 em 5 páginas (`Render.draw_texture_grid` em (30, 20), `Stages.asm` 542-545 e 2843) e o port mantém a grade
+    vanilla 2 x 5 em 10 páginas desde o T1.6 (desvio não registrado até 2026-11-04).
 - [ ] **Fase 5** modos (Tag Team, Tug of War/Stamina, KOTH, Smashketball, 1P, Training).
 - [ ] **Fase 6** IA. **Aceite:** `REMIX-TODO(AI)` em 0, recuperação no nível 9 sem regressão (base 181/222).
 - [ ] **Fase 7** bugs abertos (Poly Young Link ausente na CSS, Metal Mario parcial no Training, stutter do Switch, OOB do

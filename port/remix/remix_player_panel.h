@@ -4,7 +4,7 @@
  * The Remix panel is drawn inside the character select screens; the port does not redraw it. Each option is a value per
  * port, edited in the port menu (Remix > Player Panel) and stored as the CVar `gRemix.Panel.<Key>.P<port>`. A run can
  * override values with SSB64_REMIX_PANEL="<Key>.<port 1..4>=<value>;...", for example "Size.2=1;Damage.1=50". The match
- * hooks read the registry through remix_panel_get.
+ * hooks read the registry through remix_panel_get. The 20 custom player tags have a name each (remix_panel_tag_name).
  */
 
 #ifndef PORT_REMIX_REMIX_PLAYER_PANEL_H
@@ -53,6 +53,16 @@ void remix_panel_reset(void);
 /** Reads the SSB64_REMIX_PANEL overrides. Call once at start-up. */
 void remix_panel_init(void);
 
+/** Number of custom player tags (css/PlayerTag.asm MAX_TAGS). */
+#define REMIX_PANEL_TAG_COUNT 20
+
+/**
+ * Name of the custom player tag `tag` (1..REMIX_PANEL_TAG_COUNT, the PlayerTag panel value): the text typed in the port menu
+ * (Remix > Player Tags, CVar `gRemix.Panel.TagName.<tag>`) or set by SSB64_REMIX_TAG_NAMES="<tag>=<name>;...".
+ * Returns "" for an unnamed or invalid tag. The pointer is valid until the next call with the same tag.
+ */
+const char *remix_panel_tag_name(int tag);
+
 #ifdef __cplusplus
 }
 
@@ -75,6 +85,7 @@ struct Option {
 
 const std::vector<Option> &All();
 std::string CVarName(const Option &option, int port);
+std::string TagNameCVarName(int tag);
 std::map<int32_t, const char *> ComboMap(const Option &option);
 
 } // namespace remix_panel
