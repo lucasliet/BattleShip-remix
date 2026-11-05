@@ -77,6 +77,14 @@ EXTRA_SYMBOLS = [
     "Action.shared_action_string_table",
     "Character.action_string.table",
     "SinglePlayerModes.icon_offset_table",
+    "Bonus.btt_stage_table",
+    "Bonus.btp_stage_table",
+    "Bonus.stock_icon_table",
+    "Stages.bonus_pointer_table",
+    "Character.BTT_TABLE",
+    "Character.BTP_TABLE",
+    "Character.REMIX_BTT_TABLE",
+    "Character.REMIX_BTP_TABLE",
     "Character.remix_1p_end_bgm.table",
     "CharacterSelect.portrait_offset_by_character_table",
     "Stages.random_table",
@@ -112,8 +120,10 @@ EXTRA_SYMBOLS = [
     "SinglePlayer.name_delay_table",
     "Character.singleplayer_vs_preview.table",
     "CharacterSelect.fgm_table",
+    "Shield.color_fix_.table_ffa",
+    "Shield.color_fix_.table_team",
 ]
-EXTRA_SYMBOL_PREFIXES = ["Hazards.", "GFX.", "GFXRoutine.", "Toggles.entry_", "Toggles.head_", "Toggles.profile_defaults_"]
+EXTRA_SYMBOL_PREFIXES = ["Hazards.", "GFX.", "GFXRoutine.", "Toggles.entry_", "Toggles.head_", "Toggles.profile_defaults_", "Teams."]
 CSS_FIGHTER_DIRS = ["Falco", "Ganondorf", "YoungLink", "DrMario", "Wario", "Dedede", "Sonic", "Sheik", "Marina",
                     "Goemon", "Crash", "Peach", "Bowser", "Wolf", "Conker", "Mewtwo", "Marth", "Banjo"]
 

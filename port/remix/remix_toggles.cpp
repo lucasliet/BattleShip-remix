@@ -236,3 +236,24 @@ extern "C" void remix_toggles_load_profile(int profile) {
         CVarSetInteger(sToggles[i].cvar.c_str(), Clamp(sToggles[i], sToggles[i].defaults[profile]));
     }
 }
+
+static_assert(remix_toggles::Gameplay == REMIX_TOGGLE_GROUP_GAMEPLAY, "gameplay group number");
+static_assert(remix_toggles::Pokemon == REMIX_TOGGLE_GROUP_POKEMON, "pokemon group number");
+
+extern "C" int remix_toggle_group_snapshot(int group, int *values, int *maxima, int capacity) {
+    using namespace remix_toggles;
+
+    if ((group < 0) || (group >= GroupCount)) {
+        return 0;
+    }
+    int count = 0;
+    for (size_t i = 0; (i < sToggles.size()) && (count < capacity); i++) {
+        if (sToggles[i].group != static_cast<Group>(group)) {
+            continue;
+        }
+        values[count] = ValueOf(i);
+        maxima[count] = sToggles[i].max;
+        count++;
+    }
+    return count;
+}

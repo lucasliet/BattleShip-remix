@@ -21,7 +21,7 @@ typedef struct ExpectedRange
 /* Ranges of the port registry (remix_training.cpp kOptions); the menu must not offer a value the registry would clamp. */
 static const ExpectedRange sRegistryRanges[] =
 {
-    { SC1PTRAININGMENU_SLOT_COSTUME, 0, 6 },          { SC1PTRAININGMENU_SLOT_TYPE, 0, 3 },
+    { SC1PTRAININGMENU_SLOT_COSTUME, 0, 12 },          { SC1PTRAININGMENU_SLOT_TYPE, 0, 3 },
     { SC1PTRAININGMENU_SLOT_PERCENT, 0, 999 },        { SC1PTRAININGMENU_SLOT_RESET_SETS_PERCENT, 0, 1 },
     { SC1PTRAININGMENU_SLOT_SHIELD_BREAK, 0, 2 },     { SC1PTRAININGMENU_SLOT_OOS, 0, 11 },
     { SC1PTRAININGMENU_SLOT_MUSIC, 0, 16 },           { SC1PTRAININGMENU_SLOT_STAGE_BG, 0, 1 },

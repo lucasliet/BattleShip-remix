@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-11-05 | [remix_tugofwar_asm_deviations](remix_tugofwar_asm_deviations_2026-11-05.md) | Tug of War: last-hit index by team and teammate shield-break test are register slips in TugOfWar.asm; the port keeps the intended behaviour; stock cap of 127 |
 | 2026-11-04 | [remix_css_bookend_width_img](remix_css_bookend_width_img_2026-11-04.md) | VS CSS crashed on frame 4: the sprite fixup sized the bonus bookend texels by width_img (96, the real stride is 16) and byte-swapped past the end of file 0xA06 into the main GObj |
 | 2026-11-04 | [remix_zcancel_egg_lp64](remix_zcancel_egg_lp64_2026-11-04.md) | Z-cancel Egg punishment: the egg file was not loaded and a 32-bit clear of the 8-byte capture effect pointer crashed the egg update |
 | 2026-10-29 | [remix_routine_gobjs_on_effect_link](remix_routine_gobjs_on_effect_link_2026-10-29.md) | Cloaking Device and Super Mushroom routine GObjs lived on the effect link, so a shield release read an FTStruct as an EFStruct and crashed |

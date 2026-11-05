@@ -60,7 +60,8 @@ std::vector<std::string> BuildCharacterNames() {
 
 const std::vector<std::string> kCharacterNames = BuildCharacterNames();
 const std::vector<std::string> kTypeNames = { "Auto", "Human", "CPU", "Disabled" };
-const std::vector<std::string> kCostumeNames = { "Auto", "1", "2", "3", "4", "5", "6" };
+/* Values 7 to 12 are the Classic Sonic costumes (Training.asm: the costume item of Sonic goes 6 higher). */
+const std::vector<std::string> kCostumeNames = { "Auto", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12" };
 const std::vector<std::string> kSpawnNames = { "Auto", "Port 1", "Port 2", "Port 3", "Port 4" };
 
 const std::vector<Option> kOptions = {
@@ -95,10 +96,10 @@ const std::vector<Option> kOptions = {
     { REMIX_TRAINING_CHARACTER_P2, "Character2", "P2 Character", 0, kCharacterCount, 0, kCharacterNames },
     { REMIX_TRAINING_CHARACTER_P3, "Character3", "P3 Character", 0, kCharacterCount, 0, kCharacterNames },
     { REMIX_TRAINING_CHARACTER_P4, "Character4", "P4 Character", 0, kCharacterCount, 0, kCharacterNames },
-    { REMIX_TRAINING_COSTUME_P1, "Costume1", "P1 Costume", 0, 6, 0, kCostumeNames },
-    { REMIX_TRAINING_COSTUME_P2, "Costume2", "P2 Costume", 0, 6, 0, kCostumeNames },
-    { REMIX_TRAINING_COSTUME_P3, "Costume3", "P3 Costume", 0, 6, 0, kCostumeNames },
-    { REMIX_TRAINING_COSTUME_P4, "Costume4", "P4 Costume", 0, 6, 0, kCostumeNames },
+    { REMIX_TRAINING_COSTUME_P1, "Costume1", "P1 Costume", 0, 12, 0, kCostumeNames },
+    { REMIX_TRAINING_COSTUME_P2, "Costume2", "P2 Costume", 0, 12, 0, kCostumeNames },
+    { REMIX_TRAINING_COSTUME_P3, "Costume3", "P3 Costume", 0, 12, 0, kCostumeNames },
+    { REMIX_TRAINING_COSTUME_P4, "Costume4", "P4 Costume", 0, 12, 0, kCostumeNames },
     { REMIX_TRAINING_SPAWN_P1, "Spawn1", "P1 Spawn", 0, 4, 0, kSpawnNames },
     { REMIX_TRAINING_SPAWN_P2, "Spawn2", "P2 Spawn", 0, 4, 0, kSpawnNames },
     { REMIX_TRAINING_SPAWN_P3, "Spawn3", "P3 Spawn", 0, 4, 0, kSpawnNames },

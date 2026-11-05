@@ -56,7 +56,9 @@ Bugs corrigidos e decisões ficam em [`../bugs/README.md`](../bugs/README.md) (a
 
 Os briefs mandam gravar as notas do trabalho em [`notes/`](notes/): uma por lutador/golpe (`<id>_<NOME>[_<MOVE>].md`), item
 (`item_<Nome>.md`), patch compartilhado (`shared_*.md`) e tarefa (`f7_*.md`, `f8_*.md`, `f9_*.md`, `f10_*.md`, `f11_mode_*.md`). São os desvios, as incertezas e os
-`REMIX-TODO` de cada porte; o código do decomp as cita.
+`REMIX-TODO` de cada porte; o código do decomp as cita. Notas das Fases 4 e 5 do M11: `f16_css_panel_menu.md` (menu do painel na
+CSS), `f17_vs_css_modes.md` (CSS dos modos e fila do Tag Team), `f18_classic_sonic.md`, `f19_koth_smashketball.md`,
+`f20_tagteam_stamina.md`, `f21_1p_leftovers.md`, `f22_teams_yellow.md` e `i7_part_image.md` (costumes extras por parte).
 
 ## Regras desta pasta
 

@@ -17,6 +17,9 @@ extern "C" {
 /** Smashketball type: 0 basketball (Smashketball stage), 1 soccer (Soccer stage). */
 int remix_modes_smashketball_type(void);
 
+/** Sets the Smashketball type (the toggle of the VS character select, Smashketball.asm enable_toggling_mode_): 0 basketball, nonzero soccer. */
+void remix_modes_smashketball_set_type(int type);
+
 /** Name of a Remix fighter id as the roster spells it (MARIO, CAPTAIN), or NULL when the id has no roster entry. */
 const char *remix_modes_fighter_name(int fkind);
 
@@ -25,6 +28,14 @@ const char *remix_modes_fighter_name(int fkind);
  * fighter id, or -1 when the slot is Random.
  */
 int remix_modes_tagteam_slot(int port, int slot);
+
+/**
+ * Sets the Tag Team queue slot `slot` (1..5) of `port` from the VS character select: the CVar of the port menu takes the
+ * fighter when it is in the Remix CSS grid, else Random (the menu cannot name it).
+ *
+ * @return The fighter the CVar now holds as remix_modes_tagteam_slot reports it, -1 for Random.
+ */
+int remix_modes_tagteam_set_slot(int port, int slot, int fkind);
 
 #ifdef __cplusplus
 }

@@ -33,6 +33,21 @@ void remix_toggle_set(uint32_t entry_addr, int value);
 /** Sets every toggle to the defaults of profile 0 (CE), 1 (TE), 2 (NE) or 3 (JP). */
 void remix_toggles_load_profile(int profile);
 
+/* Toggle groups as numbered by remix_toggles::Group (the Menu.entry chains of Toggles.asm). */
+#define REMIX_TOGGLE_GROUP_GAMEPLAY 1
+#define REMIX_TOGGLE_GROUP_POKEMON 4
+
+/**
+ * Current value and highest value of every toggle of a group, in menu order (the order Toggles.asm packs them into its SRAM block).
+ *
+ * @param group REMIX_TOGGLE_GROUP_* number.
+ * @param values Receives the current value of each toggle.
+ * @param maxima Receives the highest value of each toggle.
+ * @param capacity Size of both arrays.
+ * @return Number of toggles written, 0 when the registry is not built or the group is unknown.
+ */
+int remix_toggle_group_snapshot(int group, int *values, int *maxima, int capacity);
+
 #ifdef __cplusplus
 }
 

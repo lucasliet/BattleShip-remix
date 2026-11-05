@@ -297,25 +297,173 @@ static void testStockStaysDefaultOutsideTheModesThatUseIt(void)
     CHECK_EQ(0, mnRemixPanelMenuRulesStockValue(0, 2));
 }
 
+static MNRemixPanelMenuHighScoreGlobals makeDefaultHighScoreGlobals(void)
+{
+    MNRemixPanelMenuHighScoreGlobals globals = { { 0, 0 }, MNREMIX_PANELMENU_POKEMON_WORD_DEFAULT, 0 };
+
+    return globals;
+}
+
 static void testHighScoresStayOnWhileFlaggedItemsAreDefault(void)
 {
     int values[MNREMIX_PANELMENU_ITEM_COUNT] = { 0 };
+    MNRemixPanelMenuHighScoreGlobals globals = makeDefaultHighScoreGlobals();
 
-    CHECK_EQ(1, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values));
+    CHECK_EQ(1, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values, &globals));
     values[MNREMIX_PANELMENU_ITEM_SHIELD] = 5;
     values[MNREMIX_PANELMENU_ITEM_DELAY] = 3;
-    CHECK_EQ(1, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values));
+    CHECK_EQ(1, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values, &globals));
     values[MNREMIX_PANELMENU_ITEM_SIZE] = 1;
-    CHECK_EQ(0, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values));
+    CHECK_EQ(0, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values, &globals));
 }
 
 static void testHighScoresIgnoreItemsTheModeDoesNotList(void)
 {
     int values[MNREMIX_PANELMENU_ITEM_COUNT] = { 0 };
+    MNRemixPanelMenuHighScoreGlobals globals = makeDefaultHighScoreGlobals();
 
     values[MNREMIX_PANELMENU_ITEM_PRACTICE] = 4;
-    CHECK_EQ(0, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values));
-    CHECK_EQ(1, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_BONUS, values));
+    CHECK_EQ(0, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values, &globals));
+    CHECK_EQ(1, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_BONUS, values, &globals));
+}
+
+static void testHighScoresTurnOffWithAnEnemyPort(void)
+{
+    int values[MNREMIX_PANELMENU_ITEM_COUNT] = { 0 };
+    MNRemixPanelMenuHighScoreGlobals globals = makeDefaultHighScoreGlobals();
+
+    globals.enemy_port = 2;
+    CHECK_EQ(0, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values, &globals));
+    globals.enemy_port = 0;
+    CHECK_EQ(1, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_1P, values, &globals));
+}
+
+static void testToggleBitWidthFollowsTheHighestValue(void)
+{
+    CHECK_EQ(1, mnRemixPanelMenuRulesToggleBitWidth(0));
+    CHECK_EQ(1, mnRemixPanelMenuRulesToggleBitWidth(1));
+    CHECK_EQ(2, mnRemixPanelMenuRulesToggleBitWidth(2));
+    CHECK_EQ(2, mnRemixPanelMenuRulesToggleBitWidth(3));
+    CHECK_EQ(3, mnRemixPanelMenuRulesToggleBitWidth(4));
+    CHECK_EQ(3, mnRemixPanelMenuRulesToggleBitWidth(7));
+    CHECK_EQ(4, mnRemixPanelMenuRulesToggleBitWidth(11));
+    CHECK_EQ(4, mnRemixPanelMenuRulesToggleBitWidth(15));
+    CHECK_EQ(5, mnRemixPanelMenuRulesToggleBitWidth(16));
+}
+
+/* The first Gameplay toggles of Toggles.asm 2419-2428 (Hitstun .. Improved AI) as (highest value) and the bit each one starts at. */
+static void testPackingPutsImprovedAiOnBit20AndJapaneseSoundsOnBits6And7(void)
+{
+    int maxima[10] = { 1, 4, 2, 2, 1, 1, 4, 4, 11, 1 };
+    int values[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
+    unsigned int words[2];
+
+    mnRemixPanelMenuRulesPackToggles(values, maxima, 10, words, 2);
+    CHECK_EQ(1U << 20, words[0]);
+    CHECK_EQ(0, words[1]);
+
+    values[9] = 0;
+    values[3] = 2;
+    mnRemixPanelMenuRulesPackToggles(values, maxima, 10, words, 2);
+    CHECK_EQ(1U << 7, words[0]);
+
+    values[3] = 1;
+    mnRemixPanelMenuRulesPackToggles(values, maxima, 10, words, 2);
+    CHECK_EQ(1U << 6, words[0]);
+}
+
+static void testPackingStartsANewWordWhenAToggleEndsOnTheBoundary(void)
+{
+    int maxima[33];
+    int values[33];
+    unsigned int words[2];
+    int index;
+
+    for (index = 0; index < 33; index++)
+    {
+        maxima[index] = 1;
+        values[index] = 0;
+    }
+    values[31] = 1;
+    values[32] = 1;
+    mnRemixPanelMenuRulesPackToggles(values, maxima, 33, words, 2);
+    CHECK_EQ(0, words[0]);
+    CHECK_EQ(3U, words[1]);
+}
+
+static void testPackingDropsTogglesBeyondTheGivenWords(void)
+{
+    int maxima[40];
+    int values[40];
+    unsigned int words[1];
+    int index;
+
+    for (index = 0; index < 40; index++)
+    {
+        maxima[index] = 1;
+        values[index] = 1;
+    }
+    mnRemixPanelMenuRulesPackToggles(values, maxima, 40, words, 1);
+    CHECK_EQ(0x7FFFFFFFU, words[0]);
+}
+
+static void testPokemonDefaultsPackToTheAsmDefaultWord(void)
+{
+    int maxima[14] = { 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    int values[14] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    unsigned int words[1];
+
+    mnRemixPanelMenuRulesPackToggles(values, maxima, 14, words, 1);
+    CHECK_EQ(MNREMIX_PANELMENU_POKEMON_WORD_DEFAULT, words[0]);
+}
+
+static void testTogglesAtDefaultKeepTheHighScores(void)
+{
+    MNRemixPanelMenuHighScoreGlobals globals = makeDefaultHighScoreGlobals();
+
+    CHECK_EQ(1, mnRemixPanelMenuRulesTogglesKeepHighScores(&globals));
+}
+
+static void testImprovedAiAndJapaneseNeverSoundsDoNotTurnTheHighScoresOff(void)
+{
+    MNRemixPanelMenuHighScoreGlobals globals = makeDefaultHighScoreGlobals();
+
+    globals.gameplay_words[0] = (1U << 20) | (1U << 7);
+    CHECK_EQ(1, mnRemixPanelMenuRulesTogglesKeepHighScores(&globals));
+    globals.gameplay_words[0] = 1U << 6;
+    CHECK_EQ(0, mnRemixPanelMenuRulesTogglesKeepHighScores(&globals));
+}
+
+static void testAnyOtherGameplayToggleTurnsTheHighScoresOff(void)
+{
+    MNRemixPanelMenuHighScoreGlobals globals = makeDefaultHighScoreGlobals();
+
+    globals.gameplay_words[0] = 1U << 1;
+    CHECK_EQ(0, mnRemixPanelMenuRulesTogglesKeepHighScores(&globals));
+    globals.gameplay_words[0] = 0;
+    globals.gameplay_words[1] = 1U << 3;
+    CHECK_EQ(0, mnRemixPanelMenuRulesTogglesKeepHighScores(&globals));
+}
+
+static void testPokemonSoundsAreIgnoredButEachPokemonCounts(void)
+{
+    MNRemixPanelMenuHighScoreGlobals globals = makeDefaultHighScoreGlobals();
+
+    globals.pokemon_word = MNREMIX_PANELMENU_POKEMON_WORD_DEFAULT | 0x3U;
+    CHECK_EQ(1, mnRemixPanelMenuRulesTogglesKeepHighScores(&globals));
+    globals.pokemon_word = MNREMIX_PANELMENU_POKEMON_WORD_DEFAULT & ~(1U << 5);
+    CHECK_EQ(0, mnRemixPanelMenuRulesTogglesKeepHighScores(&globals));
+    globals.pokemon_word = MNREMIX_PANELMENU_POKEMON_WORD_DEFAULT | (1U << 15);
+    CHECK_EQ(0, mnRemixPanelMenuRulesTogglesKeepHighScores(&globals));
+}
+
+static void testHighScoresTurnOffWithATogglePastItsDefault(void)
+{
+    int values[MNREMIX_PANELMENU_ITEM_COUNT] = { 0 };
+    MNRemixPanelMenuHighScoreGlobals globals = makeDefaultHighScoreGlobals();
+
+    globals.gameplay_words[0] = 1U << 9;
+    CHECK_EQ(0, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_BONUS, values, &globals));
 }
 
 void remixTestCssPanelMenuRules(void)
@@ -347,4 +495,15 @@ void remixTestCssPanelMenuRules(void)
     RUN_TEST(testStockStaysDefaultOutsideTheModesThatUseIt);
     RUN_TEST(testHighScoresStayOnWhileFlaggedItemsAreDefault);
     RUN_TEST(testHighScoresIgnoreItemsTheModeDoesNotList);
+    RUN_TEST(testHighScoresTurnOffWithAnEnemyPort);
+    RUN_TEST(testToggleBitWidthFollowsTheHighestValue);
+    RUN_TEST(testPackingPutsImprovedAiOnBit20AndJapaneseSoundsOnBits6And7);
+    RUN_TEST(testPackingStartsANewWordWhenAToggleEndsOnTheBoundary);
+    RUN_TEST(testPackingDropsTogglesBeyondTheGivenWords);
+    RUN_TEST(testPokemonDefaultsPackToTheAsmDefaultWord);
+    RUN_TEST(testTogglesAtDefaultKeepTheHighScores);
+    RUN_TEST(testImprovedAiAndJapaneseNeverSoundsDoNotTurnTheHighScoresOff);
+    RUN_TEST(testAnyOtherGameplayToggleTurnsTheHighScoresOff);
+    RUN_TEST(testPokemonSoundsAreIgnoredButEachPokemonCounts);
+    RUN_TEST(testHighScoresTurnOffWithATogglePastItsDefault);
 }

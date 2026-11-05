@@ -8,6 +8,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_1p_enemy_rules.c
     test_1p_afk_rules.c
     test_1p_leftover_rules.c
+    test_1p_bonus_modes_rules.c
+    test_1p_bonus_remix_rules.c
     test_1p_hrc_rules.c
     test_1p_hrc_signs.c
     test_1p_hrc_travel.c
@@ -17,6 +19,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_koth_rules.c
     test_tugofwar_rules.c
     test_tagteam_rules.c
+    test_stockmode_rules.c
     test_smashketball_rules.c
     test_stamina_rules.c
     test_ai_tables_rules.c
@@ -60,9 +63,12 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_css_rules.c
     test_css_cpu_costume_rules.c
     test_css_panel_menu_rules.c
+    test_css_vsmodes_rules.c
     test_practice_rules.c
     test_partimage_rules.c
     test_sprite_bitmap_row.c
+    test_sonic_classic_rules.c
+    test_teams_rules.c
     ${CMAKE_SOURCE_DIR}/port/bridge/sprite_bitmap_row.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_decode.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_layout.c
@@ -78,11 +84,15 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premix1prules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixbonus3rules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixendingrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixhighscoresrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1pbonusremixrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixscorerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixallstarrestrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtimedstockrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixkothrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtugofwarrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtagteamrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixstockmoderules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixsmashketballrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixstaminarules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaitablesrules.c
@@ -103,6 +113,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadmaprules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadcontrolrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixpartimagerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/sonic/ftremixsonicclassicrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixteamsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixpracticerules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/it/itremix/itremixstopwatchbgrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingrules.c
@@ -124,7 +136,12 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecblayout.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecbcustom.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcssrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcssmoderules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcsssliderules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixgoalrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtagteamcssrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcsspanelmenurules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixbonusmodesrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagepanelrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagetournamentrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstageroulette.c

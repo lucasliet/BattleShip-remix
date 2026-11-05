@@ -121,6 +121,51 @@ static void testTheFirstBasketStartsTheStreakOfThePlayer(void)
     CHECK_EQ(0, streaks[0]);
 }
 
+static void testTeamColorsAreTheColorTagValuesOfTheAsm(void)
+{
+    CHECK_EQ(0xED3636FF, gmRemixSmashketballRulesTeamColor(0));
+    CHECK_EQ(0x4E4EE9FF, gmRemixSmashketballRulesTeamColor(1));
+    CHECK_EQ(0x4EB94EFF, gmRemixSmashketballRulesTeamColor(2));
+    CHECK_EQ(0xFFDF1AFF, gmRemixSmashketballRulesTeamColor(3));
+}
+
+static void testTheCrowdChantsFromThreeBasketsInARow(void)
+{
+    CHECK_EQ(0, gmRemixSmashketballRulesIsChantStreak(2));
+    CHECK_EQ(1, gmRemixSmashketballRulesIsChantStreak(3));
+    CHECK_EQ(1, gmRemixSmashketballRulesIsChantStreak(5));
+}
+
+static void testTheCameraGrowsToTheBallWithPaddingAndAlwaysShowsTheFloor(void)
+{
+    float left = -500.0F;
+    float right = 500.0F;
+    float bottom = -200.0F;
+    float top = 800.0F;
+
+    gmRemixSmashketballRulesFollowBall(2000.0F, 1500.0F, &left, &right, &bottom, &top);
+
+    CHECK_EQ(-500, (int)left);
+    CHECK_EQ(3000, (int)right);
+    CHECK_EQ(-1000, (int)bottom);
+    CHECK_EQ(2500, (int)top);
+}
+
+static void testTheCameraKeepsABottomBelowTheFloorAndOnlyTheOuterBoundsGrow(void)
+{
+    float left = -5000.0F;
+    float right = 5000.0F;
+    float bottom = -3000.0F;
+    float top = 4000.0F;
+
+    gmRemixSmashketballRulesFollowBall(100.0F, 100.0F, &left, &right, &bottom, &top);
+
+    CHECK_EQ(-5000, (int)left);
+    CHECK_EQ(5000, (int)right);
+    CHECK_EQ(-3000, (int)bottom);
+    CHECK_EQ(4000, (int)top);
+}
+
 void remixTestSmashketballRules(void)
 {
     printf("smashketball rules\n");
@@ -136,4 +181,8 @@ void remixTestSmashketballRules(void)
     RUN_TEST(testTheHomeTeamIsNotChangedByLaterFighters);
     RUN_TEST(testAnAttributedBasketResetsTheOtherStreaks);
     RUN_TEST(testTheFirstBasketStartsTheStreakOfThePlayer);
+    RUN_TEST(testTeamColorsAreTheColorTagValuesOfTheAsm);
+    RUN_TEST(testTheCrowdChantsFromThreeBasketsInARow);
+    RUN_TEST(testTheCameraGrowsToTheBallWithPaddingAndAlwaysShowsTheFloor);
+    RUN_TEST(testTheCameraKeepsABottomBelowTheFloorAndOnlyTheOuterBoundsGrow);
 }

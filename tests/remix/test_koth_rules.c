@@ -94,6 +94,39 @@ static void testMeterXFollowsThePort(void)
     CHECK_EQ(250, (int)gmRemixKothRulesMeterX(3));
 }
 
+static void testFfaTagsFollowTheColorOrderOfTheAsmAndACpuIsGray(void)
+{
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_RED, gmRemixKothRulesTag(0, 0, 0));
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_BLUE, gmRemixKothRulesTag(1, 0, 0));
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_YELLOW, gmRemixKothRulesTag(2, 0, 0));
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_GREEN, gmRemixKothRulesTag(3, 0, 0));
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_GRAY, gmRemixKothRulesTag(2, 0, 1));
+}
+
+static void testTeamTagsUseTheTeamColorOrderAndNeverGray(void)
+{
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_RED, gmRemixKothRulesTag(0, 1, 0));
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_BLUE, gmRemixKothRulesTag(1, 1, 0));
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_GREEN, gmRemixKothRulesTag(2, 1, 0));
+    CHECK_EQ(GMREMIX_KOTHRULES_TAG_YELLOW, gmRemixKothRulesTag(3, 1, 1));
+}
+
+static void testTagColorsAreTheColorTagValuesOfTheAsm(void)
+{
+    CHECK_EQ(0xED3636FF, gmRemixKothRulesTagColor(GMREMIX_KOTHRULES_TAG_RED));
+    CHECK_EQ(0x4E4EE9FF, gmRemixKothRulesTagColor(GMREMIX_KOTHRULES_TAG_BLUE));
+    CHECK_EQ(0x4EB94EFF, gmRemixKothRulesTagColor(GMREMIX_KOTHRULES_TAG_GREEN));
+    CHECK_EQ(0xFFDF1AFF, gmRemixKothRulesTagColor(GMREMIX_KOTHRULES_TAG_YELLOW));
+    CHECK_EQ(0xACACACFF, gmRemixKothRulesTagColor(GMREMIX_KOTHRULES_TAG_GRAY));
+}
+
+static void testTheContestedGrayStartsDarkAndLightensAsTheBufferRunsOut(void)
+{
+    CHECK_EQ(0x6E, gmRemixKothRulesContestedGray(BUFFER));
+    CHECK_EQ(0x8C, gmRemixKothRulesContestedGray(15));
+    CHECK_EQ(0xA8, gmRemixKothRulesContestedGray(1));
+}
+
 void remixTestKothRules(void)
 {
     printf("koth rules\n");
@@ -106,4 +139,8 @@ void remixTestKothRules(void)
     RUN_TEST(testTheBufferHoldsTheHillUntilItRunsOut);
     RUN_TEST(testMeterSitsAtTheBottomUnlessTheDragonKingHudApplies);
     RUN_TEST(testMeterXFollowsThePort);
+    RUN_TEST(testFfaTagsFollowTheColorOrderOfTheAsmAndACpuIsGray);
+    RUN_TEST(testTeamTagsUseTheTeamColorOrderAndNeverGray);
+    RUN_TEST(testTagColorsAreTheColorTagValuesOfTheAsm);
+    RUN_TEST(testTheContestedGrayStartsDarkAndLightensAsTheBufferRunsOut);
 }

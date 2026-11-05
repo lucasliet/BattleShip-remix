@@ -65,3 +65,22 @@ extern "C" int remix_modes_tagteam_slot(int port, int slot) {
 extern "C" int remix_modes_smashketball_type(void) {
     return CVarGetInteger(REMIX_MODES_CVAR_SMASHKETBALL_TYPE, 0) != 0 ? 1 : 0;
 }
+
+extern "C" void remix_modes_smashketball_set_type(int type) {
+    CVarSetInteger(REMIX_MODES_CVAR_SMASHKETBALL_TYPE, type != 0 ? 1 : 0);
+}
+
+extern "C" int remix_modes_tagteam_set_slot(int port, int slot, int fkind) {
+    if (port < 0 || port >= 4 || slot < 1 || slot >= REMIX_MODES_TAGTEAM_SLOTS) {
+        return -1;
+    }
+    int choice = 0;
+    for (int i = 0; i < REMIX_CSS_NUM_SLOTS; i++) {
+        if (kRemixCssSlotIds[i] == fkind) {
+            choice = i + 1;
+            break;
+        }
+    }
+    CVarSetInteger(TagTeamCVar(port, slot).c_str(), choice);
+    return choice > 0 ? kRemixCssSlotIds[choice - 1] : -1;
+}

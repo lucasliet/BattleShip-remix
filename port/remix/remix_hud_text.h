@@ -25,6 +25,9 @@ extern "C" {
  *   3       title screen: "Smash Remix v2.0.1" (mnremixtitleversion.c)
  *   4       VS item switch: ": All On/Off" legend text (mnremixitemswitchlegend.c)
  *   5..8    battle: custom player tag names of the four ports (ifremixplayertag.c)
+ *   9..13   battle: reserved for King of the Hill and Smashketball in-match text (none used so far, both HUDs are sprites,
+ *           rectangles and the stage scoreboard)
+ *   14..18  battle: reserved for the Tag Team, Tug of War and Stamina in-match HUD (no text drawn yet)
  *   19..22  battle pause: Gentlemen's Reset request texts (ifremixgentlemensreset.c); 23 free
  *   51..70  battle pause legend: its text rows and the music title (ifremixpauselegend.c), VS and 1P battles
  *   73..77  Training D-pad legend lines and the Z prompt (sc1ptrainingremixlegend.c)
@@ -47,7 +50,9 @@ extern "C" {
  *           labels +0..2, row values +3..5, page number +6, panel p starts at 56 + 7 * p (mnremixcsspanelmenutext.c)
  *   105..116 Training: Show Action rows (action names 105..108, frame counts 109..112), its legend 113..114 (sc1ptrainingremixaction.c),
  *           Hold to Exit text 115..116 (sc1ptrainingremixexit.c)
- * Rect slots: 30..33 12CB Manual stock D-pad marks (mnremixtwelvecbstockmanual.c), 34..37 VS CSS D-pad variant marks (mnremixcssindicators.c), 40..45 12CB Custom legend squares, 0..1 battle pause legend squares, 2 match start banner, 24..27 Training D-pad legend squares, 28..29 Training Z menu cursor and underline, 30 Training Hold to Exit bar, 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
+ *   96..104 1P leftovers (any scene of the 1P family): 96 "High Scores Disabled" on the 1P, Bonus and All-Star select
+ *           (mnremixcsshighscores.c), 97..98 Bonus 3 MODE row, label and course name (mnremixbonusmodes.c)
+ * Rect slots: 30..33 12CB Manual stock D-pad marks (mnremixtwelvecbstockmanual.c), 34..37 VS CSS D-pad variant marks (mnremixcssindicators.c), 40..45 12CB Custom legend squares, 0..1 battle pause legend squares, 2 match start banner, 24..27 Training D-pad legend squares, 28..29 Training Z menu cursor and underline, 30 Training Hold to Exit bar, 1..47 Match Stats pages (the dimmed background is a game display list object, mnremixvsstatsscene.c). 46 Bonus 3 Option bar (mnremixbonusmodes.c). Bar slots: KOTH bars from 0 (gmremixkothhud.c).
  */
 #define REMIX_HUD_TEXT_SLOTS 128
 #define REMIX_HUD_BAR_SLOTS 16

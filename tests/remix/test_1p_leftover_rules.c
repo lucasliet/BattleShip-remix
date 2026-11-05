@@ -10,6 +10,7 @@
 #include "sc/sc1pmode/sc1premixallstarrestrules.h"
 #include "sc/sc1pmode/sc1premixbonus3rules.h"
 #include "sc/sc1pmode/sc1premixendingrules.h"
+#include "sc/sc1pmode/sc1premixhighscoresrules.h"
 #include "sc/sc1pmode/sc1premixmodename.h"
 #include "sc/sc1pmode/sc1premixmoderules.h"
 
@@ -51,11 +52,19 @@ static void testNewRecordReplacesTheCompleteSound(void)
     CHECK_EQ(COMPLETE_FGM, sc1PRemixBonus3CompleteFgm(SC1PREMIX_BONUS3_RECORD_KEEP, COMPLETE_FGM, NEW_RECORD_FGM));
 }
 
-static void testRecordIsSavedOnlyWhenTheCpuPlaysTheEnemy(void)
+static void testRecordIsSavedOnlyWhenTheSwitchIsOnAndTheCpuPlaysTheEnemy(void)
 {
-    CHECK_TRUE(sc1PRemixBonus3CanSaveRecord(0));
-    CHECK_EQ(0, sc1PRemixBonus3CanSaveRecord(1));
-    CHECK_EQ(0, sc1PRemixBonus3CanSaveRecord(4));
+    CHECK_TRUE(sc1PRemixHighScoresAllowSave(1, 0));
+    CHECK_EQ(0, sc1PRemixHighScoresAllowSave(1, 1));
+    CHECK_EQ(0, sc1PRemixHighScoresAllowSave(1, 4));
+    CHECK_EQ(0, sc1PRemixHighScoresAllowSave(0, 0));
+    CHECK_EQ(0, sc1PRemixHighScoresAllowSave(0, 2));
+}
+
+static void testKoRecordChecksOnlyTheSwitch(void)
+{
+    CHECK_TRUE(sc1PRemixHighScoresAllowKoSave(1));
+    CHECK_EQ(0, sc1PRemixHighScoresAllowKoSave(0));
 }
 
 static void testTimerMovesDownWithTheDragonKingHud(void)
@@ -134,6 +143,31 @@ static void testRestAreaIconsMoveDownWithTheDragonKingHud(void)
     CHECK_NEAR(191.0F, y);
 }
 
+static void testRestAreaShowsOnePortraitPerOpponentOfTheNextMatch(void)
+{
+    CHECK_EQ(1, sc1PRemixAllstarRestPortraitCount(1, 30, 0));
+    CHECK_EQ(2, sc1PRemixAllstarRestPortraitCount(2, 30, 4));
+    CHECK_EQ(3, sc1PRemixAllstarRestPortraitCount(3, 30, 18));
+    CHECK_EQ(3, sc1PRemixAllstarRestPortraitCount(3, 30, 27));
+}
+
+static void testRestAreaPortraitsStopWithTheLastFighter(void)
+{
+    CHECK_EQ(2, sc1PRemixAllstarRestPortraitCount(3, 30, 28));
+    CHECK_EQ(1, sc1PRemixAllstarRestPortraitCount(3, 30, 29));
+    CHECK_EQ(0, sc1PRemixAllstarRestPortraitCount(3, 30, 30));
+}
+
+static void testRestAreaPortraitsPutTheNextFighterOnTheFarLeft(void)
+{
+    CHECK_NEAR(-200.0F, sc1PRemixAllstarRestPortraitX(1, 0));
+    CHECK_NEAR(-600.0F, sc1PRemixAllstarRestPortraitX(2, 0));
+    CHECK_NEAR(-200.0F, sc1PRemixAllstarRestPortraitX(2, 1));
+    CHECK_NEAR(-1000.0F, sc1PRemixAllstarRestPortraitX(3, 0));
+    CHECK_NEAR(-600.0F, sc1PRemixAllstarRestPortraitX(3, 1));
+    CHECK_NEAR(-200.0F, sc1PRemixAllstarRestPortraitX(3, 2));
+}
+
 void remixTest1PLeftoverRules(void)
 {
     printf("1p leftover rules\n");
@@ -142,11 +176,15 @@ void remixTest1PLeftoverRules(void)
     RUN_TEST(testEmptyRecordSlotTakesTheTimeWithoutAFanfare);
     RUN_TEST(testOnlyAStrictlyFasterTimeBeatsTheRecord);
     RUN_TEST(testNewRecordReplacesTheCompleteSound);
-    RUN_TEST(testRecordIsSavedOnlyWhenTheCpuPlaysTheEnemy);
+    RUN_TEST(testRecordIsSavedOnlyWhenTheSwitchIsOnAndTheCpuPlaysTheEnemy);
+    RUN_TEST(testKoRecordChecksOnlyTheSwitch);
     RUN_TEST(testTimerMovesDownWithTheDragonKingHud);
     RUN_TEST(testCreditsPlayTheFighterSongOnlyInRemix1PAndAllStar);
     RUN_TEST(testZeroTableEntryKeepsTheStandardCreditsSong);
     RUN_TEST(testRestAreaShowsTheFightersLeft);
     RUN_TEST(testRestAreaIconsFillTenToARow);
     RUN_TEST(testRestAreaIconsMoveDownWithTheDragonKingHud);
+    RUN_TEST(testRestAreaShowsOnePortraitPerOpponentOfTheNextMatch);
+    RUN_TEST(testRestAreaPortraitsStopWithTheLastFighter);
+    RUN_TEST(testRestAreaPortraitsPutTheNextFighterOnTheFarLeft);
 }

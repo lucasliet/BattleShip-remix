@@ -13,6 +13,8 @@ extern void remixTest1PModeRules(void);
 extern void remixTest1PEnemyRules(void);
 extern void remixTest1PAfkRules(void);
 extern void remixTest1PLeftoverRules(void);
+extern void remixTest1PBonusModesRules(void);
+extern void remixTest1PBonusRemixRules(void);
 extern void remixTest1PHrcRules(void);
 extern void remixTest1PHrcSigns(void);
 extern void remixTest1PHrcTravel(void);
@@ -21,6 +23,7 @@ extern void remixTestTimedStockRules(void);
 extern void remixTestKothRules(void);
 extern void remixTestTugOfWarRules(void);
 extern void remixTestTagTeamRules(void);
+extern void remixTestStockModeRules(void);
 extern void remixTestSmashketballRules(void);
 extern void remixTestStaminaRules(void);
 extern void remixTestAiTablesRules(void);
@@ -65,9 +68,12 @@ extern void remixTestDpadControlRules(void);
 extern void remixTestCssRules(void);
 extern void remixTestCssCpuCostumeRules(void);
 extern void remixTestCssPanelMenuRules(void);
+extern void remixTestCssVsModesRules(void);
 extern void remixTestPracticeRules(void);
 extern void remixTestPartImageRules(void);
 extern void remixTestSpriteBitmapRow(void);
+extern void remixTestSonicClassicRules(void);
+extern void remixTestTeamsRules(void);
 
 int main(void)
 {
@@ -77,6 +83,8 @@ int main(void)
     remixTest1PEnemyRules();
     remixTest1PAfkRules();
     remixTest1PLeftoverRules();
+    remixTest1PBonusModesRules();
+    remixTest1PBonusRemixRules();
     remixTest1PHrcRules();
     remixTest1PHrcSigns();
     remixTest1PHrcTravel();
@@ -85,6 +93,7 @@ int main(void)
     remixTestKothRules();
     remixTestTugOfWarRules();
     remixTestTagTeamRules();
+    remixTestStockModeRules();
     remixTestSmashketballRules();
     remixTestStaminaRules();
     remixTestAiTablesRules();
@@ -129,9 +138,12 @@ int main(void)
     remixTestCssRules();
     remixTestCssCpuCostumeRules();
     remixTestCssPanelMenuRules();
+    remixTestCssVsModesRules();
     remixTestPracticeRules();
     remixTestPartImageRules();
     remixTestSpriteBitmapRow();
+    remixTestSonicClassicRules();
+    remixTestTeamsRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;
