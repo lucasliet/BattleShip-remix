@@ -56,9 +56,9 @@ detalhe de cada task.
 - **Próximo passo:** sobras da Fase 4 (lista no M11), depois as Fases 5 a 8 em ordem, com checkpoint e commit por fase.
 - **Depende do usuário:** T9.1b (passagem de escuta e visual) e T10.2 (validação na Switch). "Remix jogável" (T9.3) só é
   reportado depois da Fase 8.
-- **Último checkpoint:** CP10a (2026-11-02); o M11 registra o avanço de 2026-11-03 por task. Índice dos docs: `docs/remix/README.md`.
-- **Estimativa geral:** ~87% pela tabela do fim do arquivo (recalcular no checkpoint da Fase 2; as peças da Fase 1 e do CSS do
-  12CB ainda não entraram na conta).
+- **Último checkpoint:** CP11 (2026-11-04, Fase 3 fechada e lote 3 da Fase 4; outer `cc4e413`, decomp `91df70499`). Índice dos
+  docs: `docs/remix/README.md`.
+- **Estimativa geral:** ~89% pela tabela do fim do arquivo (CP11).
 
 ---
 
@@ -698,12 +698,12 @@ T8.2, T8.3, T9.1 e T9.3 acima.
 
 | Área | Peso | Feito |
 |---|---|---|
-| Fighters (roster, specials, projéteis, entradas) | 35% | ~97% |
+| Fighters (roster, specials, projéteis, entradas) | 35% | ~98% (lote 2 da Fase 3: specials, Size, anúncios) |
 | Itens | 10% | ~83% |
-| Stages (loader, seletor, hazards) | 20% | ~84% |
+| Stages (loader, seletor, hazards) | 20% | ~88% (Fase 3 fechada; falta a grade 3 x 6 do stage select) |
 | Áudio | 10% | ~90% |
-| Settings, menus, modos | 20% | ~80% (HUDs agora em Kabel e CSS do 12CB feita até o passo 17; faltam os itens abertos da Fase 2 do M11) |
+| Settings, menus, modos | 20% | ~86% (Fase 2 feita exceto duas linhas, lote 3 da Fase 4; faltam as sobras da Fase 4 e a Fase 5) |
 | Verificação final | 5% | ~55% (T9.2 feito; T9.1 completo na parte automatizável, falta só o Tech do menu visto; T9.1b preparado, T9.3 só depois da sua passada) |
-| **Total ponderado** | | **~87%** (35×0,97 + 10×0,83 + 20×0,84 + 10×0,90 + 20×0,80 + 5×0,55 = 86,8; 2026-11-02 pós-auditoria: menus e modos de 90 para 80 por T8.3; antes, CP10 88,8: CP10: T9.1 automatizável completo e OOS visto; antes CP9b: conferências do T9.1 e correção do Salty Runback; as sobras de T2.11, T8.1 e T8.2 seguem abertas) |
+| **Total ponderado** | | **~89%** (CP11: 35×0,98 + 10×0,83 + 20×0,88 + 10×0,90 + 20×0,86 + 5×0,55 = 89,2; antes ~87%: 35×0,97 + 10×0,83 + 20×0,84 + 10×0,90 + 20×0,80 + 5×0,55 = 86,8; 2026-11-02 pós-auditoria: menus e modos de 90 para 80 por T8.3; antes, CP10 88,8: CP10: T9.1 automatizável completo e OOS visto; antes CP9b: conferências do T9.1 e correção do Salty Runback; as sobras de T2.11, T8.1 e T8.2 seguem abertas) |
 
 A partir de T0.2 a estimativa vem da tabela de paridade (`ported` / total por área).
