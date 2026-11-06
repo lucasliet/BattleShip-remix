@@ -57,7 +57,8 @@ Tests: `tests/remix/test_stamina_rules.c` (`gmremixstaminarules.c`: total HP, HP
 |---|---|
 | `stamina_knockback_*` | `ftRemixStaminaKnockbackDamageAdd` (`ftremixstaminaknockback.c`), one point in `ftParamGetCommonKnockback` (`ftparam.c`) |
 | `stamina_main_`, `stamina_ko_`, `stamina_percent_prevent` | `ftRemixStaminaStoredDamage` (`ftremixstaminako.c`), called from `ftParamUpdateDamage` (`ftparam.c`) |
-| `stamina_ko_action` | `ftRemixStaminaKOStatus` (`ftremixstaminaaction.c`), last step of the status id mapping in `ftMainSetStatus` (`ftmain.c`); includes the Giga Bowser 1P branch (`sc1PRemix1PIsActive`) |
+| `stamina_ko_action` | `ftRemixStaminaKOStatus` (`ftremixstaminaaction.c`), last step of the status id mapping in `ftMainSetStatus` (`ftmain.c`); includes the Giga Bowser 1P branch (`sc1PRemix1PIsActive`). `ftRemixStaminaKOAnimSpeed` forces the animation speed to 1.0 whenever the KO action is forced (`lui a3, 0x3F80`), called before the mapping |
+| `action_hit_crash_prevent` | `ftParamStopVoiceRunProcDamage` (`ftparam.c`) calls `ftRemixAirDodgeResetAirDash` on every hit, in every mode, and `ftRemixStaminaClearDeadWaitOnHit` (`ftremixstaminahit.c`), which clears `status_vars.common.dead.wait` of a defeated fighter hit during a VS Stamina match |
 | `stamina_shield_prevent` | `ftRemixStaminaIsOutOfHP` early return in `ftcommonguard1.c` |
 | `stamina_down_*`, `stamina_ledge` | `ftRemixStaminaDownBlocked`, `ftRemixStaminaLedgeBlocked` (`ftremixstaminadown.c`) in `ftcommondownwaitbounce.c` and `ftcommoncliffcatchwait.c` |
 | `stamina_invis_prevent`, `egg_crash_prevent` | `ftRemixStaminaSkipsInvisible`, `ftRemixStaminaSkipsDeadWaitInit` (`ftremixstaminaguard.c`) in `ftCommonDeadInitStatusVars` |

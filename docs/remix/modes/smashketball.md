@@ -81,8 +81,11 @@ structs (0-9, 10 for a dash). There is no text; the CSS uses title sprites.
 - **Ball spawn wait.** The asm waits 0x135 frames from the screen load; the port counts the frames of the go status.
 - **Mode type storage.** The Basketball / Soccer choice is a port CVar (also editable in the port menu, Remix > Modes) and `SSB64_SMASH_TYPE`
   overrides it; it is flipped on the CSS by the game mode button as in the asm.
-- **Overtime.** Sudden death copies the transfer battle state into the VS battle state (`gmRemixSmashketballPrepareSuddenDeath`), so the
-  Smashketball scores survive it (the setup does not clear them while `is_suddendeath` is set).
+- **Overtime.** As in the asm, the overtime runs on the main battle state: `gmRemixSmashketballPrepareSuddenDeath` only sets the time limit to infinite and
+  `is_suddendeath` (`allow_overtime_`), and `scVSBattleStartScene` does not switch `gSCManagerBattleState` to the VS state; `ftParamInitPlayerBattleStats` keeps the
+  place, falls, score, KOs, damage and combo totals while `gmRemixSmashketballKeepsMatchStats` (`prevent_match_stats_reset_`), so the results show the whole match.
+  The scores survive because the setup does not clear them while `is_suddendeath` is set. Deviation: the time limit before the overtime is put back when the next
+  match sets up, so a salty runback does not start with an infinite clock.
 - **Fixed camera.** `Camera.asm`'s fixed Smashketball camera is only used with Camera Mode FIXED (`gmremixcameramode.c`); the default mode uses the follow
   camera plus `camera_follow`.
 - **CPU range constant.** `ai_ball_attack_range` loads `lui t3, 4348` (decimal, `0x10FC0000`) where its comment says 200.0; this is a likely asm bug

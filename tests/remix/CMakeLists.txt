@@ -5,6 +5,14 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_twelvecb_rules.c
     test_1p_mode_names.c
     test_1p_mode_rules.c
+    test_allstar_percent_rules.c
+    test_twelvecb_modes_rules.c
+    test_1p_game_rules.c
+    test_1p_intro_rules.c
+    test_1p_retry_rules.c
+    test_1p_bonusstage_rules.c
+    test_envmap_rules.c
+    test_gameend_wait_rules.c
     test_1p_enemy_rules.c
     test_1p_afk_rules.c
     test_1p_leftover_rules.c
@@ -110,6 +118,16 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixallstarpercentrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixtwelvecbdefeatedrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecbdkmoderules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmusicrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixgamerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1pintrorules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixretryrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1pbonusstagerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sys/sysremixenvmaprules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgameendwaitrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixenemyrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixenemyafkrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1ptrainingsbmrules.c

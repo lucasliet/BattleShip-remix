@@ -7,7 +7,7 @@ that last across the games. Asm source: `TwelveCharBattle.asm` (in `.toolchain/p
 Port code: `decomp/src/gm/gmremixtwelvecb.c` (state tied to the match), `gmremixtwelvecbrules.c` (pure rules), `gmremixtwelvecbhud.c` (CSS and results
 text), `decomp/src/mn/mnplayers/mnremixtwelvecblayout.c`, `mnremixtwelvecbcustom.c`, `mnremixtwelvecbcustomlegend.c`, `mnremixtwelvecbstockmanual.c`
 (CSS), the 12CB branches in `mnplayers/mnplayersvs.c`, `decomp/src/if/ifremixgentlemensreset.c` (pause reset), `gm/gmremixgameend.c`.
-Tests: `tests/remix/test_twelvecb_rules.c`, `test_twelvecb_layout.c`, `test_twelvecb_custom.c`, `test_stockmode_rules.c`;
+Tests: `tests/remix/test_twelvecb_rules.c`, `test_twelvecb_layout.c`, `test_twelvecb_custom.c`, `test_twelvecb_modes_rules.c`, `test_stockmode_rules.c`;
 `cmake --build build --target run_remix_mode_tests`. Shared plumbing: [`../modes_base.md`](../modes_base.md).
 
 ## How the Remix does it
@@ -59,28 +59,44 @@ Remix files `File.CHARACTER_PORTRAITS` (0xA05) and `File.CSS_IMAGES` (0xA06).
 | `before_css_setup_`, `force_ffa_and_stock_`, `leave_css_setup_`, `start_match_setup_` | the 12CB profile (stock rule, FFA, 3 stocks, no goal) in `gmremixmodecss.c`; `gmRemixModeLeaveCSS` resets the battle with `gmRemixTwelveCBReset` |
 | `game_setup_` | `gmRemixTwelveCBBeginMatch` (`gmremixtwelvecb.c`, called before the fighters are made in `scVSBattleStartBattle`): portraits of both players, `gmRemixTwelveCBStartGame` (record), starting stocks; a COMPLETE battle starts over |
 | `set_initial_stock_count_` | `gmRemixTwelveCBGetStocks`, used by `gmRemixStockModeBeginMatch` |
-| `update_stocks_remaining_` | `gmRemixTwelveCBOnKo` (`ftCommonDeadUpdateScore`, after the stock was taken) -> `gmRemixTwelveCBRecordKo` (pool, portrait, COMPLETE) |
+| `update_stocks_remaining_` | `gmRemixTwelveCBOnKo` (`ftCommonDeadUpdateScore`, after the stock was taken) -> `gmRemixTwelveCBRecordKo` (pool, portrait, COMPLETE); outside the mode `gmRemixStockModeOnKo` (same place) stores the stock count the port is left with for Stock Mode Last (`gmremixstockmode.c`, Stamina out-of-stock keeps -1, only on the VS battle scene) |
 | `set_best_characters_` | `gmRemixTwelveCBCalculateBest`; shown by `gmRemixTwelveCBHudDrawCSS/DrawResults` (`gmremixtwelvecbhud.c`) through `remix_hud_text` |
 | layout, sets, hit test, slide-in | `mnremixtwelvecblayout.c` (`mnRemixTwelveCBLayoutFkind/CellX/CellY/StartX/NextX`, slot at a point), portraits built by `mnPlayersVSMakeTwelveCBPortrait` in `mnplayersvs.c` |
 | Custom set | `mnremixtwelvecbcustom.c` (cycle, apply all, preset, copy, randomise, repeat timer, D-pad up timer) driven by `mnPlayersVSTwelveCBApplyCustomInput`; legend in `mnremixtwelvecbcustomlegend.c` |
 | Manual stock mode in the panels | `mnremixtwelvecbstockmanual.c` (blinking arrows, D-pad icon) and `gmRemixTwelveCBCanEditStocks` / `StepStocks` |
-| `setup_ports_and_characters_`, `ignore_ports_3_and_4_`, `skip_rendering_panels_3_and_4_`, `change_2p_panel_position_` | ports 3-4 N/A and hidden (`mnPlayersVSTwelveCBFrameUpdate`), `mnPlayersVSGetPanelIndex` at the 19 sites |
-| `prevent_defeated_char_select_` | `mnPlayersVSTwelveCBIsSlotSelectable` with `gmRemixTwelveCBGetWinnerPortrait`; defeated portraits get the dark overlay and marks (`mnPlayersVSMakeTwelveCBDefeatedMarks`) |
-| `treat_selected_defeated_chars_as_unselected_` | `gmRemixTwelveCBCheckSlot` (`mnPlayersVSGetReadyPlayerCount`) |
+| `ignore_ports_3_and_4_`, `skip_rendering_panels_3_and_4_`, `change_2p_panel_position_` | ports 3-4 N/A and hidden (`mnPlayersVSTwelveCBFrameUpdate`), `mnPlayersVSGetPanelIndex` at the 19 sites |
+| `setup_ports_and_characters_` | `mnPlayersVSTwelveCBSetupPort` and `mnPlayersVSTwelveCBFixCostume` in `mnPlayersVSInitPlayer` (`mnplayersvs.c`) with the pure `gmRemixTwelveCBSetupPort` (`gmremixtwelvecbrules.c`): on CSS re-entry the winner of the last game comes back on the character and portrait he won with, a defeated CPU keeps its token, a defeated human keeps his character only while the port has a portrait of it with stocks (else no character), a character the port's set does not hold clears the slot to a human with no character, and a costume past the fighter's last one goes back to 0; a resolved Random does not come back in this mode |
+| `prevent_defeated_char_select_` | `mnPlayersVSTwelveCBIsSlotSelectable` with `gmRemixTwelveCBGetWinnerPortrait`, applied to the A press in `mnPlayersVSSelectFighter` (denied sound); the hover still previews the fighter; defeated portraits get the dark overlay and marks (`mnPlayersVSMakeTwelveCBDefeatedMarks`) |
+| `defeated_action_override_` (12CB branch) | `ftRemixTwelveCBDefeatedSwapMotion` (`ftremixtwelvecbdefeated.c`, called from `ftMainSetStatus` after the Classic Sonic swap): on the VS CSS the fighter of a defeated character gets the `defeated_array` row of its fighter kind (DownStandU animation file, the moveset of texture/model changes and `FSM = 0`, flags) resolved from the RAM image (`REMIX_SYM_TwelveCharBattle__defeated_array`); `mnPlayersVSUpdateFighter` tells it which port shows a defeated character (`ftRemixTwelveCBDefeatedSetPose`) |
+| `prevent_token_pickup_` | `gmRemixTwelveCBTokenIsFree` at the top of `mnPlayersVSSetCursorGrab`: once the battle started, the token of a CPU that ended the last game with stocks left cannot be picked up (denied sound) |
+| `treat_selected_defeated_chars_as_unselected_` | `gmRemixTwelveCBCheckSlot` (`mnPlayersVSGetReadyPlayerCount`) with `gmRemixTwelveCBSlotMayStart`: a defeated character or an empty pool of the player blocks the start, so after a COMPLETE battle START stays blocked until RESET |
+| `update_portrait_id_table_` -> `DKMode._check_portraits` | `mnRemixTwelveCBDKModeUpdate` (`mnremixtwelvecbdkmode.c`) after every Custom set edit in `mnPlayersVSTwelveCBUpdateCustom`, with the letter masks D, K and L in `mnremixtwelvecbdkmoderules.c`; it calls `ftRemixDKModeSetMode` (1 DK Mode, 2 Lanky Mode) |
 | `handle_stock_count_change_`, `handle_stock_change_fgm_` | `gmRemixTwelveCBTrySetStocks` and the stock arrows in `mnplayersvs.c` (denied sound FGM 165 once started) |
 | `handle_custom_presses_` | `mnPlayersVSTwelveCBApplyCustomInput` |
 | `gentlemens_reset_` | `ifRemixGentlemensResetHandleCombo/Update` (`ifremixgentlemensreset.c`, hooks in `ifcommon.c`) and `gmRemixTwelveCBUndoCurrentGame` |
-| `update_css_header_`, `update_announcer_on_entry_` | header offset `0x2048` and FGM 1016 in `mnremixcssmoderules.c`; "Game N" in the results text; a COMPLETE battle returns FALSE from `mnRemixCssModeAnnounce`, so the vanilla voice plays instead of the winner announcement |
+| `update_css_header_`, `update_announcer_on_entry_` | header offset `0x2048` and FGM 1016 in `mnremixcssmoderules.c`; "Game N" in the results text; a COMPLETE battle plays "Player 1/2" (FGM 503/504, `mnRemixCssModeAnnounce`) and "Wins" (FGM 533) on frame 0x34 of the CSS (`mnRemixCssModeAnnounceWins`, called from `mnPlayersVSFuncRun`) |
 | GameEnd salty runback off | `gmRemixGameEndSelectScene` (`gmremixgameend.c`) skips the runback when `gmRemixTwelveCBIsActive` |
 
 `gmRemixTwelveCBPortraitOf(fkind)` is the last-resort mapping from a fighter to a portrait slot (the 12 original fighters in 0..11, any other by number in
 12..23); the CSS reports the real slot through `gmRemixTwelveCBSetCssPortrait`, and the match prefers the slot the fighter holds in the layout of the
 player's character set.
 
+### DK Mode and Lanky Mode
+
+The 24 portraits of the Custom set of each player read as a 3 x 8 grid (both halves of a row repeat the same four characters). A letter is drawn by the portraits that
+show the character of the first portrait; every other portrait must show another character. Player 2 spelling a K with player 1 spelling a D turns DK Mode on (big heads and
+arms through `ftRemixDKModeResizeHead`), with an L it turns Lanky Mode on (small heads); anything else turns the mode off. The check runs after every Custom edit (cycle, set all,
+random, preset, copy). `SSB64_DK_MODE=1|2` still sets the mode without the CSS.
+
 ### Deviations from the asm
 
 - **Records.** The asm keeps 24 game records per player, which a long battle can overrun (each game defeats one portrait of the loser, so up to 47
   games); the port keeps 48 (`GMREMIX_TWELVECB_GAMES`).
+- **Defeated pose scripts.** The moveset rows of `defeated_array` are read from the RAM image as words in native order (the same words the asm interprets), so
+  the polygon rows reuse the animation of the matching vanilla fighter exactly as the asm does; the figatree overflow log of `ftMainSetStatus` reports a row whose
+  animation is larger than the fighter's heap.
+- **Entry state of a resolved Random.** The asm clears the Random character of a port when the 12CB select re-opens (its character id is not in the set tables); the port
+  does the same through the same validity rule instead of restoring the Random bookend.
 - **N64 heap.** No `custom_heap_address` reset or heap slot handling: the port loads files per kind on demand.
 - **Text path.** All CSS and results text goes through `remix_hud_text` (the Remix Kabel font rebuilt from the user's .o2r); buttons, arrows and the
   crown are native sprites.
@@ -95,5 +111,7 @@ Open gaps: `docs/remix/patch_audit.md`, group g8.
   (both ports pick Mario, START at 200, A on the stage select at 300). `SSB64_CSS_STOCKS=<n>` opens the CSS with n stocks (the value shown is n + 1).
 - Direct match: `SSB64_REMIX_MODE=12cb SSB64_VS_STOCKS=2 .claude/skills/remix-smoke-tests/scripts/vs.sh 0,8 .claude/skills/remix-smoke-tests/inputs/walk_right.txt tcb_ko 2200`
   to reach a KO and the results with the pool record.
+- DK Mode: `SSB64_REMIX_MODE=12cb`, hold the token over a portrait of the Custom set and edit portraits (Z / R, L, D-pad) to spell D (player 1) and K (player 2); a VS match
+  after that shows big heads (the log has no line for it; check with a screenshot of the match).
 - Check: after a game the winner's portrait stays selected, a defeated portrait cannot be picked, holding A + B + Z + R + START at the end does not start a
   salty runback, the pause reset asks the opponent first.

@@ -33,7 +33,7 @@ The stage select and the exit are the vanilla ones; there are no results.
 | `shield_break_mode_` | CPU shield: Off, On (shield break with out-of-shield inputs) or Infinite; a per-port state machine (shield, stun, OOS frame 1, OOS frame 2) with 12 OOS options read from `oos_inputs_frame_1/2` |
 | `di_practice_mode_` | every frame advance sets the hitlag of non-dead fighters to 2 and runs the DI routine |
 | `spam_practice_`, `spam_practice_timer_` | a CPU repeats one of 13 moves from `spam_command_table`, fixed or random interval (byte timer, 999 wraps), only outside hitlag and while Shield Break is off |
-| `show_stage_bg_` | Stage Background entry: the stage background instead of the training one (also for the magnify bubble) |
+| `show_stage_bg_` | Stage Background entry: the stage background instead of the training one, and the stage keeps its own fog color for the magnify bubble instead of the training wallpaper one |
 | `fix_sector_z_crashes_`, `fix_pokemon_crashes_` | null player guard in Sector Z; Hitmonlee, Starmie and Blastoise use the throwing player when no opponent exists |
 | `skip_crowd_cheer_` | skips the start crowd cheer in Training, Bonus 1/2 and Bonus 3 / HRC by the Skip Start Cheer toggle |
 
@@ -109,7 +109,7 @@ registry, so the port menu and the Z menu agree. The stick and the C buttons mov
 | `spam_practice_`, `spam_practice_timer_` | `ftRemixTrainingSpamSetObjective` (called before the objective switch in `ftComputerProcessObjective`, `ftcomputer.c`), `sc1PTrainingRulesSpamReloadTimer` |
 | `di_practice_mode_` | `ftRemixTrainingUpdateFighters` (hitlag 2 and `ftCommonDamageCommonProcLagUpdate` on fighters past the KO statuses) |
 | CPU Teching, CPU DI | `ftRemixAiTechByMenu` (`ftremixaiteching.c`; a failed tech counts as a VsStats TechMiss) and `ftremixaidi.c` with the pure `ftremixaidirules.c` |
-| `show_stage_bg_` | `grWallpaperMakeDecideKind` (`grwallpaper.c`) takes the non-training branch when Stage Background is on |
+| `show_stage_bg_` | `grWallpaperMakeDecideKind` (`grwallpaper.c`) takes the non-training branch when Stage Background is on; `sc1PTrainingModeInitDisplayVars` skips the training fog color override (`_magnifying_glass`: the asm copies the ground fog color onto itself) |
 | items | the Item row adds `SC1PTRAININGREMIX_ITEM_COUNT` (13) Remix items (`sc1PTrainingRemixGetItemKind`) and the name images come from file 0xFE (`sc1PTrainingModeGetRemixItemName`); the held item entry is `sc1PTrainingLeftoverRulesGetHeldItemEntry`; the log has `training item hud: held entry N sprite WxH` |
 | Start With | `ftRemixStartItemTrainingBegin` (`ftremixstartitem.c`), called in `sc1ptrainingmode.c` |
 | Single Button Mode gate | `sc1PTrainingRemixGetSingleButtonGate` returns `FTREMIX_SBM_GATE_TRAINING_MENU` while a Training menu is up |

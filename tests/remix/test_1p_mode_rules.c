@@ -51,7 +51,7 @@ static void testHandicapsFollowTheAsmKnockbackRatios(void)
     CHECK_EQ(0, sc1PRemixModeHumanHandicap(SC1PREMIX_MODE_MULTIMAN));
 }
 
-static void testKosCountUntilThePlayerIsKod(void)
+static void testKosKeepCountingAfterThePlayerIsKod(void)
 {
     SC1PRemixMultimanKos counter;
 
@@ -62,7 +62,7 @@ static void testKosCountUntilThePlayerIsKod(void)
 
     sc1PRemixMultimanKosSetPlayerKo(&counter);
     sc1PRemixMultimanKosAddEnemy(&counter);
-    CHECK_EQ(2, counter.kos);
+    CHECK_EQ(3, counter.kos);
 }
 
 static void testResetClearsTheKosAndThePlayerKo(void)
@@ -116,6 +116,15 @@ static void testBonusStartCheerFollowsThePreviousScreen(void)
     CHECK_EQ(0, sc1PRemixModeSkipsBonusStartCheer(2, SC1PREMIX_MODE_REMIX_1P, 0));
 }
 
+static void testMasterHandSlotNeedsTheCpuPlayerKind(void)
+{
+    CHECK_EQ(1, sc1PRemixSlotIsCpuMasterHand(1, 12));
+    CHECK_EQ(0, sc1PRemixSlotIsCpuMasterHand(0, 12));
+    CHECK_EQ(0, sc1PRemixSlotIsCpuMasterHand(2, 12));
+    CHECK_EQ(0, sc1PRemixSlotIsCpuMasterHand(1, 11));
+    CHECK_EQ(0, sc1PRemixSlotIsCpuMasterHand(1, 0));
+}
+
 void remixTest1PModeRules(void)
 {
     printf("1p mode rules\n");
@@ -124,10 +133,11 @@ void remixTest1PModeRules(void)
     RUN_TEST(testSeedAdvanceIsOneToSixtyFourByFrameCount);
     RUN_TEST(testHordeModesAreMultimanAndCruelOnly);
     RUN_TEST(testHandicapsFollowTheAsmKnockbackRatios);
-    RUN_TEST(testKosCountUntilThePlayerIsKod);
+    RUN_TEST(testKosKeepCountingAfterThePlayerIsKod);
     RUN_TEST(testResetClearsTheKosAndThePlayerKo);
     RUN_TEST(testOnlyTheResetButtonRestartsTheRun);
     RUN_TEST(testMultimanHudMovesDownOnlyOnTheAlwaysSetting);
     RUN_TEST(testBonusStartCheerIsSkippedOnlyWhenTheToggleIsBonus);
     RUN_TEST(testBonusStartCheerFollowsThePreviousScreen);
+    RUN_TEST(testMasterHandSlotNeedsTheCpuPlayerKind);
 }

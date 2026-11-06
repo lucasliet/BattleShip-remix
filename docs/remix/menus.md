@@ -242,7 +242,8 @@ Test: `inputs/stats_view.txt`; play a 2-4 player match with a CPU to the results
 ### 7.2 Extra rows, full results, winner
 
 - **Always Show Full Results** (`TimedStock.asm show_full_results_`, 0x801376E4): `gmRemixGameEndResultsDrawKind` maps StockRoyal to
-  TimeRoyal and StockTeam to TimeTeam when the toggle is on; used in `mnVSResultsMakeLabel`.
+  TimeRoyal and StockTeam to TimeTeam when the toggle is on; used in `mnVSResultsMakeLabel`. The asm falls into the Time branch of `mnVSResultsInitVars`, which also sets
+  the exit wait 410 instead of 370: `gmRemixGameEndResultsStockExitWait` (`gmremixgameendwaitrules.c` holds the numbers).
 - **Mode rows** (`VsRemixMenu.asm add_row_to_results_`, :1007-1047): King of the Hill adds a "Times" row (`M:SS`, tens digit forced) and
   Smashketball an "FGs" row (baskets capped at 999) at y 124 (96 on a no contest at tic 100); the place line drops to 140 and appears 20
   tics later; teams use the FFA routine. Port: `gm/gmremixgameendrowsrules.c` (constants, pure) and `gmremixgameendrows.c` (`gmRemixKothGetScore` /

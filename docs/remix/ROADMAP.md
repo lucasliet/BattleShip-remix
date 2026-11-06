@@ -345,7 +345,10 @@ Closed phases:
       `SSB64_PORT_MENU_OPEN`; unit tests `test_css_rules`, `test_tagteam_rules`, `test_teams_rules`, `test_stamina_rules`,
       `test_dpad_control_rules`; results with `SSB64_VS_STOCKS` and Remix winners, the C-held input, the FGM log and
       `wavstat.py`.
-  - [ ] **Lot 6, modes** (MD and OP).
+  - [ ] **Lot 6, modes** (MD and OP). Progress (2026-11-05): coded by five workers (M1 to M6, M2 and M3 in one) and built; 7087 unit checks;
+    done with runs: OP-1, OP-3, OP-5, OP-6, OP-7, OP-10, OP-17, OP-28; OP-42 partial (room doll drop screen not placed);
+    OP-8 waits for MS-3; the rest ported, in-game check pending. Test note: the 1P scene shortcut needs `SSB64_SPGAME_FKIND`
+    (fkind 28 otherwise), and an All-Star run starts from the 1P CSS (scene 17) with `SSB64_REMIX_1P_MODE=allstar`.
     - M1 1P game (owner of `sc1pgame.c`), three serial batches: (a) OP-4, OP-5, OP-6, OP-7, OP-8, OP-15; (b) OP-11, OP-12,
       OP-13 (trait and level only), IT-1; (c) OP-18, OP-19, OP-24, OP-25, OP-26, OP-45 and the `sc1pgame.c` part of OP-10.
       The `sc1pgame.c` parts of OP-17, OP-34 and OP-23 come after (c).
