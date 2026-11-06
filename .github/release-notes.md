@@ -7,6 +7,8 @@ on the first launch and the phone extracts the game data itself. It installs nex
 - Fixed a crash on the 1P character select when hovering a fighter right after boot.
 - Desktop first run: the extractor no longer mistakes a `torch/` source folder for the Torch executable.
 - Warnings for missing or outdated game files on Switch and desktop.
+- Widescreen stretches the 2D layer across the screen again, as in BattleShip (menus, HUD and backgrounds fill wide screens).
+- The Remix menu hides the Widescreen and Stereo Fix settings, which the port handles itself.
 
 ## Install
 
