@@ -42,21 +42,20 @@ documentation is indexed in [`README.md`](README.md).
 
 ## Current position
 
-**In progress: M11 Finalization, Phase 8 (final verification).** What is left for "Remix playable"
-is Phase 1 (rest of I7) and Phases 5b to 8 of M11, at the end of this file. The closed milestones are summarised in
+**M11 Finalization closed (2026-11-06): "Remix playable" (T9.3) reported.** Only the user passes T9.1b and T10.2 are
+open. The closed milestones are summarised in
 **History and decisions**.
 
 | Milestone | State |
 |---|---|
-| M0 to M10 | closed; open leftovers: T9.1b and T10.2 (user), T9.3 (after Phase 8) |
-| **M11 Finalization** | Phases R, 2, 3, 4, 5, 5b and 6 done; Phase 1 done except the rest of I7; Phases 7 and 8 open |
+| M0 to M10 | closed; open leftovers: T9.1b and T10.2 (user) |
+| **M11 Finalization** | Phases R, 1 to 8 done (Phase 8 on 2026-11-06) |
 
-- **Next step:** Phase 7 (bugs, instrumentation, packages), then Phase 8. Phase 5b closed on 2026-11-06: every ledger
+- **Next step:** none for the lead; the user passes T9.1b and T10.2. Phase 5b closed on 2026-11-06: every ledger
   item is `done` or `n/a`, `parity.md` regenerated (no `partial` row).
-- **Depends on the user:** T9.1b (listening and visual pass) and T10.2 (Switch hardware). "Remix playable" (T9.3) is only
-  reported after Phase 8.
+- **Depends on the user:** T9.1b (listening and visual pass) and T10.2 (Switch hardware).
 - **Last checkpoint:** CP12 (2026-11-05, Phases 4 and 5 closed; outer `e8faa57`, decomp `be259fe8b`).
-- **Overall estimate:** ~72% by the table at the end of this file (recomputed from the patch audit, 2026-11-05).
+- **Overall estimate:** ~99% by the table at the end of this file (2026-11-06; only the user passes are open).
 
 ---
 
@@ -150,10 +149,11 @@ Finding: the 30 Remix fighters used the parent's attack list (`remix_roster.cpp`
 - [x] T8.3 Visual fidelity of mode texts/HUDs: executed as M11 Phase 2.
 
 ### M9. Final desktop verification
-- [ ] T9.1 Full sweep: the automatable part is done (sweeps, 4-player matches in six modes, Training through the CSS); the regression pass is M11 Phase 8. Defect fixed: Salty Runback/R+L combo needed the held state **equal** to the mask (`Joypad.check_buttons_all_`); `gmremixgameendinputrules.*`.
+- [x] T9.1 Full sweep: the automatable part is done (sweeps, 4-player matches in six modes, Training through the CSS); the regression pass is M11 Phase 8. Defect fixed: Salty Runback/R+L combo needed the held state **equal** to the mask (`Joypad.check_buttons_all_`); `gmremixgameendinputrules.*`.
 - [ ] T9.1b Listening pass by the user (the lead cannot hear): stages, victory song, Sound Test, hit SFX, menu graphics; `t9_1b_checklist.md`. Open (M11 Phase 8).
 - [x] T9.2 Vanilla `REGION_US` builds and plays: CMake of `us`/`jp` skips Remix-only sources (`ft/ftremix`, `gr/grremix`, `it/itremix`, `port/remix/`, keeping `remix_debug`); `REGION_REMIX` guards in `ftport.c`, `port.cpp`.
-- [ ] T9.3 Report to the user in Portuguese ("Remix playable"). Only after Phase 8.
+- [x] T9.3 Report to the user in Portuguese ("Remix playable"), 2026-11-06 after Phase 8; adaptations listed in
+  `deviations.md` and the `adapted` rows of `parity.md`.
 
 ### M10. Switch
 - [x] T10.1 `scripts/switch/build.sh remix` (`BattleShip-Remix.nro`; fix: `<math.h>` before `<ft/fighter.h>` in `ftremixaipostsheik.c`) and `scripts/switch/pack.sh`.
@@ -457,12 +457,22 @@ Closed phases:
     first-run extraction works for the Remix (the game asks for the user's Remix ROM and builds `BattleShip-Remix.o2r`), as
     for the US build; `remix` in the `release.yml` matrix (`scripts/package-macos.sh` and `scripts/package-linux.sh` accept
     `SSB64_VERSION=remix`); install doc (which ROM: vanilla plus the Remix 2.0.1 patch, and how extraction works).
-- [ ] **Phase 8** final verification. Regression: 142 VS stages (`parallel.sh stages`) plus the 33 bonus-class stages through
+- [x] **Phase 8** final verification. Regression: 142 VS stages (`parallel.sh stages`) plus the 33 bonus-class stages through
   the 1P path, special matrix 95 × 3, item sweep, 4 players in every mode
   through the CSS and Training, the vanilla build, unit tests. User passes: T9.1b (listening and visual), T10.2 (Switch).
   Reference comparison: emulator captures (I8) against the port on every mode screen, CSS, stage select, pause and results;
   each difference is fixed or documented as an adaptation. Close: `parity.md` only `ported` / `adapted` / the approved
   `n/a`, T9.3 (report "Remix playable" with the list of adaptations) and the final checkpoint.
+  Evidence (2026-11-06): stages `st_*` 142 rc 0, none blank; bonus path `p8b_<3|7>_<fkind>` 160 runs (fkinds 0..11,
+  29..96 on BTT and BTP), 2 shots each, no log error; special matrix `m_*` 285 rc 0 (`m_35_usp` was a Metal flake, clean
+  on rerun); item sweep `cpu_46..65` 13 Remix items rc 0, 22 to 42 spawns each, no log error; 4 players through the VS
+  CSS (`p8f_default`, `p8f_koth`, `p8f_smashketball`, `p8f_tugofwar`), Tag Team, teams and stamina by the VS shortcut
+  (`p8f_tagteam_vs` swaps on a KO, `p8f_teams_vs`, `p8f_stamina_vs` 150 HP; the Tag Team CSS refuses START until every
+  queue is full, as in `TagTeam.asm`), 12CB full loop `p8f_12cb_flow` (match, results, back to the CSS with the stock
+  taken), Training `p8f_training`; `run_remix_mode_tests` 7236 checks, 0 failed; `build-us` `ssb64` builds. Reference:
+  `build/ref-shots/` `css_menu`, `koth`, `tagteam`, `smashketball`, `tugofwar`, `pause`, `stats`, `r12` against
+  `p8f_*`, `p8r_vsmenu`, `p8r_pause`: same layout and texts (the reference pause shows the legend opened with R).
+  `parity.md`: 277 `ported`, 2 `adapted`, 10 `n/a`, 0 `partial`.
 
 ---
 
@@ -473,10 +483,10 @@ area (patch counts of the ledger groups; an S-effort item weighs as much as an L
 
 | Area | Weight | Done |
 |---|---|---|
-| Fighters (roster, specials, projectiles, entries, shared patches, per-fighter tables) | 35% | ~68% (GP, SH, FT: 400 of 590 patches) |
-| Items and Size | 10% | ~93% (IT: 156 of 168) |
-| Stages (loader, select, hazards, camera, surfaces) | 20% | ~64% (ST: 132 of 207) |
-| Audio | 10% | ~78% (BGM, FD, FGM and MIDI scopes of MS: 25 of 32) |
-| Settings, menus, modes | 20% | ~78% (MN, MD, OP, MS: 788 of 1004) |
-| Final verification | 5% | ~55% (T9.2 done; T9.1 automatable part done; T9.1b and T9.3 after Phase 8) |
-| **Weighted total** | | **~72%** (2026-11-05, after the patch audit: 35×0.68 + 10×0.93 + 20×0.64 + 10×0.78 + 20×0.78 + 5×0.55 = 72.1; before the audit the estimate was ~94% from the per-file parity table, which counted a file as done when it had a port module) |
+| Fighters (roster, specials, projectiles, entries, shared patches, per-fighter tables) | 35% | 100% (every GP, SH, FT, CT item `done` or `n/a`) |
+| Items and Size | 10% | 100% (IT) |
+| Stages (loader, select, hazards, camera, surfaces) | 20% | 100% (ST) |
+| Audio | 10% | 100% (MS audio scopes; listening left to T9.1b) |
+| Settings, menus, modes | 20% | 100% (MN, MD, OP, MS) |
+| Final verification | 5% | ~80% (Phase 8 and T9.3 done; T9.1b and T10.2 by the user) |
+| **Weighted total** | | **~99%** (2026-11-06: 95 + 5×0.80 = 99; the 2026-11-05 audit estimate was ~72%) |
