@@ -236,7 +236,8 @@ jobs:
           } >> "$GITHUB_ENV"
       - name: Build APK
         working-directory: android
-        run: ./gradlew --no-daemon assembleRelease -Pssb64.version=remix -Pssb64.abis=arm64-v8a \
+        run: |
+          ./gradlew --no-daemon assembleRelease -Pssb64.version=remix -Pssb64.abis=arm64-v8a \
             -Pssb64.versionName="$GITHUB_REF_NAME" -Pssb64.versionCode="$(git rev-list --count HEAD)"
       - name: Stage APK
         run: |
