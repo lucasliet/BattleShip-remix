@@ -403,6 +403,15 @@ ExtractionResult ExtractAssetsIfNeeded(const std::string& target_o2r_path, bool 
             port_log("first_run: no ROM available for recipe re-extraction; "
                      "continuing with the existing (possibly stale) %s\n",
                      SSB64_O2R_NAME);
+            /* Shown even when silent: the archive exists, so no wizard modal follows to race it. */
+            const std::string staleMsg =
+                std::string(SSB64_O2R_NAME) + " was made by an older version of the game and may show "
+                "broken graphics or crash.\n\nTo extract it again, place your " + kRomDesc +
+                " (" + kRomBase + ".z64, .n64 or .v64) into:\n  " +
+                Ship::Context::GetAppDirectoryPath() +
+                "\n\nThen launch the game again. The game will now start with the old files.";
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Game files out of date",
+                                     staleMsg.c_str(), nullptr);
             return { true, targetPath.string(), {}, {} };
         }
         const std::string appData = Ship::Context::GetAppDirectoryPath();

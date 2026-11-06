@@ -36,6 +36,9 @@
 #include "bridge/framebuffer_capture.h"
 #include "enhancements/enhancements.h"
 #include "first_run.h"
+#ifdef __SWITCH__
+#include "switch_assets.h"
+#endif
 #include "gui/PortMenu.h"
 #ifdef PORT_HIRES_ENABLED
 #include "hires/HiResHook.h"
@@ -990,13 +993,14 @@ static int PortInitImpl(int argc, char* argv[]) {
 		// generated on a desktop and shipped on the SD card
 		// (scripts/switch/pack.sh lays out dist/switch/SD).
 		std::error_code ec;
-		const std::string targetO2r =
-			Ship::Context::GetPathRelativeToAppDirectory(SSB64_O2R_NAME);
-		if (!std::filesystem::exists(targetO2r, ec) &&
-		    !std::filesystem::exists(PortLocateFile(SSB64_O2R_NAME), ec)) {
-			port_log("SSB64: missing %s — copy it to sdmc:/switch/BattleShip/ "
-			         "(generate on a desktop build; see BUILDING.md Switch section)\n",
-			         SSB64_O2R_NAME);
+		std::string archive = Ship::Context::GetPathRelativeToAppDirectory(SSB64_O2R_NAME);
+		if (!std::filesystem::exists(archive, ec)) {
+			archive = PortLocateFile(SSB64_O2R_NAME);
+		}
+		if (!std::filesystem::exists(archive, ec)) {
+			archive.clear();
+		}
+		if (!ssb64::SwitchAssetsAreCurrent(archive)) {
 			PortShutdown();
 			return 1;
 		}
