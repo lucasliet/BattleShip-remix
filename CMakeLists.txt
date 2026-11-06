@@ -587,6 +587,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/port_window_icon\\.cpp$")
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX
         "port/enhancements/(Updater|DiscordRichPresence|ShaderDownloader)\\.cpp$")
+else()
+    # The in-process libcurl updater only exists on Switch; the desktop updater shells out to curl.
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/(UpdaterSwitch|SwitchHttp)\\.cpp$")
 endif()
 if(BATTLESHIP_UWP)
     # Xbox packages are updated as MSIX and cannot use these Win32
@@ -1062,6 +1065,16 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
         ${DEVKITPRO}/portlibs/switch/include
         ${DEVKITPRO}/portlibs/switch/include/SDL2)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship)
+    # libcurl portlib (system TLS through libnx's ssl service) for the self-updater.
+    # scripts/switch/setup-toolchain.sh installs it; CI: dkp-pacman -S switch-curl.
+    find_library(SSB64_SWITCH_CURL_LIBRARY curl
+        PATHS ${DEVKITPRO}/portlibs/switch/lib NO_DEFAULT_PATH)
+    if (NOT SSB64_SWITCH_CURL_LIBRARY)
+        message(FATAL_ERROR "libcurl not found under ${DEVKITPRO}/portlibs/switch/lib. "
+            "Run scripts/switch/setup-toolchain.sh (or dkp-pacman -S switch-curl).")
+    endif()
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CURL_STATICLIB)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${SSB64_SWITCH_CURL_LIBRARY} z)
     # newlib's libg.a already defines __assert(file, line, expr); the decomp's
     # IDO-style __assert(expr, file, line) stub in n64_stubs.c would collide
     # with it at link time, so rename the decomp one.
@@ -1604,3 +1617,6 @@ endif()
 # Headless unit tests of the Remix mode rules (tests/remix): cmake --build <build> --target run_remix_mode_tests
 ################################################################################
 add_subdirectory(tests/remix)
+
+# Headless unit tests of the self-updater logic (tests/updater): cmake --build <build> --target run_updater_tests
+add_subdirectory(tests/updater)

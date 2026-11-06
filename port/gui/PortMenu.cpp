@@ -11,6 +11,7 @@
 #include "remix/remix_training.h"
 #include "remix/remix_toggles.h"
 #include "remix/remix_toggle_actions.h"
+#include "remix/remix_toggle_tips.h"
 #include "remix/remix_symbols.h"
 #include "PortMenu.h"
 
@@ -1446,6 +1447,16 @@ bool IsRemixToggleWithoutPortEffect(const remix_toggles::Toggle &toggle) {
     return (toggle.entryAddr == REMIX_SYM_Toggles__entry_widescreen) || (toggle.entryAddr == REMIX_SYM_Toggles__entry_stereo_fix);
 }
 
+/* Options with the tip of a Remix setting, when it has one. */
+template <typename WidgetOptionsType>
+WidgetOptionsType WithRemixToggleTip(WidgetOptionsType options, const remix_toggles::Toggle &toggle) {
+    const char *tip = remix_toggle_tip(toggle);
+    if (tip != nullptr) {
+        options.Tooltip(tip);
+    }
+    return options;
+}
+
 /* Puts the next widget of a two-column page in the column after the previous one. */
 void PlaceInNextColumn(WidgetPath &path, int &shown) {
     path.column = (shown++ % 2 == 0) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
@@ -1576,21 +1587,23 @@ void PortMenu::AddMenuRemixToggle(WidgetPath &path, const remix_toggles::Toggle 
             .CVar(toggle.cvar.c_str())
             .RaceDisable(false)
             .Callback([entryAddr](WidgetInfo &) { remix_toggle_action_apply(entryAddr); })
-            .Options(CheckboxOptions().DefaultValue(toggle.defaults[0] != 0));
+            .Options(WithRemixToggleTip(CheckboxOptions().DefaultValue(toggle.defaults[0] != 0), toggle));
     } else if (!toggle.strings.empty()) {
         AddWidget(path, toggle.title, WIDGET_CVAR_COMBOBOX)
             .CVar(toggle.cvar.c_str())
             .RaceDisable(false)
             .Callback([entryAddr](WidgetInfo &) { remix_toggle_action_apply(entryAddr); })
-            .Options(ComboboxOptions()
-                         .ComboMap(remix_toggles::ComboMap(toggle))
-                         .DefaultIndex(static_cast<uint32_t>(toggle.defaults[0])));
+            .Options(WithRemixToggleTip(ComboboxOptions()
+                                            .ComboMap(remix_toggles::ComboMap(toggle))
+                                            .DefaultIndex(static_cast<uint32_t>(toggle.defaults[0])),
+                                        toggle));
     } else {
         AddWidget(path, toggle.title, WIDGET_CVAR_SLIDER_INT)
             .CVar(toggle.cvar.c_str())
             .RaceDisable(false)
             .Callback([entryAddr](WidgetInfo &) { remix_toggle_action_apply(entryAddr); })
-            .Options(IntSliderOptions().Min(toggle.min).Max(toggle.max).DefaultValue(toggle.defaults[0]));
+            .Options(WithRemixToggleTip(
+                IntSliderOptions().Min(toggle.min).Max(toggle.max).DefaultValue(toggle.defaults[0]), toggle));
     }
 }
 
@@ -2070,7 +2083,7 @@ void PortMenu::AddMenuAbout() {
     AddWidget(path, "Zorkats: C Modding Documentation", WIDGET_TEXT);
 
 
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
     // BUILT-IN UPDATER — hidden on Android. App updates come through the
     // Play Store on mobile; a curl-driven GitHub-releases updater can't
     // replace a system-managed installation, and the curl shell-out
@@ -2113,6 +2126,17 @@ void PortMenu::AddMenuAbout() {
             info.name = ssb64::enhancements::GetDownloadStatus();
         }
     });
+
+#if defined(__SWITCH__)
+    AddWidget(path, "Restart Game", WIDGET_BUTTON)
+    .RaceDisable(false)
+    .PreFunc([](WidgetInfo& info) {
+        info.isHidden = !ssb64::enhancements::CanRestartAfterUpdate();
+    })
+    .Callback([](WidgetInfo&) {
+        ssb64::enhancements::RestartAfterUpdate();
+    });
+#endif
 
     // 4. Update result text
     AddWidget(path, "Update Status", WIDGET_TEXT)

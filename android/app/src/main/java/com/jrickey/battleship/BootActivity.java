@@ -398,6 +398,10 @@ public class BootActivity extends ComponentActivity {
     /* ===================================================================== */
 
     private void startGame() {
+        new UpdatePrompt(this, mStatus, this::launchGameActivity).run();
+    }
+
+    private void launchGameActivity() {
         Log.i(TAG, "Assets ready, launching BattleShipActivity");
         startActivity(new Intent(this, BattleShipActivity.class));
         finish();

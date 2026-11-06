@@ -137,6 +137,8 @@ jobs:
           apt-get install -y --no-install-recommends python3 python3-pil zip git
           # The switch-tinyxml2 portlib is too old for libultraship; its FetchContent copy is used instead.
           dkp-pacman -R --noconfirm switch-tinyxml2 || true
+          # libcurl powers the in-game Switch updater; the image normally ships it already.
+          test -f /opt/devkitpro/portlibs/switch/lib/libcurl.a || dkp-pacman -Sy --noconfirm switch-curl
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -168,6 +170,8 @@ jobs:
           dir="dist/switch/SD/switch/$app"
           mkdir -p "$dir"
           cp "build-switch/$app.nro" "$dir/"
+          # The bare .nro is its own release asset: the in-game updater downloads it and swaps the running file.
+          cp "build-switch/$app.nro" dist/
           (cd libultraship/src/fast && cmake -E tar cf "$GITHUB_WORKSPACE/$dir/f3d.o2r" --format=zip shaders)
           cp gamecontrollerdb.txt config.yml "$dir/"
           cp -a assets "$dir/"
@@ -185,7 +189,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: remix-switch
-          path: dist/BattleShip-Remix-switch.zip
+          path: |
+            dist/BattleShip-Remix-switch.zip
+            dist/BattleShip-Remix.nro
           if-no-files-found: error
 
   build-android:
@@ -230,7 +236,8 @@ jobs:
           } >> "$GITHUB_ENV"
       - name: Build APK
         working-directory: android
-        run: ./gradlew --no-daemon assembleRelease -Pssb64.version=remix -Pssb64.abis=arm64-v8a
+        run: ./gradlew --no-daemon assembleRelease -Pssb64.version=remix -Pssb64.abis=arm64-v8a \
+            -Pssb64.versionName="$GITHUB_REF_NAME" -Pssb64.versionCode="$(git rev-list --count HEAD)"
       - name: Stage APK
         run: |
           mkdir -p dist
@@ -270,6 +277,7 @@ jobs:
             artifacts/BattleShip-Remix-x86_64.AppImage
             artifacts/BattleShip-Remix-windows.zip
             artifacts/BattleShip-Remix-switch.zip
+            artifacts/BattleShip-Remix.nro
             artifacts/BattleShip-Remix-android.apk
             artifacts/SHA256SUMS.txt
           body_path: .github/release-notes.md

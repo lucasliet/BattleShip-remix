@@ -125,6 +125,12 @@ std::string GetUpdateStatus();
 std::string GetDownloadStatus();
 std::string GetLatestVersion();
 
+#if defined(__SWITCH__)
+// Switch only: after a finished update, relaunch the freshly installed .nro through the homebrew loader.
+bool CanRestartAfterUpdate();
+void RestartAfterUpdate();
+#endif
+
 // Libretro shader pack downloader. Two-phase background flow:
 //
 //   1. FetchShaderPackCatalogAsync() pulls libretro/glsl-shaders'

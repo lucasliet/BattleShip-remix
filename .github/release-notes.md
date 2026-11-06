@@ -1,14 +1,13 @@
 ## Highlights
 
-**New: Android.** BattleShip-Remix now ships an Android APK (arm64-v8a, Android 7+). Pick your Smash Remix 2.0.1 ROM
-on the first launch and the phone extracts the game data itself. It installs next to the vanilla BattleShip app.
+**New: self-updating Android and Switch.** The game now downloads and installs new releases itself.
 
-- Android arm64 APK with touch controls, its own package id (`dev.lucasliet.battleship.remix`) and Remix icon.
-- Fixed a crash on the 1P character select when hovering a fighter right after boot.
-- Desktop first run: the extractor no longer mistakes a `torch/` source folder for the Torch executable.
-- Warnings for missing or outdated game files on Switch and desktop.
-- Widescreen stretches the 2D layer across the screen again, as in BattleShip (menus, HUD and backgrounds fill wide screens).
-- The Remix menu hides the Widescreen and Stereo Fix settings, which the port handles itself.
+- Android: on launch the app checks for a new release, downloads the APK and asks Android to install it (one tap to
+  confirm). The first install from this release must be done by hand; later releases update in place. If you installed
+  a build signed with another key, uninstall it once first.
+- Switch: About > Check for updates downloads the new `BattleShip-Remix.nro` and replaces it on the SD card, then
+  Restart Game relaunches it. The release now also ships the bare `BattleShip-Remix.nro`.
+- Remix menu: every setting has a short tooltip explaining what it does.
 
 ## Install
 

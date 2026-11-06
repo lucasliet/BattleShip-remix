@@ -80,20 +80,23 @@ if (( ${#missed[@]} > 0 )); then
 fi
 
 # --- extract into $DKP ------------------------------------------------------
-if [[ ! -x "$DKP/devkitA64/bin/aarch64-none-elf-gcc" ]]; then
-  echo "== extraindo para $DKP =="
-  tmp="$TC/.extract-tmp"
-  for f in "$PKGS"/*.pkg.tar.*; do
-    rm -rf "$tmp"; mkdir -p "$tmp"
-    tar -xf "$f" -C "$tmp"
-    if [[ -d "$tmp/opt/devkitpro" ]]; then
-      cp -a "$tmp/opt/devkitpro/." "$DKP/"
-    else
-      cp -a "$tmp/." "$DKP/"
-    fi
-  done
-  rm -rf "$tmp"
-fi
+echo "== extraindo para $DKP =="
+tmp="$TC/.extract-tmp"
+marks="$TC/.extracted"
+mkdir -p "$marks"
+while read -r repo file sha url; do
+  [[ -f "$marks/$file" ]] && continue
+  echo "  [extract] $file"
+  rm -rf "$tmp"; mkdir -p "$tmp"
+  tar -xf "$PKGS/$file" -C "$tmp"
+  if [[ -d "$tmp/opt/devkitpro" ]]; then
+    cp -a "$tmp/opt/devkitpro/." "$DKP/"
+  else
+    cp -a "$tmp/." "$DKP/"
+  fi
+  touch "$marks/$file"
+done < <(dkp_manifest)
+rm -rf "$tmp"
 
 # --- host cmake / ninja -----------------------------------------------------
 echo "== host cmake/ninja =="

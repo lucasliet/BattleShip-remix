@@ -158,6 +158,15 @@ running `build.sh us` and then `build.sh remix` reconfigures the same directory,
 The Home menu icon is a 256x256 JPEG embedded in the `.nro` by CMake (`assets/switch/icon.jpg` for the original, `assets/switch/icon-remix.jpg` for the Remix, with "SR"). Both
 are made from `assets/icon.png` by `.toolchain/host/venv/bin/python -I tools/gen_switch_icon.py` (Pillow only); the script also writes `assets/icon-remix.png`.
 
+### In-game updater (Switch)
+
+The About menu (Updates section) checks `releases/latest` of `lucasliet/BattleShip-remix` and, on "Download Update", downloads the bare release asset `BattleShip-Remix.nro`
+(the release workflow publishes it next to the zip) to `<running .nro>.part`, checks the size and the `NRO0` header, then swaps it over the running file (the old one
+stays as `.old` until the swap succeeds). "Restart Game" relaunches it through `envSetNextLoad`. Only the `.nro` is replaced: if a release also changes `f3d.o2r`,
+`config.yml`, `assets/` or needs a new `.o2r`/`.recipe`, those still have to be copied by hand. Code: `port/enhancements/UpdaterSwitch.cpp` (libcurl through the
+`switch-curl` portlib, pinned in `scripts/switch/packages.lock`; TLS is the console's own ssl service), shared logic and tests in `UpdateRelease.cpp`/`UpdateInstall.cpp`
+(`cmake --build build --target run_updater_tests`).
+
 If the `.o2r` or Torch change (a new `.recipe`), rebuild the package: an old `.o2r` on the SD card with a new `.nro` causes a storm of invalid reloc tokens. The game writes
 `BattleShip-Remix.log` next to the `.nro`, on the SD card.
 

@@ -73,6 +73,15 @@
     "sha256": "7eee6a98312991faac73246f93d88740fb234d90ac5bd19ca969d6e227a59c8f",
     "version": "1.5.2-1"
    },
+   "switch-curl": {
+    "depends": [
+     "switch-zlib",
+     "libnx"
+    ],
+    "filename": "switch-curl-7.69.1-5-any.pkg.tar.zst",
+    "sha256": "062f683cc9925e6c27e38a9dc9c97fabe17a9eae6002c355000f5cff5886c81e",
+    "version": "7.69.1-5"
+   },
    "switch-glad": {
     "depends": [],
     "filename": "switch-glad-0.1.27-1-any.pkg.tar.xz",

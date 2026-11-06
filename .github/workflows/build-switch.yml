@@ -25,6 +25,7 @@ jobs:
           # switch.cmake FetchContent path provides 10.x instead. Keep the
           # portlib out of the way so find_package falls through.
           dkp-pacman -R --noconfirm switch-tinyxml2 || true
+          test -f /opt/devkitpro/portlibs/switch/lib/libcurl.a || dkp-pacman -Sy --noconfirm switch-curl
 
       - uses: actions/checkout@v4
         with:

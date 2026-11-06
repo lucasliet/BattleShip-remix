@@ -148,8 +148,8 @@ android {
         val ssb64MinSdk = (project.findProperty("ssb64.minSdk") as String?)?.toInt() ?: 24
         minSdk = ssb64MinSdk
         targetSdk = 34       // Play Store requires >= 34 (since Aug 2024)
-        versionCode = 1
-        versionName = "0.1.0-spike"
+        versionCode = (project.findProperty("ssb64.versionCode") as String?)?.toInt() ?: 1
+        versionName = (project.findProperty("ssb64.versionName") as String?) ?: "0.1.0-spike"
 
         // ABIs to build. Default arm64-v8a (covers ~99% of in-use devices and
         // runs natively on the M-series emulator). Override at the command line
