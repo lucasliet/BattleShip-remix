@@ -448,7 +448,10 @@ Closed phases:
   - [x] Instrumentation (2026-11-06): spdlog flushed before the `RelocPointerTable` aborts (`port_log` already flushes
     every write), `scene <id> summary: <frames>, <slow>, max <ms>` at every scene change (`p7_instr`), and
     `lbReloc: slow load file_id <id>` for a load above 20 ms.
-  - [ ] Test packages with the `.o2r` embedded (macOS script and AppImage), marked for personal use.
+  - [x] Test packages with the `.o2r` embedded (macOS script and AppImage), marked for personal use (2026-11-06):
+    `dist/desktop/BattleShip-Remix-2.0.1-port.07d89c8-macOS-arm64.dmg/.zip` (the bundled binary reaches a VS match, rc 0)
+    and `build-linux-release/BattleShip-Remix-2.0.1-port.ab57e0f-linux-x86_64.AppImage` (podman amd64; the Dockerfile now
+    zeroes the AppImage magic of linuxdeploy and appimagetool, which broke binfmt under emulation).
   - [ ] Final packages without the `.o2r` (macOS `.app`/`.dmg`/`.zip`, AppImage x86_64, Switch `.nro`): first confirm that
     first-run extraction works for the Remix (the game asks for the user's Remix ROM and builds `BattleShip-Remix.o2r`), as
     for the US build; `remix` in the `release.yml` matrix (`scripts/package-macos.sh` and `scripts/package-linux.sh` accept

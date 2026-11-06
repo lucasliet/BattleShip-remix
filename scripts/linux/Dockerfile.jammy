@@ -30,4 +30,8 @@ RUN wget -q "$APPIMAGETOOL_URL" -O /usr/local/bin/appimagetool \
  && echo "$APPIMAGETOOL_SHA256  /usr/local/bin/appimagetool" | sha256sum -c - \
  && wget -q "$LINUXDEPLOY_URL" -O /usr/local/bin/linuxdeploy \
  && echo "$LINUXDEPLOY_SHA256  /usr/local/bin/linuxdeploy" | sha256sum -c - \
- && chmod +x /usr/local/bin/appimagetool /usr/local/bin/linuxdeploy
+ && chmod +x /usr/local/bin/appimagetool /usr/local/bin/linuxdeploy \
+ && for tool in appimagetool linuxdeploy; do \
+      printf '\0\0\0' | dd of=/usr/local/bin/$tool bs=1 seek=8 count=3 conv=notrunc status=none; \
+    done
+# The AppImage magic (bytes 8..10) hides the ELF header from binfmt under amd64 emulation ("Exec format error").
