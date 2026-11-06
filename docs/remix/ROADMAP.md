@@ -320,10 +320,10 @@ Closed phases:
     out of containers), IT-3. I2 (`ftshadow.c`, `ftremixsize.c`): IT-5, IT-6. I3: IT-4, IT-9, IT-11. Tests:
     `SSB64_FORCE_CONTAINER_DROP` with `SSB64_REMIX_ITEM_LOG` and `item_cpu_sweep.sh`; `SSB64_REMIX_PANEL` (Start With,
     Size, Visibility) against the reference; two matches in a row for IT-4; `SSB64_REMIX_FORCE_ITEM` for IT-11.
-  - [ ] **Lot 5, CSS, menus and screens.** Progress (2026-11-05): coded and built; 35 items done with runs (MN-1, MN-2, MN-3,
-    MN-6 to MN-10, MN-13, MN-15, MN-20, MD-12 to MD-17, CT-1, CT-13, OP-29, OP-30, OP-31, MS-1, MS-7, MS-9, MS-10, MS-11, MS-12,
-    MS-18, MS-20, MS-21, MS-24 and the new CT-24), MS-2 n/a (the port never shows the N64 logo); MN-4, MN-5, MN-11, MN-12, MN-14,
-    MD-3, MD-20, MD-22, OP-32, OP-33, OP-40, OP-41 and MS-19 ported, in-game check pending (they need clicks on CSS buttons or the
+  - [ ] **Lot 5, CSS, menus and screens.** Progress (2026-11-05): coded and built; 37 items done with runs (MN-1, MN-2, MN-3,
+    MN-6 to MN-10, MN-13, MN-14, MN-15, MN-20, MD-3, MD-12 to MD-17, CT-1, CT-13, OP-29, OP-30, OP-31, MS-1, MS-7, MS-9, MS-10, MS-11, MS-12,
+    MS-18, MS-20, MS-21, MS-24 and the new CT-24), MS-2 n/a (the port never shows the N64 logo); MN-4, MN-5, MN-11, MN-12,
+    MD-20, MD-22, OP-32, OP-33, OP-40, OP-41 and MS-19 ported, in-game check pending (they need clicks on CSS buttons or the
     mode menus; the CSS press point is the hand + (20, 3), see `inputs/css_panelmenu_visibility.txt`). Found and fixed on the way: the Gallery
     label read the common menu file; the port menu built before the Remix toggles loaded, so the Remix section never showed
     (now added after `remix_toggles_init`, `SSB64_PORT_MENU_PAGE` opens a page for screenshots); `syAudioGetBGMPlaying` cleared

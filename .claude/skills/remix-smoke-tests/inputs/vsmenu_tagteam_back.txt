@@ -1,0 +1,10 @@
+# VS mode menu (scene 9): Remix Modes (4 downs, A), Tag Team (down, A) opens its CSS; B held 80 frames returns to the VS
+# menu, which must reopen on the Remix page with the cursor on Tag Team (shot 600, 650 frames).
+100 101 0 DD 0 0
+115 116 0 DD 0 0
+130 131 0 DD 0 0
+145 146 0 DD 0 0
+160 161 0 A 0 0
+190 191 0 DD 0 0
+205 206 0 A 0 0
+400 480 0 B 0 0
