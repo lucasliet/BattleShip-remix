@@ -1490,6 +1490,10 @@ int main(int argc, char* argv[]) {
 	int windowSlowFrames = 0;
 	double windowSlowMs = 0.0;
 	double windowMaxMs = 0.0;
+	int sceneId = port_diag_get_scene_curr();
+	int sceneFrames = 0;
+	int sceneSlowFrames = 0;
+	double sceneMaxMs = 0.0;
 	while (WindowIsRunning()) {
 		port_input_script_tick();
 		const auto frameStart = std::chrono::steady_clock::now();
@@ -1505,6 +1509,21 @@ int main(int argc, char* argv[]) {
 				hitchesLogged++;
 				SPDLOG_WARN("slow frame {} scene {} took {:.1f} ms", frame, port_diag_get_scene_curr(), frameMs);
 			}
+		}
+		if (port_diag_get_scene_curr() != sceneId) {
+			if (sceneFrames > 0) {
+				SPDLOG_WARN("scene {} summary: {} frames, {} slow (>{:.0f} ms), max {:.1f} ms", sceneId, sceneFrames,
+				            sceneSlowFrames, kSlowFrameMs, sceneMaxMs);
+			}
+			sceneId = port_diag_get_scene_curr();
+			sceneFrames = 0;
+			sceneSlowFrames = 0;
+			sceneMaxMs = 0.0;
+		}
+		sceneFrames++;
+		sceneMaxMs = std::max(sceneMaxMs, frameMs);
+		if (frameMs > kSlowFrameMs) {
+			sceneSlowFrames++;
 		}
 		if (frame % kSlowWindowFrames == 0) {
 			SPDLOG_WARN("frames {}-{}: {} slow (>{:.0f} ms), {:.0f} ms total, max {:.1f} ms, scene {}",

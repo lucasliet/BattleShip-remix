@@ -440,7 +440,9 @@ Closed phases:
     are the turnip's 10 images; the two outside the file (927 and 928, targets 2482 and 2352 in a file of 1176 words) are
     images 8 and 9, and the turnip only uses images 3 to 6 (`stage_setting_` L181-217). Zeroing those slots, as the bridge
     does, is safe.
-  - [ ] Instrumentation: `fflush` before `abort()`, hitch summary per scene, slow `lbReloc` report.
+  - [x] Instrumentation (2026-11-06): spdlog flushed before the `RelocPointerTable` aborts (`port_log` already flushes
+    every write), `scene <id> summary: <frames>, <slow>, max <ms>` at every scene change (`p7_instr`), and
+    `lbReloc: slow load file_id <id>` for a load above 20 ms.
   - [ ] Test packages with the `.o2r` embedded (macOS script and AppImage), marked for personal use.
   - [ ] Final packages without the `.o2r` (macOS `.app`/`.dmg`/`.zip`, AppImage x86_64, Switch `.nro`): first confirm that
     first-run extraction works for the Remix (the game asks for the user's Remix ROM and builds `BattleShip-Remix.o2r`), as

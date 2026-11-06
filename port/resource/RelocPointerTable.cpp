@@ -85,6 +85,7 @@ static void ensureCapacity(void)
         uint32_t newCapacity = sCapacity * 2;
         if (newCapacity > TOKEN_INDEX_MASK) {
             spdlog::error("RelocPointerTable: token index capacity exhausted");
+            spdlog::default_logger()->flush();
             abort();
         }
         spdlog::info("RelocPointerTable: growing {} -> {} entries",
@@ -92,6 +93,7 @@ static void ensureCapacity(void)
         Slot *grown = (Slot *)realloc(sSlots, newCapacity * sizeof(Slot));
         if (grown == nullptr) {
             spdlog::error("RelocPointerTable: out of memory growing to {} entries", newCapacity);
+            spdlog::default_logger()->flush();
             abort();
         }
         sSlots = grown;

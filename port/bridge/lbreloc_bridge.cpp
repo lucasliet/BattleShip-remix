@@ -15,6 +15,7 @@
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -1002,7 +1003,7 @@ extern "C" void portRelocLoadFileFromBytesPrivate(
  * libultraship ResourceManager (i.e., the BattleShip.o2r /
  * BattleShip.fromsource.o2r pipeline).
  */
-void lbRelocLoadAndRelocFile(u32 file_id, void *ram_dst, u32 bytes_num, s32 loc)
+static void lbRelocLoadAndRelocFileTimed(u32 file_id, void *ram_dst, u32 bytes_num, s32 loc)
 {
 	auto relocFile = portLoadRelocResource(file_id);
 	if (!relocFile)
@@ -1081,6 +1082,25 @@ size_t lbRelocGetFileSize(u32 id)
 	sLBRelocExternFileIDsMax = ARRAY_COUNT(file_ids_extern_buf);
 
 	return lbRelocGetExternBytesNum(id);
+}
+
+static constexpr double kLBRelocSlowLoadMs = 20.0;
+
+/**
+ * Loads and relocates one file, and logs the file id and size when it takes longer than kLBRelocSlowLoadMs.
+ */
+void lbRelocLoadAndRelocFile(u32 file_id, void *ram_dst, u32 bytes_num, s32 loc)
+{
+	const auto start = std::chrono::steady_clock::now();
+
+	lbRelocLoadAndRelocFileTimed(file_id, ram_dst, bytes_num, loc);
+
+	const double elapsed_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+
+	if (elapsed_ms > kLBRelocSlowLoadMs)
+	{
+		spdlog::warn("lbReloc: slow load file_id {} ({} bytes) took {:.1f} ms", file_id, bytes_num, elapsed_ms);
+	}
 }
 
 // // // // // // // // // // // //
