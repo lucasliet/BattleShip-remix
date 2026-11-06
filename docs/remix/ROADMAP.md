@@ -363,7 +363,9 @@ Closed phases:
       `test_1p_mode_rules`, `test_1p_enemy_rules`, `test_1p_bonus_remix_rules`, `test_css_cpu_costume_rules`,
       `test_gameend_rows_rules`, `test_stockmode_rules`, `test_twelvecb_rules`, `test_twelvecb_custom`; `SSB64_BGM_LOG`;
       reference captures of the 1P cards, the Rest Area and the 12CB screens.
-  - [ ] **Lot 7, audio.** A1 BGM: MS-3 with MS-6 (alt and random music by C button and scene, FD theme), MS-4, MS-5 (the
+  - [ ] **Lot 7, audio.** Progress (2026-11-06): coded by two workers and built (7228 unit checks); done with runs: MS-3, MS-6,
+    MS-8, MS-22, MS-23; MS-4, MS-5, MS-16, MS-25 ported, in-game check pending (`l7_hurry` on stage 2 played track 5, not a hurry
+    track: pick a Mushroom Kingdom stage id next time). `SSB64_MIDI_LOG=1` logs the MIDI overrides. A1 BGM: MS-3 with MS-6 (alt and random music by C button and scene, FD theme), MS-4, MS-5 (the
     30-second hurry swap by track). A2 FGM and MIDI: MS-8, MS-22 with MS-23 (per-song priority, bend range and volume
     overrides; hook site confirmed first), MS-16 with MS-25 (Crash DSP voices and the announcer lines). Tests:
     `SSB64_BGM_LOG` with `test_bgm_rules` extended, the FGM log and `wavstat.py`, the audio dump against the reference

@@ -365,10 +365,19 @@ to the DK picture with the scroll sound and no announcer), `l5_screens_gallery` 
   so the decomp `// 0x` comments were not used). `gmRemixMenuMusicKeepsCurrent` is the "do not restart the playing track" rule (nothing is kept when
   no track plays or a 64 track plays; RANDOM, RANDOM CLASSICS and RANDOM ALL keep any other track). Menu Music values include the Remix menu
   tracks; RANDOM ALL (Menu Music 21, `BGM.asm:635-668`) picks from the Random Music list ignoring its toggle (`grRemixRandomMusicPickForced`),
-  or one of four hidden GameBoy songs (BGM 0xA2-0xA5) when the list is empty; the custom MIDI entries are not in that list. Not hooked (Remix
+  or one of four hidden GameBoy songs (BGM 0xA2-0xA5) when the list is empty; the list includes the custom MIDI entries (see audio.md section 5.1). Not hooked (Remix
   has no `alt_menu_music_` call there): sound test, results, Data characters/record, stage select, item switch. The Settings L shortcut
   `handle_sss_shortcut` is not ported. Test: `SSB64_START_SCENE` of each screen with Menu Music set through `SSB64_REMIX_TOGGLES`; the track must
   not restart when entering the CSS and returning.
+  Easter egg `itsatrap` (`Toggles.asm play_menu_music_ _sm64_trap_check`, `BGM.asm _check_current_trap`): an A press on Menu Music counts the
+  presses that resolve to FILESELECT_SM64 (value 7, or a RANDOM value that rolls 7); the fourth in a row plays `MAIN_TRAP_SM64` (260) and the
+  counter becomes -1, a press that resolves to any other track clears it, and the press after the trap restarts the count at 1. While the
+  counter is -1 every path that resolves value 7 (the CSS and menu screens, RANDOM) plays 260, and 260 counts as a listed menu track (kept
+  on entering a screen, not stopped by `gmRemixMenuMusicStop`). Port: `gmRemixMenuMusicAudition` and `gmRemixMenuMusicTrackOf`
+  (`gmremixmenumusic.c`), counter rule `gmremixmenumusicrules.c`; the counter lives in the process and starts at 0, as the asm RAM word.
+  Profile-load resets (`Toggles.asm:725, 2216`) call `play_menu_music_` in the asm and would count a press; the port menu does not route
+  them through `gmRemixMenuMusicAudition`, so they do not count (deviation). Test: Menu Music = FILESELECT_SM64 and four A presses in the port
+  menu with `SSB64_BGM_LOG=1`: the fourth logs `[bgm] play ... track=260`, the fifth `track=259`.
 - **Music title at match start** (`BGM.asm show_music_title_`): at the GO lights (`ifCommonCountdownMakeInterface`, 0x8011268C) the asm draws a
   translucent rectangle (1, 156, 320 x 28, `0x34343494`) with the track line (scale 1.0, note glyphs) and the game line (scale 0.75) in Kabel,
   destroyed at the GO! text. Port: `gm/gmremixmusictitle.c` checks the `show_music_title` and `play_music` toggles, reads

@@ -77,8 +77,10 @@ Check: `0x2C11170` holds `0047 0000 0000 7d00 0000 2a90` (header of the 71-instr
 | Voice Sound Test entries | 850 | 244..1093 |
 | Tracks (MIDI) | 328 | 47..374 (`0x2F`..`0x176`) |
 
-FGM `0x2B7` (695) is the first new one and is a placeholder in `FGM.asm:989`; `FGM.asm:962-974` treats `0x2B7` as SFX cancel, so the first new FGM
-has special behaviour.
+FGM `0x2B7` (695) is the first new one and is a placeholder in `FGM.asm:989`; `FGM.asm:962-974` (`fix_0x2b7_`) treats `0x2B7` as SFX cancel, so the first new FGM
+has special behaviour. The port does the same: `func_800269C0_275C0` (`libultra/n_audio/n_env.c`) returns NULL for `0x2B7` after the bounds check
+(`gmRemixMidiRulesFgmIsSilenced`), so nothing plays and the placeholder sample is never started. The Remix items that use `0x2B7` as a hit sound
+(Flashbang explosion, Blue Shell hurtbox) are silent, as in the Remix. `SSB64_AUDIO_FGM_LOG=1` still prints the request, with a ` silenced` suffix (`[fgm] play id=695 table=1545 silenced`).
 
 ## 2. ROM layout
 
@@ -461,6 +463,9 @@ index in the `S1_music` table. Ids 0..46 are vanilla and not listed. The port's 
 | `0x8039076C` | button check in the Sound Test | `FGM.asm:108` |
 | `0x80002CA0` | vanilla dmaCopy, used to reload the bank map | `midi.asm:1259` |
 | `0x8001F548` (patch at ROM 0x20148) | bank map reload at boot | `midi.asm:1252-1254` |
+| `0x8002BC20` (patch 0x2C820) | `override_instrument_parameters_`: replaces the call to `0x8002E2AC` (`__n_setInstChanState_Alt`) on a MIDI program change | `midi.asm:1363-1416` |
+| `0x8002F6C0` (patch 0x302C0) | `override_master_volume_`: replaces the master volume read in `n_alSeqpGetVol` | `midi.asm:1423-1440` |
+| `0x800269CC` (patch 0x275CC) | `fix_0x2b7_`: FGM id `0x2B7` is out of bounds in `play_` | `FGM.asm:962-974` |
 | `0x800DF864` (patch 0x5B064) | `sfx_replace` (steps/landing) | `SFXReplace.asm:19-21` |
 | `0x80144470` (patch 0xBEEB0) | `sfx_replace_down_bounce` | `SFXReplace.asm` |
 | `0x800C86C4` (patch 0x440A4) | pan fix of the hit SFX | `Stereo.asm` |
@@ -478,7 +483,43 @@ index in the `S1_music` table. Ids 0..46 are vanilla and not listed. The port's 
 | Sequences | `parseSeqFile` points the sequence entries straight into the 14.7 MB sbk blob (it does not fit the audio heap and outlives the session). |
 | FGM tables | `fgm_tbl` / `fgm_ucd` are rebuilt as compact tables (`BE u32 count`, offsets, records), `fgm_unk` as the flat envelope array; the bridge parses them as `SYAudioPackage`. |
 | Track titles | `port/remix/remix_music_titles_data.inc` (generated), drawn at match start by `decomp/src/gm/gmremixmusictitle.c` (BGM.asm `show_music_title_`). |
-| Stage music, random music (`BGM.asm`) | `grRemixGetStageBGM` (`decomp/src/gr/grremix/grremixstage.c`), the Random Music list (`grremixrandommusic.c`), master volume (`decomp/src/gm/gmremixmusic.c`), menu music (`gmremixmenumusic.c`). The custom MIDI entries of the Random Music list are not listed (their ids are assembly-time values without a symbol in `remix_symbols.h`). |
+| Per-song MIDI overrides (`midi.asm` `priority_override_table`, `bend_range_override_table`, `master_volume_override_table`) | `decomp/src/gm/gmremixmidi.c` reads the tables from the RAM image (`REMIX_SYM_MIDI__*`) for the song that is playing (`syAudioGetBGMPlaying(0)`, the port equivalent of `BGM.safe_id`); the pure addressing and "0 = not set" rules are in `gmremixmidirules.c` (`tests/remix/test_midi_rules.c`). Hooks: `__n_CSPHandleMIDIMsg` in `libultra/n_audio/n_env.c` (program change, the only caller `0x8002BC20` patches; the `N_ALSeqPlayer` copy in `n_seqplayer.c` is not on the BGM path) calls `gmRemixMidiOverrideInstrument` after `__n_setInstChanState_Alt`, and `n_alSeqpGetVol` (`n_seqpgetvol.c`) reads the master volume through `gmRemixMidiMasterVolume`. Tables in the built image: priority 30 overrides in 18 songs (an array of one byte per instrument, 71 instruments), bend range 17 overrides in 14 songs (a signed halfword per instrument), master volume 177 songs with a value (one byte per song, 376 songs, max 127). A zero value keeps the instrument or sequence value. A song id outside `0..375`, or no song playing (`-1`), has no override. `SSB64_MIDI_LOG=1` prints `[midi] instrument track=<id> inst=<n> priority=<old>-><new> bend=<old>-><new>` for every program change an override changes, and `[midi] master track=<id> volume=<old>-><new>` once per song when the master volume override changes the value. |
+| Stage music, random music (`BGM.asm`) | `grRemixGetStageBGM` (`decomp/src/gr/grremix/grremixstage.c`), the Random Music list (`grremixrandommusic.c`), master volume (`decomp/src/gm/gmremixmusic.c`), menu music (`gmremixmenumusic.c`). The Random Music list includes the custom MIDI entries (section 5.1). Stage song pick, FD intro and Hurry Up swap: section 5.1. |
+
+### 5.1 Stage song pick, Final Destination intro and Hurry Up swap
+
+Hook `BGM.asm apply_alt_or_random_music_` (RAM `0x800FC314`, right after the stage file loads) is `mpCollisionInitGroundData`, which now calls
+`grRemixGetStageBGM` (`gr/grremix/grremixstagebgm.c`, rules in `gm/gmremixbgmstagerules.c`) in every scene that plays the stage song: VS, 1P game,
+Bonus stage, Training, How to Play and the VS demo (`scene_curr` in VSBattle, 1PGame, 1PBonusStage, 1PTrainingMode, Explain, AutoDemo). The opening
+movies load a stage too but never play its song, so they are skipped. The steps, in the asm order:
+
+1. VS demo only: a file song of 24 (the Final Destination intro) becomes 25, so the demo skips the intro.
+2. `Stages.default_music_track_table` override (value minus 1) or the file song is the stage default (`BGM.default_track`).
+3. C buttons held on any of the four controllers at that moment (`Joypad.check_buttons_all_`, "match any", read from `gSYControllerDevices[].button_hold`):
+   C-Up the default song, C-Left the Occasional, C-Right the Rare, C-Down the Rare 2 alternate (checked in that order). A forced song also blocks Random
+   Music (`random_disabled`), except when the stage has no song in that slot: then the default plays and Random Music may still replace it.
+4. No C button: with Salty Runback Preserves Song on and a salty runback the previous pick is reused (`BGM.current_track`, the pick before Random Music);
+   otherwise one roll of 100 chooses the default (65), Occasional (16), Rare (10) or Rare 2 (9), an empty slot keeping the default. The roll does not block
+   Random Music.
+5. Random Music (when `random_music` is on and `random_disabled` is false): a pick from the list of stage and menu tracks plus the custom MIDIs. The custom
+   part is not a table of ids: `Toggles.entry_random_music_first_custom` starts the `Menu.entry` chain of the sorted custom rows (277 in the Remix image);
+   each row's value is its toggle and its word `0x24` the BGM id (the `preview_bgm_` argument), so `grremixrandommusic.c` walks the chain and no symbol per
+   track is needed. Menu Music RANDOM ALL and the pause D-pad Down share that list.
+
+The 1P modes that force a song (`SinglePlayerModes.asm set_bgm`, `sc1PRemixMusicApplyModeSong`) write the stage header after this pick and win over it.
+`master_hand_music_fix_` (OP-8) keeps the random or alternate song on the 1P Final Stage when Random Music is on; it works now that the 1P scene runs the pick.
+
+**Final Destination intro** (`FD.asm music_fix_`, hook `ifCommonBattleUpdateInterfaceAll` at `0x8011486C`, `gmRemixBgmSwapFdIntroUpdate`): on Final Destination,
+Final Destination DL and Final Tentation (VS) and on the 1P Final Stage (standard and Remix 1P, scene 1PGame, `spgame_stage` 13), exactly 840 updates
+(`dSYTaskmanUpdateCount`) after the last song started, if the stage song still is 24, the current and stage songs become 25 and 25 plays. The start of the count
+is stored when the stage song plays (`mpCollisionSetPlayBGM`, the asm stores it in `BGM.play_`) and restarts when the playing song changes (item music), seen one
+update later than the asm. `scVSBattlePortFixupFDMusic` (play 25 at once) is compiled only for the non-Remix port. Alternate or Random Music on Final Destination
+replaces song 24 before the check, so no intro plays then.
+
+**Hurry Up** (`BGM.asm thirty_second_music_swap`, `ifCommonTimerFuncRun`, `gmRemixBgmSwapHurryUpdate`): at 30 seconds left the swap is chosen by the song playing
+(`gMPCollisionBGMCurrent`), not by the stage: Mushroom Kingdom (2) to Fast (3), SMB2 Overworld (179) to SMB2 Boss (292), Underground (315) to Underground Hurry
+(316), unless the stage song already is a Hurry song. While Hammer or Star music plays nothing swaps until it ends. The vanilla Inishie-only test remains for the
+non-Remix port.
 
 Case note for the Remix source: `main.asm:320` includes `src/MIDI.asm` and `FGM.asm:11` includes `MIDI.asm`, but the file is `src/midi.asm`. It builds
 on case-insensitive file systems (macOS) and breaks on case-sensitive ones (Linux); `scripts/remix/assemble-remix.sh` runs on macOS.

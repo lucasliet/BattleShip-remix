@@ -5,6 +5,11 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_twelvecb_rules.c
     test_1p_mode_names.c
     test_1p_mode_rules.c
+    test_bgm_stage_rules.c
+    test_bgm_swap_rules.c
+    test_menu_music_rules.c
+    test_midi_rules.c
+    test_announcer_rules.c
     test_allstar_percent_rules.c
     test_twelvecb_modes_rules.c
     test_1p_game_rules.c
@@ -118,6 +123,12 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtwelvecbrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmodename.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixmoderules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixbgmstagerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixbgmswaprules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixmenumusicrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixmidirules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixannouncerrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixannouncertables.c
     ${CMAKE_SOURCE_DIR}/decomp/src/sc/sc1pmode/sc1premixallstarpercentrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixtwelvecbdefeatedrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecbdkmoderules.c
