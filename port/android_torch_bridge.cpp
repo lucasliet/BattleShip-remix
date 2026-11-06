@@ -430,6 +430,34 @@ static void derive_android_css_stage_assets(const char *rom_path, const char *ds
          out_dir.string().c_str());
 }
 
+/**
+ * Renames Torch's output to this build's archive name and writes the .recipe sidecar that
+ * AssetExtractor compares against BuildConfig to decide when to re-extract.
+ *
+ * @param out_path archive Torch wrote (config.yml names it BattleShip.o2r for every ROM).
+ * @param dst_dir  directory the game loads the archive from.
+ * @return true when the archive and its sidecar are in place.
+ */
+static bool finalize_archive(const std::string &out_path, const char *dst_dir) {
+    const std::filesystem::path archive = std::filesystem::path(dst_dir) / SSB64_O2R_NAME;
+    std::error_code ec;
+    if (std::filesystem::path(out_path) != archive) {
+        std::filesystem::rename(out_path, archive, ec);
+        if (ec) {
+            LOGE("torch_extract_o2r: could not rename %s to %s: %s", out_path.c_str(),
+                 archive.string().c_str(), ec.message().c_str());
+            return false;
+        }
+    }
+    std::ofstream recipe(archive.string() + ".recipe", std::ios::trunc);
+    recipe << SSB64_ASSET_RECIPE_HASH << '\n';
+    if (!recipe) {
+        LOGE("torch_extract_o2r: could not write %s.recipe", archive.string().c_str());
+        return false;
+    }
+    return true;
+}
+
 } // namespace
 
 extern "C" {
@@ -538,7 +566,12 @@ int torch_extract_o2r(const char *rom_path, const char *src_dir, const char *dst
         }
 
         LOGI("torch_extract_o2r: extraction completed (%s)", out_path.c_str());
+        if (!finalize_archive(out_path, dst_dir)) {
+            return 4;
+        }
+#ifdef REGION_US
         derive_android_css_stage_assets(rom_path, dst_dir);
+#endif
         return 0;
     } catch (const std::exception &e) {
         LOGE("torch_extract_o2r: std::exception: %s", e.what());
@@ -589,6 +622,16 @@ Java_com_jrickey_battleship_RomImporter_extractO2R(
     if (dst) env->ReleaseStringUTFChars(dst_jstr, dst);
 
     return result;
+}
+
+/**
+ * Java signature: public static native String assetRecipe();
+ *
+ * @return the asset-pipeline fingerprint this build writes to the .recipe sidecar.
+ */
+JNIEXPORT jstring JNICALL
+Java_com_jrickey_battleship_RomImporter_assetRecipe(JNIEnv *env, jclass /*clazz*/) {
+    return env->NewStringUTF(SSB64_ASSET_RECIPE_HASH);
 }
 
 } // extern "C"

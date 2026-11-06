@@ -74,10 +74,13 @@ public final class RomImporter {
      * @param romPath  absolute path to a real file (NOT a content:// URI)
      * @param srcDir   directory with config.yml + yamls/us/*.yml
      *                 (extracted there by AssetExtractor on first run)
-     * @param dstDir   where BattleShip.o2r will be written
+     * @param dstDir   where BuildConfig.O2R_NAME and its .recipe sidecar will be written
      * @return 0 on success
      */
     public static native int extractO2R(String romPath, String srcDir, String dstDir);
+
+    /** @return the asset-pipeline fingerprint this build writes to the .recipe sidecar. */
+    public static native String assetRecipe();
 
     private RomImporter() { /* static */ }
 }

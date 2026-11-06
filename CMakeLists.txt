@@ -122,15 +122,13 @@ set_property(CACHE SSB64_VERSION PROPERTY STRINGS remix us jp)
 if(NOT SSB64_VERSION MATCHES "^(remix|us|jp)$")
     message(FATAL_ERROR "SSB64_VERSION must be 'remix', 'us' or 'jp' (got '${SSB64_VERSION}')")
 endif()
-# Android ships US-only. The Android build pipeline (Gradle asset staging,
-# touch overlay, JNI bridges) has only ever been tested against the US
-# decomp; bifurcating the APK / app-data dir per region the way desktop
-# does (PR #191) would also need a JP-specific BootActivity/AssetExtractor.
-# Until someone signs up for the JP Android effort, force US.
-if (CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT SSB64_VERSION STREQUAL "us")
+# Android ships US and Remix. The Android build pipeline (Gradle asset staging,
+# touch overlay, JNI bridges) has never been tested against the JP decomp;
+# a JP APK would also need a JP-specific BootActivity/AssetExtractor.
+if (CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT SSB64_VERSION MATCHES "^(us|remix)$")
     message(FATAL_ERROR
-        "Android build is US-only (got SSB64_VERSION=${SSB64_VERSION}). "
-        "Drop -DSSB64_VERSION=jp from the Gradle externalNativeBuild args.")
+        "Android build supports SSB64_VERSION=us or remix (got ${SSB64_VERSION}). "
+        "Pass -Pssb64.version=remix|us to Gradle.")
 endif()
 if (BATTLESHIP_UWP AND NOT SSB64_VERSION STREQUAL "us")
     message(FATAL_ERROR "The UWP package supports the US ROM only")
@@ -1562,6 +1560,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
     # BinaryTools, N64Graphics, spdlog, GSL, ...). All are static libs from
     # torch's CMakeLists.txt under USE_STANDALONE=OFF.
     target_link_libraries(torch_runner PRIVATE torch)
+    target_compile_definitions(torch_runner PRIVATE
+        SSB64_O2R_NAME=\"${SSB64_APP_NAME}.o2r\"
+        SSB64_ASSET_RECIPE_HASH=\"${SSB64_ASSET_RECIPE_HASH}\"
+        REGION_${SSB64_VERSION_UC}=1
+    )
     set_target_properties(torch_runner PROPERTIES OUTPUT_NAME "torch_runner")
 
     # Standalone ARM coroutine test (off by default — opt in for asm

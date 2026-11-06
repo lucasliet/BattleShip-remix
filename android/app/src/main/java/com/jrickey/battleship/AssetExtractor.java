@@ -142,9 +142,25 @@ public final class AssetExtractor {
         }
     }
 
-    /** Whether BattleShip.o2r already exists in externalFilesDir. Phase 4.4 uses this. */
+    /**
+     * Whether the game archive in externalFilesDir exists and was extracted by this build's asset
+     * pipeline; an archive with an outdated or missing .recipe sidecar must be extracted again.
+     */
     public static boolean haveExtractedRom(Context ctx) {
         File dst = ctx.getExternalFilesDir(null);
-        return dst != null && new File(dst, "BattleShip.o2r").isFile();
+        if (dst == null || !new File(dst, BuildConfig.O2R_NAME).isFile()) {
+            return false;
+        }
+        File recipe = new File(dst, BuildConfig.O2R_NAME + ".recipe");
+        try {
+            String have = new String(readAll(recipe), StandardCharsets.UTF_8).trim();
+            if (have.equals(RomImporter.assetRecipe())) {
+                return true;
+            }
+            Log.i(TAG, "Game archive is outdated (recipe " + have + "), asking for the ROM again");
+        } catch (IOException ioe) {
+            Log.i(TAG, "Game archive has no readable recipe, asking for the ROM again: " + ioe.getMessage());
+        }
+        return false;
     }
 }

@@ -46,6 +46,16 @@ val haveReleaseKeystore: Boolean =
 // Resolve relative to projectDir so it works from any worktree.
 val repoRoot = rootProject.projectDir.resolve("..").canonicalFile
 
+// Game version built into the APK: -Pssb64.version=remix (default) or us. Each version gets its own
+// package id, label and archive name, so both can be installed side by side.
+data class GameVersion(val applicationId: String, val label: String, val o2rName: String)
+val ssb64Version = (project.findProperty("ssb64.version") as String?) ?: "remix"
+val gameVersion = when (ssb64Version) {
+    "remix" -> GameVersion("dev.lucasliet.battleship.remix", "BattleShip Remix", "BattleShip-Remix.o2r")
+    "us" -> GameVersion("com.jrickey.battleship", "BattleShip", "BattleShip.o2r")
+    else -> error("ssb64.version must be 'remix' or 'us' (got '$ssb64Version')")
+}
+
 /** Resolve a generated asset by checking the desktop build dir first
  *  (where new-worktree.sh symlinks main-tree outputs into build/), then
  *  the repo root, then fail with a clear message. */
@@ -123,7 +133,10 @@ android {
     ndkVersion = "29.0.14206865"
 
     defaultConfig {
-        applicationId = "com.jrickey.battleship"
+        applicationId = gameVersion.applicationId
+        resValue("string", "app_name", gameVersion.label)
+        buildConfigField("String", "O2R_NAME", "\"${gameVersion.o2rName}\"")
+        buildConfigField("String", "SSB64_VERSION", "\"$ssb64Version\"")
         // Default floor is Android 7.0 (API 24) — the lowest this codebase can
         // build for on 32-bit ARM. libc++ <fstream> (pulled in via libultraship)
         // calls ::fseeko/::ftello, which Bionic only declares at API >= 24 on
@@ -158,7 +171,13 @@ android {
                 arguments += listOf(
                     "-DUSE_AUTO_VCPKG=OFF",
                     "-DANDROID_STL=c++_shared",
+                    "-DSSB64_VERSION=$ssb64Version",
                 )
+                // The asset generators need Pillow; the repo's venv has it.
+                val venvPython = repoRoot.resolve(".toolchain/host/venv/bin/python")
+                if (venvPython.exists()) {
+                    arguments += "-DPython3_EXECUTABLE=${venvPython.absolutePath}"
+                }
                 // Targets we explicitly want AGP to drive a build for.
                 //   ssb64         — libmain.so (the Activity loads this)
                 //   torch_runner  — libtorch_runner.so (first-run ROM
@@ -248,6 +267,42 @@ android {
                 "META-INF/LGPL2.1",
             )
         }
+    }
+}
+
+/** Copies the res/ templates, replacing @APPLICATION_ID@ with the variant's package id. */
+abstract class GenerateTemplateResTask : DefaultTask() {
+    @get:InputDirectory
+    abstract val templateDir: DirectoryProperty
+
+    @get:Input
+    abstract val applicationId: Property<String>
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val source = templateDir.get().asFile
+        val target = outputDir.get().asFile
+        target.deleteRecursively()
+        source.walkTopDown().filter { it.isFile }.forEach { file ->
+            val out = target.resolve(file.relativeTo(source))
+            out.parentFile.mkdirs()
+            out.writeText(file.readText().replace("@APPLICATION_ID@", applicationId.get()))
+        }
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        val task = tasks.register<GenerateTemplateResTask>(
+            "generate${variant.name.replaceFirstChar { it.uppercase() }}TemplateRes"
+        ) {
+            templateDir.set(layout.projectDirectory.dir("src/template/res"))
+            applicationId.set(variant.applicationId)
+        }
+        variant.sources.res?.addGeneratedSourceDirectory(task, GenerateTemplateResTask::outputDir)
     }
 }
 

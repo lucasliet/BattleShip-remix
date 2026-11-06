@@ -153,9 +153,9 @@ public class BootActivity extends ComponentActivity {
         if (repick) {
             File extDir = getExternalFilesDir(null);
             if (extDir != null) {
-                File rom = new File(extDir, "BattleShip.o2r");
+                File rom = new File(extDir, BuildConfig.O2R_NAME);
                 if (rom.exists() && !rom.delete()) {
-                    Log.w(TAG, "Couldn't delete BattleShip.o2r for repick");
+                    Log.w(TAG, "Couldn't delete " + BuildConfig.O2R_NAME + " for repick");
                 }
             }
         }
@@ -221,7 +221,7 @@ public class BootActivity extends ComponentActivity {
             return;
         }
         mPickButton.setVisibility(View.GONE);
-        mStatus.setText("Extracting ROM into BattleShip.o2r — this can take a few seconds…");
+        mStatus.setText("Extracting ROM into " + BuildConfig.O2R_NAME + " — this can take a few seconds…");
 
         new Thread(() -> {
             File extDir = getExternalFilesDir(null);
@@ -242,13 +242,13 @@ public class BootActivity extends ComponentActivity {
                         // an unrecognized ROM dump (SHA-1 not in config.yml).
                         // Byte order is NOT the problem: Torch normalizes
                         // .z64/.v64/.n64 in memory before hashing.
-                        msg = "That file isn't a supported ROM. BattleShip needs "
-                            + "Super Smash Bros. (U) v1.0 or the Japanese release "
-                            + "— any byte order (.z64/.v64/.n64) works. Re-dump "
-                            + "from a known-good cartridge or pick a different file.";
+                        msg = "That file isn't a supported ROM. This app needs "
+                            + supportedRomDescription()
+                            + " — any byte order (.z64/.v64/.n64) works. Pick a "
+                            + "different file.";
                         break;
                     case 4:
-                        msg = "Couldn't write BattleShip.o2r — free up storage "
+                        msg = "Couldn't write " + BuildConfig.O2R_NAME + " — free up storage "
                             + "space and try again.";
                         break;
                     default:
@@ -269,7 +269,7 @@ public class BootActivity extends ComponentActivity {
                 // archive on disk before returning 0; kept as a last-resort
                 // assertion.
                 runOnUi(() -> showError(
-                    "Torch returned success but BattleShip.o2r is not in " +
+                    "Torch returned success but " + BuildConfig.O2R_NAME + " is not in " +
                     extDir));
                 return;
             }
@@ -287,13 +287,19 @@ public class BootActivity extends ComponentActivity {
     private void showRomPicker() {
         mStatus.setText(
             "Welcome!\n\n" +
-            "BattleShip needs a copy of the original Super Smash Bros. (US) " +
-            "ROM to extract its assets. Provide your own dump — Nintendo's " +
-            "ROM is not distributed with the app.\n\n" +
+            "This app needs your own copy of " + supportedRomDescription() + " " +
+            "to extract its assets. The ROM is not distributed with the app.\n\n" +
             "After you pick the file, the assets stay on your device and the " +
             "ROM is discarded."
         );
         mPickButton.setVisibility(View.VISIBLE);
+    }
+
+    /** @return the ROM this build extracts from, as shown to the player. */
+    private static String supportedRomDescription() {
+        return "remix".equals(BuildConfig.SSB64_VERSION)
+            ? "the Smash Remix 2.0.1 ROM"
+            : "Super Smash Bros. (U) v1.0";
     }
 
     private void launchRomPicker() {

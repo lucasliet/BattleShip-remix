@@ -18,7 +18,7 @@
 
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.jrickey.battleship"
+            android:targetPackage="@APPLICATION_ID@"
             android:targetClass="com.jrickey.battleship.BootActivity">
             <extra
                 android:name="ssb64.repick"
@@ -36,7 +36,7 @@
 
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.jrickey.battleship"
+            android:targetPackage="@APPLICATION_ID@"
             android:targetClass="com.jrickey.battleship.BootActivity">
             <extra
                 android:name="ssb64.import_pack"

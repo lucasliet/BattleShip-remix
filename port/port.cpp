@@ -46,8 +46,8 @@
 #endif
 #if !defined(__ANDROID__)
 #include "port_window_icon.h"
-#include "widescreen/widescreen.h"
 #endif
+#include "widescreen/widescreen.h"
 #if defined(__ANDROID__)
 #include <android/api-level.h>  // android_get_device_api_level (audio-driver gate)
 #endif
