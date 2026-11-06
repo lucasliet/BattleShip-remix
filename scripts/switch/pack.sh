@@ -37,14 +37,14 @@ for extra in gamecontrollerdb.txt config.yml; do
 done
 [[ -d "$ROOT/assets" ]] && cp -a "$ROOT/assets" "$TARGET_DIR/"
 
-cat > "$TARGET_DIR/LEIA-ME.txt" <<EOF
-$APP — Nintendo Switch (homebrew)
+cat > "$TARGET_DIR/README.txt" <<EOF
+$APP for Nintendo Switch (homebrew)
 
-1. Copie a pasta switch/ para a raiz do cartao SD.
-2. Os arquivos .o2r sao derivados da SUA copia do jogo (nenhum asset distribuido).
-   Se faltam, gere-os numa maquina com o build desktop e copie para switch/$APP/.
-3. Execute via Homebrew Menu em modo full-memory (segure R ao abrir um jogo
-   instalado) — applet mode nao tem RAM suficiente.
+1. Copy the switch/ folder to the root of the SD card.
+2. The .o2r files come from YOUR copy of the game (no assets are distributed).
+   If they are missing, extract them with the desktop build and copy them to switch/$APP/.
+3. Launch from the Homebrew Menu in full-memory mode (hold R while opening an
+   installed game). Applet mode does not have enough memory.
 EOF
 
 echo "Pacote SD: $SD"

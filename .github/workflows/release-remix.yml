@@ -1,0 +1,217 @@
+name: Release (Remix)
+
+# BattleShip-remix fork release: BattleShip-Remix for macOS, Linux, Windows and Nintendo Switch.
+#
+# Triggered by a tag v* (for example v2.0.1-port.1), or by hand to test the builds (no Release is created then).
+# The release lands as a draft whose body is .github/release-notes.md plus the generated changelog; write the
+# Highlights section, then publish it.
+#
+# No game data is produced here: the desktop builds extract BattleShip-Remix.o2r from the user's ROM on first run,
+# and the Switch package needs the .o2r that the desktop build made (see the release notes).
+# The inherited upstream workflows (release.yml, build.yml, build-switch.yml, build-uwp.yml, readme-stats.yml) are
+# disabled in the fork's Actions settings.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  SSB64_VERSION: remix
+
+jobs:
+  build-macos:
+    runs-on: macos-14
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0   # git describe --tags gives the updater version
+      - name: Install build deps
+        run: |
+          brew install cmake ninja \
+            sdl2 glew libzip nlohmann-json tinyxml2 spdlog \
+            zip create-dmg dylibbundler coreutils
+          python3 -m pip install --break-system-packages Pillow
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: release-remix-macos
+          max-size: 2G
+      - name: Package macOS .app + .dmg (ad-hoc signed, not notarized)
+        env:
+          DMG_STYLED: "1"
+          DMG_TIMEOUT: "300"
+        run: bash scripts/package-macos.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remix-macos
+          path: dist/BattleShip-Remix.dmg
+          if-no-files-found: error
+
+  build-linux:
+    # jammy (glibc 2.35) so the AppImage runs on Steam Deck, Debian 12, Fedora 38+ and Ubuntu 22.04+.
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: release-remix-linux
+          max-size: 2G
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build zip clang \
+            libsdl2-dev libzip-dev libglew-dev \
+            nlohmann-json3-dev libtinyxml2-dev libspdlog-dev \
+            libgl1-mesa-dev libegl1-mesa-dev \
+            libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+            python3 python3-pil imagemagick file
+          # libzip's CMake config lists CLI tools that Ubuntu does not package.
+          sudo touch /usr/bin/zipcmp /usr/bin/zipmerge /usr/bin/ziptool
+          sudo chmod +x /usr/bin/zipcmp /usr/bin/zipmerge /usr/bin/ziptool
+      - name: Use clang
+        run: |
+          echo "CC=clang" >> "$GITHUB_ENV"
+          echo "CXX=clang++" >> "$GITHUB_ENV"
+      - name: Install AppImage tooling
+        run: |
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage \
+            -O /usr/local/bin/appimagetool
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage \
+            -O /usr/local/bin/linuxdeploy
+          chmod +x /usr/local/bin/appimagetool /usr/local/bin/linuxdeploy
+      - name: Package Linux AppImage
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: bash scripts/package-linux.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remix-linux
+          path: dist/BattleShip-Remix-x86_64.AppImage
+          if-no-files-found: error
+
+  build-windows:
+    runs-on: windows-2022
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Install build deps
+        run: |
+          choco install ninja -y
+          python -m pip install --upgrade pip
+          python -m pip install Pillow
+        shell: pwsh
+      - name: Package Windows zip
+        env:
+          SSB64_ENABLE_SCRIPTING: "0"
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/package-windows.ps1
+        shell: pwsh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remix-windows
+          path: dist/BattleShip-Remix-windows.zip
+          if-no-files-found: error
+
+  build-switch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    container:
+      image: devkitpro/devkita64:20260219   # date-pinned
+    steps:
+      - name: Install host deps
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends python3 python3-pil zip git
+          # The switch-tinyxml2 portlib is too old for libultraship; its FetchContent copy is used instead.
+          dkp-pacman -R --noconfirm switch-tinyxml2 || true
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Mark the checkout safe for git describe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: release-remix-switch
+      - name: Configure
+        env:
+          DEVKITPRO: /opt/devkitpro
+        run: |
+          cmake -S . -B build-switch -GNinja \
+            -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBATTLESHIP_SWITCH=ON \
+            -DDISABLE_SCRIPTING=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DSSB64_VERSION=remix
+      - name: Build NRO
+        env:
+          DEVKITPRO: /opt/devkitpro
+        run: cmake --build build-switch --target ssb64_nro -j "$(nproc)"
+      - name: Package SD card folder
+        run: |
+          app=BattleShip-Remix
+          dir="dist/switch/SD/switch/$app"
+          mkdir -p "$dir"
+          cp "build-switch/$app.nro" "$dir/"
+          (cd libultraship/src/fast && cmake -E tar cf "$GITHUB_WORKSPACE/$dir/f3d.o2r" --format=zip shaders)
+          cp gamecontrollerdb.txt config.yml "$dir/"
+          cp -a assets "$dir/"
+          cat > "$dir/README.txt" <<EOF
+          $app for Nintendo Switch (homebrew)
+
+          1. Copy the switch/ folder to the root of the SD card.
+          2. Add your own BattleShip-Remix.o2r and BattleShip-Remix.o2r.recipe to switch/$app/.
+             They are not included: run the desktop build once with your Smash Remix 2.0.1 ROM and
+             copy the two files it extracts (its app data folder) to this folder.
+          3. Launch from the Homebrew Menu in full-memory mode (hold R while opening an installed game).
+             Applet mode does not have enough memory.
+          EOF
+          (cd dist/switch/SD && zip -qr "$GITHUB_WORKSPACE/dist/$app-switch.zip" switch)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remix-switch
+          path: dist/BattleShip-Remix-switch.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish draft release
+    needs: [build-macos, build-linux, build-windows, build-switch]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/release-notes.md
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Generate SHA256SUMS.txt
+        run: (cd artifacts && sha256sum -- * > SHA256SUMS.txt && cat SHA256SUMS.txt)
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/BattleShip-Remix.dmg
+            artifacts/BattleShip-Remix-x86_64.AppImage
+            artifacts/BattleShip-Remix-windows.zip
+            artifacts/BattleShip-Remix-switch.zip
+            artifacts/SHA256SUMS.txt
+          body_path: .github/release-notes.md
+          generate_release_notes: true
+          draft: true

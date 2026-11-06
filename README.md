@@ -20,7 +20,7 @@ What the port covers:
 
 The few places where the port deliberately behaves differently from the assembly are listed in [`docs/remix/deviations.md`](docs/remix/deviations.md). Widescreen stays out of scope for the Remix build (4:3).
 
-Packages are built for **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)** and **Nintendo Switch (homebrew .nro)**. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
+[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)** and **Nintendo Switch (homebrew .nro)** packages, and the built-in updater of the Remix build follows them. Android is not supported yet for the Remix. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
 
 ## No copyrighted assets are included in this repository
 

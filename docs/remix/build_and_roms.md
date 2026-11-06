@@ -95,7 +95,10 @@ To redo only the assets: `cmake --build build --target ExtractAssets`.
 
 These packages **embed `BattleShip-Remix.o2r`**, which is derived from the ROM. They are for personal use only and are never redistributed. A distributable package does
 not carry the `.o2r`: it is extracted from the user's ROM on first run, as `scripts/package-macos.sh`, `scripts/package-linux.sh` and
-`scripts/package-windows.ps1` do for every version; the release matrix of `.github/workflows/release.yml` builds `us`, `jp` and `remix`.
+`scripts/package-windows.ps1` do for every version. The fork's releases come from `.github/workflows/release-remix.yml`: a `v*` tag builds the
+macOS `.dmg` (ad-hoc signed, not notarized), the Linux AppImage, the Windows zip and the Switch SD-card zip (without `.o2r`), and opens a draft release whose
+body is `.github/release-notes.md` (write its Highlights, then publish). The Remix build's updater reads `lucasliet/BattleShip-remix` releases
+(`port/enhancements/Updater.cpp`). The inherited upstream workflows are disabled in the fork.
 
 - **macOS:** first make a Release build with `-DNON_PORTABLE=ON` in `build-macos-release/`, then run `scripts/macos/package-remix-contained.sh`. It reads the `.o2r`,
   `f3d.o2r` and the icons from `build/` and writes `dist/desktop/BattleShip-Remix.app`, `.dmg` and `.zip`. It does not use dylibbundler: the libraries are static from

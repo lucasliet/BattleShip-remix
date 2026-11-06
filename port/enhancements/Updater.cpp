@@ -47,6 +47,24 @@ namespace {
 #define BATTLESHIP_CURRENT_VERSION "v1.0.0"
 #endif
 
+#if defined(REGION_REMIX)
+// The Remix build is released by the BattleShip-remix fork, with its own asset names.
+constexpr const char* kLatestReleaseApi =
+    "https://api.github.com/repos/lucasliet/BattleShip-remix/releases/latest";
+constexpr const char* kReleasePageUrl =
+    "https://github.com/lucasliet/BattleShip-remix/releases/latest";
+
+#if defined(__linux__)
+constexpr const char* kPlatformAssetName = "BattleShip-Remix-x86_64.AppImage";
+#elif defined(_WIN32)
+constexpr const char* kPlatformAssetName = "BattleShip-Remix-windows.zip";
+#elif defined(__APPLE__)
+constexpr const char* kPlatformAssetName = "BattleShip-Remix.dmg";
+#else
+constexpr const char* kPlatformAssetName = "";
+#endif
+
+#else
 constexpr const char* kLatestReleaseApi =
     "https://api.github.com/repos/JRickey/BattleShip/releases/latest";
 constexpr const char* kReleasePageUrl =
@@ -60,6 +78,7 @@ constexpr const char* kPlatformAssetName = "BattleShip-windows.zip";
 constexpr const char* kPlatformAssetName = "BattleShip.dmg";
 #else
 constexpr const char* kPlatformAssetName = "";
+#endif
 #endif
 
 #if !defined(_WIN32)
