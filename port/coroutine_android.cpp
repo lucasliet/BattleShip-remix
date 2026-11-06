@@ -15,12 +15,11 @@
  * time.
  */
 
-#if defined(__ANDROID__) || defined(__SWITCH__)
+#if defined(__ANDROID__) || defined(__SWITCH__) || defined(__PS5__)
 
-#if !defined(__aarch64__) && !defined(__arm__)
-#  error "This coroutine backend supports arm64-v8a (coroutine_aarch64.S) "  \
-         "and armeabi-v7a (coroutine_armv7.S) only. Add an x86/x86_64 swap " \
-         "if you need those ABIs."
+#if !defined(__aarch64__) && !defined(__arm__) && !defined(__x86_64__)
+#  error "This coroutine backend supports arm64-v8a (coroutine_aarch64.S), "  \
+         "armeabi-v7a (coroutine_armv7.S) and x86_64 (coroutine_x86_64.S) only."
 #endif
 
 #include "coroutine.h"
@@ -31,7 +30,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__PS5__)
 #include <sys/mman.h>
 #include <unistd.h>
 #endif
@@ -75,6 +74,23 @@ static_assert(__builtin_offsetof(CoroCtx, sp)  == 32,     "sp offset");
 static_assert(__builtin_offsetof(CoroCtx, lr)  == 36,     "lr offset");
 static_assert(__builtin_offsetof(CoroCtx, d8)  == 40,     "d8 offset");
 static_assert(__builtin_offsetof(CoroCtx, d15) == 96,     "d15 offset");
+
+#elif defined(__x86_64__)
+/* SysV AMD64 callee-saved set. Mirrors coroutine_x86_64.S. */
+struct alignas(16) CoroCtx {
+    uint64_t rbx, rbp, r12, r13;   /* offsets   0..24 */
+    uint64_t r14, r15;             /*          32..40 */
+    uint64_t rsp;                   /*             48 */
+    uint32_t mxcsr;                 /*             56 */
+    uint16_t fpucw;                 /*             60 */
+    uint16_t pad;
+};
+static_assert(sizeof(CoroCtx) == 64,            "CoroCtx size must match asm");
+static_assert(__builtin_offsetof(CoroCtx, rbx)   == 0,    "rbx offset");
+static_assert(__builtin_offsetof(CoroCtx, r15)   == 40,   "r15 offset");
+static_assert(__builtin_offsetof(CoroCtx, rsp)   == 48,   "rsp offset");
+static_assert(__builtin_offsetof(CoroCtx, mxcsr) == 56,   "mxcsr offset");
+static_assert(__builtin_offsetof(CoroCtx, fpucw) == 60,   "fpucw offset");
 #endif
 
 struct PortCoroutine {
@@ -87,12 +103,14 @@ struct PortCoroutine {
     size_t  stack_total;    /* full mapping length incl. guard page */
 };
 
-/* Implemented in port/coroutine_aarch64.S (arm64) / coroutine_armv7.S (arm32) */
+/* Implemented in port/coroutine_aarch64.S (arm64) / coroutine_armv7.S (arm32) / coroutine_x86_64.S */
 void port_coroutine_swap(CoroCtx *from, CoroCtx *to);
 #if defined(__aarch64__)
 void port_coroutine_trampoline_aarch64(void);
 #elif defined(__arm__)
 void port_coroutine_trampoline_armv7(void);
+#elif defined(__x86_64__)
+void port_coroutine_trampoline_x86_64(void);
 #endif
 
 static thread_local PortCoroutine *sCurrentCoroutine = nullptr;
@@ -184,6 +202,15 @@ PortCoroutine *port_coroutine_create(void (*entry)(void *), void *arg, size_t st
     co->ctx.sp = (uint32_t)(uintptr_t)stack_top;
     co->ctx.r4 = (uint32_t)(uintptr_t)co;
     co->ctx.lr = (uint32_t)(uintptr_t)&port_coroutine_trampoline_armv7;
+#elif defined(__x86_64__)
+    /* The swap's final `ret` pops the trampoline address; r12 carries the
+     * coroutine. rsp is 16-byte aligned once that pop has happened. */
+    uint64_t *initial_sp = (uint64_t *)stack_top - 1;
+    *initial_sp = (uint64_t)&port_coroutine_trampoline_x86_64;
+    co->ctx.rsp   = (uint64_t)initial_sp;
+    co->ctx.r12   = (uint64_t)co;
+    co->ctx.mxcsr = 0x1F80;
+    co->ctx.fpucw = 0x037F;
 #endif
 
     return co;
@@ -243,4 +270,4 @@ int port_coroutine_in_coroutine(void) {
 
 } /* extern "C" */
 
-#endif /* __ANDROID__ */
+#endif /* __ANDROID__ || __SWITCH__ || __PS5__ */
