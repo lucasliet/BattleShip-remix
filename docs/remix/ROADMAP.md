@@ -42,17 +42,17 @@ documentation is indexed in [`README.md`](README.md).
 
 ## Current position
 
-**In progress: M11 Finalization, Phase 5b (gaps found by the patch audit of 2026-11-05).** What is left for "Remix playable"
+**In progress: M11 Finalization, Phase 7 (open bugs, instrumentation, packages).** What is left for "Remix playable"
 is Phase 1 (rest of I7) and Phases 5b to 8 of M11, at the end of this file. The closed milestones are summarised in
 **History and decisions**.
 
 | Milestone | State |
 |---|---|
 | M0 to M10 | closed; open leftovers: T9.1b and T10.2 (user), T9.3 (after Phase 8) |
-| **M11 Finalization** | Phases R, 2, 3, 4, 5 and 6 done; Phase 1 done except the rest of I7; Phases 5b (in-game checks), 7 and 8 open |
+| **M11 Finalization** | Phases R, 2, 3, 4, 5, 5b and 6 done; Phase 1 done except the rest of I7; Phases 7 and 8 open |
 
-- **Next step:** the 86 ledger items still open in Phase 5b (in-game checks of lots 3 to 7, CT-7 on every fighter row,
-  GP-6, ST-10, ST-11, IT-10), then Phases 7 and 8. The rest of I7 is in lot 3 (package F2).
+- **Next step:** Phase 7 (bugs, instrumentation, packages), then Phase 8. Phase 5b closed on 2026-11-06: every ledger
+  item is `done` or `n/a`, `parity.md` regenerated (no `partial` row).
 - **Depends on the user:** T9.1b (listening and visual pass) and T10.2 (Switch hardware). "Remix playable" (T9.3) is only
   reported after Phase 8.
 - **Last checkpoint:** CP12 (2026-11-05, Phases 4 and 5 closed; outer `e8faa57`, decomp `be259fe8b`).
@@ -190,7 +190,7 @@ Closed phases:
 - [ ] **Phase 1, rest of I7** (model part image or palette swap, `MODEL_PART_IMAGE_INIT_`; `notes/i7_part_image.md`): the
   Yoshi egg colour when the egg is thrown, laid and at the entry. Done in Phase 5b lot 3 (package F2, with CT-9). Costumes
   beyond `num_costumes` in the match and on the CSS, and the shield and escape egg, are done.
-- [ ] **Phase 5b** gaps found by the patch audit (2026-11-05, plan approved the same day). The ledger is
+- [x] **Phase 5b** gaps found by the patch audit (2026-11-05, plan approved the same day). The ledger is
   [`patch_audit.md`](patch_audit.md): one ID per item (prefix per group), asm location, decomp function, what the player
   misses, hook site, effort; the per-scope map is [`patch_audit_scopes.md`](patch_audit_scopes.md). Every open ledger item
   (251 at the audit) is placed below; lot 8 and the Phase 6 list close the count. The CPU-only scopes got the rows SH-15 to

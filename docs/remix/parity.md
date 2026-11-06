@@ -5,11 +5,11 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 
 | Area | ported | adapted | partial | todo | n/a | progress |
 |---|---|---|---|---|---|---|
-| fighters | 110 | 0 | 42 | 0 | 0 | 86% |
-| items | 29 | 0 | 4 | 0 | 0 | 94% |
-| stages | 6 | 0 | 1 | 0 | 0 | 93% |
+| fighters | 152 | 0 | 0 | 0 | 0 | 100% |
+| items | 33 | 0 | 0 | 0 | 0 | 100% |
+| stages | 7 | 0 | 0 | 0 | 0 | 100% |
 | audio | 6 | 0 | 0 | 0 | 0 | 100% |
-| menus_modes | 31 | 0 | 13 | 0 | 0 | 85% |
+| menus_modes | 44 | 0 | 0 | 0 | 0 | 100% |
 | ai | 32 | 0 | 0 | 0 | 0 | 100% |
 | infra | 2 | 2 | 0 | 0 | 9 | 100% |
 
@@ -23,50 +23,50 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `AirDodge.asm` | Air dodge changes: resets the air dash flag on landing and at fighter start, and hooks the jump-input check for the Remix air dodge rules. | fighters | ported | ftremixairdodge.c |
 | `BGM.asm` | Background music system: play/stop/volume hooks, stage music selection, random music lists, menu music, and the music title shown at match start. | audio | ported | grRemixGetStageBGM; ledger: 3 done, 0 n/a, 0 open |
 | `Banjo/AI/Attacks.asm` | CPU attack table of Banjo: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `Banjo/Banjo.asm` | Banjo: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/banjo; ledger: 3 done, 0 n/a, 1 open (CT-7) |
+| `Banjo/Banjo.asm` | Banjo: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/banjo; ledger: 4 done, 0 n/a, 0 open |
 | `Banjo/BanjoSpecial.asm` | Banjo special moves: egg shooting forward and backward on the ground and in the air, plus the other special-move actions, physics and collisions. | fighters | ported | decomp/src/ft/ftremix/banjo |
 | `Blastzone.asm` | Blast zone options: skip the bottom blast zone sound and replace the routines that KO players at the edges of the screen (blast zone modes). | stages | ported | grremixblastzone.c |
 | `Bonus.asm` | Bonus 1/2/3 mode select: CSS objects when cycling between modes, no auto-start after choosing a fighter in Remix mode, and bonus stage handling. | menus_modes | ported | sc1premixbonusexit.c, sc1premixmultiman.c |
 | `Boot.asm` | Boot loader of the Remix image (DMAs the code to RAM 0x80400000), version string on the title screen, and the 1P victory image shown after the N64 logo. | menus_modes | ported | title logo in mntitle.c, mnremixsplash.c; ledger: 1 done, 1 n/a, 0 open |
 | `Bowser/AI/Attacks.asm` | CPU attack table of Bowser: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
 | `Bowser/BowserSpecial.asm` | Bowser special moves: fire breath and flame-cancel handling, projectile skip, air/ground transitions and the Giant Bowser variant. | fighters | ported | decomp/src/ft/ftremix/bowser |
-| `Bowser/bowser.asm` | Bowser: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/bowser; ledger: 4 done, 0 n/a, 1 open (CT-7) |
+| `Bowser/bowser.asm` | Bowser: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/bowser; ledger: 5 done, 0 n/a, 0 open |
 | `Camera.asm` | Camera options: camera mode selection and values on creation, fixed camera during Master Hand entry, and camera tweaks for Remix stages and modes. | stages | ported | grremixcamera.c; ledger: 2 done, 0 n/a, 0 open |
-| `CharEnvColor.asm` | Per-character environment colour overrides (cloaked/invisible and other tints), custom display list reset on fighter load, and player indicator alpha. | fighters | partial | ftremixenvcolor.c; ledger: 1 done, 0 n/a, 1 open (GP-6) |
+| `CharEnvColor.asm` | Per-character environment colour overrides (cloaked/invisible and other tints), custom display list reset on fighter load, and player indicator alpha. | fighters | ported | ftremixenvcolor.c; ledger: 2 done, 0 n/a, 0 open |
 | `Character.asm` | Fighter framework: defines the 97 character ids, the id-indexed tables (moves, AI, sounds, variants, costume data) and the define_character macro for all added fighters. | fighters | ported | port/remix/remix_roster.cpp, ftremix*; ledger: 14 done, 2 n/a, 0 open |
 | `CharacterDataScreen.asm` | Character data screen (the Data menu fighter viewer) extended for the Remix roster. | menus_modes | ported | mnremixchardata.c, mncharacters.c; ledger: 4 done, 0 n/a, 0 open |
-| `CharacterSelect.asm` | Character select screen extended to the full roster: grid layout and pages, portraits, name textures, series logos, CPU/costume handling, tables per character. | menus_modes | partial | CSS port (port/css_*, mnplayers*); ledger: 8 done, 0 n/a, 2 open (MN-4, MN-5) |
-| `CharacterSelectDebugMenu.asm` | Debug menu on the character select screen with extra control over characters and gameplay options. | menus_modes | partial | remix_player_panel.cpp, mnremixcsspanelmenu*.c; ledger: 3 done, 0 n/a, 1 open (MN-11) |
+| `CharacterSelect.asm` | Character select screen extended to the full roster: grid layout and pages, portraits, name textures, series logos, CPU/costume handling, tables per character. | menus_modes | ported | CSS port (port/css_*, mnplayers*); ledger: 10 done, 0 n/a, 0 open |
+| `CharacterSelectDebugMenu.asm` | Debug menu on the character select screen with extra control over characters and gameplay options. | menus_modes | ported | remix_player_panel.cpp, mnremixcsspanelmenu*.c; ledger: 4 done, 0 n/a, 0 open |
 | `ChargeSmashAttacks.asm` | Charge smash attacks: charging routine, display of the charge, and item position update on hitlag. | fighters | ported | ftremixchargesmash.c |
 | `Cheats.asm` | Permanent patches such as unlocking everything. | menus_modes | ported | only the unlock word is live in the asm (Cheats.asm:19-37 is commented out); unlock all is a port toggle |
 | `Color.asm` | Colour constants (generated). | infra | n/a | constants |
 | `Combo.asm` | Combo counting that includes grabs and wall bounces. | fighters | ported | ftremixcombo.c |
 | `ComboMeter.asm` | Combo meter display; hides it while a SCORE +/-1 value is shown for a port. | menus_modes | ported | ifremixcombometer.c, ifremixcombohits.c |
 | `Conker/AI/Attacks.asm` | CPU attack table of Conker: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `Conker/Conker.asm` | Conker: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/conker; ledger: 0 done, 0 n/a, 1 open (CT-7) |
+| `Conker/Conker.asm` | Conker: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/conker; ledger: 1 done, 0 n/a, 0 open |
 | `Conker/ConkerSpecial.asm` | Conker special moves: grenade throw (begin, explosion, resting, blast zone, collision), wait/descent air states. | fighters | ported | decomp/src/ft/ftremix/conker |
-| `Costumes.asm` | Extended costumes: 19XX-style C-left/C-right selection, extra costumes per fighter (palette, prim colour, texture parts), CPU costumes, team costumes and stock icon palettes. | menus_modes | partial | CSS port (costume tables); ledger: 0 done, 0 n/a, 1 open (MN-12) |
+| `Costumes.asm` | Extended costumes: 19XX-style C-left/C-right selection, extra costumes per fighter (palette, prim colour, texture parts), CPU costumes, team costumes and stock icon palettes. | menus_modes | ported | CSS port (costume tables); ledger: 1 done, 0 n/a, 0 open |
 | `Crash/AI/Attacks.asm` | CPU attack table of Crash Bandicoot: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
-| `Crash/Crash.asm` | Crash Bandicoot: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/crash; ledger: 3 done, 0 n/a, 1 open (CT-7) |
+| `Crash/Crash.asm` | Crash Bandicoot: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/crash; ledger: 4 done, 0 n/a, 0 open |
 | `Crash/CrashSpecial.asm` | Crash special moves: spin and dig/dive actions with their GFX, blocked variants, shield hitlag and ECB patches. | fighters | ported | decomp/src/ft/ftremix/crash |
 | `Crash.asm` | Disables the vanilla crash-debugger button checks. | infra | adapted | N64 crash debugger; the port crash handler logs the backtrace without the button sequence |
 | `Credits.asm` | Remix credits: extended section info table and the credits file load. | menus_modes | ported | scstaffroll.c; ledger: 1 done, 0 n/a, 0 open |
 | `CustomGrabAction.asm` | Custom grabbed-action support: a fighter can use its own action instead of CapturePulled, position fix on frame 1, and the ThrownDK break-out/mash rules. | fighters | ported | ftremixpianoshared.c, fighter_registry custom_capture_* |
 | `DI.asm` | Toggle for Japanese-style directional influence strength. | fighters | ported | ftremixdi.c |
-| `DKMode.asm` | DK mode / Lanky mode: enlarges the head and arms of fighters through the render hook (portrait easter egg). | fighters | partial | ftremixdkmode.c (port variable: the RAM image is read-only); ledger: 0 done, 0 n/a, 1 open (MD-23) |
+| `DKMode.asm` | DK mode / Lanky mode: enlarges the head and arms of fighters through the render hook (portrait easter egg). | fighters | ported | ftremixdkmode.c (port variable: the RAM image is read-only); ledger: 1 done, 0 n/a, 0 open |
 | `DSamus/AI/Attacks.asm` | CPU attack table of Dark Samus: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `DSamus/DSamus.asm` | Dark Samus: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/dsamus; ledger: 1 done, 0 n/a, 1 open (CT-7) |
+| `DSamus/DSamus.asm` | Dark Samus: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/dsamus; ledger: 2 done, 0 n/a, 0 open |
 | `DSamus/DsamusSpecial.asm` | Dark Samus special moves: charge shot with ground/air charge levels, Kirby copy variants, and the physics/transition patches. | fighters | ported | decomp/src/ft/ftremix/dsamus; ledger: 1 done, 1 n/a, 0 open |
-| `Damage.asm` | Damage types: jump tables for damage effects by id, a stun damage type that puts opponents in the Stun action, and extended damage handling. | fighters | partial | ftremixdamage.c; ledger: 1 done, 0 n/a, 2 open (GP-4, GP-13) |
+| `Damage.asm` | Damage types: jump tables for damage effects by id, a stun damage type that puts opponents in the Stun action, and extended damage handling. | fighters | ported | ftremixdamage.c; ledger: 3 done, 0 n/a, 0 open |
 | `Dedede/AI/Attacks.asm` | CPU attack table of King Dedede: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 4 done, 0 n/a, 0 open |
-| `Dedede/Dedede.asm` | King Dedede: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/dedede; ledger: 5 done, 0 n/a, 2 open (CT-7, FT-21) |
+| `Dedede/Dedede.asm` | King Dedede: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/dedede; ledger: 7 done, 0 n/a, 0 open |
 | `Dedede/DededeSpecial.asm` | King Dedede special moves: swallow/spit, Super Dedede Jump with ceiling bonk, idle/walk/turn states while holding. | fighters | ported | decomp/src/ft/ftremix/dedede |
 | `DrLuigi/AI/Attacks.asm` | CPU attack table of Dr. Luigi: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `DrLuigi/DrLuigi.asm` | Dr. Luigi: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | data-only clone (roster); ledger: 0 done, 0 n/a, 1 open (CT-2) |
+| `DrLuigi/DrLuigi.asm` | Dr. Luigi: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | data-only clone (roster); ledger: 1 done, 0 n/a, 0 open |
 | `DrMario/AI/Attacks.asm` | CPU attack table of Dr. Mario: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `DrMario/DrMario.asm` | Dr. Mario: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | data-only clone (roster); ledger: 0 done, 0 n/a, 1 open (CT-7) |
+| `DrMario/DrMario.asm` | Dr. Mario: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | data-only clone (roster); ledger: 1 done, 0 n/a, 0 open |
 | `DragonKing/AI/Attacks.asm` | CPU attack table of Dragon King: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 4 done, 0 n/a, 0 open |
-| `DragonKing/DragonKing.asm` | Dragon King: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/dragonking; ledger: 1 done, 0 n/a, 2 open (CT-7, CT-10) |
+| `DragonKing/DragonKing.asm` | Dragon King: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/dragonking; ledger: 3 done, 0 n/a, 0 open |
 | `DragonKing/DragonKingSpecial.asm` | Dragon King special moves: dragon ball spawn and destruction, air pull/drain with the drain flash fix, Kirby copy variants. | fighters | ported | decomp/src/ft/ftremix/dragonking |
 | `DragonKingHUD.asm` | Damage-number HUD rework used by Dragon King: damage digit offsets, horizontal spacing and vertical position. | stages | ported | ifremixdragonkinghud.c; ledger: 1 done, 0 n/a, 0 open |
 | `ELink/ELink.asm` | E Link (European-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries. | fighters | ported | data-only clone (roster) |
@@ -74,36 +74,36 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `EPuff/EPuff.asm` | E Jigglypuff (European-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries. | fighters | ported | data-only clone (roster) |
 | `ESamus/ESamus.asm` | E Samus (European-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries. | fighters | ported | data-only clone (roster) |
 | `Ebi/AI/Attacks.asm` | CPU attack table of Ebisumaru: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 1 done, 0 n/a, 0 open |
-| `Ebi/Ebi.asm` | Ebisumaru: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/ebi; ledger: 1 done, 0 n/a, 1 open (CT-7) |
+| `Ebi/Ebi.asm` | Ebisumaru: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/ebi; ledger: 2 done, 0 n/a, 0 open |
 | `Ebi/EbiSpecial.asm` | Ebisumaru special moves: begin/wait/end ground and air actions with recoil and the Goemon on-hit subroutine. | fighters | ported | decomp/src/ft/ftremix/ebi |
 | `FD.asm` | Plays the Final Destination battle music after the VS intro. | audio | ported | scvsbattle.c (FD music); ledger: 1 done, 0 n/a, 0 open |
 | `FGM.asm` | Sound effect system: registers new SFX/FGM and Sound Test entries, writes the extended bank tables and hooks FGM play/volume. | audio | ported | Torch RemixAudioFactory; ledger: 2 done, 0 n/a, 0 open |
 | `FPS.asm` | FPS counter calculation. | infra | adapted | FPS Display toggle, port/remix/remix_display_settings.cpp |
 | `Falco/AI/Attacks.asm` | CPU attack table of Falco: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
-| `Falco/Falco.asm` | Falco: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/falco; ledger: 1 done, 0 n/a, 1 open (CT-7) |
+| `Falco/Falco.asm` | Falco: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/falco; ledger: 2 done, 0 n/a, 0 open |
 | `Falco/Phantasm.asm` | Falco Phantasm: the side-special dash with ground/air subroutines and variable setup. | fighters | ported | decomp/src/ft/ftremix/falco |
 | `File.asm` | Constants for the Remix file ids (3329 names for the files added to the ROM). | infra | ported | Torch yamls/remix, RelocFactory |
 | `FootStool.asm` | Footstool jump: stops the jump reset during jump squat and handles the aerial jump press that triggers a footstool. | fighters | ported | ftremixfootstool.c |
 | `GBowser/AI/Attacks.asm` | CPU attack table of Giant Bowser: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
-| `GBowser/gbowser.asm` | Giant Bowser: giant variant of Bowser with its own moveset and tables. | fighters | partial | data-only clone (roster); ledger: 2 done, 0 n/a, 3 open (CT-6, CT-7, FT-51) |
-| `GFX.asm` | Extended graphics effects: custom GFX instruction ids and an extended GFX id table for moveset commands. | fighters | partial | lbremixgfx.c, ftparam.c; ledger: 0 done, 0 n/a, 1 open (GP-12) |
+| `GBowser/gbowser.asm` | Giant Bowser: giant variant of Bowser with its own moveset and tables. | fighters | ported | data-only clone (roster); ledger: 5 done, 0 n/a, 0 open |
+| `GFX.asm` | Extended graphics effects: custom GFX instruction ids and an extended GFX id table for moveset commands. | fighters | ported | lbremixgfx.c, ftparam.c; ledger: 1 done, 0 n/a, 0 open |
 | `GFXRoutine.asm` | Extended GFX routine table for action changes and when a fighter graphics routine ends. | fighters | ported | gmremixcolscripts.c |
 | `Gallery.asm` | Gallery on the Congratulations screen: image viewer with fades, music reset and cycling. | menus_modes | ported | mnremixgallery.c; ledger: 3 done, 0 n/a, 0 open |
 | `GameEnd.asm` | Skip-results option: changes the screen loaded after a match when skipping the results screen is enabled. | menus_modes | ported | gmremixgameend.c |
 | `Ganondorf/AI/Attacks.asm` | CPU attack table of Ganondorf: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 4 done, 0 n/a, 0 open |
-| `Ganondorf/Ganondorf.asm` | Ganondorf: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | data-only clone (roster); ledger: 0 done, 0 n/a, 1 open (CT-7) |
+| `Ganondorf/Ganondorf.asm` | Ganondorf: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | data-only clone (roster); ledger: 1 done, 0 n/a, 0 open |
 | `Global.asm` | Enumeration of global variables and addresses of the vanilla game used by the Remix code. | infra | n/a | addresses and constants |
 | `Goemon/AI/Attacks.asm` | CPU attack table of Goemon: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 1 done, 0 n/a, 0 open |
-| `Goemon/Goemon.asm` | Goemon: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/goemon; ledger: 1 done, 0 n/a, 1 open (CT-7) |
+| `Goemon/Goemon.asm` | Goemon: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/goemon; ledger: 2 done, 0 n/a, 0 open |
 | `Goemon/GoemonSpecial.asm` | Goemon special moves: chain attack with wall/air pull and cloud attach/destroy, projectile and collision logic. | fighters | ported | decomp/src/ft/ftremix/goemon |
 | `HRC.asm` | Home-Run Contest changes: players load visible, countdown SFX and the "Are You Ready?" call. | menus_modes | ported | sc1premixhrc*.c; ledger: 1 done, 0 n/a, 0 open |
 | `Handicap.asm` | Lets the Remix override the handicap values of CPUs. | menus_modes | ported | ftremixhandicap.c |
-| `Hazards.asm` | Stage hazard toggles and Remix hazard logic: Dream Land wind, Sector Z Arwing, Mushroom Kingdom POW blocks, Big Boo laugh and other stage-specific behaviour. | stages | partial | grremixhazards_*.c, grremixgating.c; ledger: 14 done, 0 n/a, 3 open (ST-10, ST-11, ST-18) |
+| `Hazards.asm` | Stage hazard toggles and Remix hazard logic: Dream Land wind, Sector Z Arwing, Mushroom Kingdom POW blocks, Big Boo laugh and other stage-specific behaviour. | stages | ported | grremixhazards_*.c, grremixgating.c; ledger: 17 done, 0 n/a, 0 open |
 | `Hitbox.asm` | Hitbox and hurtbox display: fighter, projectile and item hitboxes, advanced hurtbox colours for armour and grab-immune frames, transparency options. | fighters | ported | ftremixhitbox.c |
 | `Hitstun.asm` | Toggle for Melee-style hitstun (knockback divided by 2.5 instead of 1.875). | fighters | ported | ftparam.c |
 | `InputDelay.asm` | Input delay option: buffers the controller struct writes when the delay is above 0. | menus_modes | ported | ftremixinputdelay.c |
 | `InputDisplay.asm` | Input display HUD; moves the VS timer when the 4P display is at the top. | menus_modes | ported | ftremixinputdisplay.c; ledger: 1 done, 0 n/a, 0 open |
-| `Item.asm` | Item framework: registers custom items and their ids, spawn GFX, pick-up hooks, item tables, and the item switch/spawn options. | items | partial | itremixspawn.c, itmanager.c, mnvsitemswitch.c; ledger: 3 done, 0 n/a, 2 open (IT-1, IT-4) |
+| `Item.asm` | Item framework: registers custom items and their ids, spawn GFX, pick-up hooks, item tables, and the item switch/spawn options. | items | ported | itremixspawn.c, itmanager.c, mnvsitemswitch.c; ledger: 5 done, 0 n/a, 0 open |
 | `JDK/JDK.asm` | J Donkey Kong (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries. | fighters | ported | data-only clone (roster); ledger: 2 done, 0 n/a, 0 open |
 | `JFalcon/JFalcon.asm` | J Captain Falcon (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries. | fighters | ported | data-only clone (roster); ledger: 1 done, 0 n/a, 0 open |
 | `JFox/JFox.asm` | J Fox (Japanese-version clone): clone of the vanilla fighter with the other-region behaviour (moveset and sound differences), costumes and per-id table entries. | fighters | ported | data-only clone (roster); ledger: 1 done, 0 n/a, 0 open |
@@ -121,30 +121,30 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `Japan.asm` | Japanese-version behaviour toggles: hitlag, shield stun, momentum sliding glitch and other J-version rules. | fighters | ported | ftremixhitlag.c, shieldstun, jstunsleep, japanesesounds |
 | `Joypad.asm` | Per-port taunt button override and the fix that stops the remapped taunt button from jumping. | infra | ported | ftremixtauntbutton.c (Taunt Button mask and jump guard) |
 | `KingOfTheHill.asm` | King of the Hill mode: 3-digit scroller, CPU seeks the hill, delayed respawn and scoring. | menus_modes | ported | gmremixkoth*.c, mnremixgoalpicker.c; ledger: 1 done, 0 n/a, 0 open |
-| `Kirby/Kirby.asm` | Kirby: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/kirby; ledger: 2 done, 0 n/a, 1 open (FT-29) |
+| `Kirby/Kirby.asm` | Kirby: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/kirby; ledger: 3 done, 0 n/a, 0 open |
 | `KirbyHats.asm` | Kirby copy hats for the added fighters: custom hat models, hat switching between high and low poly, and special image/track setup. | fighters | ported | ftremixkirbycopy.c, ftremixkirbyhats.c, ftremixkirbypower.c; ledger: 2 done, 0 n/a, 0 open |
 | `Knockback.asm` | Random knockback angle mode: randomises angles per action at fighter init, hitbox creation and throws. | fighters | ported | ftremixknockback.c |
 | `Lanky/AI/Attacks.asm` | CPU attack table of Lanky Kong: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `Lanky/Lanky.asm` | Lanky Kong: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/lanky; ledger: 1 done, 0 n/a, 1 open (CT-7) |
+| `Lanky/Lanky.asm` | Lanky Kong: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/lanky; ledger: 2 done, 0 n/a, 0 open |
 | `Lanky/LankySpecial.asm` | Lanky Kong special moves: grape shooter, damage and cancel actions with their stage setting and collision. | fighters | ported | decomp/src/ft/ftremix/lanky |
 | `LedgeJump.asm` | Ledge jump option: extends the ledge hold input check to allow ledge jumping via C-jump below/above 100%. | fighters | ported | ftremixledgejump.c |
 | `LedgeTrump.asm` | Ledge trump option and the ledge grab counter for VS stats. | fighters | ported | ftremixledgetrump.c |
 | `Lucas/AI/Attacks.asm` | CPU attack table of Lucas: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 1 done, 0 n/a, 0 open |
-| `Lucas/Lucas.asm` | Lucas: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/lucas; ledger: 5 done, 0 n/a, 4 open (CT-7, FT-30, FT-34, FT-35) |
+| `Lucas/Lucas.asm` | Lucas: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/lucas; ledger: 9 done, 0 n/a, 0 open |
 | `Lucas/LucasSpecial.asm` | Lucas special move movement (air move) helper. | fighters | ported | decomp/src/ft/ftremix/lucas |
-| `MLuigi/MLuigi.asm` | Metal Luigi: new fighter based on Luigi with metal appearance, costumes and per-id table entries. | fighters | partial | data-only clone (roster); ledger: 1 done, 0 n/a, 3 open (CT-6, CT-7, CT-10) |
+| `MLuigi/MLuigi.asm` | Metal Luigi: new fighter based on Luigi with metal appearance, costumes and per-id table entries. | fighters | ported | data-only clone (roster); ledger: 4 done, 0 n/a, 0 open |
 | `MagnifyingGlass.asm` | Custom zoom for the magnifying glass item applied to the camera viewport. | items | ported | gmremixmagnify.c |
 | `Marina/AI/Attacks.asm` | CPU attack table of Marina: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 5 done, 0 n/a, 0 open |
-| `Marina/Marina.asm` | Marina: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/marina; ledger: 4 done, 0 n/a, 1 open (CT-7) |
+| `Marina/Marina.asm` | Marina: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/marina; ledger: 5 done, 0 n/a, 0 open |
 | `Marina/MarinaSpecial.asm` | Marina special moves: absorb, clanpot throw/pull/stow with ground and air versions and the throw turn. | fighters | ported | decomp/src/ft/ftremix/marina |
 | `Marth/AI/Attacks.asm` | CPU attack table of Marth: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
-| `Marth/Marth.asm` | Marth: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/marth; ledger: 2 done, 0 n/a, 1 open (CT-7) |
+| `Marth/Marth.asm` | Marth: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/marth; ledger: 3 done, 0 n/a, 0 open |
 | `Marth/MarthSpecial.asm` | Marth special moves: multi-hit sword special with ground/air stages 1 to 3, attack and counter style actions, collision and detection patches. | fighters | ported | decomp/src/ft/ftremix/marth |
 | `Menu.asm` | Menu framework for the Remix settings menus (menu arguments, entries, scrolling). | infra | n/a | replaced by the port menu (ROADMAP T4.1 deviation) |
 | `MetalMario/MetalMario.asm` | Metal Mario: redefines the Metal Mario slot (0x0D) with Remix actions and tables. | fighters | ported | data-only clone (roster) |
 | `Mewtwo/AI/Attacks.asm` | CPU attack table of Mewtwo: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
-| `Mewtwo/Mewtwo.asm` | Mewtwo: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/mewtwo; ledger: 4 done, 0 n/a, 1 open (CT-7) |
-| `Mewtwo/MewtwoSpecial.asm` | Mewtwo special moves: charged Shadow Ball with charge level, teleport movement and the other special actions. | fighters | partial | decomp/src/ft/ftremix/mewtwo; ledger: 1 done, 0 n/a, 1 open (FT-39) |
+| `Mewtwo/Mewtwo.asm` | Mewtwo: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/mewtwo; ledger: 5 done, 0 n/a, 0 open |
+| `Mewtwo/MewtwoSpecial.asm` | Mewtwo special moves: charged Shadow Ball with charge level, teleport movement and the other special actions. | fighters | ported | decomp/src/ft/ftremix/mewtwo; ledger: 2 done, 0 n/a, 0 open |
 | `NBanjo/NBanjo.asm` | Polygon (N) team variant of Banjo: fighter entry that reuses the Banjo moveset labels, with menu zoom, action strings and polygon setup. | fighters | ported | data-only clone (roster); ledger: 1 done, 0 n/a, 0 open |
 | `NBowser/nbowser.asm` | Polygon Bowser: polygon-team variant entry; sets the jab 3 action for the polygon version. | fighters | ported | data-only clone (roster); ledger: 2 done, 0 n/a, 0 open |
 | `NConker/NConker.asm` | Polygon (N) team variant of Conker: fighter entry that reuses the Conker moveset labels, with menu zoom, action strings and polygon setup. | fighters | ported | data-only clone (roster); ledger: 1 done, 0 n/a, 0 open |
@@ -170,10 +170,10 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `Parry.asm` | Parry: hit parry detection per fighter, item and projectile, parry bubble and extra hitlag on the attacker. | fighters | ported | ftremixparry.c |
 | `Pause.asm` | Pause menu additions: extra camera controls, HUD hide, controls legend, hold-to-pause. | menus_modes | ported | ftremixpause.c; ledger: 1 done, 0 n/a, 0 open |
 | `Peach/AI/Attacks.asm` | CPU attack table of Peach: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `Peach/Peach.asm` | Peach: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/peach; ledger: 3 done, 0 n/a, 1 open (CT-7) |
+| `Peach/Peach.asm` | Peach: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/peach; ledger: 4 done, 0 n/a, 0 open |
 | `Peach/PeachSpecial.asm` | Peach special moves: item pull (turnip) creation, float and fall overrides, parasol/close actions and aerial auto-cancel. | fighters | ported | decomp/src/ft/ftremix/peach |
 | `Peppy/AI/Attacks.asm` | CPU attack table of Peppy Hare: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 1 done, 0 n/a, 0 open |
-| `Peppy/Peppy.asm` | Peppy Hare: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/peppy; ledger: 2 done, 0 n/a, 1 open (CT-7) |
+| `Peppy/Peppy.asm` | Peppy Hare: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/peppy; ledger: 3 done, 0 n/a, 0 open |
 | `Peppy/PeppySpecial.asm` | Peppy special moves: blaster with charge and shoot actions, projectile collision, and the Flashbang item spawn. | fighters | ported | decomp/src/ft/ftremix/peppy |
 | `PerfectShield.asm` | Perfect shield: reflects projectiles and items and skips the shield stun action change. | fighters | ported | ftremixperfectshield.c |
 | `Piano/AI/Attacks.asm` | CPU attack table of Piano Mario: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
@@ -183,46 +183,46 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `Poison.asm` | Poison status: damage-over-time hook and a star fix. | fighters | ported | ftremixpoison.c |
 | `PokemonAnnouncer.asm` | Pokemon-style voice announcer: hit, charge, special move, clang and other callouts. | fighters | ported | ifremixannouncer.c, ifremixhitannouncer.c; ledger: 2 done, 0 n/a, 0 open |
 | `Practice.asm` | Practice mode: Z-cancel flash and overlay colour. | menus_modes | ported | ftremixzcancel.c (Flash On Z-Cancel), ftremixoverlay.c (Spawned Fear overlay n/a, M11) |
-| `Practice_1P.asm` | 1P practice: hold L to retry, bonus retries and Master Hand softlock prevention. | menus_modes | partial | gmremixpractice.c; ledger: 0 done, 0 n/a, 3 open (OP-34, OP-35, OP-36) |
+| `Practice_1P.asm` | 1P practice: hold L to retry, bonus retries and Master Hand softlock prevention. | menus_modes | ported | gmremixpractice.c; ledger: 3 done, 0 n/a, 0 open |
 | `Projectile.asm` | Projectile registry: macro to add Remix projectile ids after the 0x1F vanilla ones. | fighters | ported | decomp/src/wp/*remix* |
 | `Rage.asm` | Rage: knockback multiplier by damage, applied to direct hits, projectiles and throws, with graphics. | fighters | ported | ftremixrage.c |
 | `Reflect.asm` | Reflect: reflect input handling, extension of reflection to items and projectiles, direction fix. | fighters | ported | ftremixreflect.c; ledger: 2 done, 0 n/a, 0 open |
 | `Render.asm` | Rendering and file helpers: load_file (reloc file loader), textures, strings, display objects, font setup and character width tables, heap. | infra | n/a | replaced by the port's GObj/SObj calls |
 | `Roy/AI/Attacks.asm` | CPU attack table of Roy: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
-| `Roy/Roy.asm` | Roy: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/roy; ledger: 1 done, 0 n/a, 1 open (CT-7) |
+| `Roy/Roy.asm` | Roy: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/roy; ledger: 2 done, 0 n/a, 0 open |
 | `Roy/RoySpecial.asm` | Roy special moves: begin/wait/end ground and air actions (charged sword special). | fighters | ported | decomp/src/ft/ftremix/roy |
 | `SFXReplace.asm` | Sound effect replacement for steps, landing and down bounce. | audio | ported | ftremixsfxreplace.c |
 | `SRAM.asm` | Save data (SRAM) read/write for Remix settings and records. | menus_modes | ported | lbBackup records (port_save.cpp); toggles and panels as CVars |
 | `SSonic/AI/Attacks.asm` | CPU attack table of Super Sonic: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 1 done, 0 n/a, 0 open |
-| `SSonic/SSonic.asm` | Super Sonic: special variant of Sonic with its own moveset hooks and tables. | fighters | partial | decomp/src/ft/ftremix/ssonic; ledger: 0 done, 0 n/a, 1 open (CT-7) |
-| `Sandbag/Sandbag.asm` | Sandbag: training dummy fighter with its own tables. | fighters | partial | data-only clone (roster); ledger: 0 done, 0 n/a, 2 open (CT-7, FT-42) |
+| `SSonic/SSonic.asm` | Super Sonic: special variant of Sonic with its own moveset hooks and tables. | fighters | ported | decomp/src/ft/ftremix/ssonic; ledger: 1 done, 0 n/a, 0 open |
+| `Sandbag/Sandbag.asm` | Sandbag: training dummy fighter with its own tables. | fighters | ported | data-only clone (roster); ledger: 2 done, 0 n/a, 0 open |
 | `Settings.asm` | Default tournament settings loaded on boot. | menus_modes | ported | scremixtournament.c (tournament rules) |
 | `Sheik/AI/Attacks.asm` | CPU attack table of Sheik: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
-| `Sheik/Sheik.asm` | Sheik: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/sheik; ledger: 3 done, 0 n/a, 1 open (CT-7) |
+| `Sheik/Sheik.asm` | Sheik: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/sheik; ledger: 4 done, 0 n/a, 0 open |
 | `Sheik/SheikSpecial.asm` | Sheik special moves: charged needle shots, move and attack actions with ground/air transitions. | fighters | ported | decomp/src/ft/ftremix/sheik |
 | `Shield.asm` | Shield colour fixes and the Yoshi egg colour change. | menus_modes | ported | ftremixshield.c; ledger: 1 done, 0 n/a, 0 open |
 | `SingleButtonMode.asm` | Single-button mode: CPU input handling. | fighters | ported | ftremixsinglebutton.c |
-| `SinglePlayer.asm` | 1P mode extensions: tally, 1P high scores per fighter, environment mapping, team costume preview and per-character victory/name tables. | menus_modes | partial | sc1premix*.c; ledger: 1 done, 0 n/a, 8 open (OP-38, OP-39, OP-40, OP-42, OP-43, OP-44, OP-45, OP-46) |
+| `SinglePlayer.asm` | 1P mode extensions: tally, 1P high scores per fighter, environment mapping, team costume preview and per-character victory/name tables. | menus_modes | ported | sc1premix*.c; ledger: 9 done, 0 n/a, 0 open |
 | `SinglePlayerEnemy.asm` | Remix 1P enemy control: AFK enemies, button behaviour, respawn and shield. | menus_modes | ported | sc1premixenemy*.c (all seven groups) |
-| `SinglePlayerMenus.asm` | Revised 1P menu screens and buttons. | menus_modes | partial | mnremix1pmode.c; ledger: 3 done, 0 n/a, 2 open (OP-32, OP-33) |
-| `SinglePlayerModes.asm` | Remix single-player modes: stage list, All-Star finale, Multi-Man, Cruel, HRC and Bonus 3 logic, crash on death and end-of-match screen. | menus_modes | partial | sc1premixintro/allstar/multiman*.c; ledger: 9 done, 0 n/a, 19 open (OP-2, OP-4, OP-8, OP-9, OP-11, OP-12, OP-13, OP-14, OP-15, OP-16, OP-18, OP-19, OP-21, OP-22, OP-23, OP-24, OP-25, OP-26, OP-27) |
-| `Size.asm` | Size mode: camera centre and zoom, ECB, graphic scale, jump height and PK fire position for resized fighters. | fighters | partial | ftremixsize*.c; ledger: 3 done, 0 n/a, 2 open (IT-5, IT-9) |
+| `SinglePlayerMenus.asm` | Revised 1P menu screens and buttons. | menus_modes | ported | mnremix1pmode.c; ledger: 5 done, 0 n/a, 0 open |
+| `SinglePlayerModes.asm` | Remix single-player modes: stage list, All-Star finale, Multi-Man, Cruel, HRC and Bonus 3 logic, crash on death and end-of-match screen. | menus_modes | ported | sc1premixintro/allstar/multiman*.c; ledger: 28 done, 0 n/a, 0 open |
+| `Size.asm` | Size mode: camera centre and zoom, ECB, graphic scale, jump height and PK fire position for resized fighters. | fighters | ported | ftremixsize*.c; ledger: 5 done, 0 n/a, 0 open |
 | `Skeleton.asm` | Skeleton display mode per port. | fighters | ported | ftremixskeleton.c (per-port force) |
 | `Slippy/AI/Attacks.asm` | CPU attack table of Slippy Toad: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 1 done, 0 n/a, 0 open |
 | `Slippy/Slippy.asm` | Slippy Toad: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/slippy; ledger: 2 done, 0 n/a, 0 open |
 | `Slippy/SlippyHipTranslation.asm` | Slippy hip joint translation patch for his animations. | fighters | ported | decomp/src/ft/ftremix/slippy |
 | `Slippy/SlippySpecial.asm` | Slippy special moves: laser shot, movement physics, Kirby copy variants and stage setting. | fighters | ported | decomp/src/ft/ftremix/slippy |
-| `Smashketball.asm` | Smashketball mode: ball AI, overtime, chant, goal selector, despawn and stats. | menus_modes | partial | gmremixsmashketball*.c, itremixbasketball.c; ledger: 1 done, 0 n/a, 2 open (MD-9, MD-22) |
+| `Smashketball.asm` | Smashketball mode: ball AI, overtime, chant, goal selector, despawn and stats. | menus_modes | ported | gmremixsmashketball*.c, itremixbasketball.c; ledger: 3 done, 0 n/a, 0 open |
 | `Sonic/AI/Attacks.asm` | CPU attack table of Sonic: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `Sonic/Sonic.asm` | Sonic: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/sonic; ledger: 2 done, 0 n/a, 1 open (CT-7) |
-| `Sonic/SonicSpecial.asm` | Sonic special moves: charged spin dash, homing/air move actions, jump and recoil actions and physics. | fighters | partial | decomp/src/ft/ftremix/sonic; ledger: 1 done, 0 n/a, 1 open (FT-46) |
+| `Sonic/Sonic.asm` | Sonic: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/sonic; ledger: 3 done, 0 n/a, 0 open |
+| `Sonic/SonicSpecial.asm` | Sonic special moves: charged spin dash, homing/air move actions, jump and recoil actions and physics. | fighters | ported | decomp/src/ft/ftremix/sonic; ledger: 2 done, 0 n/a, 0 open |
 | `Spawn.asm` | Spawn and respawn point loading. | stages | ported | grremixspawn.c; ledger: 2 done, 0 n/a, 0 open |
 | `SpecialZoom.asm` | Special Zoom (beta): camera zoom for special moves and final knockback, with offset. | fighters | ported | gmremixspecialzoom*.c |
 | `Speed.asm` | Game speed option: update rate and processing. | fighters | ported | ftremixspeed.c |
 | `SpotDodge.asm` | Spot dodge input check. | fighters | ported | ftremixspotdodge.c |
 | `Stages.asm` | Stage select expansion: stage ids, pages, previews, names, stage-specific data and random stage lists for the Remix stages. | stages | ported | grremixstage.c, mnmaps.c; ledger: 5 done, 0 n/a, 0 open |
 | `StaleMoves.asm` | Stale move negation: penalty for repeated moves. | fighters | ported | ftremixstalemoves.c |
-| `Stamina.asm` | Stamina mode: stock/time display, crash prevention, down-bounce input and percent port update. | menus_modes | partial | ftremixstamina*.c, gmremixstamina*.c; ledger: 0 done, 0 n/a, 4 open (MD-2, MD-18, MD-19, MD-20) |
+| `Stamina.asm` | Stamina mode: stock/time display, crash prevention, down-bounce input and percent port update. | menus_modes | ported | ftremixstamina*.c, gmremixstamina*.c; ledger: 4 done, 0 n/a, 0 open |
 | `Stereo.asm` | Stereo pan fix for sound effects. | audio | ported | lbcommon.c fix_sfx_pan_ |
 | `StockMode.asm` | Stock mode: sets the starting stock count. | menus_modes | ported | gmremixstockmode.c |
 | `String.asm` | String functions (a few string.h equivalents). | infra | n/a | assembler helpers |
@@ -230,13 +230,13 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `SwordTrail.asm` | Sword trail effect: axis setup, drawing and checks. | fighters | ported | ftremixswordtrail.c |
 | `TagTeam.asm` | Tag Team mode: slot swap, stock steal, icons, token pickup and file loading. | menus_modes | ported | gmremixtagteam*.c |
 | `Teams.asm` | Teams mode: team setup, results screen extensions and classic costume fixes (team costumes per fighter). | menus_modes | ported | scmanager.c, ftremixstamina*.c |
-| `TimedStock.asm` | Timed Stock mode: scoring, sudden death prevention and full results. | menus_modes | partial | gmremixtimedstock*.c; ledger: 0 done, 0 n/a, 1 open (OP-47) |
-| `Toggles.asm` | Settings framework: all toggle entries of the Remix menus, defaults per profile, saved values. | menus_modes | partial | remix_toggles.cpp, PortMenu.cpp (Remix section); ledger: 2 done, 0 n/a, 1 open (MS-19) |
-| `Training.asm` | Training mode: menus, reset, item spawn disable, Pokemon crash fixes and Z sector. | menus_modes | partial | sc1ptrainingmode.c, remix_training.* (Z menu as port menu); ledger: 0 done, 0 n/a, 1 open (MD-21) |
+| `TimedStock.asm` | Timed Stock mode: scoring, sudden death prevention and full results. | menus_modes | ported | gmremixtimedstock*.c; ledger: 1 done, 0 n/a, 0 open |
+| `Toggles.asm` | Settings framework: all toggle entries of the Remix menus, defaults per profile, saved values. | menus_modes | ported | remix_toggles.cpp, PortMenu.cpp (Remix section); ledger: 3 done, 0 n/a, 0 open |
+| `Training.asm` | Training mode: menus, reset, item spawn disable, Pokemon crash fixes and Z sector. | menus_modes | ported | sc1ptrainingmode.c, remix_training.* (Z menu as port menu); ledger: 1 done, 0 n/a, 0 open |
 | `Transitions.asm` | Restores unused VS-to-results screen transitions. | menus_modes | ported | lbtransition.c |
 | `Tripping.asm` | Tripping: hitstun retention on turn and the trip check. | fighters | ported | ftremixtripping.c |
 | `TugOfWar.asm` | Tug of War mode: stock credit and last-hit tracking. | menus_modes | ported | gmremixtugofwar*.c |
-| `TwelveCharBattle.asm` | 12 Char Battle mode: stock changes, FFA, ports 3/4, portrait and defeated-fighter select prevention. | menus_modes | partial | gmremixtwelvecb*.c; ledger: 1 done, 0 n/a, 7 open (MD-1, MD-4, MD-5, MD-6, MD-7, MD-8, MD-23) |
+| `TwelveCharBattle.asm` | 12 Char Battle mode: stock changes, FFA, ports 3/4, portrait and defeated-fighter select prevention. | menus_modes | ported | gmremixtwelvecb*.c; ledger: 8 done, 0 n/a, 0 open |
 | `VanillaLv10Attacks.asm` | Level 10 AI attack behaviour tables for the vanilla fighters (data). | ai | ported | ftremixailv10.c; ledger: 1 done, 0 n/a, 0 open |
 | `VsDemo.asm` | VS demo: enables Remix fighters and stages in the attract-mode demo and an offset fix. | menus_modes | ported | scremixvsdemo.c; ledger: 2 done, 0 n/a, 0 open |
 | `VsRemixMenu.asm` | VS menu for the Remix modes. | menus_modes | ported | mnremixvsmode.c; ledger: 1 done, 0 n/a, 0 open |
@@ -244,14 +244,14 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `WallTeching.asm` | Wall teching: tracks successful rolls and techs. | fighters | ported | ftremixwalltech.c |
 | `Walljump.asm` | Wall jump logic (hooks are present but commented out). | infra | n/a | all patches are commented out in the Remix 2.0.1 build |
 | `Wario/AI/Attacks.asm` | CPU attack table of Wario: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 2 done, 0 n/a, 0 open |
-| `Wario/Wario.asm` | Wario: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/wario; ledger: 4 done, 0 n/a, 3 open (CT-7, FT-47, FT-48) |
+| `Wario/Wario.asm` | Wario: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/wario; ledger: 7 done, 0 n/a, 0 open |
 | `Wario/WarioSpecial.asm` | Wario special moves: bike/move actions with recoil, direction change and collision handling. | fighters | ported | decomp/src/ft/ftremix/wario |
 | `Widescreen.asm` | Widescreen mode switch and menu aspect-ratio fix. | infra | n/a | out of scope (4:3) |
 | `Wolf/AI/Attacks.asm` | CPU attack table of Wolf: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 3 done, 0 n/a, 0 open |
-| `Wolf/Wolf.asm` | Wolf: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/wolf; ledger: 1 done, 0 n/a, 1 open (CT-7) |
+| `Wolf/Wolf.asm` | Wolf: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/wolf; ledger: 2 done, 0 n/a, 0 open |
 | `Wolf/WolfSpecial.asm` | Wolf special moves: two-stage up special and the other special actions with ground/air transitions. | fighters | ported | decomp/src/ft/ftremix/wolf |
 | `YoungLink/AI/Attacks.asm` | CPU attack table of Young Link: move choices with ranges, angles and timing for the Remix AI. | ai | ported | ftremixaitables.c reads the attack table from the Remix image; ledger: 1 done, 0 n/a, 0 open |
-| `YoungLink/YoungLink.asm` | Young Link: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | partial | decomp/src/ft/ftremix/younglink; ledger: 1 done, 0 n/a, 1 open (CT-7) |
+| `YoungLink/YoungLink.asm` | Young Link: new playable fighter; defines the moveset, animation and action parameters, menu actions, costumes, team costumes and per-id table entries. | fighters | ported | decomp/src/ft/ftremix/younglink; ledger: 2 done, 0 n/a, 0 open |
 | `YoungLink/YoungLinkSpecial.asm` | Young Link special moves: bombs and bombchu (held, thrown, resting, exploding states), reflect and hurtbox logic. | fighters | ported | decomp/src/ft/ftremix/younglink |
 | `ZCancel.asm` | Z-cancel options including Cruel Z-Cancel and the 1P boss instant-KO rule. | fighters | ported | ftremixzcancel.c |
 | `captainshared.asm` | Shared Captain Falcon/Ganondorf code: per-fighter animation struct for Ganondorf specials, entry and other id-based changes. | fighters | ported | ftremixdkcaptainshared.c, ftremixentry.c; ledger: 4 done, 0 n/a, 0 open |
@@ -259,14 +259,14 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `dkshared.asm` | Shared Donkey Kong code for DK clones: character id checks for cargo hold, barrel/box grabbing and related actions. | fighters | ported | ftremixdkcaptainshared.c, ftremixentry.c; ledger: 3 done, 0 n/a, 0 open |
 | `fireball.asm` | Fireball and capsule projectiles: Dr. Mario capsule, Banjo egg, Kirby copy joint fix. | fighters | ported | wpmarioremixfireball.c, wpmariofireball.c; ledger: 2 done, 0 n/a, 0 open |
 | `foxshared.asm` | Shared Fox code: CPU recovery angle logic and post-process tables for Fox and clones. | fighters | ported | ftremix/falco, wolf, peppy, slippy; ledger: 2 done, 0 n/a, 0 open |
-| `items/Basketball.asm` | Basketball item of Smashketball: ball physics, hitbox, bounce FGM and barrel entry. | items | partial | decomp/src/it/itremix/itremixbasketball.c; ledger: 0 done, 0 n/a, 1 open (IT-10) |
+| `items/Basketball.asm` | Basketball item of Smashketball: ball physics, hitbox, bounce FGM and barrel entry. | items | ported | decomp/src/it/itremix/itremixbasketball.c; ledger: 1 done, 0 n/a, 0 open |
 | `items/BlueShell.asm` | Blue Shell item: seeks and explodes on the leading player. | items | ported | decomp/src/it/itremix/itremixblueshell.c |
 | `items/Boomerang.asm` | Boomerang item: a thrown weapon that turns around and returns to its thrower. | items | ported | decomp/src/it/itremix/itremixboomerang.c |
 | `items/BulletBill.asm` | Unused Bullet Bill item. | items | ported | decomp/src/it/itremix/itremixbulletbill.c |
 | `items/Cacodemon.asm` | Cacodemon hazard item: a floating DOOM enemy spawned by a stage. | items | ported | decomp/src/it/itremix/itremixcacodemon.c |
 | `items/Car.asm` | Car hazard item of Onett: a car that drives along the street and hits players. | items | ported | decomp/src/it/itremix/itremixcar.c |
 | `items/ClanBomb.asm` | Clan Bomb item: a bomb with a thrown state, owned by the fighter that throws it (Marina). | items | ported | decomp/src/it/itremix/itremixclanbomb.c |
-| `items/CloakingDevice.asm` | Cloaking Device item: makes the holder invisible and immune to damage and shadow while active. | items | partial | decomp/src/it/itremix/itremixcloakingdevice.c; ledger: 0 done, 0 n/a, 1 open (IT-6) |
+| `items/CloakingDevice.asm` | Cloaking Device item: makes the holder invisible and immune to damage and shadow while active. | items | ported | decomp/src/it/itremix/itremixcloakingdevice.c; ledger: 1 done, 0 n/a, 0 open |
 | `items/Cloud.asm` | Cloud item (Goemon cloud): an attached cloud with a flash flag. | items | ported | decomp/src/it/itremix/itremixcloud.c |
 | `items/Dango.asm` | Dango item: a Maxim Tomato-like food item that restores damage. | items | ported | decomp/src/it/itremix/itremixdango.c |
 | `items/DekuNut.asm` | Deku Nut item: a throwable nut that bursts on impact. | items | ported | decomp/src/it/itremix/itremixdekunut.c |
@@ -289,15 +289,15 @@ is `partial`); rerun the script after a ledger state changes. The Port column li
 | `items/SuperMushroom.asm` | Super Mushroom item: grows the player who touches it. | items | ported | decomp/src/it/itremix/itremixsupermushroom.c |
 | `items/Turnip.asm` | Turnip item: a pulled vegetable projectile (Peach). | items | ported | decomp/src/it/itremix/itremixturnip.c |
 | `items/WaddleDee.asm` | Waddle Dee item: an enemy that walks and attacks; removes the bob-omb walking FGM. | items | ported | decomp/src/it/itremix/itremixwaddledee.c |
-| `items/WaddleDoo.asm` | Waddle Doo item: an enemy that fires a beam; beam knockback direction fix. | items | partial | decomp/src/it/itremix/itremixwaddledoo.c; ledger: 0 done, 0 n/a, 1 open (IT-11) |
+| `items/WaddleDoo.asm` | Waddle Doo item: an enemy that fires a beam; beam knockback direction fix. | items | ported | decomp/src/it/itremix/itremixwaddledoo.c; ledger: 1 done, 0 n/a, 0 open |
 | `jigglypuffkirbyshared.asm` | Shared Jigglypuff/Kirby code: id checks for Jigglypuff clones (multi-jumps, air state) and recovery logic. | fighters | ported | ftremixpuffkirbyshared.c; ledger: 11 done, 0 n/a, 0 open |
-| `linkshared.asm` | Shared Link code: animation struct for Young Link/Marth entry, bomb struct by character id and bomb flashing. | fighters | partial | ftremixlinkshared.c; ledger: 3 done, 0 n/a, 1 open (SH-14) |
-| `marioshared.asm` | Shared Mario code: pipe entry/exit turn and tables for Mario clones. | fighters | partial | ftremixentry.c, wpmario; ledger: 1 done, 0 n/a, 2 open (CT-2, SH-7) |
+| `linkshared.asm` | Shared Link code: animation struct for Young Link/Marth entry, bomb struct by character id and bomb flashing. | fighters | ported | ftremixlinkshared.c; ledger: 4 done, 0 n/a, 0 open |
+| `marioshared.asm` | Shared Mario code: pipe entry/exit turn and tables for Mario clones. | fighters | ported | ftremixentry.c, wpmario; ledger: 3 done, 0 n/a, 0 open |
 | `midi.asm` | Music system: music table, MIDI bank, bank map DMA at boot, instrument samples and master volume. | audio | ported | Torch RemixAudioFactory, audio_bridge.cpp; ledger: 2 done, 0 n/a, 0 open |
 | `moveset.asm` | Custom moveset support: command address lookup and shared moveset scripts. | fighters | ported | ftremixcommand.c |
-| `nessshared.asm` | Shared Ness code: PK Thunder/PK Fire fixes, Lucas/Ness id checks and CPU USP use. | fighters | partial | ftremix/lucas; ledger: 8 done, 0 n/a, 2 open (SH-3, SH-5) |
+| `nessshared.asm` | Shared Ness code: PK Thunder/PK Fire fixes, Lucas/Ness id checks and CPU USP use. | fighters | ported | ftremix/lucas; ledger: 10 done, 0 n/a, 0 open |
 | `os.asm` | OS helper macros (patch_start/patch_end, tables, print helpers); no gameplay routines. | infra | n/a | assembler helpers |
-| `pikashared.asm` | Shared Pikachu code: Thunder/Thunder Jolt, smash forward fixes and animation structs. | fighters | partial | ftremix/jpika; ledger: 2 done, 0 n/a, 1 open (SH-6) |
+| `pikashared.asm` | Shared Pikachu code: Thunder/Thunder Jolt, smash forward fixes and animation structs. | fighters | ported | ftremix/jpika; ledger: 3 done, 0 n/a, 0 open |
 | `resultsscreen.asm` | Results screen: winner logo, win animations, winner BGM/FGM and win record. | menus_modes | ported | mnremixwinbgm.c, mnvsresults.c; ledger: 7 done, 0 n/a, 0 open |
 | `samusshared.asm` | Shared Samus code: charge shot, bomb, grapple and Kirby power. | fighters | ported | ftremixsamusshared.c, ftremixsamusshared2.c |
 | `timeouts.asm` | Timeout hooks: branch hooks in time-limit routines. | menus_modes | ported | mnremixtimeouts.c |
