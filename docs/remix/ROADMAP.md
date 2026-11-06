@@ -472,6 +472,9 @@ Closed phases:
   taken), Training `p8f_training`; `run_remix_mode_tests` 7236 checks, 0 failed; `build-us` `ssb64` builds. Reference:
   `build/ref-shots/` `css_menu`, `koth`, `tagteam`, `smashketball`, `tugofwar`, `pause`, `stats`, `r12` against
   `p8f_*`, `p8r_vsmenu`, `p8r_pause`: same layout and texts (the reference pause shows the legend opened with R).
+  Sound Test: `build/ref-shots/p8_data` against `p8r_sound`, same layout, legend and cursor. Stage select, title, 1P
+  intro cards, Character Data and the Giga Bowser CSS were compared in lots 1, 5 and 6. Credits and Congratulations have
+  no reference capture (the reference emulator would need a full 1P run); they ran without error in lot 5.
   `parity.md`: 277 `ported`, 2 `adapted`, 10 `n/a`, 0 `partial`.
 
 ---
