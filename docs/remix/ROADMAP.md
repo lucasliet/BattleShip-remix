@@ -476,7 +476,8 @@ Closed phases:
   intro cards, Character Data and the Giga Bowser CSS were compared in lots 1, 5 and 6. Congratulations:
   `build/ref-shots/p8_scene_37` (reached with a local mupen64plus cheat on the title scene: `D00A4AD0 0001`,
   `810465D2 0001` (`screen_interrupt`), `800A4AD0 0037`) against `p8r_congra`, same picture and text. Credits: the same
-  cheat with scene 0x38 gives no presented frame in 600 s, so there is no reference capture; the port credits
+  cheat with scene 0x38 presents no frame after the jump (tried 600 s and 1800 s; the only shot is the boot notice), so
+  there is no reference capture; the port credits
   (`p8r_credits`) roll without error.
   `parity.md`: 277 `ported`, 2 `adapted`, 10 `n/a`, 0 `partial`.
 
