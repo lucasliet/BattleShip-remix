@@ -473,8 +473,11 @@ Closed phases:
   `build/ref-shots/` `css_menu`, `koth`, `tagteam`, `smashketball`, `tugofwar`, `pause`, `stats`, `r12` against
   `p8f_*`, `p8r_vsmenu`, `p8r_pause`: same layout and texts (the reference pause shows the legend opened with R).
   Sound Test: `build/ref-shots/p8_data` against `p8r_sound`, same layout, legend and cursor. Stage select, title, 1P
-  intro cards, Character Data and the Giga Bowser CSS were compared in lots 1, 5 and 6. Credits and Congratulations have
-  no reference capture (the reference emulator would need a full 1P run); they ran without error in lot 5.
+  intro cards, Character Data and the Giga Bowser CSS were compared in lots 1, 5 and 6. Congratulations:
+  `build/ref-shots/p8_scene_37` (reached with a local mupen64plus cheat on the title scene: `D00A4AD0 0001`,
+  `810465D2 0001` (`screen_interrupt`), `800A4AD0 0037`) against `p8r_congra`, same picture and text. Credits: the same
+  cheat with scene 0x38 gives no presented frame in 600 s, so there is no reference capture; the port credits
+  (`p8r_credits`) roll without error.
   `parity.md`: 277 `ported`, 2 `adapted`, 10 `n/a`, 0 `partial`.
 
 ---
