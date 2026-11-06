@@ -86,9 +86,9 @@ Output lands at `.claude/worktrees/<slug>` on branch `agent/<slug>`. The script:
 - **Normal git flow for submodule changes**:
   1. Edit and commit inside `<worktree>/decomp/`, `<worktree>/libultraship/`, or `<worktree>/torch/`.
   2. Push to the fork: `git -C <worktree>/<sm> push origin <branch>`.
-     - `decomp` → `port-patches` on `JRickey/ssb-decomp-re`
-     - `libultraship` → `ssb64` on `JRickey/libultraship`
-     - `torch` → `ssb64` on `JRickey/Torch`
+     - `decomp` → `feature/remix-port` on `lucasliet/ssb-decomp-re-remix` (upstream `JRickey/ssb-decomp-re`)
+     - `libultraship` → `feature/remix-port` on `lucasliet/libultraship-remix` (upstream `JRickey/libultraship`)
+     - `torch` → `feature/remix-port` on `lucasliet/Torch-remix` (upstream `JRickey/Torch`)
   3. In the outer worktree, bump the submodule pointer: `git add <sm> && git commit -m "Bump <sm>: <summary>"`.
   4. When the outer branch lands on main, the pointer update goes with it.
 

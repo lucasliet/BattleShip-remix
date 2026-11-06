@@ -97,7 +97,7 @@ for rom in "${ROMS[@]}"; do
 done
 
 # ── 3. Independent submodule clones ──
-# Submodules pin SHAs to JRickey/libultraship and JRickey/Torch on `ssb64`.
+# Submodules pin SHAs to the -remix forks (lucasliet/*-remix) on `feature/remix-port`.
 # Those SHAs frequently exist only in the main checkout's local .git/modules
 # (branch hasn't been pushed), so `git submodule update --init` inside a
 # fresh worktree fails with "upload-pack: not our ref".

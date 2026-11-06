@@ -2,7 +2,7 @@
 
 ## Source Organization
 ```
-decomp/                — Submodule: JRickey/ssb-decomp-re#port-patches
+decomp/                — Submodule: lucasliet/ssb-decomp-re-remix#feature/remix-port
   include/             — C decomp shim headers (PR/, sys/, n_audio/, libc/, ...)
   src/
     sys/               — System: main loop, DMA, scheduling, audio, controllers, threading
