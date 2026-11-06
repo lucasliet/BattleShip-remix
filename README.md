@@ -4,6 +4,11 @@
 
 # BattleShip-Remix
 
+> [!WARNING]
+> **This is a community fork of [BattleShip](https://github.com/JRickey/BattleShip) that ports Smash Remix.** It is not made, endorsed or supported by
+> the BattleShip author, the Smash Remix team or the Harbour Masters. Please **do not** open issues on their repositories or ask for help in their
+> channels for anything you hit while building or playing this fork: report it on [this repository's issue tracker](https://github.com/lucasliet/BattleShip-remix/issues).
+
 **BattleShip-Remix** is a native PC and Switch port of **[Smash Remix](https://github.com/JSsixtyfour/smashremix) 2.0.1**, the Super Smash Bros. (N64) mod, built on the [BattleShip](https://github.com/JRickey/BattleShip) port. BattleShip turns the [VetriTheRetri/ssb-decomp-re](https://github.com/vetritheretri/ssb-decomp-re) decompilation into a native program with [libultraship](https://github.com/Kenix3/libultraship) (rendering, audio, input) and [Torch](https://github.com/HarbourMasters/Torch) (asset extraction). This fork rewrites the Remix's MIPS assembly as C on top of that decompilation, so the Remix runs as native code instead of patches on an emulated ROM.
 
 What the port covers:
@@ -29,6 +34,28 @@ The Remix build needs the Smash Remix 2.0.1 ROM (made by applying the Remix rele
 | `baserom.us.z64` | Super Smash Bros. NTSC-U v1.0 (`NALE`) | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
 
 The vanilla builds need only their own ROM: US as above, or JP (Nintendo All-Star! Dairantou Smash Brothers v1.0, `NALJ`, SHA-1 `4b71f0e01878696733eefa9c80d11c147ecb4984`, MD5 `66db457b130d31a286a23d6e4dd9726e`) with `-DSSB64_VERSION=jp`. A dump that does not match the hashes for its version will not work.
+
+## Nintendo Switch
+
+The Switch build is a homebrew `.nro` (libnx). The console does not read the ROM: `BattleShip-Remix.o2r` is the one the desktop build
+extracted from your ROM, copied to the SD card. Folder layout on the SD card:
+
+```
+sdmc:/switch/BattleShip-Remix/
+├── BattleShip-Remix.nro
+├── BattleShip-Remix.o2r          (from your desktop build)
+├── BattleShip-Remix.o2r.recipe   (from your desktop build)
+├── f3d.o2r
+├── config.yml
+├── gamecontrollerdb.txt
+└── assets/
+```
+
+- Launch it from the Homebrew Menu in **full-memory mode** (hold R while opening an installed game, or use a forwarder). Applet mode does not
+  have enough memory.
+- After an update that changes the asset pipeline (a new `.recipe`), copy the new `.o2r` too: an old `.o2r` with a new `.nro` breaks loading.
+- The game writes `BattleShip-Remix.log` next to the `.nro`; attach it to any Switch bug report.
+- Build and packaging steps: [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md#switch-build-battleship-and-battleship-remix).
 
 ## How the Remix port was done and validated
 
