@@ -319,6 +319,16 @@ set(SSB64_CREDITS_GENERATED_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/decomp/src/credits/companies.credits.encoded
     ${CMAKE_CURRENT_SOURCE_DIR}/decomp/src/credits/companies.credits.metadata
 )
+# The Remix staff roll is the vanilla tables plus the Remix entries (tools/gen_remix_credits.py).
+set(SSB64_REMIX_CREDITS_COMMAND "")
+if(SSB64_VERSION STREQUAL "remix")
+    foreach(_table staff titles info companies)
+        list(APPEND SSB64_CREDITS_GENERATED_FILES
+            ${CMAKE_CURRENT_SOURCE_DIR}/decomp/src/credits/remix/${_table}.credits.encoded
+            ${CMAKE_CURRENT_SOURCE_DIR}/decomp/src/credits/remix/${_table}.credits.metadata)
+    endforeach()
+    set(SSB64_REMIX_CREDITS_COMMAND COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gen_remix_credits.py)
+endif()
 
 add_custom_target(RegenerateRelocYamls
     BYPRODUCTS ${SSB64_RELOC_YAML_FILES}
@@ -343,6 +353,7 @@ add_custom_target(GenerateCreditsAssets
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py titles.credits.${SSB64_TEXT_VERSION}.txt
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py -paragraphFont -multiline info.credits.${SSB64_TEXT_VERSION}.txt
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/creditsTextConverter.py -paragraphFont companies.credits.${SSB64_TEXT_VERSION}.txt
+    ${SSB64_REMIX_CREDITS_COMMAND}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decomp/src/credits
     COMMENT "Encoding credits text assets (${SSB64_VERSION})"
 )
