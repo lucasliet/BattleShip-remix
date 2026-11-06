@@ -1,56 +1,46 @@
 <p align="center">
-  <img src="assets/BattleShip.svg" alt="BattleShip" width="640">
+  <img src="assets/SmashRemix.png" alt="Smash Remix" width="720">
 </p>
 
-# BattleShip
+# BattleShip-Remix
 
-**BattleShip** is a PC port of **Super Smash Bros. (N64)** — both the **US** (NTSC-U v1.0) and **Japanese** (Nintendo All-Star! Dairantou Smash Brothers) releases — built on top of the [VetriTheRetri/ssb-decomp-re](https://github.com/vetritheretri/ssb-decomp-re) decompilation, using [libultraship](https://github.com/Kenix3/libultraship) for PC-native rendering / audio / input and [Torch](https://github.com/HarbourMasters/Torch) for extracting assets out of the ROM at build time.
+**BattleShip-Remix** is a native PC and Switch port of **[Smash Remix](https://github.com/JSsixtyfour/smashremix) 2.0.1**, the Super Smash Bros. (N64) mod, built on the [BattleShip](https://github.com/JRickey/BattleShip) port. BattleShip turns the [VetriTheRetri/ssb-decomp-re](https://github.com/vetritheretri/ssb-decomp-re) decompilation into a native program with [libultraship](https://github.com/Kenix3/libultraship) (rendering, audio, input) and [Torch](https://github.com/HarbourMasters/Torch) (asset extraction). This fork rewrites the Remix's MIPS assembly as C on top of that decompilation, so the Remix runs as native code instead of patches on an emulated ROM.
 
-Runs natively on macOS (Apple Silicon), Linux, Windows, and Android.
+What the port covers:
 
-Download the high resolution texture pack from [GhostlyDark](https://github.com/GhostlyDark) [here!](https://evilgames.eu/texture-packs/ssb-reloaded.htm#pc)
+- every Remix 2.0.1 fighter (97 fighter ids, including the Remix clones, Polygons and bosses), stage, hazard and custom item;
+- the Remix modes: Remix 1P, All-Star, Multi-Man, Cruel, Home-Run Contest, Bonus 3, King of the Hill, Smashketball, Tag Team, Stamina, Tug of War, 12-Character Battle, the Remix Training mode;
+- the Remix menus and screens: the character select panel and its options, the Remix settings and toggles (in the port menu), Character Data, Sound Test, Gallery, credits, results and Match Stats;
+- the Remix audio banks (music and voices) and the CPU AI changes.
+
+The few places where the port deliberately behaves differently from the assembly are listed in [`docs/remix/deviations.md`](docs/remix/deviations.md). Widescreen stays out of scope for the Remix build (4:3).
+
+Packages are built for **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)** and **Nintendo Switch (homebrew .nro)**. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
 
 ## No copyrighted assets are included in this repository
 
-**None of Nintendo's assets (code, textures, audio, models, text, ROM data) are checked into this repo or distributed with builds.** The port is a pure C/C++ source tree; every byte of Nintendo-owned data is extracted at build time from a ROM that *you* supply. If you do not own a legal copy of Super Smash Bros. for the Nintendo 64, you cannot build or run this project.
+**None of Nintendo's assets (code, textures, audio, models, text, ROM data), and no Smash Remix ROM data, are checked into this repo or distributed with builds.** Every byte of game data is extracted on the first run from ROMs that *you* supply. If you do not own a legal copy of Super Smash Bros. for the Nintendo 64, you cannot build or run this project.
 
-You supply your own ROM. The decomp game code is region-compiled, so US
-and JP are separate builds — build the one matching your ROM
-(`-DSSB64_VERSION=us|jp`, see [BUILDING.md](BUILDING.md)). The canonical,
-supported dumps (internal name `SMASH BROTHERS`):
+The Remix build needs the Smash Remix 2.0.1 ROM (made by applying the Remix release patch to your own US ROM) and the US ROM, both in the repository root:
 
-| Version | Game code | SHA‑1 | MD5 |
-|---------|-----------|-------|-----|
-| **US** — NTSC-U v1.0 | `NALE` | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
-| **JP** — Nintendo All-Star! Dairantou Smash Brothers v1.0 | `NALJ` | `4b71f0e01878696733eefa9c80d11c147ecb4984` | `66db457b130d31a286a23d6e4dd9726e` |
+| File | ROM | SHA-1 | MD5 |
+|------|-----|-------|-----|
+| `baserom.remix.z64` | Smash Remix 2.0.1 (internal name `SMASH REMIX`, game code `NALE`) | `13716381ed5e29be2606e0f4724b18fd00789d04` | `2b2d6b295106c54216b7fc7a2f14346e` |
+| `baserom.us.z64` | Super Smash Bros. NTSC-U v1.0 (`NALE`) | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
 
-If your dump does not match the hashes for its version, it will not work.
+The vanilla builds need only their own ROM: US as above, or JP (Nintendo All-Star! Dairantou Smash Brothers v1.0, `NALJ`, SHA-1 `4b71f0e01878696733eefa9c80d11c147ecb4984`, MD5 `66db457b130d31a286a23d6e4dd9726e`) with `-DSSB64_VERSION=jp`. A dump that does not match the hashes for its version will not work.
 
-## Project stats
+## How the Remix port was done and validated
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/readme-stats/star-growth-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/readme-stats/star-growth-light.svg">
-    <img src="assets/readme-stats/star-growth-light.svg" alt="GitHub star growth chart" width="840">
-  </picture>
-</p>
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/readme-stats/release-downloads-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/readme-stats/release-downloads-light.svg">
-    <img src="assets/readme-stats/release-downloads-light.svg" alt="Downloads by Platform chart" width="840">
-  </picture>
-</p>
-
-<p align="center">
-  <sub>Charts are generated by GitHub Actions. Downloads are split by platform and ROM region; GitHub exposes current per-asset totals, not per-download timestamps.</sub>
-</p>
+- **Plan and history:** [`docs/remix/ROADMAP.md`](docs/remix/ROADMAP.md), milestone by milestone, with the evidence of each task.
+- **Method:** [`docs/remix/porting_guide.md`](docs/remix/porting_guide.md) (reading the Remix source, resolving addresses, the hook convention for vanilla code) and [`docs/remix/architecture.md`](docs/remix/architecture.md).
+- **Patch audit:** every `OS.patch_start` of the Remix source (2007), its 80 direct `origin` writes and its 988 character-table patches were mapped to the decomp function they land in (`tools/audit_remix_patches.py`) and compared with the port by hand. Each gap got a ledger ID and was closed with a test ([`docs/remix/patch_audit.md`](docs/remix/patch_audit.md), [`docs/remix/patch_audit_scopes.md`](docs/remix/patch_audit_scopes.md)); [`docs/remix/parity.md`](docs/remix/parity.md) is the per-file summary.
+- **Tests:** unit tests for the pure rules (`tests/remix/`), headless in-game smoke tests driven by input scripts (the `remix-smoke-tests` skill in `.claude/skills/`: VS matches, special-move matrices, stage and item sweeps, CSS and mode flows, audio dumps), and screen comparisons against the real Remix ROM in a reference emulator ([`docs/remix/notes/i8_reference_emulator.md`](docs/remix/notes/i8_reference_emulator.md)).
+- **Reference docs:** [`docs/remix/README.md`](docs/remix/README.md) indexes how each Remix subsystem works and how the port implements it.
 
 ## Features
 
-Everything below is toggleable in-game from the ESC menu.
+Everything below comes from BattleShip and is toggleable in-game from the ESC menu. The Remix adds its own settings pages (Remix, Gameplay, Music, Stage and Pokemon) to the same menu.
 
 ### Input enhancements (per-player)
 
@@ -103,29 +93,29 @@ Everything below is toggleable in-game from the ESC menu.
 
 Work in progress.
 
-## Author's notes
+## About the BattleShip port
 
-### About the project
+BattleShip, the port this fork builds on, was created by [JRickey](https://github.com/JRickey). From its author:
 
-This is a project that I started and developed alone with Claude until the v0.3-beta release. It took a little over a month of night and day work to get to the first beta release, and a massive 4 day long sprint working all day resolving bugs from v0.3-beta to v0.7-beta. As of now, this is no longer a pure AI project. Many people have offered their time playtesting, their knowledge of the game, or their experience with modding or competitive play; to bring improvements, bug fixes, new feature suggestions, and additions. Without them, the project would not be what it is today.
-
-If you find anything that you would like to see improved, create an issue on Github. I'll fix it.
-
-This port was started when the original decomp was 96% complete code only. The remaining 4% was the internal debug menu and Libultra functions that aren't necessary to port the game. The relocatable data was also not decompiled at the time. The port was designed with this in mind, and it is why certain design decisions had to have been made. I like to move fast, obviously.
-
-This project uses a heavily modified LibUltraShip and Torch, those two modules obviously don't work with every n64 game out of the box and a lot of game specific things needed to be implemented. The original game is quite unique and uses rendering techniques and n64 hardware tricks in ways other LUS projects did not need to account for.
-
-This is a passion project for me. Not out of nostalgia, but to actually make something. I don't have too much nostalgia for the original game, considering I didn't own a copy as a kid, but I remember playing it at a friend's house a handful of times. What motivates me to work on this is because I can. Because it's hard, because it hasn't been done before (at least not open source). It's required a ton of my personal time, even using AI. It's forced me to get creative, to design custom tools, to force the agents into certain boxes.
-
-People may not like it because I used AI, and that's okay. I'm not going to argue with your opinion or try to say that my way is the correct way of doing things. It works for me and that's what matters to me. My code is open source, it's free, it's MIT Licensed, and everyone can learn from it. That's what should matter to you.
-
-I hope you enjoy the project.
+> This is a project that I started and developed alone with Claude until the v0.3-beta release. It took a little over a month of night and day work to get to the first beta release, and a massive 4 day long sprint working all day resolving bugs from v0.3-beta to v0.7-beta. As of now, this is no longer a pure AI project. Many people have offered their time playtesting, their knowledge of the game, or their experience with modding or competitive play; to bring improvements, bug fixes, new feature suggestions, and additions. Without them, the project would not be what it is today.
+>
+> If you find anything that you would like to see improved, create an issue on Github. I'll fix it.
+>
+> This port was started when the original decomp was 96% complete code only. The remaining 4% was the internal debug menu and Libultra functions that aren't necessary to port the game. The relocatable data was also not decompiled at the time. The port was designed with this in mind, and it is why certain design decisions had to have been made. I like to move fast, obviously.
+>
+> This project uses a heavily modified LibUltraShip and Torch, those two modules obviously don't work with every n64 game out of the box and a lot of game specific things needed to be implemented. The original game is quite unique and uses rendering techniques and n64 hardware tricks in ways other LUS projects did not need to account for.
+>
+> This is a passion project for me. Not out of nostalgia, but to actually make something. I don't have too much nostalgia for the original game, considering I didn't own a copy as a kid, but I remember playing it at a friend's house a handful of times. What motivates me to work on this is because I can. Because it's hard, because it hasn't been done before (at least not open source). It's required a ton of my personal time, even using AI. It's forced me to get creative, to design custom tools, to force the agents into certain boxes.
+>
+> People may not like it because I used AI, and that's okay. I'm not going to argue with your opinion or try to say that my way is the correct way of doing things. It works for me and that's what matters to me. My code is open source, it's free, it's MIT Licensed, and everyone can learn from it. That's what should matter to you.
+>
+> I hope you enjoy the project.
 
 ---
 
 ## Building
 
-If you want to manually compile BattleShip, please consult the [building instructions](BUILDING.md).
+The Remix build (macOS, Linux and Switch, with a self-contained toolchain under `.toolchain/`) is described in [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md). The generic BattleShip steps (including Windows) are in [BUILDING.md](BUILDING.md).
 
 ## Architecture
 
@@ -231,7 +221,9 @@ Patching the *reads* in game code instead of the *layout* is forbidden by team p
 
 ## Why the submodules are forks
 
-Both `libultraship` and `torch` are pinned to **personal forks** rather than the upstream Harbour Masters repos, because each needs SSB64-specific changes that don't exist upstream.
+`decomp`, `libultraship` and `torch` point at the `-remix` forks ([ssb-decomp-re-remix](https://github.com/lucasliet/ssb-decomp-re-remix), [libultraship-remix](https://github.com/lucasliet/libultraship-remix), [Torch-remix](https://github.com/lucasliet/Torch-remix), branch `feature/remix-port`). They are forks of the BattleShip forks below and add the Remix work: the Remix C code and hooks in the decomp, the Remix asset factories in Torch, and the runtime fixes the Remix needed in libultraship.
+
+The BattleShip forks exist because each dependency needs SSB64-specific changes that don't exist upstream.
 
 ### [`libultraship`](https://github.com/JRickey/libultraship/tree/ssb64) — fork of [Kenix3/libultraship](https://github.com/Kenix3/libultraship)
 
@@ -298,7 +290,7 @@ scripts/      packaging (.dmg / .AppImage / .zip), worktree helper
 
 PRs are welcome from anyone. If you're opening a bug report, the most useful things to include are:
 
-- SHA-1 of your `baserom.us.z64`
+- SHA-1 of your `baserom.remix.z64` and `baserom.us.z64`
 - OS + architecture (especially macOS ARM64 vs x86_64, since LP64 bitfield layout has bitten us several times — see `docs/bugs/`)
 - The contents of `ssb64.log` from the run that reproduces the issue
 - A GBI trace if the issue is rendering-related (see `docs/debug_gbi_trace.md`)
@@ -314,7 +306,8 @@ PRs are welcome from anyone. If you're opening a bug report, the most useful thi
 - High-resolution texture pack: *SSB Reloaded* by [GhostlyDark](https://github.com/GhostlyDark), distributed separately at [evilgames.eu](https://evilgames.eu/texture-packs/ssb-reloaded.htm#pc). Not bundled with this repository or its builds — the port loads it only if you download it yourself.
 - Reference ports I learned from and adapted code from: [Starship](https://github.com/HarbourMasters/Starship) (SF64) and [Ship of Harkinian](https://github.com/HarbourMasters/Shipwright) (OoT) — both MIT-licensed by The Harbour Masters; see [`LICENSE`](LICENSE) for the per-file attribution.
 - Reference ports I learned from but did not borrow code from: [SM64 PC Port](https://github.com/sm64-port/sm64-port) (SM64), [SpaghettiKart](https://github.com/HarbourMasters/SpaghettiKart) (MK64).
-- Port work: me ([JRickey](https://github.com/JRickey)), with an enormous amount of help, debugging, and feature suggestions from contributors in our Discord server.
+- Smash Remix: [the Smash Remix team](https://github.com/JSsixtyfour/smashremix) — the mod this fork ports; its source was the reference for every routine. No Remix ROM data is included.
+- BattleShip port: [JRickey](https://github.com/JRickey), with an enormous amount of help, debugging, and feature suggestions from contributors in our Discord server.
 
 This project is **not affiliated with, endorsed by, or authorized by Nintendo.** It is a personal, non-commercial research and preservation effort. Do not upload ROMs, extracted `.o2r` archives, or any other Nintendo-owned data to issues or pull requests.
 
