@@ -20,7 +20,7 @@ What the port covers:
 
 The few places where the port deliberately behaves differently from the assembly are listed in [`docs/remix/deviations.md`](docs/remix/deviations.md). Widescreen stays out of scope for the Remix build (4:3).
 
-[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)** and **Nintendo Switch (homebrew .nro)** packages, and the built-in updater of the Remix build follows them. Android is not supported yet for the Remix. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
+[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .nro)** and **Android (arm64 .apk)** packages, and the built-in updater of the Remix build follows them. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
 
 ## No copyrighted assets are included in this repository
 
@@ -143,7 +143,7 @@ BattleShip, the port this fork builds on, was created by [JRickey](https://githu
 
 ## Building
 
-The Remix build (macOS, Linux and Switch, with a self-contained toolchain under `.toolchain/`) is described in [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md). The generic BattleShip steps (including Windows) are in [BUILDING.md](BUILDING.md).
+The Remix build (macOS, Linux, Switch and Android, with a self-contained toolchain under `.toolchain/`) is described in [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md). The generic BattleShip steps (including Windows) are in [BUILDING.md](BUILDING.md).
 
 ## Architecture
 

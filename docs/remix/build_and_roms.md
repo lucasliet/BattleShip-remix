@@ -169,3 +169,28 @@ If the `.o2r` or Torch change (a new `.recipe`), rebuild the package: an old `.o
 4. Desktop build (above), then the Switch build and pack.
 5. For the Remix symbol map and the action tables: `scripts/remix/assemble-remix.sh` (writes `build/remixasm/remix.sym`), then
    `.toolchain/host/venv/bin/python -I tools/gen_remix_actions.py`.
+
+## Android build (BattleShip and BattleShip-Remix)
+
+Built on a Linux host with the Android SDK, NDK `29.0.14206865` and JDK 17+ (Gradle `externalNativeBuild` runs the same `CMakeLists.txt`).
+The version is a Gradle property: `-Pssb64.version=remix` (default) or `us`.
+
+```
+cd android
+./gradlew assembleDebug -Pssb64.version=remix -Pssb64.abis=arm64-v8a
+```
+
+| Version | Package id | Label | Archive |
+|---|---|---|---|
+| `remix` | `dev.lucasliet.battleship.remix` | BattleShip Remix | `BattleShip-Remix.o2r` |
+| `us` | `com.jrickey.battleship` | BattleShip | `BattleShip.o2r` |
+
+Debug builds add `.debug` to the package id. The app asks for the ROM on the first launch and runs Torch on the phone
+(`port/android_torch_bridge.cpp`); the bridge renames the output to the version's archive and writes its `.recipe`, and
+`AssetExtractor.haveExtractedRom` asks for the ROM again when the recipe changes. Per-version resources (launcher icon)
+live in `android/app/src/<version>/res`.
+
+ABIs: arm64-v8a is tested on a Samsung S25. armeabi-v7a compiles but is not tested (no 32-bit device; the Remix C was
+written for LP64), so releases ship arm64 only. There is no x86/x86_64 build (the coroutine backend has no x86 swap).
+Release signing reads `SSB64_RELEASE_KEYSTORE*` from the environment (repository secrets in CI); without them the APK is
+debug-signed.

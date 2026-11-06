@@ -20,6 +20,10 @@ next to `BattleShip-Remix.nro` in `sdmc:/switch/BattleShip-Remix/`, and launch i
 opening an installed game). When a release changes the asset pipeline, copy the newly extracted `.o2r` and `.recipe`
 again.
 
+**Android (arm64):** install `BattleShip-Remix-android.apk` (allow installs from unknown sources), open it and pick the
+Smash Remix 2.0.1 ROM; it extracts `BattleShip-Remix.o2r` on the phone. It installs next to the vanilla BattleShip app.
+32-bit Android (armeabi-v7a) is not shipped yet.
+
 ## Files
 
 | File | Platform |
@@ -28,6 +32,7 @@ again.
 | `BattleShip-Remix-x86_64.AppImage` | Linux x86_64 |
 | `BattleShip-Remix-windows.zip` | Windows x64 |
 | `BattleShip-Remix-switch.zip` | Nintendo Switch homebrew (`.nro`, `f3d.o2r`, `config.yml`, `assets/`) |
+| `BattleShip-Remix-android.apk` | Android arm64-v8a, Android 7+ |
 | `SHA256SUMS.txt` | Checksums |
 
 Report bugs on [this repository's issue tracker](https://github.com/lucasliet/BattleShip-remix/issues), not on
