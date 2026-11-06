@@ -10,6 +10,7 @@
 #include "remix/remix_player_panel.h"
 #include "remix/remix_training.h"
 #include "remix/remix_toggles.h"
+#include "remix/remix_toggle_actions.h"
 #include "PortMenu.h"
 
 #include "Compat.h"
@@ -43,6 +44,12 @@ namespace ssb64 { void MountModsDir(); void UnmountMissingMods(); }
 #include <cctype>
 #include <cstring>
 #include <filesystem>
+
+namespace Ship {
+extern bool navigateToWidget;
+extern const char *navigateMainEntry;
+extern const char *navigateSidebar;
+} // namespace Ship
 
 namespace fs = std::filesystem;
 
@@ -795,11 +802,41 @@ WidgetInfo& PortMenu::AddWidget(WidgetPath& pathInfo, std::string widgetName, Wi
     return widget;
 }
 
+namespace {
+
+/**
+ * Test hook: SSB64_PORT_MENU_PAGE="<header>/<sidebar>" makes the first menu frame open that page, through the
+ * navigation request Menu::DrawElement already handles (CVars set in memory only, nothing saved).
+ */
+void RequestTestMenuPage() {
+    static std::string header;
+    static std::string sidebar;
+    const char *page = remix_debug_env_text("SSB64_PORT_MENU_PAGE");
+    if (page == nullptr) {
+        return;
+    }
+    const std::string text(page);
+    const size_t slash = text.find('/');
+    if (slash == std::string::npos) {
+        SPDLOG_WARN("SSB64_PORT_MENU_PAGE='{}' ignored: expected '<header>/<sidebar>', e.g. 'Remix/Other Screens'", text);
+        return;
+    }
+    header = text.substr(0, slash);
+    sidebar = text.substr(slash + 1);
+    Ship::navigateMainEntry = header.c_str();
+    Ship::navigateSidebar = sidebar.c_str();
+    Ship::navigateToWidget = true;
+}
+
+} // namespace
+
 PortMenu::PortMenu()
     : Menu("gOpenPortMenu", "Port Menu", 0, UIWidgets::Colors::LightBlue) {
-    // Not SetVisibility(): it saves gOpenPortMenu to the config, so the test override would leak into later runs.
+    // Not SetVisibility(): it saves gOpenPortMenu at once. The first Draw still syncs and saves it (GuiWindow::Draw),
+    // so the smoke-test scene.sh restores BattleShip.cfg.json after a run with this override.
     if (remix_debug_env_int("SSB64_PORT_MENU_OPEN", 0) != 0) {
         mIsVisible = true;
+        RequestTestMenuPage();
     }
 }
 
@@ -1370,6 +1407,107 @@ void PortMenu::AddMenuSettings() {
 }
 
 #ifdef REGION_REMIX
+/* decomp/src/sc/sccommon/scremixscreens.h, which the port layer cannot include */
+extern "C" void scRemixScreensOpen(int32_t screen, int32_t galleryPage);
+
+namespace {
+
+constexpr int32_t kScreenDebug = 0;
+constexpr int32_t kScreenIntro = 1;
+constexpr int32_t kScreenHowToPlay = 2;
+constexpr int32_t kScreenCredits = 3;
+constexpr int32_t kScreenGallery = 4;
+constexpr const char *kGalleryPageCVar = "gRemix.GalleryPage";
+
+/* Toggles.asm string_table_gallery, in Gallery page order. */
+const std::map<int32_t, const char *> kGalleryPageNames = {
+    { 0, "Mario" },         { 1, "DK" },           { 2, "Link" },          { 3, "Samus" },
+    { 4, "Yoshi" },         { 5, "Kirby" },        { 6, "Fox" },           { 7, "Pikachu" },
+    { 8, "Luigi" },         { 9, "Captain Falcon" }, { 10, "Ness" },       { 11, "Jigglypuff" },
+    { 12, "Ganondorf" },    { 13, "Young Link" },  { 14, "Dr. Mario" },    { 15, "Falco" },
+    { 16, "Wario" },        { 17, "Bowser" },      { 18, "Wolf" },         { 19, "Conker" },
+    { 20, "Mewtwo" },       { 21, "Marth" },       { 22, "Sonic" },        { 23, "Sheik" },
+    { 24, "Marina" },       { 25, "Dedede" },      { 26, "Goemon" },       { 27, "Banjo" },
+    { 28, "Crash" },        { 29, "Peach" },       { 30, "Dark Samus" },   { 31, "Lucas" },
+    { 32, "Slippy & Peppy" }, { 33, "Roy" },       { 34, "Dr. Luigi" },    { 35, "Lanky Kong" },
+    { 36, "Dragon King" },  { 37, "Ebisumaru" },   { 38, "Mad Piano" },    { 39, "Remix" },
+};
+
+/* The "Load Profile:" rows of the Music and Stage pages run a profile loader on A; their value means nothing, so the page shows
+ * one button per profile instead (AddMenuRemixSubProfiles). */
+bool IsRemixProfileLoaderRow(const remix_toggles::Toggle &toggle) {
+    return toggle.hasAction && (toggle.title == "Load Profile:");
+}
+
+/* Puts the next widget of a two-column page in the column after the previous one. */
+void PlaceInNextColumn(WidgetPath &path, int &shown) {
+    path.column = (shown++ % 2 == 0) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
+}
+
+/* "Random Music Toggles:" gives "Random Music Toggles: toggle all"; the bare "Toggle:" of the Pokemon page gives "Toggle all". */
+std::string ToggleAllLabel(const remix_toggles::ToggleAllRow &row) {
+    std::string title = row.title;
+    if (!title.empty() && (title.back() == ':')) {
+        title.pop_back();
+    }
+    return (title == "Toggle") ? "Toggle all" : title + ": toggle all";
+}
+
+/* Lower-case word of the page a profile loader belongs to: "music" or "stage". */
+const char *ProfileKind(remix_toggles::Group group) {
+    return (group == remix_toggles::Music) ? "music" : "stage";
+}
+
+} // namespace
+
+void PortMenu::AddMenuRemixOtherScreens() {
+    AddSidebarEntry("Remix", "Other Screens", 1);
+    WidgetPath path = { "Remix", "Other Screens", SECTION_COLUMN_1 };
+    AddWidget(path, "Other Screens", WIDGET_SEPARATOR_TEXT);
+    AddWidget(path, "Leaves the current screen for the one chosen. Use it from a menu, not in the middle of a match.",
+              WIDGET_TEXT);
+    AddWidget(path, "Debug", WIDGET_BUTTON)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo &) { scRemixScreensOpen(kScreenDebug, 0); })
+        .Options(ButtonOptions().Tooltip("Opens the debug menu."));
+    AddWidget(path, "View Intro", WIDGET_BUTTON)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo &) { scRemixScreensOpen(kScreenIntro, 0); })
+        .Options(ButtonOptions().Tooltip("Plays the opening movie."));
+    AddWidget(path, "View How to Play", WIDGET_BUTTON)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo &) { scRemixScreensOpen(kScreenHowToPlay, 0); })
+        .Options(ButtonOptions().Tooltip("Plays the How to Play demonstration."));
+    AddWidget(path, "View Credits", WIDGET_BUTTON)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo &) { scRemixScreensOpen(kScreenCredits, 0); })
+        .Options(ButtonOptions().Tooltip("Rolls the credits for player 1."));
+
+    AddWidget(path, "Gallery", WIDGET_SEPARATOR_TEXT);
+    AddWidget(path, "First picture", WIDGET_CVAR_COMBOBOX)
+        .CVar(kGalleryPageCVar)
+        .RaceDisable(false)
+        .Options(ComboboxOptions().ComboMap(kGalleryPageNames).DefaultIndex(0).Tooltip("Picture the Gallery opens on."));
+    AddWidget(path, "View Gallery", WIDGET_BUTTON)
+        .RaceDisable(false)
+        .Callback([](WidgetInfo &) { scRemixScreensOpen(kScreenGallery, CVarGetInteger(kGalleryPageCVar, 0)); })
+        .Options(ButtonOptions().Tooltip("Opens the Gallery. B leaves it for the Options screen."));
+}
+
+void PortMenu::AddRemixSection() {
+    if (menuEntries.count("Remix") != 0) {
+        return;
+    }
+    AddMenuRemix();
+    if (menuEntries.count("Remix") == 0) {
+        SPDLOG_WARN("Port menu: no Remix toggles loaded, the Remix section is not shown");
+        return;
+    }
+    menuOrder.erase(std::find(menuOrder.begin(), menuOrder.end(), "Remix"));
+    const auto settings = std::find(menuOrder.begin(), menuOrder.end(), "Settings");
+    menuOrder.insert((settings == menuOrder.end()) ? menuOrder.begin() : std::next(settings), "Remix");
+}
+
 void PortMenu::AddMenuRemix() {
     const auto &toggles = remix_toggles::All();
     if (toggles.empty()) {
@@ -1395,35 +1533,79 @@ void PortMenu::AddMenuRemix() {
         }
         AddWidget(path, sidebar, WIDGET_SEPARATOR_TEXT);
 
-        int shown = 0;
-        for (const auto &toggle : toggles) {
-            if ((toggle.group != group) || toggle.hasAction) {
-                continue;
-            }
-            path.column = (shown++ % 2 == 0) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
-            if (toggle.isBool) {
-                AddWidget(path, toggle.title, WIDGET_CVAR_CHECKBOX)
-                    .CVar(toggle.cvar.c_str())
-                    .RaceDisable(false)
-                    .Options(CheckboxOptions().DefaultValue(toggle.defaults[0] != 0));
-            } else if (!toggle.strings.empty()) {
-                AddWidget(path, toggle.title, WIDGET_CVAR_COMBOBOX)
-                    .CVar(toggle.cvar.c_str())
-                    .RaceDisable(false)
-                    .Options(ComboboxOptions()
-                                 .ComboMap(remix_toggles::ComboMap(toggle))
-                                 .DefaultIndex(static_cast<uint32_t>(toggle.defaults[0])));
-            } else {
-                AddWidget(path, toggle.title, WIDGET_CVAR_SLIDER_INT)
-                    .CVar(toggle.cvar.c_str())
-                    .RaceDisable(false)
-                    .Options(IntSliderOptions().Min(toggle.min).Max(toggle.max).DefaultValue(toggle.defaults[0]));
-            }
-        }
+        AddMenuRemixGroup(path, static_cast<remix_toggles::Group>(group));
     }
+    AddMenuRemixOtherScreens();
     AddMenuRemixPlayerPanel();
     AddMenuRemixModes();
     AddMenuRemixTraining();
+}
+
+void PortMenu::AddMenuRemixGroup(WidgetPath &path, remix_toggles::Group group) {
+    const auto &rows = remix_toggles::ToggleAllRows();
+    int shown = 0;
+    for (const auto &toggle : remix_toggles::All()) {
+        if (toggle.group != group) {
+            continue;
+        }
+        for (const auto &row : rows) {
+            if (!row.followers.empty() && (row.followers.front() == toggle.entryAddr)) {
+                AddMenuRemixToggleAll(path, shown, row);
+            }
+        }
+        if (IsRemixProfileLoaderRow(toggle)) {
+            AddMenuRemixSubProfiles(path, shown, toggle);
+        } else {
+            PlaceInNextColumn(path, shown);
+            AddMenuRemixToggle(path, toggle);
+        }
+    }
+}
+
+void PortMenu::AddMenuRemixToggle(WidgetPath &path, const remix_toggles::Toggle &toggle) {
+    const uint32_t entryAddr = toggle.entryAddr;
+    if (toggle.isBool) {
+        AddWidget(path, toggle.title, WIDGET_CVAR_CHECKBOX)
+            .CVar(toggle.cvar.c_str())
+            .RaceDisable(false)
+            .Callback([entryAddr](WidgetInfo &) { remix_toggle_action_apply(entryAddr); })
+            .Options(CheckboxOptions().DefaultValue(toggle.defaults[0] != 0));
+    } else if (!toggle.strings.empty()) {
+        AddWidget(path, toggle.title, WIDGET_CVAR_COMBOBOX)
+            .CVar(toggle.cvar.c_str())
+            .RaceDisable(false)
+            .Callback([entryAddr](WidgetInfo &) { remix_toggle_action_apply(entryAddr); })
+            .Options(ComboboxOptions()
+                         .ComboMap(remix_toggles::ComboMap(toggle))
+                         .DefaultIndex(static_cast<uint32_t>(toggle.defaults[0])));
+    } else {
+        AddWidget(path, toggle.title, WIDGET_CVAR_SLIDER_INT)
+            .CVar(toggle.cvar.c_str())
+            .RaceDisable(false)
+            .Callback([entryAddr](WidgetInfo &) { remix_toggle_action_apply(entryAddr); })
+            .Options(IntSliderOptions().Min(toggle.min).Max(toggle.max).DefaultValue(toggle.defaults[0]));
+    }
+}
+
+void PortMenu::AddMenuRemixToggleAll(WidgetPath &path, int &shown, const remix_toggles::ToggleAllRow &row) {
+    const uint32_t titleAddr = row.titleAddr;
+    PlaceInNextColumn(path, shown);
+    AddWidget(path, ToggleAllLabel(row), WIDGET_BUTTON)
+        .RaceDisable(false)
+        .Callback([titleAddr](WidgetInfo &) { remix_toggle_action_toggle_all(titleAddr); })
+        .Options(ButtonOptions().Tooltip("Sets every toggle below to the opposite of the first one."));
+}
+
+void PortMenu::AddMenuRemixSubProfiles(WidgetPath &path, int &shown, const remix_toggles::Toggle &loader) {
+    const uint32_t loaderAddr = loader.entryAddr;
+    for (size_t i = 0; i < loader.strings.size(); i++) {
+        const int profile = loader.min + static_cast<int>(i);
+        PlaceInNextColumn(path, shown);
+        AddWidget(path, "Load " + loader.strings[i] + " " + ProfileKind(loader.group) + " profile", WIDGET_BUTTON)
+            .RaceDisable(false)
+            .Callback([loaderAddr, profile](WidgetInfo &) { remix_toggle_action_load_sub_profile(loaderAddr, profile); })
+            .Options(ButtonOptions().Tooltip("Sets the toggles below to the defaults of this profile."));
+    }
 }
 
 void PortMenu::AddMenuRemixTraining() {
@@ -1955,9 +2137,6 @@ void PortMenu::AddMenuAbout() {
 
 void PortMenu::AddMenuElements() {
     AddMenuSettings();
-#ifdef REGION_REMIX
-    AddMenuRemix();
-#endif
     AddMenuAssets();
 #ifndef DISABLE_SCRIPTING
     AddMenuMods();
@@ -2033,6 +2212,13 @@ void PortMenu::InitElement() {
 
 void PortMenu::UpdateElement() {
     Ship::Menu::UpdateElement();
+#ifdef REGION_REMIX
+    const bool visible = IsVisible();
+    if (mWasVisible && !visible) {
+        remix_toggle_action_menu_closed();
+    }
+    mWasVisible = visible;
+#endif
 }
 
 void PortMenu::Draw() {

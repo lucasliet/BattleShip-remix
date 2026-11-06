@@ -16,6 +16,8 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_1p_remix_rules.c
     test_timedstock_rules.c
     test_gallery_rules.c
+    test_vsdemo_rules.c
+    test_toggle_action_rules.c
     test_koth_rules.c
     test_tugofwar_rules.c
     test_tagteam_rules.c
@@ -75,6 +77,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_kirbygun_rules.c
     test_dpad_control_rules.c
     test_css_rules.c
+    test_css_token_rules.c
     test_css_cpu_costume_rules.c
     test_css_panel_menu_rules.c
     test_css_vsmodes_rules.c
@@ -100,6 +103,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_bowserammo_rules.c
     test_ness_rules.c
     test_pika_rules.c
+    test_results_rules.c
     ${CMAKE_SOURCE_DIR}/port/bridge/sprite_bitmap_row.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_decode.c
     ${CMAKE_SOURCE_DIR}/port/remix/remix_font_layout.c
@@ -156,6 +160,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/slippy/ftremixslippyhipsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixkirbygunrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadcontrolrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixdpadmenurules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixjabrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixkirbyspawnrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/bowser/ftremixbowserammorules.c
@@ -189,14 +194,24 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoverylogicfighterrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixairecoverydriftrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnvsmode/mnremixvsstatsrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnvsmode/mnremixvsmodereturnrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixaiteachingrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixgroupdisplayrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/if/ifremixspriterules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixbgmrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mncommon/mnremixgalleryrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mncommon/mnremixgalleryaudio.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mncommon/mnremixsplashrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/sc/sccommon/scremixvsdemorules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/gm/gmremixtoggleactionrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecblayout.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixtwelvecbcustom.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcssrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcsstokenrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcssafkrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcssunplugrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixstockrangerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnvsmode/mnremixvsstaminarules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcssmoderules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcsssliderules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixgoalrules.c
@@ -204,6 +219,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixcsspanelmenurules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnplayers/mnremixbonusmodesrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagepanelrules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnvsmode/mnremixresultsrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagetournamentrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstageroulette.c
     ${CMAKE_SOURCE_DIR}/decomp/src/mn/mnmaps/mnremixstagegridrules.c

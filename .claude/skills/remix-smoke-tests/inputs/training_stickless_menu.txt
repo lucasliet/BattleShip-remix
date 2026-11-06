@@ -1,0 +1,5 @@
+# Training (scene 54) with SSB64_REMIX_PANEL="DpadControl.1=2" (Stickless): START pauses, D-pad down moves the menu cursor
+# from CP to Item, D-pad right changes the item (None to Maxim Tomato). Shots at 220, 250, 280.
+200 201 0 START 0 0
+230 231 0 DD 0 0
+260 261 0 DR 0 0

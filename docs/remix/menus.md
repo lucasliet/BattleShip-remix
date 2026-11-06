@@ -44,8 +44,17 @@ VS demo, credits, boot).
 
 - The settings menu is the ImGui menu, not a replica of `Menu.asm`: `PortMenu.cpp` `AddMenuRemix` builds Remix > profile buttons and one
   widget per toggle (checkbox, combobox or integer slider), plus Player Panel, Player Tags, Modes (Smashketball type, Tag Team queue) and
-  Training pages. The OPTION screen stays vanilla; the 5th Mode Select button, the L shortcut and the Other Screens entries (Debug, View Intro,
-  How to Play, Credits, Gallery) do not exist in it.
+  Training pages. The OPTION screen stays vanilla; the 5th Mode Select button and the L shortcut do not exist in it. The Other Screens
+  entries (Debug, View Intro, How to Play, Credits, Gallery) are the buttons of Remix > Other Screens.
+- A-press rows (`port/remix/remix_toggle_actions.{h,cpp}`): the widgets have no A press, so each row runs its routine after the value
+  changes. BGM Volume, SFX Volume, Punish Failed Z-Cancel, Default CPU LVL (V.S.) (`set_cpu_level`), Menu Music (`play_menu_music_`, plays
+  the chosen track now) and every per-track Random Music bool (`preview_bgm_`, plays the BGM id of the entry word 0x24) are ordinary
+  widgets. The title rows `toggle_all_` ("Random Music Toggles:", "Random Stage Toggles:", "Toggle:") are a "toggle all" button at the same
+  place of the page, and the "Load Profile:" INT rows (`load_sub_profile_`) are one button per profile on the Music and Stage pages. Details
+  and the routines' port names: [`toggles.md`](toggles.md) section 1.4.
+- Deviation, Random Music preview: the asm sets `reset_menu_music` and restarts the menu music when the settings screen is left. The port
+  menu also opens during a match, so the first preview remembers the BGM id playing (or none) and closing the menu (`PortMenu::UpdateElement`,
+  `remix_toggle_action_menu_closed`) puts it back or stops the music; a Menu Music press after a preview keeps the track it chose.
 - `port/remix/remix_toggles.{h,cpp}`: the registry is built at start-up from the `Menu.entry` nodes of the Remix RAM image (value, range,
   string table, title) and the four `Toggles.profile_defaults_*`. A value is the CVar `gRemix.Toggle.<index>`. Environment:
   `SSB64_REMIX_PROFILE=<0..3>`, `SSB64_REMIX_TOGGLES="<title>=<value>;..."`. Match code reads a toggle with `gmRemixToggle(name)`
@@ -298,6 +307,10 @@ check is `<= 0.100098` under `REGION_REMIX`. The random motion pick skips the ki
   and the roll speed differs from the normal one, Start is simulated once. Port: `scStaffrollIsStartPressed` (`scstaffroll.c`) with
   `sc1PRemixAfkIsSpeedAssistActive` (`sc1premixenemyafk*`); enable with `SSB64_REMIX_TAG_NAMES="2=afk"`. The fast speed on Start is 0.11
   (`:20-23`, `scstaffroll.c` 0.11F under `REGION_REMIX`, 0.05F otherwise).
+- **Away mode** (`Credits.asm:1238-1246` `awayMode`): with the same `afk` tag the crosshair fires by itself at the names
+  (`sc1PRemixAfkCreditsTapShoot`) and an automatic shot plays no sound and draws no highlight (`sc1PRemixAfkCreditsShotIsSilent` in
+  `scStaffrollMakeHighlightGObj` and `scStaffrollCheckCursorHighlightPrompt`). Test `l5_credits_afk` against `l5_credits_noafk`: the
+  info boxes of Yoshiki Suzuki and Yoshiya Taniguchi open with no input, no FGM is logged.
 - Test: `SSB64_START_SCENE=56`; after "Presents" the Remix titles run from "Project Leader" to "Video Team"; names with digits and symbols
   show their glyphs.
 
@@ -310,18 +323,22 @@ Falco, Wario, Bowser, Wolf, Conker, MTwo, Marth, Sonic, Sheik, Marina, Dedede, G
 Dragon King, Ebi, Piano, Boss; `id_table` :445-487) on the Congratulations scene. Pictures are the BOTTOM/TOP pairs of `File.asm` (vanilla
 characters) or `SinglePlayer.custom_victory_file_table` (`(char_id - 12) * 2`, `SinglePlayer.asm:2293-2378`); the offset in the file is 0x20718.
 State `Gallery.status` (`:19-35`: active, index, fade_length, music_index, idle, idle_index, idle_timer, previous_screen). Controls (`main_`
-:929-1186): stick X >= +-40 of any player or L/R/D-pad left/right change the picture (fades 45 normal, 4 quick, 100 idle), A changes the
+:929-1186): stick X >= +-40 of any player or D-pad left/right change the picture (fades 45 normal, 4 quick, 100 idle), A changes the
 picture's song (`bgm_table`, `[count, bgm ids...]`; index 0 plays the Gallery BGM), START toggles idle mode (a shuffled `idle_table` of 40
 entries every `IDLE_TIME` 150 s with random music), L/R/Z play the 18-pair drum kit (`fgm_drum_kit`), B leaves (index saved in
 `Toggles.entry_view_gallery + 4`, back to `previous_screen`). Entry: a 4th "Gallery" button on the Data menu (`data_menu.add_button_` :1339,
 text X 80.0, button y 183.0, cursor wrap 4 positions), or Other Screens > View Gallery.
 
-Port: `mn/mncommon/mnremixgallery.{c,h}` (state, paging with L/R, D-pad and stick edge, B to the previous scene, scene reload per page) and
+Port: `mn/mncommon/mnremixgallery.{c,h}` (state, paging with the D-pad and the stick edge, A for the picture's songs, START for the
+idle modes, L/R drums and Z for the next kit through `mnremixgalleryaudio.{c,h}`, B to the previous scene, scene reload per page) and
 `mnremixgalleryrules.{c,h}` (the `id_table` as Character.id = port fkind through `REMIX_ID_TO_PORT_FKIND`, `custom_victory_file_table` and every
-`set_ending_image` call, Lanky's last call wins); `mncongra.c` hands its input to the gallery and uses the rules for every Character.id from
-12 (Boss, polygons, Remix fighters; it also gives the Remix 1P ending its picture). Open with `SSB64_START_GALLERY=1` (return scene `nSCKindData`,
-`scmanager.c`). Open gaps MS-10 to MS-12 and MS-18 (`patch_audit.md`): the Data button and the menu entry, the per-picture music, A, idle
-mode and drum kit, the 45/4/100 fades and the Congratulations sound suppression.
+`set_ending_image` call, Lanky's last call wins, the song lists, the idle order, the drum kit); `mncongra.c` hands its input to the gallery,
+uses the 45/4/100 fades and plays no Congratulations voice on a Gallery picture, and uses the rules for every Character.id from 12 (Boss,
+polygons, Remix fighters; it also gives the Remix 1P ending its picture). Entries: the fourth Data button (`mn/mndata/mnremixdatagallery.c`,
+label bitmap at 0x4EE8 of the Data menu file, B returns to Data), Remix > Other Screens > View Gallery in the port menu (first picture
+chosen there, B returns to the Options screen) and `SSB64_START_GALLERY=1` (return scene `nSCKindData`, `scmanager.c`). Tests:
+`l5_data_gallery` (Data, Gallery with BGM 281, B back to Data), `l5_gallery_ctl` (L 0x20, R 0x1F, Z then L 0x11F, A song 6, D-pad right
+to the DK picture with the scroll sound and no announcer), `l5_screens_gallery` (the menu routine opens the Kirby picture).
 
 ---
 
@@ -329,7 +346,10 @@ mode and drum kit, the 45/4/100 fades and the Congratulations sound suppression.
 
 - **Title version** (`Boot.asm:155-169`): "Smash Remix v2.0.1", centred at (160, 218), colour `0x888800FF`, scale 0.9375. Port:
   `mn/mncommon/mnremixtitleversion.*`, `remix_hud_text` slot 3, put every frame by `mnTitleFuncRun`. The larger title logo rows (0x245C8, 0x3DC88)
-  are in `mntitle.c`. The Remix splash image after the N64 logo (`Boot.asm:18-53`) is not shown.
+  are in `mntitle.c`. The Remix splash (`Boot.asm:18-53`): the port never shows the N64 logo (issue #260), so every entry into the
+  startup scene goes to the Congratulations scene with Character.id NONE (`scmanager.c`), which shows the splash image (file
+  0x95E/0x95F) for 512 frames with the jingle (FGM 0xA0, other sounds with L held, `mn/mncommon/mnremixsplash*.c`) and then the title, as
+  the asm does after the logo (also after each attract loop). Test `l5_splash`.
 - **Menu music** (`BGM.asm alt_menu_music_` :492 and `_prevent_stop`): helper `decomp/src/gm/gmremixmenumusic.{c,h}` and `sys/audio.c`
   `syAudioGetBGMPlaying` (the port's `BGM.safe_id`).
 
@@ -362,10 +382,14 @@ mode and drum kit, the 45/4/100 fades and the Congratulations sound suppression.
   0x8018DC08 in `scAutoDemoInitSObjs`). Port: `sc/sccommon/scremixvsdemo.{c,h}` (`scRemixVsDemoPickFocusFighters`: two distinct Remix fighters with
   `variant_type == REMIX_VARIANT_NA` from `kRemixRoster`, unlock masks ignored; `scRemixVsDemoPickNonFocusedFighter`; `scRemixVsDemoPickStage`: a
   random stage id in [0, 0xD7) of class BATTLE in `Stages.class_table`, never Rest Area 0x8B, `0xD7` itself never drawn as in the asm), called from
-  `mntitle.c:360`, `scautodemo.c`. The Remix pick overrides `SSB64_DEMO_FKINDS`. The name plates still use the parent fighter's vanilla name
-  (`scRemixVsDemoGetNameTextureOffset` exists and is not called).
+  `mntitle.c:360`, `scautodemo.c`. The Remix pick overrides `SSB64_DEMO_FKINDS`. The name plates come from
+  `SinglePlayer.name_texture_table` + 0x10 for every fighter (`scRemixVsDemoGetNameTextureOffset` in `scAutoDemoInitSObjs`), and port 4
+  never repeats port 3's fighter (`scRemixVsDemoPickNonFocusedFighter`). Test `l5_vsdemo` (Dedede's own plate at frame 900).
 - **Sound test**: `mn/mndata/mnremixsoundtest.c` extends the music and voice lists (`MIDI.extended_music_map_table`,
   `FGM.extended_voice_map_table`; `augment_sound_test_*`); inputs `soundtest_browse.txt` / `soundtest_wrap.txt` with `SSB64_START_SCENE=59`.
+  With the second player tag named `afk` (`FGM.asm afk_soundTest`) the screen presses right and A by itself after 7 minutes of a song,
+  counting while `syAudioGetBGMPlaying` (the port's `BGM.safe_id`, cleared only by a stop, not when a song without a loop ends) has a
+  track (`sc1premixenemyafk.c`). Test `l5_soundtest_afk` (track 33, then 34 after 25 200 frames).
 - **Render groups**: `Render.asm toggle_group_display_` walks the list at `GROUP_TABLE[group]` (= `gGCCommonLinks` in the port) and writes `hide`
   to every node; port `gm/gmremixgroupdisplay.{c,h}` (`gmRemixGroupDisplaySet`, `gmRemixGroupDisplayTempSet` for `SpecialZoom.asm
   temp_toggle_group_display_`). Groups in use: 0x0D menu instructions, 0x0E HUD, 0x0F and 0x10 pause legend, 0x16 results rows. `Pause.asm

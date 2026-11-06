@@ -14,6 +14,10 @@
 
 #include <map>
 
+#ifdef REGION_REMIX
+#include "remix/remix_toggles.h"
+#endif
+
 namespace ssb64 {
 
 class PortMenu : public Ship::Menu {
@@ -25,6 +29,13 @@ class PortMenu : public Ship::Menu {
     void DrawElement() override;
     void UpdateElement() override;
     void Draw() override;
+#ifdef REGION_REMIX
+    /**
+     * Adds the Remix section after Settings. The menu is built when the window opens, before the game archive and
+     * the Remix toggles load, so PortInit calls this once remix_toggles_init and remix_panel_init have run.
+     */
+    void AddRemixSection();
+#endif
 
   protected:
     void AddSidebarEntry(std::string sectionName, std::string sidbarName, uint32_t columnCount);
@@ -35,7 +46,12 @@ class PortMenu : public Ship::Menu {
     void AddMenuAbout();
 #ifdef REGION_REMIX
     void AddMenuRemix();
+    void AddMenuRemixGroup(WidgetPath& path, remix_toggles::Group group);
+    void AddMenuRemixToggle(WidgetPath& path, const remix_toggles::Toggle& toggle);
+    void AddMenuRemixToggleAll(WidgetPath& path, int& shown, const remix_toggles::ToggleAllRow& row);
+    void AddMenuRemixSubProfiles(WidgetPath& path, int& shown, const remix_toggles::Toggle& loader);
     void AddMenuRemixPlayerPanel();
+    void AddMenuRemixOtherScreens();
     void AddMenuRemixModes();
     void AddMenuRemixTraining();
 #endif
@@ -46,6 +62,9 @@ class PortMenu : public Ship::Menu {
   private:
     bool mShowReextractMessage = false;
     bool mMenuElementsInitialized = false;
+#ifdef REGION_REMIX
+    bool mWasVisible = false;
+#endif
 };
 
 } // namespace ssb64

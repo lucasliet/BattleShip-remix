@@ -1,0 +1,8 @@
+# Gallery (scene 55 with SSB64_START_GALLERY=1): L and R drum (FGM 0x20, 0x1F), Z next kit, L again (0x11F), A plays the
+# picture's next song, D-pad right moves to the next picture. Run with SSB64_BGM_LOG=1 SSB64_AUDIO_FGM_LOG=1.
+200 201 0 L 0 0
+230 231 0 R 0 0
+260 261 0 Z 0 0
+290 291 0 L 0 0
+330 331 0 A 0 0
+400 401 0 DR 0 0

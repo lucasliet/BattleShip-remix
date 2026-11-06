@@ -1,0 +1,5 @@
+# Training (LLDB_START_SCENE=54 SSB64_TRAIN_FKINDS=0,8) with SSB64_REMIX_PANEL="DpadControl.1=1" (Stick Swap): stick up
+# freezes (the D-pad up shortcut), stick right held advances one frame every 5 frames (the DR turbo). Count with lldb_count.sh
+# on sc1ptrainingremix.c:124 (advance, 7 in this run) and :129 (freeze toggle, 1).
+200 202 0 - 0 70
+240 275 0 - 70 0

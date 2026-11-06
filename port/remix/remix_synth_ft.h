@@ -58,6 +58,16 @@ void port_fighter_synth_ft_destroy(struct FTData *ft);
  * Points the registered FTData of `fkind` at the Remix offset; returns 0 if it has none. */
 int port_fighter_set_attributes_offset(int fkind, uint32_t o_attributes);
 
+/* Character.asm copy_menu_actions: copies the menu motion rows [begin, begin + count) of base_fkind into the menu motion array
+ * of target_fkind, first growing that array to begin + count rows when it is shorter. The row count of the grown array
+ * replaces the vanilla one so the figatree heap is sized for the copied animations (the asm keeps the vanilla count pointer;
+ * the N64 heap size does not depend on it). Returns 0 when nothing changed. */
+int port_fighter_copy_menu_motions(int target_fkind, int base_fkind, uint32_t begin, uint32_t count);
+
+/* Character.asm `origin 0x97A4C + 0x68`: target_fkind uses the menu motion array of base_fkind (Giant DK shares DK's). The
+ * row count is shared too, for the reason given above. Returns 0 when nothing changed. */
+int port_fighter_share_menu_motions(int target_fkind, int base_fkind);
+
 #ifdef __cplusplus
 }
 #endif

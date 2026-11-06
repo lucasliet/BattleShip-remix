@@ -287,7 +287,7 @@ Closed phases:
     clean; unit tests 6062 checks. Done in the ledger with their runs: GP-1 = CT-14, FT-38, FT-43, OP-20, SH-10, FT-15, SH-1,
     FT-50, SH-11, SH-12, IT-7, SH-4, GP-7 = CT-15; FT-19 `n/a`. The rest is ported and marked "in-game check pending" in the
     ledger. Verification batch (2026-11-05, 184 runs `pc_*`, scenarios with `lldb_count.sh`/`lldb_first.sh`): 41 more items done
-    across lots 2 to 4 (ledger evidence); FT-49 failed (the L-held voice 0x300 never plays); 27 items still need a scenario
+    across lots 2 to 4 (ledger evidence); FT-49 first failed because the input released L before the voice frame, then passed; 27 items still need a scenario
     that triggers them. Open: GP-6 (Visibility per-part render modes: needs a renderer state for the
     alpha render mode), GP-12 (GFX 0x64 user not found). Deviations in `deviations.md` 5.8.
   F5 and F6 are single owners of `efmanager.c` and `ftmain.c`; F5
@@ -320,7 +320,15 @@ Closed phases:
     out of containers), IT-3. I2 (`ftshadow.c`, `ftremixsize.c`): IT-5, IT-6. I3: IT-4, IT-9, IT-11. Tests:
     `SSB64_FORCE_CONTAINER_DROP` with `SSB64_REMIX_ITEM_LOG` and `item_cpu_sweep.sh`; `SSB64_REMIX_PANEL` (Start With,
     Size, Visibility) against the reference; two matches in a row for IT-4; `SSB64_REMIX_FORCE_ITEM` for IT-11.
-  - [ ] **Lot 5, CSS, menus and screens.**
+  - [ ] **Lot 5, CSS, menus and screens.** Progress (2026-11-05): coded and built; 29 items done with runs (MN-1, MN-2, MN-3,
+    MN-6, MN-7, MN-15, MD-12 to MD-17, CT-1, CT-13, OP-29, OP-30, OP-31, MS-1, MS-7, MS-9, MS-10, MS-11, MS-12, MS-18, MS-20,
+    MS-24 and the new CT-24), MS-2 n/a (the port never shows the N64 logo); MN-4, MN-5, MN-8 to MN-14, MN-20, MD-3, MD-20, MD-22,
+    OP-32, OP-33, OP-40, OP-41, MS-19 and MS-21 ported, in-game check pending (verification batch next). Found and fixed on the way: the Gallery
+    label read the common menu file; the port menu built before the Remix toggles loaded, so the Remix section never showed
+    (now added after `remix_toggles_init`, `SSB64_PORT_MENU_PAGE` opens a page for screenshots); `syAudioGetBGMPlaying` cleared
+    when a song without a loop ended, unlike `BGM.safe_id`; Giant DK crashed the VS results and Metal Mario and the polygons had
+    empty menu motions (`Character.asm` `copy_menu_actions`, CT-24,
+    `docs/bugs/remix_giant_dk_results_menu_motions_2026-11-05.md`). The results sweep `l5_rs_*` (82 Remix winners) is clean.
     - C1 CSS common (owner of `mnplayersvs.c`, `mnplayers1pgame.c`, `mnplayers1pbonus.c`, `mnplayers1ptraining.c`): MN-1,
       MN-2, MN-3, MN-4, MN-5, MN-11, MD-3, MD-22.
     - C2 CSS per mode (after C1, same files, `mnremixvariants.c`, `mnremixvsstamina.c`): MN-6, MN-7, MN-9, MN-10, MN-12,

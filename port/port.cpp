@@ -1208,6 +1208,11 @@ static int PortInitImpl(int argc, char* argv[]) {
 	remix_toggles_init();
 	remix_panel_init();
 	remix_training_init();
+	if (auto window = sContext->GetWindow(); window && window->GetGui()) {
+		if (auto menu = std::dynamic_pointer_cast<ssb64::PortMenu>(window->GetGui()->GetMenu())) {
+			menu->AddRemixSection();
+		}
+	}
 #endif
 
 #ifndef DISABLE_SCRIPTING

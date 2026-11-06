@@ -256,16 +256,29 @@ int resolveParentFkind(const RemixRecord &record, size_t index)
     return parentFkind;
 }
 
-/* VS results winner line. Vanilla rows leave these at 0 (they use the decomp
- * tables), so a copied parent row would draw the name at scale 0. Values follow
- * the US tables: names start near x=30, "WINS!" near x=175, and long names
- * (JIGGLYPUFF) shrink to 0.6. */
-void setResultsLayout(FighterDescriptor &descriptor, const std::string &name)
+/* Character.crowd_chant_fgm.table (Character.asm get_crowd_chant_fgm_): the FGM the crowd chants for a fighter when the
+ * rally starts, one halfword per fighter id. The polygon rows hold 0x02B7, "no voice". The VS results winner line
+ * (name, "WINS!" x, announcer voice, emblem) is read from the Remix tables by mn/mnvsmode/mnremixresults.c. */
+constexpr uint32_t kCrowdChantEntrySize = 2;
+
+/* Crowd chant of a Remix fighter, or -1 when the table is not in the image. */
+int readCrowdChantFgm(int remixId)
 {
-    constexpr size_t kLongNameLength = 7;
-    descriptor.results_name_lx = 30.0f;
-    descriptor.results_name_scale = (name.size() > kLongNameLength) ? 0.6f : 1.0f;
-    descriptor.results_wins_lx = 175.0f;
+    const uint32_t fgm = remix_ram_image_read_half(REMIX_SYM_Character__crowd_chant_fgm__table
+                                                   + static_cast<uint32_t>(remixId) * kCrowdChantEntrySize);
+    return (fgm != 0) ? static_cast<int>(fgm) : -1;
+}
+
+/* Gives the synth its own crowd chant instead of its parent's. The registry field is named after the caller,
+ * ftPublicTryStartCall (ft/ftpublic.c), which reads it as the FGM of the chant. */
+void bindCrowdChant(SynthFighter &synth, int remixId)
+{
+    const int fgm = readCrowdChantFgm(remixId);
+    if (fgm < 0) {
+        spdlog::warn("remix_roster: no crowd chant FGM for remix id 0x{:02X}, keeping the parent's", remixId);
+        return;
+    }
+    synth.descriptor.public_call_fgm = fgm;
 }
 
 /* Replaces the parent's special statuses with the synth's own Remix action
@@ -328,8 +341,7 @@ SynthFighterPtr buildSynthFighter(const std::vector<uint8_t> &bytes, int remixId
     synth->descriptor.parent_fkind = parentFkind;
     synth->descriptor.scale = kRemixRoster[index].menu_zoom;
     synth->descriptor.ft_data = synth->ft_data.get();
-    synth->descriptor.results_name = synth->name.c_str();
-    setResultsLayout(synth->descriptor, synth->name);
+    bindCrowdChant(*synth, remixId);
     bindSpecials(*synth, remixId, parentFkind);
     bindEntryStatuses(*synth, remixId);
     return synth;
@@ -349,6 +361,30 @@ void patchVanillaAttributeOffsets(const std::vector<uint8_t> &bytes)
         if (!port_fighter_set_attributes_offset(fkind, record.o_attributes)) {
             spdlog::warn("remix_roster: vanilla fkind {} has no FTData to patch", fkind);
         }
+    }
+}
+
+/* Character.asm:3573-3592: Metal Mario and the polygons take the menu motions 1 to 13 (CSS pose, victory poses, claps...) of
+ * their base fighter, and Giant DK uses DK's whole menu array. Vanilla has empty rows there (NLuigi, NPurin and Giant DK have
+ * a single row, so the results screen read past the end of the array and crashed for Giant DK). */
+void patchVanillaMenuMotions()
+{
+    constexpr int kMarioFkind = 0;
+    constexpr int kDonkeyFkind = 2;
+    constexpr int kMetalFkind = 13;
+    constexpr int kFirstPolygonFkind = 14;
+    constexpr int kLastPolygonFkind = 25;
+    constexpr int kGiantDonkeyFkind = 26;
+    constexpr uint32_t kFirstCopiedMotion = 1;
+    constexpr uint32_t kCopiedMotionCount = 13;
+
+    bool ok = port_fighter_copy_menu_motions(kMetalFkind, kMarioFkind, kFirstCopiedMotion, kCopiedMotionCount) != 0;
+    for (int fkind = kFirstPolygonFkind; fkind <= kLastPolygonFkind; ++fkind) {
+        ok = (port_fighter_copy_menu_motions(fkind, fkind - kFirstPolygonFkind, kFirstCopiedMotion, kCopiedMotionCount) != 0) && ok;
+    }
+    ok = (port_fighter_share_menu_motions(kGiantDonkeyFkind, kDonkeyFkind) != 0) && ok;
+    if (!ok) {
+        spdlog::error("remix_roster: the menu motions of Metal Mario, the polygons or Giant DK were not copied (see the port log)");
     }
 }
 
@@ -411,6 +447,7 @@ bool remix_roster_load()
     }
     patchVanillaAttributeOffsets(blob->Data);
     patchVanillaMenuZoom();
+    patchVanillaMenuMotions();
 
     std::vector<SynthFighterPtr> built;
     for (int remixId = kFirstSynthRemixId; remixId <= kLastSynthRemixId; ++remixId) {

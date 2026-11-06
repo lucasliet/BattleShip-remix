@@ -14,6 +14,7 @@
 #include "mn/mnplayers/mnremixcsssliderules.h"
 #include "mn/mnplayers/mnremixgoalrules.h"
 #include "mn/mnplayers/mnremixtagteamcssrules.h"
+#include "mn/mnvsmode/mnremixvsmodereturnrules.h"
 
 static void testTitleOffsetPerMode(void)
 {
@@ -422,6 +423,32 @@ static void testIconCountIsTheStockCountPlusOne(void)
     CHECK_EQ(0, mnRemixTagTeamCssRulesIconCount(-1));
 }
 
+static void testReturnFromTheCssOpensTheRemixPageOnTheModePlayed(void)
+{
+    CHECK_EQ(0, mnRemixVSModeReturnCursor(1, 1));
+    CHECK_EQ(1, mnRemixVSModeReturnCursor(1, 2));
+    CHECK_EQ(2, mnRemixVSModeReturnCursor(1, 3));
+    CHECK_EQ(3, mnRemixVSModeReturnCursor(1, 4));
+    CHECK_EQ(4, mnRemixVSModeReturnCursor(1, 5));
+}
+
+static void testReturnAfterVsStartOpensPageOne(void)
+{
+    CHECK_EQ(MNREMIX_VSMODE_RETURN_NO_MODE_CURSOR, mnRemixVSModeReturnCursor(1, 0));
+}
+
+static void testReturnFromAnyOtherSceneOpensPageOne(void)
+{
+    CHECK_EQ(MNREMIX_VSMODE_RETURN_NO_MODE_CURSOR, mnRemixVSModeReturnCursor(0, 1));
+    CHECK_EQ(MNREMIX_VSMODE_RETURN_NO_MODE_CURSOR, mnRemixVSModeReturnCursor(0, 5));
+}
+
+static void testReturnWithAModeOutOfRangeOpensPageOne(void)
+{
+    CHECK_EQ(MNREMIX_VSMODE_RETURN_NO_MODE_CURSOR, mnRemixVSModeReturnCursor(1, -1));
+    CHECK_EQ(MNREMIX_VSMODE_RETURN_NO_MODE_CURSOR, mnRemixVSModeReturnCursor(1, 6));
+}
+
 void remixTestCssVsModesRules(void)
 {
     RUN_TEST(testTitleOffsetPerMode);
@@ -459,4 +486,8 @@ void remixTestCssVsModesRules(void)
     RUN_TEST(testQueueIsCompleteWhenTheLastSlotIsFilled);
     RUN_TEST(testIconRowFollowsThePanel);
     RUN_TEST(testIconCountIsTheStockCountPlusOne);
+    RUN_TEST(testReturnFromTheCssOpensTheRemixPageOnTheModePlayed);
+    RUN_TEST(testReturnAfterVsStartOpensPageOne);
+    RUN_TEST(testReturnFromAnyOtherSceneOpensPageOne);
+    RUN_TEST(testReturnWithAModeOutOfRangeOpensPageOne);
 }

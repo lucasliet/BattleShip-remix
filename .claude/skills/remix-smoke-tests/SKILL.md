@@ -41,7 +41,10 @@ Verification by running the real game headless with environment overrides, scree
 
 Outputs: `build/agent-shots/vs/<name>/` with `frame_<n>.png`, `stdout.log`, `ssb64.log`, `save.bin`.
 
-Input scripts (`inputs/`): `soundtest_browse.txt` / `soundtest_wrap.txt` (with `SSB64_START_SCENE=59`, drive the Sound Test), `grab_walk` was dropped (CPUs do not reach grabs reliably), `none.txt` (no input), `nsp_tap.txt`/`dsp_tap.txt`/`usp_tap.txt` (walk right, then the special
+Input scripts (`inputs/`): lot 5 screens: `gallery_controls.txt` (scene 55 with `SSB64_START_GALLERY=1`), `data_gallery.txt` (scene
+58 to the Gallery and back), `soundtest_afk_once.txt` (scene 59, the 7-minute AFK check), `training_stickswap_advance.txt` and
+`training_stickless_menu.txt` (Training D-pad Control), `css_hand_down.txt` (CSS cursor limit); each file's header says how to run it.
+`soundtest_browse.txt` / `soundtest_wrap.txt` (with `SSB64_START_SCENE=59`, drive the Sound Test), `grab_walk` was dropped (CPUs do not reach grabs reliably), `none.txt` (no input), `nsp_tap.txt`/`dsp_tap.txt`/`usp_tap.txt` (walk right, then the special
 every 150 frames from frame 420), `css_pick_four.txt` (four ports pick, START at 200, A at 300; run it with `css.sh` and
 `SSB64_REMIX_MODE=<mode>` to play a 4-player match of each Remix mode), `training_oos_platform.txt` (Training with `SSB64_TRAIN_FKINDS=0,8 SSB64_VS_STAGE=6 SSB64_REMIX_TRAINING="ShieldBreak=1;Oos=3"`: Mario climbs to the Dream Land left platform where the shielding CPU stands and jabs it; the log shows `training oos`), `training_css_pick.txt` (with `SSB64_START_SCENE=18`: the 1P hand climbs to the Mario portrait, A, START, A on the stage select; the log shows `training port` lines for the picked fighters), `training_tech_platform.txt` (same Training setup with `Tech=<1..5>;ShieldBreak=0;Percent2=30`: Mario climbs to the left platform and fsmashes the CPU right, it lands on the floor and the log shows `training tech ... teched 1 status N`; Roll Left 73, Roll Right 74, In Place 81), `css_pick_mario.txt` (both ports pick Mario, START at 200, A on the stage select at
 300), `css_page3_stage.txt` (same, then R 15 times to reach page 3 of the stage select and A at 600). Line format:
@@ -69,7 +72,8 @@ locked in its jab combo; use the CPU item sweep instead.
 | `SSB64_REMIX_ITEM_LOG=1` | Logs `[remix-item] spawn|hold|consume|touch|drop|throw|bullet kind=0x..` |
 | `SSB64_REMIX_FIGHTER_LOG=1` | Logs `[remix-fighter] status|hit|ammo` (status changes, damage with percent and knockback, fire-breath ammo of Bowser and of Kirby with the Bowser hat) and `[remix-weapon] end kind= lifetime=` (frames since the weapon was made); every line has the battle tic `t=` |
 | `SSB64_BGM_LOG=1` | Logs `[bgm] play t= track= player=` and `[bgm] stop t= player=` at every BGM start and stop; the track is the one actually played, after the Remix and shuffle substitutions |
-| `SSB64_PORT_MENU_OPEN=1` | The port ImGui menu is open from boot (not saved to the config), for screenshots of the port menu |
+| `SSB64_PORT_MENU_OPEN=1` | The port ImGui menu is open from boot, for screenshots of the port menu. With `SSB64_PORT_MENU_PAGE="<header>/<sidebar>"` (e.g. `Remix/Other Screens`) it opens on that page. The open menu saves `gOpenPortMenu` and the page to `build/BattleShip.cfg.json`: run it only through `scene.sh`, which restores the file, and never two such runs at once |
+| lldb `expr` on a menu routine | A port-menu button can be tested without a click: break on a per-frame function of the scene (`breakpoint set -n mnDataFuncRun -i 120`), `expr (void)scRemixScreensOpen(4, 5)`, `breakpoint delete 1`, `continue` (run `l5_screens_gallery`) |
 | `SSB64_REMIX_CHARDATA_MOTIONS=<k1,k2,...>` | Character Data screen: the demo motions cycle through these `MNCharactersMotionKind` values (decimal: SpecialHi 0, SpecialN 1, SpecialLw 2, Wait 14, Attack1 18, AttackAirF 27, Win1..Win4 33..36) instead of the random pick |
 | `SSB64_REMIX_AI_LOG=1` | Logs `[remix-ai] recover_begin t= port= fkind= lvl= x= y=` when a CPU enters the recover objective and `recover_end t= port= result=ok|ko` when it lands or catches a ledge, or is KO'd |
 | `SSB64_VS_ALL_CPU=1` | The VS shortcut makes P1 a CPU too (level from `SSB64_VS_CPU_LEVEL`) |

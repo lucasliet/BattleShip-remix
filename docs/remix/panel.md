@@ -186,6 +186,24 @@ stick-jump, run-up and dash-attack checks (`check_jump_type_idle_`, `_running_`,
 (`ftRemixDpadControlDisablesStickJump`, `...HandlesRunStickUp`, `...SkipsDashAttackOf`, hooks in `ftcommonkneebend.c`, `ftcommonrun.c`,
 `ftcommonattackdash.c`). Known difference: the asm reads A and B after Single Button Mode filtered them, the port filters after the transform.
 
+The asm hook `css_cursor_and_dpad_controls_` (0x80004000) runs after every controller read for every port and rewrites the global controller; the
+port has it in `ftRemixDpadMenuTransform` (`ftremixdpadmenu.c`, rules in `ftremixdpadmenurules.c`), called from `syControllerUpdateGlobalData`
+with the previous held mask. Stick Swap swaps on every screen but an unpaused match. The Training screen is the exception: its D-pad shortcuts
+(DL reset, DU freeze, DR frame advance, DD model display, `sc1PTrainingRemixPollDpad`) read `gSYControllerDevices`, so the hook swaps it even
+while the match runs (stick pushed past the dead zone presses the D-pad, the D-pad moves the stick) and adds the DR turbo
+(`DR_stick_training_turbo_timer`: with the stick pushed right, the 5th frame since the last one puts DR in `button_update`; the timer keeps
+counting across releases and matches). `ftRemixDpadControlController` skips its own swap there (`ftRemixDpadMenuHasSwappedController`), reading
+the physical D-pad from the swapped stick, so every input is swapped once; every other unpaused match keeps the fighter side swap, because nothing
+else reads the D-pad there. Stickless (2) zeroes the global stick in an unpaused match and on the title (Stickless J (4) does not); on the paused
+Training menus (the vanilla one and the Z menu, both read the stick of `gSYControllerDevices`, with `game_status` Pause) it removes the D-pad
+bits and the D-pad becomes the stick (80 on the axis, the stick stays when no D-pad is held). On the character select screens the D-pad moves
+the cursor (Stickless, or the Dpad CSS Cursor Control toggle). Deviations: the title is always treated as unpaused (the asm reads the match info
+pause byte); the 1P game scene stands for the "1p battle" part of `Global.screen.TITLE_AND_1P` and screen 0x77 never occurs (the Remix modes
+run on the VS scene). With no D-pad held, the fighter side leaves the stick of a Stickless J port alone, so its physical stick still moves the
+fighter, as in the asm (`ftRemixDpadWriteStick`). The Training DR shortcut reads the repeat mask (`button_update`, Training.asm `_check_dr`
+TURBO), so a held D-pad right, or the turbo above, repeats the frame advance; DR wins over DU and DD pressed on the same frame
+(`sc1PTrainingRemixPollDpad`).
+
 **Dpad map.** The D-pad becomes Smash (1), Tilt (2) or Special (3) macros. `ftRemixDpadMapApplyPress` runs after the tap mask (hook 0x800E1330:
 swaps the tap, may write the stick, puts A in the hold) and `ftRemixDpadMapHeldButtons` before the hold is stored (0x800E1378: Special holds B,
 Smash holds A with Charge Smashes on). The stick is half range (+-40) on a single tap and full (+-80) on a double tap or a held D-pad
@@ -213,8 +231,8 @@ could zero it); a retry replays the stage with no continue, level drop or stage 
 
 ## 4. Deviations
 
-- The CSS model does not change when Model, Kirby Hat, Visibility or Size is pressed (the asm `onchange_handler`s at 0x800E9198, 0x800E8EAC and
-  0x800E8ECC reload it); the value takes effect when the match starts.
+- Model, Kirby Hat and Visibility run their asm `onchange_handler` on the CSS fighter (`mnRemixPanelMenuApplyFighterChange`,
+  `mnremixcsspanelmenureload.c`; after an arrow press and for every item of the reset button). Size still takes effect when the match starts.
 - The menu button hides with the doors and when the panel is disabled; the asm creates it once. Hiding is by flags: targets are forced hidden each
   frame and the flags seen before the hide are restored, so a target the CSS legitimately hides while the menu is open can reappear at close until
   the CSS sets it again.

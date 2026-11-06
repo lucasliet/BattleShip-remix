@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "mn/mnplayers/mnremixcsspanelmenurules.h"
+#include "remix/remix_roster_data.h"
 
 #define LIST_CAPACITY MNREMIX_PANELMENU_ITEM_COUNT
 
@@ -466,6 +467,47 @@ static void testHighScoresTurnOffWithATogglePastItsDefault(void)
     CHECK_EQ(0, mnRemixPanelMenuRulesHighScoresEnabled(MNREMIX_PANELMENU_MODE_BONUS, values, &globals));
 }
 
+static void testModelKirbyHatAndVisibilityHaveAChangeAction(void)
+{
+    CHECK_EQ(MNREMIX_PANELMENU_CHANGE_MODEL, mnRemixPanelMenuRulesChangeAction(MNREMIX_PANELMENU_ITEM_MODEL));
+    CHECK_EQ(MNREMIX_PANELMENU_CHANGE_KIRBY_HAT, mnRemixPanelMenuRulesChangeAction(MNREMIX_PANELMENU_ITEM_KIRBY_HAT));
+    CHECK_EQ(MNREMIX_PANELMENU_CHANGE_VISIBILITY, mnRemixPanelMenuRulesChangeAction(MNREMIX_PANELMENU_ITEM_VISIBILITY));
+}
+
+static void testOtherItemsHaveNoFighterChangeAction(void)
+{
+    CHECK_EQ(MNREMIX_PANELMENU_CHANGE_NONE, mnRemixPanelMenuRulesChangeAction(MNREMIX_PANELMENU_ITEM_SHIELD));
+    CHECK_EQ(MNREMIX_PANELMENU_CHANGE_NONE, mnRemixPanelMenuRulesChangeAction(MNREMIX_PANELMENU_ITEM_SKELETON));
+    CHECK_EQ(MNREMIX_PANELMENU_CHANGE_NONE, mnRemixPanelMenuRulesChangeAction(MNREMIX_PANELMENU_ITEM_SIZE));
+    CHECK_EQ(MNREMIX_PANELMENU_CHANGE_NONE, mnRemixPanelMenuRulesChangeAction(MNREMIX_PANELMENU_ITEM_PRACTICE));
+    CHECK_EQ(MNREMIX_PANELMENU_CHANGE_NONE, mnRemixPanelMenuRulesChangeAction(-1));
+}
+
+static void testModelDefaultAsksForHighPoly(void)
+{
+    CHECK_EQ(MNREMIX_PANELMENU_DETAIL_HIGH, mnRemixPanelMenuRulesModelDetail(0));
+    CHECK_EQ(MNREMIX_PANELMENU_DETAIL_HIGH, mnRemixPanelMenuRulesModelDetail(1));
+    CHECK_EQ(MNREMIX_PANELMENU_DETAIL_LOW, mnRemixPanelMenuRulesModelDetail(2));
+}
+
+static void testCssHatNoneAndRandomShowPlainKirby(void)
+{
+    CHECK_EQ(REMIX_ID_KIRBY, mnRemixPanelMenuRulesCssHatFighter(0));
+    CHECK_EQ(REMIX_ID_KIRBY, mnRemixPanelMenuRulesCssHatFighter(42));
+}
+
+static void testCssHatFollowsTheSpawnTable(void)
+{
+    CHECK_EQ(REMIX_ID_MARIO, mnRemixPanelMenuRulesCssHatFighter(1));
+    CHECK_EQ(REMIX_ID_FOX, mnRemixPanelMenuRulesCssHatFighter(2));
+    CHECK_EQ(REMIX_ID_SSONIC, mnRemixPanelMenuRulesCssHatFighter(40));
+}
+
+static void testCssHatMagicGivesTheNoneFighter(void)
+{
+    CHECK_EQ(REMIX_ID_NONE, mnRemixPanelMenuRulesCssHatFighter(41));
+}
+
 void remixTestCssPanelMenuRules(void)
 {
     RUN_TEST(testVsHumanListsEighteenItemsWithoutHandicapAndPractice);
@@ -506,4 +548,10 @@ void remixTestCssPanelMenuRules(void)
     RUN_TEST(testAnyOtherGameplayToggleTurnsTheHighScoresOff);
     RUN_TEST(testPokemonSoundsAreIgnoredButEachPokemonCounts);
     RUN_TEST(testHighScoresTurnOffWithATogglePastItsDefault);
+    RUN_TEST(testModelKirbyHatAndVisibilityHaveAChangeAction);
+    RUN_TEST(testOtherItemsHaveNoFighterChangeAction);
+    RUN_TEST(testModelDefaultAsksForHighPoly);
+    RUN_TEST(testCssHatNoneAndRandomShowPlainKirby);
+    RUN_TEST(testCssHatFollowsTheSpawnTable);
+    RUN_TEST(testCssHatMagicGivesTheNoneFighter);
 }

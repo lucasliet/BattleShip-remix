@@ -5149,10 +5149,14 @@
 #define REMIX_SYM_Toggles__head_stage_settings 0x80466ED0u
 #define REMIX_SYM_Toggles__head_super_menu 0x80461AA8u
 #define REMIX_SYM_Toggles__itsatrap 0x80461604u
+#define REMIX_SYM_Toggles__load_sub_profile_ 0x80461690u
+#define REMIX_SYM_Toggles__music_profiles 0x8046ED8Cu
 #define REMIX_SYM_Toggles__profile_defaults_CE 0x80469E08u
 #define REMIX_SYM_Toggles__profile_defaults_JP 0x8046B6F8u
 #define REMIX_SYM_Toggles__profile_defaults_NE 0x8046AEA8u
 #define REMIX_SYM_Toggles__profile_defaults_TE 0x8046A658u
+#define REMIX_SYM_Toggles__stage_profiles 0x8046EDCCu
+#define REMIX_SYM_Toggles__toggle_all_ 0x8046164Cu
 #define REMIX_SYM_Training__bgm_table 0x804E4F4Cu
 #define REMIX_SYM_Training__entry_music 0x804E52C0u
 #define REMIX_SYM_TwelveCharBattle__defeated_array 0x804FA800u

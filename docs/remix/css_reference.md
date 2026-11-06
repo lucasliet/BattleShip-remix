@@ -131,7 +131,9 @@ loads it.
   310 for the right ones) at a speed per column, `portrait_x_position`/`portrait_velocity` (`:3878-3912`, 12 entries); the patched
   animation routine is at 0x80131DC8.
 - The white flash when a token lands (`set_white_flash_texture`, `:1614-1676`) is the 32x32 flash image at the portrait offset +
-  0x860 in file 0xA05, scale 0.8125, at the portrait position.
+  0x860 in file 0xA05, scale 0.8125, at the portrait position. In Remix 2.0.1 that image holds the same picture as the portrait
+  (texels dumped in the port), so nothing visible blinks: the reference capture `build/ref-shots/css_flash` (frames 2336-2358 of
+  `scripts/ref-emu/inputs/vs_match.txt`) shows no cell changing while the two tokens land.
 - Defaults (`:1082-1121`): the vanilla portraits, shadows and fire background are not loaded or drawn.
 
 ### 2.5 Model, spotlight, announcer, name and emblem
@@ -274,13 +276,17 @@ emblems and panels:
   previous fighter's sprite is removed first on Training. Positions stay the vanilla ones of each screen.
 - Hit tests and token: `mn*GetRemixPuckFighterKind` (cell hit test through `mnRemixCssSlotAtPoint`, crossed/locked check, then
   `mnRemixVariantGetFighterKind(player, fkind)`), `CenterPuckInPortrait` and `PuckAdjustPortraitEdge` use the 24x24 cells.
+  `mn/mnplayers/mnremixcsstoken.c` (rules in `mnremixcsstokenrules.c`) gives the four screens the Remix token: scale 0.8125, the
+  held token at the hand +12/-10, the rest spots of the cells and bookends, the flash image, the cursor down to y 212; VS also
+  pushes tokens apart by portrait (variants of one portrait) with radius 10, and the 1P and Bonus tokens do not drift.
 - Costume and shade: the shade lives in the slot struct on VS and in a file static (`sMNPlayers1PGameShade`,
   `sMNPlayers1PBonusShade`, `sMNPlayers1PTrainingShade[]`) on the other screens; it is reset when the hovered fighter changes and
   on select. The C-button costume uses `mnRemixCostumeApplyButton`; the "costume used" denial is dropped under Remix.
 - Spotlight, announcer, selection action: `mnRemixCssGetSpotlightScale`, `kRemixCssAnnounceFgm` (0 or out of range plays nothing),
   `mnRemixCssGetSelectionStatus`. The vanilla `port_fighter_css_spotlight_scale` fallback remains for out-of-range fkinds.
 - Records: `GMCOMMON_FIGHTERS_SAVE_NUM` is 97 under `REGION_REMIX`; the Bonus screen returns 0/FALSE for the `spgame_records` of
-  Remix fkinds (the 12-entry array), and the totals loop over the 12 vanilla fighters.
+  Remix fkinds (the 12-entry array). The totals of the 1P CSS (`extend_1p_tally_`) and of the Bonus CSS (`extend_btx_tally_`, which
+  skips ids whose Break the Targets stage is 0xFF) loop over every Remix id.
 - Menu music: `gmRemixMenuMusicPlay(BattleSelect, FALSE)` on entry and `gmRemixMenuMusicStop()` on the back paths, see
   `docs/remix/menus.md`.
 
@@ -291,12 +297,13 @@ emblems and panels:
   `ftRemixPartImageIsLegalRandomCostume`. `mnRemixCostumeApplyPartImage` runs every frame on the panel fighter (idempotent, returns
   after three reads for a vanilla costume), so it covers every `ftParamInitAllParts` call.
 - C buttons in a team battle: `mnRemixCssCostumeButtonsActive`; `cpu_costumes_` is `mnPlayersVSGetCostumeButtonPanel` (VS).
-- Variants: `mnRemixVariantHandleInput` in the cursor update, `mnRemixCssIndicatorsUpdate` from the VS frame update draws the D-pad,
-  icons, mark and J/E flag.
+- Variants: `mnRemixVariantHandleInput` in the cursor update, `mnRemixCssIndicatorsUpdate` from the frame update of the four
+  screens draws the D-pad, icons, mark and J/E flag.
 - Random: the L trigger (setting `'L' Selects Random Character`), the CPU pick and the Random bookend all go through
   `mnRemixRandomPickFighterKind`; the recent-randoms list is per port and survives the session. The bonus bookend (`mnremixcssbonus.c`)
   scrolls with Z/R and adds the bonus fighters to the pool when Random Select is not Default.
-- The bonus fighters and the Random bookend exist on the VS and Bonus screens.
+- The bonus fighters, the Random bookend and the slide-in exist on the four screens (1P and Training since lot 5: the `?` token rolls
+  its fighter when the screen is left and comes back as `?`).
 
 ### 4.5 Modes
 

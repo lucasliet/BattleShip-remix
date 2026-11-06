@@ -66,6 +66,8 @@ extern void remixTestSpriteRules(void);
 extern void remixTestFontLayout(void);
 extern void remixTestBgmRules(void);
 extern void remixTestGalleryRules(void);
+extern void remixTestVsDemoRules(void);
+extern void remixTestToggleActionRules(void);
 extern void remixTestTwelveCBLayout(void);
 extern void remixTestTwelveCBCustom(void);
 extern void remixTestStageSelectRules(void);
@@ -80,6 +82,7 @@ extern void remixTestSlippyHipsRules(void);
 extern void remixTestKirbyGunRules(void);
 extern void remixTestDpadControlRules(void);
 extern void remixTestCssRules(void);
+extern void remixTestCssTokenRules(void);
 extern void remixTestCssCpuCostumeRules(void);
 extern void remixTestCssPanelMenuRules(void);
 extern void remixTestCssVsModesRules(void);
@@ -105,6 +108,7 @@ extern void remixTestKirbySpawnRules(void);
 extern void remixTestBowserAmmoRules(void);
 extern void remixTestNessRules(void);
 extern void remixTestPikaRules(void);
+extern void remixTestResultsRules(void);
 
 int main(void)
 {
@@ -167,6 +171,8 @@ int main(void)
     remixTestFontLayout();
     remixTestBgmRules();
     remixTestGalleryRules();
+    remixTestVsDemoRules();
+    remixTestToggleActionRules();
     remixTestTwelveCBLayout();
     remixTestTwelveCBCustom();
     remixTestStageSelectRules();
@@ -181,6 +187,7 @@ int main(void)
     remixTestKirbyGunRules();
     remixTestDpadControlRules();
     remixTestCssRules();
+    remixTestCssTokenRules();
     remixTestCssCpuCostumeRules();
     remixTestCssPanelMenuRules();
     remixTestCssVsModesRules();
@@ -206,6 +213,7 @@ int main(void)
     remixTestBowserAmmoRules();
     remixTestNessRules();
     remixTestPikaRules();
+    remixTestResultsRules();
 
     printf("%d checks, %d failed\n", gRemixTestChecks, gRemixTestFailures);
     return (gRemixTestFailures == 0) ? 0 : 1;

@@ -28,6 +28,7 @@ constexpr uint32_t kNodeMax = 0x0C;
 constexpr uint32_t kNodeAction = 0x10;
 constexpr uint32_t kNodeStrings = 0x14;
 constexpr uint32_t kNodeNext = 0x1C;
+constexpr uint32_t kNodeExtra = 0x24;
 constexpr uint32_t kNodeTitle = 0x28;
 constexpr uint32_t kTypeTitle = 0;
 constexpr uint32_t kTypeBool = 1;
@@ -50,6 +51,7 @@ const char *const kGroupNames[GroupCount] = { "Remix Settings", "Gameplay Settin
                                               "Pokemon Settings" };
 
 std::vector<Toggle> sToggles;
+std::vector<ToggleAllRow> sToggleAllRows;
 std::unordered_map<uint32_t, size_t> sByAddress;
 std::unordered_map<size_t, int> sOverrides;
 
@@ -79,27 +81,55 @@ std::string Lower(std::string text) {
     return text;
 }
 
-/* Non-title nodes of one group, in chain order. */
-void CollectGroup(Group group, std::vector<Toggle> &out) {
+/* Reads one non-title node. */
+Toggle ReadToggle(uint32_t node, Group group, uint32_t type) {
+    Toggle toggle{};
+    toggle.entryAddr = node;
+    toggle.group = group;
+    toggle.title = ReadString(node + kNodeTitle);
+    toggle.min = static_cast<int>(ReadWord(node + kNodeMin));
+    toggle.max = static_cast<int>(ReadWord(node + kNodeMax));
+    toggle.isBool = (type == kTypeBool);
+    toggle.hasAction = (ReadWord(node + kNodeAction) != 0);
+    toggle.extra = ReadWord(node + kNodeExtra);
+    const uint32_t table = ReadWord(node + kNodeStrings);
+    for (int v = toggle.min; (table != 0) && (v <= toggle.max) && (v < 64); v++) {
+        toggle.strings.push_back(ReadString(ReadWord(table + static_cast<uint32_t>(v - toggle.min) * 4)));
+    }
+    return toggle;
+}
+
+/* A title node whose A routine is toggle_all_; the node before it is the "Load Profile:" row when it runs load_sub_profile_. */
+ToggleAllRow ReadToggleAllRow(uint32_t titleNode, uint32_t previousNode, Group group) {
+    ToggleAllRow row{};
+    row.group = group;
+    row.titleAddr = titleNode;
+    row.title = ReadString(titleNode + kNodeTitle);
+    const bool hasLoader =
+        (previousNode != 0) && (ReadWord(previousNode + kNodeAction) == REMIX_SYM_Toggles__load_sub_profile_);
+    row.loaderEntryAddr = hasLoader ? previousNode : 0;
+    return row;
+}
+
+/* Non-title nodes of one group, in chain order; the toggle-all titles of the group go to rows with the nodes that follow them. */
+void CollectGroup(Group group, std::vector<Toggle> &out, std::vector<ToggleAllRow> &rows) {
     uint32_t node = kHeads[group];
-    for (size_t guard = 0; (node != 0) && (guard < kNodeLimit); guard++, node = ReadWord(node + kNodeNext)) {
+    uint32_t previous = 0;
+    bool followsToggleAll = false;
+    for (size_t guard = 0; (node != 0) && (guard < kNodeLimit);
+         guard++, previous = node, node = ReadWord(node + kNodeNext)) {
         const uint32_t type = ReadWord(node + kNodeType);
         if (type == kTypeTitle) {
+            followsToggleAll = (ReadWord(node + kNodeAction) == REMIX_SYM_Toggles__toggle_all_);
+            if (followsToggleAll) {
+                rows.push_back(ReadToggleAllRow(node, previous, group));
+            }
             continue;
         }
-        Toggle toggle{};
-        toggle.entryAddr = node;
-        toggle.group = group;
-        toggle.title = ReadString(node + kNodeTitle);
-        toggle.min = static_cast<int>(ReadWord(node + kNodeMin));
-        toggle.max = static_cast<int>(ReadWord(node + kNodeMax));
-        toggle.isBool = (type == kTypeBool);
-        toggle.hasAction = (ReadWord(node + kNodeAction) != 0);
-        const uint32_t table = ReadWord(node + kNodeStrings);
-        for (int v = toggle.min; (table != 0) && (v <= toggle.max) && (v < 64); v++) {
-            toggle.strings.push_back(ReadString(ReadWord(table + static_cast<uint32_t>(v - toggle.min) * 4)));
+        if (followsToggleAll) {
+            rows.back().followers.push_back(node);
         }
-        out.push_back(std::move(toggle));
+        out.push_back(ReadToggle(node, group, type));
     }
 }
 
@@ -165,6 +195,15 @@ const std::vector<Toggle> &All() {
     return sToggles;
 }
 
+const std::vector<ToggleAllRow> &ToggleAllRows() {
+    return sToggleAllRows;
+}
+
+const Toggle *Find(uint32_t entryAddr) {
+    const auto found = sByAddress.find(entryAddr);
+    return (found != sByAddress.end()) ? &sToggles[found->second] : nullptr;
+}
+
 std::map<int32_t, const char *> ComboMap(const Toggle &toggle) {
     std::map<int32_t, const char *> map;
     for (size_t i = 0; i < toggle.strings.size(); i++) {
@@ -179,10 +218,11 @@ extern "C" int remix_toggles_init(void) {
     using namespace remix_toggles;
 
     sToggles.clear();
+    sToggleAllRows.clear();
     sByAddress.clear();
     sOverrides.clear();
     for (int group = 0; group < GroupCount; group++) {
-        CollectGroup(static_cast<Group>(group), sToggles);
+        CollectGroup(static_cast<Group>(group), sToggles, sToggleAllRows);
     }
     std::sort(sToggles.begin(), sToggles.end(),
               [](const Toggle &a, const Toggle &b) { return a.entryAddr < b.entryAddr; });
@@ -190,6 +230,7 @@ extern "C" int remix_toggles_init(void) {
         spdlog::error("remix_toggles: found {} toggles, expected {}; the image does not hold the Remix 2.0.1 tables",
                       sToggles.size(), kExpectedToggles);
         sToggles.clear();
+        sToggleAllRows.clear();
         return 0;
     }
     for (size_t i = 0; i < sToggles.size(); i++) {

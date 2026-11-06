@@ -68,13 +68,29 @@ struct Toggle {
     int max;
     bool isBool;
     bool hasAction;
+    uint32_t extra; /* Menu.entry word 0x24: the BGM id of a Random Music toggle (Toggles.asm preview_bgm_) */
     std::string cvar;
     int defaults[REMIX_TOGGLE_PROFILE_COUNT];
     std::vector<std::string> strings;
 };
 
+/**
+ * A title row with the toggle_all_ A routine ("Random Music Toggles:", "Random Stage Toggles:", "Toggle:") and the toggles after it.
+ * The profile loader row of the page ("Load Profile:", load_sub_profile_) is the entry just before the title.
+ */
+struct ToggleAllRow {
+    Group group;
+    uint32_t titleAddr;
+    std::string title;
+    std::vector<uint32_t> followers; /* entry addresses of every toggle after the title, in chain order */
+    uint32_t loaderEntryAddr;        /* the "Load Profile:" entry before the title, 0 when the page has none */
+};
+
 const char *GroupName(Group group);
 const std::vector<Toggle> &All();
+const std::vector<ToggleAllRow> &ToggleAllRows();
+/** The toggle whose Menu.entry node is at entryAddr, nullptr when unknown. */
+const Toggle *Find(uint32_t entryAddr);
 std::map<int32_t, const char *> ComboMap(const Toggle &toggle);
 
 } // namespace remix_toggles
