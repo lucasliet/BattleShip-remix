@@ -126,7 +126,7 @@ public class BootActivity extends ComponentActivity {
         mStatus.setText("Preparing assets…");
 
         mPickButton = new Button(this);
-        mPickButton.setText("Choose your SSB64 ROM (.z64)");
+        mPickButton.setText("Choose " + supportedRomDescription() + " (.z64)");
         mPickButton.setVisibility(View.GONE);
         mPickButton.setOnClickListener(v -> launchRomPicker());
 

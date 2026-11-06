@@ -247,6 +247,7 @@ android {
     sourceSets {
         getByName("main") {
             assets.srcDirs("$buildDir/generated/staged_assets")
+            res.srcDirs("src/$ssb64Version/res")
         }
     }
 
