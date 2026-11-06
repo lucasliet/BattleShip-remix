@@ -427,9 +427,12 @@ Closed phases:
      `docs/bugs/remix_peppy_flashbang_slot_lp64_2026-11-06.md`). Notes: FT-9 (jab auto grab) and SH-25 at level 9 cannot
      fire in Remix either (ledger rows); under lldb, stage 92 stops at launch in objc_msgSend (no lldb: runs).
 - [ ] **Phase 7** open bugs, instrumentation and packages.
-  - [ ] Bugs: the vanilla-sized reloc status buffers of `sc1pintro.c`, `sc1pgame.c` and `sc1ptrainingmode.c` checked with
-    four Remix fighters (the VS results screen overflowed, `docs/bugs/remix_vs_results_status_buffer_2026-11-05.md`); Poly Young Link missing on the CSS until the first reset; Metal Mario partly tiny in Training; Switch stutter
-    (`walked past registered DL range`, stale token 0x57EE); the rc 139 flake on Tal Tal.
+  - [x] Bugs (2026-11-06): status buffers: `sc1pgame.c` and `sc1ptrainingmode.c` already use 256 entries under
+    `REGION_REMIX`; the 1P intro (100 entries) shows Remix enemies on stages 1 to 10 of Remix 1P with no "Status Buffer is
+    full" (`p7_intro_*`). Not reproduced: Poly Young Link on the VS CSS (D-pad down on Young Link shows the model on the
+    first pick, `p7_r2_120_0`, `p7_r2_122_0`), Metal Mario size on the Training CSS (`p7_tr_136_DU`, same size as the CPU
+    Mario), the rc 139 flake on Tal Tal (12 four-fighter matches on 0x2E and 0xA7, all rc 0, `p7_taltal_*`). The Switch
+    stutter (`walked past registered DL range`, stale token 0x57EE) needs the hardware: moved to T10.2.
   - [ ] Peach's Castle: blue quads with the roof-tile texture float in the sky when the camera zooms out (2026-11-05,
     `b11_pc_wide` in Remix and `b11_us_pc` in the vanilla build, both with P1 walking left; the reference emulator shows
     nothing like it). A port defect of the stage, older than the Remix work.
