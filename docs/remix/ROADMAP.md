@@ -42,7 +42,7 @@ documentation is indexed in [`README.md`](README.md).
 
 ## Current position
 
-**In progress: M11 Finalization, Phase 7 (open bugs, instrumentation, packages).** What is left for "Remix playable"
+**In progress: M11 Finalization, Phase 8 (final verification).** What is left for "Remix playable"
 is Phase 1 (rest of I7) and Phases 5b to 8 of M11, at the end of this file. The closed milestones are summarised in
 **History and decisions**.
 
@@ -426,7 +426,7 @@ Closed phases:
      (`p6_css_lv10`, `p6_css_hcap`). Found on the way: CPU Peppy crashed on the down-special detonate check (fixed,
      `docs/bugs/remix_peppy_flashbang_slot_lp64_2026-11-06.md`). Notes: FT-9 (jab auto grab) and SH-25 at level 9 cannot
      fire in Remix either (ledger rows); under lldb, stage 92 stops at launch in objc_msgSend (no lldb: runs).
-- [ ] **Phase 7** open bugs, instrumentation and packages.
+- [x] **Phase 7** open bugs, instrumentation and packages.
   - [x] Bugs (2026-11-06): status buffers: `sc1pgame.c` and `sc1ptrainingmode.c` already use 256 entries under
     `REGION_REMIX`; the 1P intro (100 entries) shows Remix enemies on stages 1 to 10 of Remix 1P with no "Status Buffer is
     full" (`p7_intro_*`). Not reproduced: Poly Young Link on the VS CSS (D-pad down on Young Link shows the model on the
@@ -452,7 +452,8 @@ Closed phases:
     `dist/desktop/BattleShip-Remix-2.0.1-port.07d89c8-macOS-arm64.dmg/.zip` (the bundled binary reaches a VS match, rc 0)
     and `build-linux-release/BattleShip-Remix-2.0.1-port.ab57e0f-linux-x86_64.AppImage` (podman amd64; the Dockerfile now
     zeroes the AppImage magic of linuxdeploy and appimagetool, which broke binfmt under emulation).
-  - [ ] Final packages without the `.o2r` (macOS `.app`/`.dmg`/`.zip`, AppImage x86_64, Switch `.nro`): first confirm that
+  - [x] ~~Final packages without the `.o2r`~~ dropped (user decision 2026-11-06: no GitHub CI release; the `release.yml`
+    matrix entries and the install doc stay as written, unused). Original text: (macOS `.app`/`.dmg`/`.zip`, AppImage x86_64, Switch `.nro`): first confirm that
     first-run extraction works for the Remix (the game asks for the user's Remix ROM and builds `BattleShip-Remix.o2r`), as
     for the US build; `remix` in the `release.yml` matrix (`scripts/package-macos.sh` and `scripts/package-linux.sh` accept
     `SSB64_VERSION=remix`); install doc (which ROM: vanilla plus the Remix 2.0.1 patch, and how extraction works).
