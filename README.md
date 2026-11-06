@@ -26,12 +26,13 @@ The few places where the port deliberately behaves differently from the assembly
 
 **None of Nintendo's assets (code, textures, audio, models, text, ROM data), and no Smash Remix ROM data, are checked into this repo or distributed with builds.** Every byte of game data is extracted on the first run from ROMs that *you* supply. If you do not own a legal copy of Super Smash Bros. for the Nintendo 64, you cannot build or run this project.
 
-The Remix build needs the Smash Remix 2.0.1 ROM (made by applying the Remix release patch to your own US ROM) and the US ROM, both in the repository root:
+The Remix needs only the Smash Remix 2.0.1 ROM, made by applying the Remix release patch to your own US ROM. A release asks for it on the first launch; a source build reads it from the repository root:
 
 | File | ROM | SHA-1 | MD5 |
 |------|-----|-------|-----|
 | `baserom.remix.z64` | Smash Remix 2.0.1 (internal name `SMASH REMIX`, game code `NALE`) | `13716381ed5e29be2606e0f4724b18fd00789d04` | `2b2d6b295106c54216b7fc7a2f14346e` |
-| `baserom.us.z64` | Super Smash Bros. NTSC-U v1.0 (`NALE`) | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
+
+The US ROM the patch is applied to is Super Smash Bros. NTSC-U v1.0 (`NALE`, SHA-1 `e2929e10fccc0aa84e5776227e798abc07cedabf`, MD5 `f7c52568a31aadf26e14dc2b6416b2ed`). A source build can also take it as `baserom.us.z64` (optional: dev-only stage images and the Remix source assembly script).
 
 The vanilla builds need only their own ROM: US as above, or JP (Nintendo All-Star! Dairantou Smash Brothers v1.0, `NALJ`, SHA-1 `4b71f0e01878696733eefa9c80d11c147ecb4984`, MD5 `66db457b130d31a286a23d6e4dd9726e`) with `-DSSB64_VERSION=jp`. A dump that does not match the hashes for its version will not work.
 

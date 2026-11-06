@@ -15,7 +15,7 @@ They sit in the **repository root**. CMake accepts `.z64`, `.n64` and `.v64` (To
 | File | Used for | Size | SHA-1 | MD5 |
 |---|---|---|---|---|
 | `baserom.remix.z64` | Remix build: source of `BattleShip-Remix.o2r` (`torch o2r`) and of the fighter, audio and file tables | 65 536 000 | `13716381ed5e29be2606e0f4724b18fd00789d04` | `2b2d6b295106c54216b7fc7a2f14346e` |
-| `baserom.us.z64` | Vanilla build, and also the Remix build: three CSS stage images (`derive_stage_assets.py` only understands the US layout) and `scripts/remix/assemble-remix.sh` | 16 777 216 | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
+| `baserom.us.z64` | Vanilla build. Optional for the Remix: dev builds derive three CSS stage PNGs from it (`derive_stage_assets.py`), and `scripts/remix/assemble-remix.sh` assembles the Remix source over it | 16 777 216 | `e2929e10fccc0aa84e5776227e798abc07cedabf` | `f7c52568a31aadf26e14dc2b6416b2ed` |
 
 SHA-256 of the reference copies:
 
@@ -26,7 +26,9 @@ N64 header CRCs: Remix `34EE4749 1833C64C`; US `916B8B5B 780B85A4`. Both have th
 
 The JP ROM (`baserom.jp.z64`) is not used by the Remix.
 
-Without `baserom.us.z64` the Remix build still compiles (the `DeriveStageAssets` target becomes a stub), but the CSS stage images are missing.
+Without `baserom.us.z64` the Remix build compiles (the `DeriveStageAssets` target becomes a stub) and the stage select still shows every thumbnail:
+`port/css_icons/port_css_stage_assets.cpp` derives the background and icon from the wallpaper sprite in the extracted `.o2r`, as in every release build
+(checked 2026-11-06, run `nous_css`: no `css_icons` PNGs, Final Destination, Battlefield and Metal Cavern thumbnails present).
 
 ## Which Remix version
 
