@@ -49,10 +49,10 @@ is Phase 1 (rest of I7) and Phases 5b to 8 of M11, at the end of this file. The 
 | Milestone | State |
 |---|---|
 | M0 to M10 | closed; open leftovers: T9.1b and T10.2 (user), T9.3 (after Phase 8) |
-| **M11 Finalization** | Phases R, 2, 3, 4 and 5 done; Phase 1 done except the rest of I7; Phases 5b, 6, 7 and 8 open |
+| **M11 Finalization** | Phases R, 2, 3, 4, 5 and 6 done; Phase 1 done except the rest of I7; Phases 5b (in-game checks), 7 and 8 open |
 
-- **Next step:** Phase 5b lot 0 (groundwork), then lots 1 to 8 in order, with Phase 6 (AI) running beside lots 1 to 7;
-  then Phases 7 and 8. The rest of I7 is in lot 3 (package F2).
+- **Next step:** the 86 ledger items still open in Phase 5b (in-game checks of lots 3 to 7, CT-7 on every fighter row,
+  GP-6, ST-10, ST-11, IT-10), then Phases 7 and 8. The rest of I7 is in lot 3 (package F2).
 - **Depends on the user:** T9.1b (listening and visual pass) and T10.2 (Switch hardware). "Remix playable" (T9.3) is only
   reported after Phase 8.
 - **Last checkpoint:** CP12 (2026-11-05, Phases 4 and 5 closed; outer `e8faa57`, decomp `be259fe8b`).
@@ -363,9 +363,9 @@ Closed phases:
       `test_1p_mode_rules`, `test_1p_enemy_rules`, `test_1p_bonus_remix_rules`, `test_css_cpu_costume_rules`,
       `test_gameend_rows_rules`, `test_stockmode_rules`, `test_twelvecb_rules`, `test_twelvecb_custom`; `SSB64_BGM_LOG`;
       reference captures of the 1P cards, the Rest Area and the 12CB screens.
-  - [ ] **Lot 7, audio.** Progress (2026-11-06): coded by two workers and built (7228 unit checks); done with runs: MS-3, MS-6,
-    MS-8, MS-22, MS-23; MS-4, MS-5, MS-16, MS-25 ported, in-game check pending (`l7_hurry` on stage 2 played track 5, not a hurry
-    track: pick a Mushroom Kingdom stage id next time). `SSB64_MIDI_LOG=1` logs the MIDI overrides. A1 BGM: MS-3 with MS-6 (alt and random music by C button and scene, FD theme), MS-4, MS-5 (the
+  - [x] **Lot 7, audio.** Done (2026-11-06): coded by two workers and built (7228 unit checks); every item checked in game:
+    MS-3, MS-6, MS-8, MS-22, MS-23, then MS-5 (`l7_hurry_mk`, Mushroom Kingdom stage 8), MS-4 (`l7_trap`), MS-16 and MS-25
+    (`l7_crash_burrow`). `SSB64_MIDI_LOG=1` logs the MIDI overrides. A1 BGM: MS-3 with MS-6 (alt and random music by C button and scene, FD theme), MS-4, MS-5 (the
     30-second hurry swap by track). A2 FGM and MIDI: MS-8, MS-22 with MS-23 (per-song priority, bend range and volume
     overrides; hook site confirmed first), MS-16 with MS-25 (Crash DSP voices and the announcer lines). Tests:
     `SSB64_BGM_LOG` with `test_bgm_rules` extended, the FGM log and `wavstat.py`, the audio dump against the reference
@@ -380,7 +380,7 @@ Closed phases:
     323, symbolic 12, no function 3), the same total as the 2026-11-05 audit; each of the 323 unhooked patches has a
     scope-map line, and each one with a GAP or STUB verdict is covered by a ledger item (the 13 that a name match missed
     sit in the line ranges or grouped scopes of MN-4, SH-1, SH-4, SH-6 and MD-13).
-- [ ] **Phase 6** AI, run beside Phase 5b lots 1 to 7 (user decision, 2026-11-05). One worker at a time owns
+- [x] **Phase 6** AI, run beside Phase 5b lots 1 to 7 (user decision, 2026-11-05). One worker at a time owns
   `ft/ftcomputer.c`; the others work in `ft/ftremix/ftremixai*.c`, `ftcommoncatch1.c`, `ftcommondash.c` and
   `mnremixcpulevel.c`, which no Phase 5b package edits; registry edits (`port/fighter_registry.h`) are merged by the lead.
   **Acceptance:** `REMIX-TODO(AI)` at 0, every AI ledger item closed, recovery at level 9 not below the re-measured
@@ -416,6 +416,16 @@ Closed phases:
      targets), the CPU scopes of step 1, then the 2026-11-03 list: `cpu_post_process` per fighter, PUFF_DSP, the vanilla
      PREVENT rows, Banjo P06, Kirby P14, P11 of Sheik, Peppy, Bowser and Giga Bowser, the 30 `cpu_*` routines,
      `_improve_recovery_drift`, the Default CPU LVL refresh and the `CpuLevel9` conflict with level 10.
+  4. [x] Acceptance (2026-11-06). `REMIX-TODO(AI)` at 0 (the last five became notes checked in the asm). Every AI ledger
+     item is `done` with its run: lldb hit counts in CPU-only matches with no vanilla fighter that takes the same path
+     (`p6p_*`, `p6q_*`, `p6r_*`, `p6s_*`; `lldb_count.sh` gained `ret:` probes on the pure rules functions, since line
+     breakpoints on a `return` land on merged lines in the Release build), with controls at 0 (level 9 for the level 10
+     items, Improved AI off). Recovery at level 9: 88.8% against the 88.6% baseline (step 3). Smashketball (`p6_ball_a`,
+     `_b`): the CPUs score and the match ends; KOTH (`p6_koth_a`, `_b`): the crown bars fill and a CPU stands on the hill.
+     Reflect: CPU Falco, Wolf, J Ness and Lucas press and hold reflect/absorb (`p6p_reflect`). FT-11 on the VS CSS
+     (`p6_css_lv10`, `p6_css_hcap`). Found on the way: CPU Peppy crashed on the down-special detonate check (fixed,
+     `docs/bugs/remix_peppy_flashbang_slot_lp64_2026-11-06.md`). Notes: FT-9 (jab auto grab) and SH-25 at level 9 cannot
+     fire in Remix either (ledger rows); under lldb, stage 92 stops at launch in objc_msgSend (no lldb: runs).
 - [ ] **Phase 7** open bugs, instrumentation and packages.
   - [ ] Bugs: the vanilla-sized reloc status buffers of `sc1pintro.c`, `sc1pgame.c` and `sc1ptrainingmode.c` checked with
     four Remix fighters (the VS results screen overflowed, `docs/bugs/remix_vs_results_status_buffer_2026-11-05.md`); Poly Young Link missing on the CSS until the first reset; Metal Mario partly tiny in Training; Switch stutter

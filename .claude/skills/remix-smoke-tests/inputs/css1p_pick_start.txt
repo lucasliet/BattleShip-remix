@@ -1,0 +1,6 @@
+# 1P CSS (SSB64_START_SCENE=17): P1 moves to the first portrait, picks it with A and presses START, so the 1P run
+# starts through the menu (with SSB64_REMIX_1P_MODE=remix1p the Remix 1P path is drawn there, as from the real menu).
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+200 202 0 START

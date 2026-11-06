@@ -5,11 +5,18 @@
 #   spec:  <function>              breakpoint by exported function name
 #          <function>@<condition>  with an lldb condition, e.g. ftRemixThrownRulesKeepsStatusAtAnimEnd@'$x0 == 52'
 #          <file.c>:<line>         breakpoint by file and line (static functions)
+#          ret:<function>@<cond>   one breakpoint on every ret instruction of the function, counted together; the
+#                                  condition sees the return value, e.g. ret:ftRemixAiIsMetalKind@'$w0 != 0'
+#   The build is Release: a line breakpoint on a "return" inside an if often lands on a merged line. The summary marks
+#   a file:line spec that resolved to another line with "(->N)"; such counts do not prove the branch. Use ret: on the
+#   pure rules function instead (helpers end in tail calls, so their own ret is not the branch result).
+#   Quote every spec that holds ">" "<" "$" "(" or "&" when the command line goes through a shell (parallel.sh custom).
 #   fkinds "-" skips SSB64_VS_FKINDS (use it with LLDB_START_SCENE=54 SSB64_TRAIN_FKINDS=... or LLDB_START_SCENE=16).
 # Env: LLDB_START_SCENE (default 22), LLDB_TIMEOUT seconds (default 420), SHOTS, any SSB64_* variable of the caller.
 #      LLDB_PRE: extra lldb commands separated by "|", added after the spec breakpoints and before "run" (their breakpoints list last, unlabelled).
 # Output files: build/agent-shots/vs/<name>/{lldb.cmds,lldb.out,ssb64.log,stdout.log}.
 # Hit counts of 0 with "(unresolved)" mean the symbol was not found (static or inlined): use <file.c>:<line>.
+# "crash=1" on the result line means the process stopped on a signal (rerun alone: the macOS Metal flake looks the same).
 set -u
 ROOT="$(builtin cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 name="$1"; fkinds="$2"; input="$3"; frames="$4"; shift 4
@@ -21,20 +28,41 @@ cmds="$dir/lldb.cmds"
 labels="$dir/lldb.labels"
 : > "$cmds"; : > "$labels"
 echo "process handle SIGSEGV SIGBUS -s true -p false" >> "$cmds"
+
+ret_addresses() {
+  lldb -b -o "disassemble -n $1" "$ROOT/build/BattleShip-Remix" 2>/dev/null |
+    sed -nE 's/^BattleShip-Remix\[(0x[0-9a-f]+)\] <\+[0-9]+>: +ret.*/\1/p'
+}
+
+add_breakpoint() {
+  local setcmd="$1" cond="$2" label="$3"
+  if [ -n "$cond" ]; then setcmd="$setcmd -c '$cond'"; fi
+  echo "$setcmd -G true" >> "$cmds"
+  printf '%s\n' "$label" >> "$labels"
+}
+
 for spec in "$@"; do
   fn="${spec%%@*}"
   cond=""
   case "$spec" in *@*) cond="${spec#*@}" ;; esac
-  if printf '%s' "$fn" | grep -qE '^[A-Za-z0-9_]+\.c:[0-9]+$'; then
-    setcmd="breakpoint set -f ${fn%%:*} -l ${fn##*:}"
-  else
-    setcmd="breakpoint set -n $fn"
-  fi
-  if [ -n "$cond" ]; then
-    setcmd="$setcmd -c '$cond'"
-  fi
-  echo "$setcmd -G true" >> "$cmds"
-  printf '%s\n' "$spec" | tr -c 'A-Za-z0-9_.:\n' '_' >> "$labels"
+  label="$(printf '%s' "$spec" | tr -c 'A-Za-z0-9_.:' '_')"
+  case "$fn" in
+    ret:*)
+      addrs="$(ret_addresses "${fn#ret:}")"
+      if [ -z "$addrs" ]; then
+        echo "lldb_count.sh: no ret instruction found in ${fn#ret:} (unknown symbol, or it only tail-calls)" >&2
+        exit 2
+      fi
+      for a in $addrs; do add_breakpoint "breakpoint set -a $a -s BattleShip-Remix" "$cond" "$label"; done
+      ;;
+    *)
+      if printf '%s' "$fn" | grep -qE '^[A-Za-z0-9_]+\.c:[0-9]+$'; then
+        add_breakpoint "breakpoint set -f ${fn%%:*} -l ${fn##*:}" "$cond" "$label"
+      else
+        add_breakpoint "breakpoint set -n $fn" "$cond" "$label"
+      fi
+      ;;
+  esac
 done
 if [ -n "${LLDB_PRE:-}" ]; then printf '%s\n' "$LLDB_PRE" | tr '|' '\n' >> "$cmds"; fi
 { echo "run"; echo "breakpoint list"; echo "quit"; } >> "$cmds"
@@ -46,10 +74,23 @@ env SSB64_START_SCENE="$start_scene" ${fk_env:+$fk_env} SSB64_INPUT_SCRIPT="$inp
   SSB64_SCREENSHOT_FRAMES="${SHOTS:-600}" SSB64_SCREENSHOT_DIR="$dir" \
   timeout -s INT -k 30 "${LLDB_TIMEOUT:-420}" lldb -b -s "$cmds" ./BattleShip-Remix > "$dir/lldb.out" 2> "$dir/stdout.log"
 rc=$?
-summary="$(grep -E '^[[:space:]]*[0-9]+: ' "$dir/lldb.out" | awk -v labels="$labels" '
+crash=0
+if grep -q "stop reason = EXC_\|stop reason = signal" "$dir/lldb.out"; then crash=1; fi
+summary="$(sed -n '/^Current breakpoints:/,$p' "$dir/lldb.out" |
+  grep -E '^[0-9]+: |^  [0-9]+\.1: where' | awk -v labels="$labels" '
   BEGIN { n = 0; while ((getline line < labels) > 0) { n++; L[n] = line } }
-  { i++; hits = 0; loc = 0
+  /^[0-9]+: / { i++; hits = 0; loc = 0
     if (match($0, /locations = [0-9]+/)) loc = substr($0, RSTART + 12, RLENGTH - 12)
     if (match($0, /hit count = [0-9]+/)) hits = substr($0, RSTART + 12, RLENGTH - 12)
-    printf " %s=%s%s", L[i], hits, (loc == 0 ? "(unresolved)" : "") }')"
-echo "vs=$name rc=$rc shots=$(ls "$dir"/*.png 2>/dev/null | wc -l | tr -d ' ') hits:$summary"
+    if (!(L[i] in total)) { order[++m] = L[i]; total[L[i]] = 0 }
+    total[L[i]] += hits
+    if (loc == 0) note[L[i]] = "(unresolved)"
+    next }
+  { if ($0 ~ /, unresolved,/) note[L[i]] = "(unresolved)"
+    want = L[i]; sub(/^.*:/, "", want)
+    if (L[i] ~ /^[A-Za-z0-9_]+\.c:[0-9]+$/ && match($0, /\.c:[0-9]+/)) {
+      got = substr($0, RSTART + 3, RLENGTH - 3)
+      if (got != want) note[L[i]] = "(->" got ")"
+    } }
+  END { for (k = 1; k <= m; k++) printf " %s=%s%s", order[k], total[order[k]], note[order[k]] }')"
+echo "vs=$name rc=$rc crash=$crash shots=$(ls "$dir"/*.png 2>/dev/null | wc -l | tr -d ' ') hits:$summary"

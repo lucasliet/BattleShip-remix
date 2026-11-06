@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-11-06 | [remix_peppy_flashbang_slot_lp64](remix_peppy_flashbang_slot_lp64_2026-11-06.md) | Peppy's down special crashed: the 8-byte flashbang pointer at N64 word 0x0ADC also covered 0x0AE0, the revolver ammo; the word is now the asm's in-flight flag and the pointer lives in a per-port table checked against the live items |
 | 2026-11-05 | [remix_giant_dk_results_menu_motions](remix_giant_dk_results_menu_motions_2026-11-05.md) | VS results crashed with a Giant DK winner: the vanilla one-row menu motion arrays of Giant DK, N Luigi and N Jigglypuff were read out of bounds; the port now applies `Character.asm` `copy_menu_actions` and Giant DK's share of DK's array (CT-24) |
 | 2026-11-05 | [remix_vs_results_status_buffer](remix_vs_results_status_buffer_2026-11-05.md) | VS results screen aborted after a match with four Remix fighters: the vanilla 120/7-entry reloc status buffers overflowed with their extern dependencies; 256/64 under REGION_REMIX |
 | 2026-11-05 | [remix_chardata_dedede_crash](remix_chardata_dedede_crash_2026-11-05.md) | Character Data: a random Dedede crash (NULL FTParts in the figatree walk), the extended fighters' filler status indexing the opening table out of bounds (fixed), and a figatree size check in `ftMainSetStatus`; the exact path of the original crash is not proven |
