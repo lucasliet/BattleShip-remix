@@ -770,6 +770,11 @@ endif()
 if(SSB64_VERSION STREQUAL "remix")
     list(APPEND SSB64_COMPILE_DEFS REGION_US=1 VERSION_US=1)
 endif()
+# windows.h min()/max() macros break std::min/std::max (MSVC C2589). Empty value, like the per-file
+# `#define NOMINMAX` already in port/css_icons/port_css_stage_assets.cpp, so the two never conflict.
+if(WIN32)
+    list(APPEND SSB64_COMPILE_DEFS NOMINMAX=)
+endif()
 if(SSB64_VERSION MATCHES "^(us|remix)$")
     list(APPEND SSB64_COMPILE_DEFS PORT_HIRES_ENABLED=1)
 else()
