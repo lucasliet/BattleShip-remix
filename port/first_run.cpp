@@ -93,6 +93,20 @@ std::string FindExisting(const std::vector<std::string>& candidates) {
     return {};
 }
 
+/**
+ * Returns the first candidate that is a regular file, skipping directories with the same name
+ * (a source checkout has a torch/ submodule next to the binary).
+ */
+std::string FindExistingFile(const std::vector<std::string>& candidates) {
+    std::error_code ec;
+    for (const auto& c : candidates) {
+        if (!c.empty() && fs::is_regular_file(c, ec)) {
+            return c;
+        }
+    }
+    return {};
+}
+
 std::string TryOpenLogPath(const fs::path& candidate) {
     if (candidate.empty()) {
         return {};
@@ -208,7 +222,7 @@ std::string FindTorchExecutable() {
         candidates.push_back(base + "/torch");
     }
 
-    const std::string found = FindExisting(candidates);
+    const std::string found = FindExistingFile(candidates);
     if (found.empty()) {
         return {};
     }
