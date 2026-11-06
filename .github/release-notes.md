@@ -1,6 +1,12 @@
 ## Highlights
 
-<!-- Replace with one paragraph and a short list for this version before publishing the draft. -->
+**New: Android.** BattleShip-Remix now ships an Android APK (arm64-v8a, Android 7+). Pick your Smash Remix 2.0.1 ROM
+on the first launch and the phone extracts the game data itself. It installs next to the vanilla BattleShip app.
+
+- Android arm64 APK with touch controls, its own package id (`dev.lucasliet.battleship.remix`) and Remix icon.
+- Fixed a crash on the 1P character select when hovering a fighter right after boot.
+- Desktop first run: the extractor no longer mistakes a `torch/` source folder for the Torch executable.
+- Warnings for missing or outdated game files on Switch and desktop.
 
 ## Install
 
