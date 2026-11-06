@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [us, jp]
+        version: [us, jp, remix]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -198,7 +198,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [us, jp]
+        version: [us, jp, remix]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -402,6 +402,10 @@ jobs:
             enable_scripting: "0"
             artifact_name: BattleShip-windows-jp
             artifact_path: dist/BattleShip-JP-windows.zip
+          - version: remix
+            enable_scripting: "0"
+            artifact_name: BattleShip-windows-remix
+            artifact_path: dist/BattleShip-Remix-windows.zip
     steps:
       - uses: actions/checkout@v4
         with:

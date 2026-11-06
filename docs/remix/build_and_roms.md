@@ -94,8 +94,8 @@ To redo only the assets: `cmake --build build --target ExtractAssets`.
 ## Test packages of BattleShip-Remix (macOS and Linux)
 
 These packages **embed `BattleShip-Remix.o2r`**, which is derived from the ROM. They are for personal use only and are never redistributed. A distributable package does
-not carry the `.o2r`: it is extracted from the user's ROM on first run, as `scripts/package-macos.sh` and `scripts/package-linux.sh` do for the original game; the
-release matrix of `.github/workflows/release.yml` builds `us` and `jp` only.
+not carry the `.o2r`: it is extracted from the user's ROM on first run, as `scripts/package-macos.sh`, `scripts/package-linux.sh` and
+`scripts/package-windows.ps1` do for every version; the release matrix of `.github/workflows/release.yml` builds `us`, `jp` and `remix`.
 
 - **macOS:** first make a Release build with `-DNON_PORTABLE=ON` in `build-macos-release/`, then run `scripts/macos/package-remix-contained.sh`. It reads the `.o2r`,
   `f3d.o2r` and the icons from `build/` and writes `dist/desktop/BattleShip-Remix.app`, `.dmg` and `.zip`. It does not use dylibbundler: the libraries are static from
@@ -105,6 +105,20 @@ release matrix of `.github/workflows/release.yml` builds `us` and `jp` only.
   `package-in-container.sh`. Output goes to `build-linux-release/`. The volume `ssb64-linux-work` keeps the build tree between runs. On Apple silicon the amd64
   image runs emulated, so the first build is slow.
 - The version comes from `DIST_VERSION`, default `2.0.1-port.<short HEAD>`. Check that the `.o2r.recipe` in `build/` matches the current Torch before packaging.
+
+## Installing a release package of BattleShip-Remix
+
+1. Download the package of your platform (`BattleShip-Remix.dmg`, `BattleShip-Remix-x86_64.AppImage`,
+   `BattleShip-Remix-windows.zip`). It has no game data.
+2. Make the Smash Remix 2.0.1 ROM: apply the Remix 2.0.1 patch from the Releases tab of `JSsixtyfour/smashremix` to your own
+   Super Smash Bros. NTSC-U v1.0 ROM (`.z64`, `.n64` or `.v64`; check the SHA-1 in **Required ROMs**).
+3. Name it `baserom.remix.z64` (or `.n64` / `.v64`) and put it in the app data folder that the error dialog of the first
+   launch prints, or next to the executable; or drag it onto the window of the first-run wizard.
+4. On the first launch the game runs Torch and writes `BattleShip-Remix.o2r` and its `.recipe` to the app data folder; a later
+   update of the asset pipeline re-extracts by itself.
+
+Checked on 2026-11-06 with `SHIP_HOME` pointing at an empty folder that held only `baserom.remix.z64` and `f3d.o2r`: the
+game extracted a 59 MB `BattleShip-Remix.o2r` and booted to the Remix splash (`first_run: extracted BattleShip-Remix.o2r`).
 
 ## Switch build (BattleShip and BattleShip-Remix)
 
