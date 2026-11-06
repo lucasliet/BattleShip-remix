@@ -63,7 +63,7 @@ assets/*
 !assets/switch/*.jpg
 !assets/macos_dmg_banner.png
 !assets/BattleShip.svg
-!assets/BattleShip-Remix.svg
+!assets/SmashRemix.png
 !assets/readme-stats/
 !assets/readme-stats/*.svg
 !assets/custom/
