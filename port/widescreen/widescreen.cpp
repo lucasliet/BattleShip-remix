@@ -8,9 +8,8 @@
 namespace {
 
 constexpr const char* kWidescreenCVar = "gEnhancements.Widescreen";
-// 0 = Stretch (legacy wide pixels), 1 = Center4_3 (letterboxed 2D,
-// undistorted). The battle-HUD Spread markers land with the decomp-side
-// anchor PRs; Center4_3 is the interim default so nothing distorts.
+// 0 = Stretch (default, upstream BattleShip behavior: 2D fills the wide screen),
+// 1 = Center4_3 (letterboxed 2D, undistorted, but 3D leaks past the 2D bars).
 constexpr const char* kWidescreen2DPolicyCVar = "gEnhancements.Widescreen2DPolicy";
 
 #ifdef __SWITCH__
@@ -26,7 +25,7 @@ bool widescreen_enabled() {
 }
 
 int widescreen_2d_policy() {
-    return CVarGetInteger(kWidescreen2DPolicyCVar, 1);
+    return CVarGetInteger(kWidescreen2DPolicyCVar, 0);
 }
 
 } // namespace
@@ -48,7 +47,7 @@ extern "C" void port_widescreen_tick(void) {
      * compresses post-projection clip-space X by (4/3)/window_aspect, expanding
      * the visible 4:3 frustum into the wider window. 2D rect ops (HUD,
      * backgrounds, menus) follow the 2D anchor policy CVar:
-     * gEnhancements.Widescreen2DPolicy — 1 (default) = Center4_3, mapping the
+     * gEnhancements.Widescreen2DPolicy — 1 = Center4_3, mapping the
      * authored 320-space into the centered 4:3 region with pixel aspect 1:1
      * (menus/title/2D effects letterbox; no distortion); 0 = legacy Stretch
      * (authored NDC across the full wide FB). The battle-HUD Spread markers

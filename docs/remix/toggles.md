@@ -139,11 +139,11 @@ The asm Options-screen port (`disable_options_functionality_`) and the fifth Mod
 
 - **Widescreen** (`widescreen`; 0 off, 1 on; default 0)  
   Asm: Widescreen.asm: sets the 16:9 viewport aspect (0x3FE8BA2F) in matches and corrects the menu aspect on other screens.  
-  Port: No reader. The port renders at the window aspect with its own widescreen handling (`port_widescreen_clip_x_scale`).
+  Port: No reader, and the Remix menu page leaves it out (`IsRemixToggleWithoutPortEffect`, port/gui/PortMenu.cpp). The port renders at the window aspect with its own widescreen handling (`port_widescreen_clip_x_scale`, Settings menu).
 
 - **Stereo Fix for Hit SFX** (`stereo_fix`; 0 off, 1 on; default 1)  
   Asm: Stereo.asm `fix_sfx_pan_`: inverts the hit-SFX pan (a vanilla bug) when ON; Sector Z Remix and the Home-Run Contest platform are always centred.  
-  Port: No reader. Deviation: the port always applies the corrected pan (lb/lbcommon.c:760-775, with the Sector Z Remix centring), because the inverted pan is an outright vanilla bug.
+  Port: No reader, and the Remix menu page leaves it out (`IsRemixToggleWithoutPortEffect`). Deviation: the port always applies the corrected pan (lb/lbcommon.c:760-775, with the Sector Z Remix centring), because the inverted pan is an outright vanilla bug.
 
 - **Random Select** (`variant_random`; 0 DEFAULT, 1 INCLUDE BONUS, 2 ALL VARIANTS, 3 VANILLA ONLY; default 0)  
   Asm: CharacterSelect.asm `get_random_char_id_`: Random Select pool. INCLUDE BONUS adds the ten bonus fighters, ALL VARIANTS turns a pick into one of its four variants one time in five, VANILLA ONLY rerolls non-vanilla fighters.  
@@ -179,7 +179,7 @@ The asm Options-screen port (`disable_options_functionality_`) and the fifth Mod
 
 - **Dpad CSS Cursor Control** (`dpad_css_control`; 0 off, 1 on; default 0)  
   Asm: css/DpadControl.asm `css_cursor_and_dpad_controls_`: the D-pad moves the CSS cursor.  
-  Port: No reader. The match-side D-pad options live in the Player Panel (ft/ftremix/ftremixdpad*.c).
+  Port: `ftRemixDpadMenu` screen state (ft/ftremix/ftremixdpadmenu.c:105): on a CSS with the Player Panel D-pad option off, the toggle turns on the D-pad cursor. The match-side D-pad options live in the Player Panel (ft/ftremix/ftremixdpad*.c).
 
 - **PK Thunder Reflect Crash Fix** (`pk_thunder_reflect_crash_fix`; 0 off, 1 on; default 1)  
   Asm: nessshared.asm: marks the PK Thunder trail objects as discarded when the head is reflected and fixes the trail rotation.  
@@ -376,7 +376,7 @@ Stage BGM path: `grRemixGetStageBGM` picks the alternate song (chances 65/16/10/
 
 - **Saffron Pokemon Rate** (`saffron_poke_rate`; 0 NORMAL, 1 SUPER, 2 HYPER, 3 QUICK ATTACK; default 0)  
   Asm: Hazards.asm `saffron_city_pokemon_rate*`: SUPER halves the Pokemon wait, HYPER also opens the door at once, QUICK ATTACK uses 15-tic and 1-tic waits. VS and Training only.  
-  Port: Read only for the stage-select panel text (mn/mnmaps/mnremixstagepanel.c:228); the Saffron gate and Pokemon timers (gr/grcommon/gryamabuki.c) do not read it.
+  Port: `grremixsaffron.c` (the rate on the VS and Training screens, the default elsewhere) sets the Saffron gate and Pokemon timers (patch_audit ST-13); the stage-select panel shows the value (mn/mnmaps/mnremixstagepanel.c:228).
 
 - **Pokemon Announcer** (`announcer_mode`; 0 STADIUM, 1 ALL STAGES, 2 OFF; default 0/2/0/2)  
   Asm: PokemonAnnouncer.asm `toggle_announcer_`: STADIUM speaks on Pokemon Stadium, Pokemon Stadium 2 and Gym Leader Castle, ALL STAGES everywhere, OFF never. See docs/remix/announcer.md.  

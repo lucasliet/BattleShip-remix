@@ -11,6 +11,7 @@
 #include "remix/remix_training.h"
 #include "remix/remix_toggles.h"
 #include "remix/remix_toggle_actions.h"
+#include "remix/remix_symbols.h"
 #include "PortMenu.h"
 
 #include "Compat.h"
@@ -1439,6 +1440,12 @@ bool IsRemixProfileLoaderRow(const remix_toggles::Toggle &toggle) {
     return toggle.hasAction && (toggle.title == "Load Profile:");
 }
 
+/* Asm settings the port replaces with its own handling, so the page leaves them out: Widescreen (the port widescreen in Settings)
+ * and Stereo Fix for Hit SFX (the port always applies the fixed pan, docs/remix/toggles.md). */
+bool IsRemixToggleWithoutPortEffect(const remix_toggles::Toggle &toggle) {
+    return (toggle.entryAddr == REMIX_SYM_Toggles__entry_widescreen) || (toggle.entryAddr == REMIX_SYM_Toggles__entry_stereo_fix);
+}
+
 /* Puts the next widget of a two-column page in the column after the previous one. */
 void PlaceInNextColumn(WidgetPath &path, int &shown) {
     path.column = (shown++ % 2 == 0) ? SECTION_COLUMN_1 : SECTION_COLUMN_2;
@@ -1545,7 +1552,7 @@ void PortMenu::AddMenuRemixGroup(WidgetPath &path, remix_toggles::Group group) {
     const auto &rows = remix_toggles::ToggleAllRows();
     int shown = 0;
     for (const auto &toggle : remix_toggles::All()) {
-        if (toggle.group != group) {
+        if ((toggle.group != group) || IsRemixToggleWithoutPortEffect(toggle)) {
             continue;
         }
         for (const auto &row : rows) {
