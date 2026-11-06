@@ -433,9 +433,11 @@ Closed phases:
     first pick, `p7_r2_120_0`, `p7_r2_122_0`), Metal Mario size on the Training CSS (`p7_tr_136_DU`, same size as the CPU
     Mario), the rc 139 flake on Tal Tal (12 four-fighter matches on 0x2E and 0xA7, all rc 0, `p7_taltal_*`). The Switch
     stutter (`walked past registered DL range`, stale token 0x57EE) needs the hardware: moved to T10.2.
-  - [ ] Peach's Castle: blue quads with the roof-tile texture float in the sky when the camera zooms out (2026-11-05,
-    `b11_pc_wide` in Remix and `b11_us_pc` in the vanilla build, both with P1 walking left; the reference emulator shows
-    nothing like it). A port defect of the stage, older than the Remix work.
+  - [x] Peach's Castle: blue quads with the roof-tile texture float in the sky when the camera pans left (2026-11-05,
+    `b11_pc_wide`, `b11_us_pc`): not a bug. They are layer-0 objects 3 and 4 of the Castle ground data (roof wedges, DLs
+    0x2808 and 0x28F8 of file 106, animated between x = +-3000 and +-3900 near the camera bounds). A reference capture with
+    P1 walking left (`build/ref-shots/pc_pan_remix`, frame 008) shows the same wedge in the top-left corner; the earlier
+    reference `vs1` never panned that far.
   - [x] Giga Bowser 1.70 zoom on the CSS (2026-11-05): not a bug. The reference capture (`build/ref-shots/giga_css2`, D-pad
     up over Bowser on the VS CSS of the real Remix) shows Giga Bowser overflowing the panel at the port's size
     (`b10_giga_css`).
