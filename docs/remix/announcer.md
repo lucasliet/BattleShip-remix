@@ -2,7 +2,7 @@
 
 Covers `PokemonAnnouncer.asm` (the commentator of Pokemon Stadium, Pokemon Stadium 2 and Gym Leader Castle, or of every stage) and the announcer voice lines the Remix adds elsewhere. Code: `decomp/src/if/ifremixannouncer.{c,h}` (pick modes, per-frame process), `ifremixannouncertables.c` and `ifremixannouncerrules.{c,h}` (the call tables, their shared-array layout, the STANDARD pick and the sleep and once-per-match rules; pure, unit tests in `tests/remix/test_announcer_rules.c`), `decomp/src/if/ifremixhitannouncer.{c,h}` (hit and throw buckets) and one `#ifdef REGION_REMIX` call at each trigger site listed in section 3. Setting: `Pokemon Announcer` (`announcer_mode`, `docs/remix/toggles.md`).
 Test: `SSB64_REMIX_TOGGLES="Pokemon Announcer=1" SSB64_AUDIO_FGM_LOG=1 .claude/skills/remix-smoke-tests/scripts/vs.sh 0,8 .claude/skills/remix-smoke-tests/inputs/none.txt announcer 3000`; the log prints `[fgm] play id=<n>` for every sound, so the announcer clips show as ids 0x45B-0x4C1, 0x4AE, 0x5CF-0x5D3 and 0x608 (ids of section 2). `=1` makes the announcer speak on every stage; for the Stadium default put `SSB64_VS_STAGE=45` (Pokemon Stadium, 0x2D) or `44` (Gym Leader Castle, 0x2C) or `164` (Pokemon Stadium 2, 0xA4) in the environment. There are no unit tests; check with the FGM log.
-Open gaps: `docs/remix/patch_audit.md`, groups g3, g5, g6 and g9.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, groups g3, g5, g6 and g9.
 
 ## 1. Activation
 

@@ -1,7 +1,7 @@
 # Smash Remix patch audit: per-scope map
 
-One line per Remix scope (or table): asm location, verdict and the port location that implements it, or the reason for NA. The open
-items are in [`patch_audit.md`](patch_audit.md), with the same group prefixes. Produced on 2026-11-05 by
+One line per Remix scope (or table): asm location, verdict and the port location that implements it, or the reason for NA. The verdicts are those of the
+audit date: every GAP and STUB became a ledger item in [`patch_audit.md`](patch_audit.md) (same group prefixes), and all of them are closed there. Produced on 2026-11-05 by
 `tools/audit_remix_patches.py` plus a manual read of every scope; line numbers are those of that date.
 
 ## OP: 1P, Bonus, All-Star, Remix 1P

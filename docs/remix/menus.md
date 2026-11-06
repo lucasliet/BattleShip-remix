@@ -11,7 +11,7 @@ Tests: `tests/remix/` (`test_gallery_rules.c`, `test_vsstats_rules.c`, `test_gam
 `test_stage_grid_rules.c`, `test_stage_select_rules.c`, `test_sprite_rules.c`, `test_sprite_bitmap_row.c`, ...), and the per-section recipes, which run
 with `SSB64_START_SCENE=<id>` through `.claude/skills/remix-smoke-tests/`.
 
-Open gaps: `docs/remix/patch_audit.md`, groups g2 (menus, Character Data, results, player tag), g8 (results screen) and g9 (gallery,
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, groups g2 (menus, Character Data, results, player tag), g8 (results screen) and g9 (gallery,
 VS demo, credits, boot).
 
 ---
@@ -152,8 +152,8 @@ B on page 2 returns to page 1 with the cursor on "Remix Modes"; A or START on a 
 exactly as VS Start (`mnVSModeSaveSettings()`, `scene_curr = nSCKindPlayersVS`). The text of the new buttons is a `Sprite` of the MNVSMode
 file read like the vanilla texts. Mode rules are in `gm/gmremixmodecss.c` (`gmRemixModeBeforeCSS` / `LeaveCSS` / `StartMatch`).
 
-The mode flags the asm sets (`twelve_cb_flag`, `vs_mode_flag`) are replaced by `gm/gmremixmode.c` state. Open gap MN-14
-(`patch_audit.md`): the port reopens the menu on page 1 with VS Start, the asm on page 2 with the cursor on the mode played.
+The mode flags the asm sets (`twelve_cb_flag`, `vs_mode_flag`) are replaced by `gm/gmremixmode.c` state. As in the asm,
+leaving the CSS reopens the VS menu on its Remix page with the cursor on the mode played (MN-14).
 
 Test: `SSB64_START_SCENE=9`, input `100 108 0 - 0 -80` (four downs from VS Start reach Remix Modes), A at 220 opens page 2, four more downs
 reach Tug of War, A at 380 leaves for the CSS; `gMNVSModeRemixMode` equals 1 + the button index.

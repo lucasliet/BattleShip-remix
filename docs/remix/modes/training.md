@@ -128,7 +128,7 @@ registry, so the port menu and the Z menu agree. The stick and the C buttons mov
 - **Music list.** The Music entry has the 17 fixed entries of the table; the Remix list appends the toggleable MIDI tracks (an assembler loop with no symbol).
 - **Single Button Mode gate** derives `Training.toggle_menu` from the battle pause status and the Z menu state (`sc1PTrainingSbmGetToggleMenu`) instead of reading the RAM byte; the Training menu path keeps START and, in mode B, B.
 
-Open gaps: `docs/remix/patch_audit.md`, group g8.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g8.
 
 ## Tests and smoke recipes
 

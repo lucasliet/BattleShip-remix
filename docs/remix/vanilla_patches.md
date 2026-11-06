@@ -67,7 +67,7 @@ active; a cloaked fighter (`itRemixCloakingDeviceIsCloaked`) is skipped. The tai
 The CSS `Poison Dmg` option (`css/PoisonDmg.asm apply_damage`) runs first in `ftRemixPoisonUpdate`: every 128 match tics (low bits below 3 at
 1/3 and 2/3 game speed, never on the extra advance of a faster speed) Low, Medium and High add 1, 2 or 4%, capped at 999; Heal sets
 `damage_heal = 2`. A Super Star or respawn blocks it; the Cloaking Device guards only the damage values, not the heal. `ftRemixPoisonClear`
-is the port of `Poison.clear_poison_`; the call from `itRemixClearActiveItems` (asm `Item.asm clear_active_custom_items_`) is open gap IT-4.
+is the port of `Poison.clear_poison_`; it is called from `itRemixClearActiveItems` (asm `Item.asm clear_active_custom_items_`) at the end of a match (IT-4).
 
 ## 3. Commands and custom grabs
 
@@ -197,4 +197,4 @@ restores the display word of every object of the group): the Remix `Render.GROUP
 Roy's counter is disabled in Remix: `MarthSpecial.asm detection_patch_` has the Roy branch commented out, so
 `ftRemixMarthDSPCounterDamage` only reduces damage for Marth and Roy keeps vanilla damage.
 
-Open gaps: `docs/remix/patch_audit.md`, groups ST (g3), GP (g5) and SH (g6).
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, groups ST (g3), GP (g5) and SH (g6).

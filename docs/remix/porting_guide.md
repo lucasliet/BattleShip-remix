@@ -234,4 +234,4 @@ After each change:
    frames and stay in `build/`; compare with a port run of the same input script.
 7. **Record**: a significant bug gets a `docs/bugs/<topic>_<YYYY-MM-DD>.md` with a row in `docs/bugs/README.md`; a deliberate difference gets its `DEVIATION` comment.
 
-Open gaps: `docs/remix/patch_audit.md` and `docs/remix/ROADMAP.md`.
+Audit ledger (every item closed): `docs/remix/patch_audit.md` and `docs/remix/ROADMAP.md`.

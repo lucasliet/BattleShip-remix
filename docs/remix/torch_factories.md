@@ -4,7 +4,7 @@ Covers the Torch factories that read `baserom.remix.z64` and write the Remix-onl
 Code: `torch/src/factories/ssb64/` (registered in `torch/src/Companion.cpp`, inside `SSB64_SUPPORT`) and the yamls in `yamls/remix/`. Torch selects
 `yamls/remix` by the SHA-1 of the ROM (`config.yml`). The ROM-derived data lives only in the `.o2r` and in `build/`.
 Test: `tools/test_remix_blobs.py` (commands under "Verification").
-Open gaps: `docs/remix/patch_audit.md`.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`.
 
 ## Files
 

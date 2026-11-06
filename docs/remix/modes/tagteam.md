@@ -83,7 +83,7 @@ queue wins and a Random token of the CSS rolls like a Random slot.
 - **Costumes of menu slots.** A fixed slot from the port menu uses costume 0 (team costume in team battles), a Random slot a random legal costume in free-for-all; a CSS pick keeps its costume.
 - **Start gate.** The asm comment says "up to stock count"; both check the last slot only, which the port implements.
 
-Open gaps: `docs/remix/patch_audit.md`, group g8.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g8.
 
 ## Tests and smoke recipes
 

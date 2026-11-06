@@ -2,7 +2,7 @@
 
 Covers the 531 entries of `Toggles.asm` (Remix, Gameplay, Music, Stage and Pokemon pages), how the port stores and reads them, and the port's own Remix menu pages. Code: `port/remix/remix_toggles.{h,cpp}` (registry), `port/remix/remix_display_settings.cpp`, `port/gui/PortMenu.cpp` (`AddMenuRemix`), `decomp/src/gm/gmremixtoggle.{h,c}` (C API) and the per-setting readers named below.
 Test a setting with `SSB64_REMIX_TOGGLES="<title>=<value>"` on any smoke script, for example `SSB64_REMIX_TOGGLES="Hitstun=1" .claude/skills/remix-smoke-tests/scripts/vs.sh 0,8 .claude/skills/remix-smoke-tests/inputs/none.txt hitstun` (see `.claude/skills/remix-smoke-tests/SKILL.md`). The pure rules of several settings have headless tests: `cmake --build build --target run_remix_mode_tests` (`tests/remix`).
-Open gaps: `docs/remix/patch_audit.md`, groups g3, g5, g8 and g9. Announcer details: `docs/remix/announcer.md`.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, groups g3, g5, g8 and g9. Announcer details: `docs/remix/announcer.md`.
 
 Profile columns used below are CE/TE/NE/JP = Community, Tournament, Netplay, Japanese (`Toggles.profile_defaults_*`); a single number means the same default in all four.
 

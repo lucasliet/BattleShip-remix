@@ -4,7 +4,7 @@ Covers setting up and driving the real Smash Remix ROM (`baserom.remix.z64`) in 
 for the Match Stats page and the pause screen. Everything lives in `.toolchain/ref-emu` (git-ignored; mupen64plus and angrylion are GPL and never enter the repository). The
 screenshots are copyrighted game frames, so they stay in `build/ref-shots/` and are not committed. Port code that follows these captures: `decomp/src/mn/mnvsmode/mnremixvsstatsview.c`
 (Match Stats), `decomp/src/if/ifremixpauselegend.c` (pause legends).
-Open gaps: `docs/remix/patch_audit.md`.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`.
 
 ## Use
 

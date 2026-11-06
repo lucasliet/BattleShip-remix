@@ -4,7 +4,7 @@ Covers where the fighter (`FTData`) table sits in `baserom.remix.z64`, the RAM t
 `tools/remix_dump_fighters.py` (stdlib only; the Torch factory `SSB64:REMIXFIGHTERS` produces the same table, `docs/remix/torch_factories.md`).
 The script writes JSON to `build/remix-dump/` (git-ignored); no ROM-derived data is versioned.
 Test: `.toolchain/host/venv/bin/python -I tools/test_remix_blobs.py --o2r <BattleShip-Remix.o2r>` compares the Torch blob with a reference built from this JSON.
-Open gaps: `docs/remix/patch_audit.md`, group g10.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g10.
 
 Command:
 

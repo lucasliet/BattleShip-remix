@@ -2,7 +2,7 @@
 
 Covers how the Remix swaps the texture, palette and colours of a fighter's model parts (extra costumes, Yoshi egg colour) and what the port does. Code:
 `decomp/src/ft/ftremix/ftremixpartimage*.{c,h}`, `ftremixyoshiegg.c`, `decomp/src/mn/mnplayers/mnremixcostumes.c` (CSS). Test: unit test
-`tests/remix/test_partimage_rules.c` and the recipe at the end (`SSB64_REMIX_COSTUME_P1..P4`). Open gaps: `docs/remix/patch_audit.md`.
+`tests/remix/test_partimage_rules.c` and the recipe at the end (`SSB64_REMIX_COSTUME_P1..P4`). Audit ledger (every item closed): `docs/remix/patch_audit.md`.
 
 ## How the asm works
 

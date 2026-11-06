@@ -5,7 +5,7 @@ scope became which C module, and where the port deliberately differs from the as
 `decomp/src/ft/ftremix/` (fighters, one directory per fighter with special-move code), `decomp/src/it/itremix/` (items),
 `decomp/src/wp/wpmario/wpmarioremixfireball.c` (Mario-family projectile clones) and the vanilla hook sites listed in section 4.
 The asm source is `.toolchain/pkgs/smashremix-src/src`. Tests: section 6 (`.claude/skills/remix-smoke-tests/`, `tests/remix/`).
-Open gaps: `docs/remix/patch_audit.md`, groups g4 to g7.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, groups g4 to g7.
 
 A deviation is a conscious different implementation (different data layout, different state home, a different but equivalent
 call, or a value the port picks where the asm reads an undefined register). A missing feature is a gap and is not listed here.
@@ -376,7 +376,7 @@ Per item:
 | Platform movement (`grremixplatformrules.c`, ST-15) | The movement rule uses the hazard type of the match stage from `Stages.stage_hazard_table`; the asm reads `dont_freeze_stage`, a flag the stage select sets, which only differs after RANDOM or the tournament layout. |
 | Smashketball ball and barrels (`itremixbasketball.c`, IT-10) | The ball finds the barrels through the list kept by `grremixjunglebarrels.c`; the asm walks the ground obstacle array through `gobj+0x20`. Same barrels, same order. |
 
-### 5.8 Fighters (Phase 5b lot 3)
+### 5.8 Fighters
 
 | Area | Deviation |
 |---|---|
@@ -386,7 +386,7 @@ Per item:
 | Sandbag (`ftremixsandbag.c`, FT-42) | The landing patch inside `ftCommonDownBounceCheckUpOrDown` that `ftcommonshieldbreakdown.c` reaches is not ported: the asm jumps into another function's frame there. |
 | Slippy hips (`ftremixslippyhips.c`, FT-44) | A status past the end of the hip table uses multiplier 1.0; the asm reads the memory after the table. |
 
-### 5.9 CPU AI (Phase 6)
+### 5.9 CPU AI
 
 | Area | Deviation |
 |---|---|

@@ -339,4 +339,4 @@ against the ROM), `tools/test_n64_addr_to_symbol.py`.
 
 **Patch audit**: `tools/audit_remix_patches.py` lists every `OS.patch_start` of the Remix with the decomp function it lands in and whether the port hooks it (`porting_guide.md`, section 11).
 
-Open gaps: `docs/remix/patch_audit.md` and `docs/remix/ROADMAP.md`.
+Audit ledger (every item closed): `docs/remix/patch_audit.md` and `docs/remix/ROADMAP.md`.

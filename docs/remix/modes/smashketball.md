@@ -91,7 +91,7 @@ structs (0-9, 10 for a dash). There is no text; the CSS uses title sprites.
 - **CPU range constant.** `ai_ball_attack_range` loads `lui t3, 4348` (decimal, `0x10FC0000`) where its comment says 200.0; this is a likely asm bug
   and matters only if the CPU code is ported.
 
-Open gaps: `docs/remix/patch_audit.md`, group g8.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g8.
 
 ## Tests and smoke recipes
 

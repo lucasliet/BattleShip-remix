@@ -65,7 +65,7 @@ follows the asm.
 - **Stock cap.** The asm guards the increment with `slti 0xFF` on a signed byte, which never limits, so 127 wraps to -128. The port stops at 127
   (`GMREMIX_TUGOFWAR_STOCK_MAX`).
 
-Open gaps: `docs/remix/patch_audit.md`, group g8.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g8.
 
 ## Tests and smoke recipes
 

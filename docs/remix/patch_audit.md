@@ -1,8 +1,8 @@
 # Smash Remix patch audit: GAP and STUB ledger
 
 Every `OS.patch_start` of the Remix 2.0.1 source (2007), the 80 direct `origin` writes and the 988
-`Character.table_patch_start` entries were compared with the port (2026-11-05). This file lists what the port is missing or
-only half does, one ID per item; [`patch_audit_scopes.md`](patch_audit_scopes.md) has the verdict and the port location of
+`Character.table_patch_start` entries were compared with the port (2026-11-05). This file lists what the port was missing or
+only half did at that date, one ID per item, and how each was closed (every item is now `done` with its test or `n/a` with the asm reason); [`patch_audit_scopes.md`](patch_audit_scopes.md) has the verdict and the port location of
 every scope (the asm-to-C map). The plan that schedules these items is `ROADMAP.md`, M11 Phase 5b (AI items: Phase 6).
 
 How it was produced:

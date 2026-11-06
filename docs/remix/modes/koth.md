@@ -111,7 +111,7 @@ only) holds the strip pieces, the marker and the meter frame (image at +0x0AA8).
   restarts when the animation ends.
 - **Dead code.** `get_surface_center_coords_` is not ported.
 
-Open gaps: `docs/remix/patch_audit.md`, group g8.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g8.
 
 ## Tests and smoke recipes
 

@@ -5,7 +5,7 @@ Covers the model that turns the Remix ROM ranges into the eight audio blobs the 
 reference `tools/remix_dump_audio.py` (stdlib only), which produces the same bytes. The reference writes to `build/remix-dump/audio/`
 (git-ignored); nothing derived from the ROM goes to a tracked path.
 Test: `.toolchain/host/venv/bin/python -I tools/test_remix_blobs.py --o2r <BattleShip-Remix.o2r>` compares every Torch blob with the reference.
-Open gaps: `docs/remix/patch_audit.md`, group g9.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g9.
 
 Reference command:
 

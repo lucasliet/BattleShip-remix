@@ -8,7 +8,7 @@ consumes it. Code: Torch factory `torch/src/factories/ssb64/RemixAudio*.{h,cpp}`
 Test: `tools/test_remix_blobs.py` (blobs against the Python reference `tools/remix_dump_audio.py`); in the game, a VS match with
 `SSB64_AUDIO_DUMP_PATH` and `.toolchain/host/venv/bin/python -I .claude/skills/remix-smoke-tests/scripts/wavstat.py <run>`, `SSB64_AUDIO_FGM_LOG=1`
 (ids >= 695 are Remix sounds), and `SSB64_START_SCENE=59` for the Sound Test.
-Open gaps: `docs/remix/patch_audit.md`, group g9.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g9.
 
 ## 0. Summary: where the expanded banks are
 

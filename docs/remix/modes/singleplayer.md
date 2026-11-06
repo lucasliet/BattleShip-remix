@@ -223,7 +223,7 @@ defaults. Vanilla builds are untouched.
   rules for a re-entry).
 - **Total label.** The "TOTAL" label keeps y 209 (the asm stores a register whose value is not traced); the number is at y 205 as in the asm.
 
-Open gaps: `docs/remix/patch_audit.md`, group g1.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g1.
 
 ## Tests and smoke recipes
 

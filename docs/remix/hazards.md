@@ -360,4 +360,4 @@ bomb) and the item branch of `ftMainProcessHitCollisionStatsMain` (`grRemixBowse
 
 Only the gates of section 2 apply. Congo Jungle stages other than the five listed spawn no barrel.
 
-Open gaps: `docs/remix/patch_audit.md`, group ST (g3).
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group ST (g3).

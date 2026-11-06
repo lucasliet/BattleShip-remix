@@ -1,4 +1,4 @@
-# 1P CSS (SSB64_START_SCENE=17) as css1p_start_hold_l.txt (L held from 300 to 4000), then START every 150 frames from
+# 1P CSS (SSB64_START_SCENE=17) as css1p_pick_start.txt with L held from 300 to 4000, then START every 150 frames from
 # 3400 so the STAGE CLEAR tally (it waits for A, B or START) moves on to the next scene (OP-34).
 100 128 0 - 0 80
 129 140 0 - 80 0

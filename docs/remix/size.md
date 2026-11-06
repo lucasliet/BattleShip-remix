@@ -140,4 +140,4 @@ multiplier; Giant Donkey Kong returns 1.0 because its own 1.4 factor is applied 
 - `adjust_hitbox` scales only the hitbox size (as the asm code does), although its comment says "size and location".
 - The Arwing wing scale is applied in place each frame, like the asm; if the animation did not reset the joint it would compound away from 1.0.
 
-Open gaps: `docs/remix/patch_audit.md`, group IT (g4).
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group IT (g4).

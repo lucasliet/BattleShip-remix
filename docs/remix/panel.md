@@ -7,7 +7,7 @@ registry `port/remix/remix_player_panel.{h,cpp}`, match reader `decomp/src/gm/gm
 `tests/remix/test_css_panel_menu_rules.c`, `test_dpad_control_rules.c`, `test_dpad_map_rules.c`, `test_practice_rules.c`,
 `test_stockmode_rules.c` and the recipes of section 5.
 
-Open gaps: `docs/remix/patch_audit.md`, groups g2 (panel items on the CSS) and g5 (gameplay hooks).
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, groups g2 (panel items on the CSS) and g5 (gameplay hooks).
 
 ---
 

@@ -6,7 +6,7 @@ Covers how the port reads the `remix/fighters` blob from the `.o2r` and register
 `docs/remix/roster_data.md`; registry: `docs/remix/fighters.md` section 6.
 Test: `tools/test_remix_blobs.py` for the blob; in the game, a VS match with `SSB64_VS_FKINDS=<fkind>,<fkind>`
 (`.claude/skills/remix-smoke-tests/scripts/vs.sh`) and the log line `remix_roster: registered N synth fighters`.
-Open gaps: `docs/remix/patch_audit.md`.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`.
 
 ## Files
 

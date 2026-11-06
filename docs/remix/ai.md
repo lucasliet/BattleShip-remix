@@ -308,4 +308,4 @@ shield break) uses the tech and DI hooks of section 7.
 | `ai_ball_behavior_` | the side offset uses the Smashketball home team | the asm compares the fighter team with `ITStruct` word 0x68, which is `vel_push.y` of the collision data (the comment says home team); that is 0 in practice, so the asm treats team 0 as the home team |
 | `ai_hill_behavior_` | the target Y is the marker Y minus 500 | the asm loads the Y of both joints from the X offset (0x1C twice), giving Y = X - 500; the port follows the commented intent |
 
-Open gaps: `docs/remix/patch_audit.md`, groups g7 (CPU hooks of AI.asm and fighters), g5 (Reflect) and g8 (modes).
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, groups g7 (CPU hooks of AI.asm and fighters), g5 (Reflect) and g8 (modes).

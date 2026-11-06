@@ -94,7 +94,7 @@ HP steps: `mnRemixVSStaminaStepHP` moves 1 below 10, 10 from 10 to 990 and 1 abo
 - **Defeated fighter.** It goes to the Sleep status (`ftCommonSleepSetStatus`) instead of losing control.
 - **Input type in the HP picker.** One step rule for both screens (above).
 
-Open gaps: `docs/remix/patch_audit.md`, group g8.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g8.
 
 ## Tests and smoke recipes
 

@@ -101,7 +101,7 @@ random, preset, copy). `SSB64_DK_MODE=1|2` still sets the mode without the CSS.
 - **Text path.** All CSS and results text goes through `remix_hud_text` (the Remix Kabel font rebuilt from the user's .o2r); buttons, arrows and the
   crown are native sprites.
 
-Open gaps: `docs/remix/patch_audit.md`, group g8.
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, group g8.
 
 ## Tests and smoke recipes
 

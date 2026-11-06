@@ -8,7 +8,7 @@ files) and how the port implements them. Port code: `decomp/src/mn/mnplayers/` (
 `test_twelvecb_custom.c`, `test_twelvecb_rules.c`, `.toolchain/host/venv/bin/python -I tools/test_remix_css_offsets.py` (309
 sprite offsets of files 0xA05/0xA06 against the `.o2r`), and the in-game recipes of section 7.
 
-Open gaps: `docs/remix/patch_audit.md`, groups g2 (CSS, costumes, teams, player tag) and g8 (12-Character Battle CSS).
+Audit ledger (every item closed): `docs/remix/patch_audit.md`, groups g2 (CSS, costumes, teams, player tag) and g8 (12-Character Battle CSS).
 
 Conventions: `CharacterSelect.asm:N` is `.toolchain/pkgs/smashremix-src/src/CharacterSelect.asm`; port paths are relative to
 `decomp/src/mn/mnplayers/` unless a full path is given. Screen coordinates are N64 units (320x240).
@@ -302,7 +302,7 @@ emblems and panels:
 - Random: the L trigger (setting `'L' Selects Random Character`), the CPU pick and the Random bookend all go through
   `mnRemixRandomPickFighterKind`; the recent-randoms list is per port and survives the session. The bonus bookend (`mnremixcssbonus.c`)
   scrolls with Z/R and adds the bonus fighters to the pool when Random Select is not Default.
-- The bonus fighters, the Random bookend and the slide-in exist on the four screens (1P and Training since lot 5: the `?` token rolls
+- The bonus fighters, the Random bookend and the slide-in exist on the four screens (on 1P and Training the `?` token rolls
   its fighter when the screen is left and comes back as `?`).
 
 ### 4.5 Modes
@@ -379,9 +379,6 @@ with the pure layout and Custom rules in `mnremixtwelvecblayout.c` and `mnremixt
 
 ## 5. Port: deviations from the asm
 
-Not deviations but open gaps, tracked in `patch_audit.md`: the token size, follow offsets and cursor limit (MN-1, MN-3), the
-overlap rule (MN-4), the white flash (MN-2) and the 12CB winner voice (MD-4).
-
 - **Token centring** uses the cell centre (`cell + w/2 - 13`) instead of `START_X + 12`.
 - **Overscan**: the port crops 10 units of overscan (`port/gui/PortMenu.cpp`, `.Overscan.Enabled`, default on), so a screenshot shows a
   sub-rectangle of the 320x240 frame: `px_x = (u_x - 10) * 4.267`, `px_y = (u_y - 10) * 4.364` for a 1280x960 capture.
@@ -423,13 +420,13 @@ Boot the VS CSS with `SSB64_START_SCENE=16` (`18` is the Training CSS) and drive
 `.toolchain/host/venv/bin/python -I .claude/skills/remix-smoke-tests/scripts/sheet.py <name>`). Input line format:
 `<from> <to> <port> <buttons|-> [stick_x stick_y]`, stick y positive is up; the cursor hot spot is the cursor sprite position + (20, 3).
 Inputs in `.claude/skills/remix-smoke-tests/inputs/`: `css_pick_four.txt` (four ports pick, START 200, A 300), `css_pick_mario.txt`,
-`css_costume_cycle.txt`, `css_l_random.txt`, `css_var_*.txt` (D-pad variants), `css_falco_green_match.txt`.
+`css_costume_cycle.txt`, `css_l_random.txt`, `css_falco_green_match.txt`.
 
 | Check | Recipe |
 |---|---|
 | 30-portrait grid, name, logo, announcer | `SSB64_START_SCENE=16`, shot at frame 60; hover Falco (6 costumes) and check name, logo and voice (`SSB64_AUDIO_FGM_LOG=1`) |
 | Costume cycle | `css_pick_mario.txt` plus `170 172 0 CR`, `180 182 0 CR` every 10 frames to 240: Mario goes 1 to 4, then the extras 5 to 7, then wraps to 0; repeat with Pikachu (4 extras, 2 skipped ids) |
-| Variants | Mario up = Metal, down = Polygon, left = J (`css_var_*.txt`) |
+| Variants | Mario up = Metal, down = Polygon, left = J |
 | Random, L trigger | `css_l_random.txt`; with Random Select set through `SSB64_REMIX_TOGGLES` the CPU pick covers variants |
 | Slide-in | `inputs/none.txt`, `SHOTS=1,5,10,15,20,30,40,50`: left columns enter from x -20, right from 310, outer columns slowest; the bonus bookend settles in about 40 frames and the Random bookend in about 35; repeat with `SSB64_REMIX_MODE=12cb` (unchanged layout there) |
 | King of the Hill goal | `SSB64_REMIX_MODE=koth`: frame 60 shows the yellow picker "GOAL 30" and header "King of the Hill"; A on the picker (hot spot on the image at (140, 22)) reads "TIME" with the VS time, again returns; arrows step 5, 10, 15 on GOAL and 1, 2, 3, 5, 8 on TIME |
