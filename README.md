@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/SmashRemix.png" alt="Smash Remix" width="720">
+  <img src="assets/BattleShip-Remix.svg" alt="BattleShip Remix" width="720">
 </p>
 
 # BattleShip-Remix
