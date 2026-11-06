@@ -370,8 +370,16 @@ Closed phases:
     overrides; hook site confirmed first), MS-16 with MS-25 (Crash DSP voices and the announcer lines). Tests:
     `SSB64_BGM_LOG` with `test_bgm_rules` extended, the FGM log and `wavstat.py`, the audio dump against the reference
     RMS per track; each item added to the T9.1b listening list.
-  - [ ] **Lot 8, `parity.md` from the ledger:** `tools/gen_remix_parity.py` reads the ledger states, so a file with an open
-    item is `partial`; `tools/audit_remix_patches.py` re-run, no unhooked patch without a ledger ID.
+  - [x] **Lot 8, `parity.md` from the ledger:** `tools/gen_remix_parity.py` reads the ledger states, so a file with an open
+    item is `partial`; `tools/audit_remix_patches.py` re-run, no unhooked patch without a ledger ID. Done (2026-11-06):
+    every ledger item is placed on its `.asm` row (by the asm or scope cell, the table rows that patch a CT table, the
+    including file for `css/*.asm`, or the section file); the Port column lists the open IDs, and every `partial` row has
+    one. Rows: 287 (fighters 98 ported / 54 partial, items 29 / 4, stages 6 / 1, audio 5 / 1, menus and modes 30 / 14,
+    AI 8 / 24, infra 4 done and 9 n/a); the partial rows are the 124 items still open (in-game checks of lots 5 to 7,
+    CT-7 on every fighter row, and the Phase 6 items). Audit re-run: 1969 patches (hooked 1171, ambiguous 460, unhooked
+    323, symbolic 12, no function 3), the same total as the 2026-11-05 audit; each of the 323 unhooked patches has a
+    scope-map line, and each one with a GAP or STUB verdict is covered by a ledger item (the 13 that a name match missed
+    sit in the line ranges or grouped scopes of MN-4, SH-1, SH-4, SH-6 and MD-13).
 - [ ] **Phase 6** AI, run beside Phase 5b lots 1 to 7 (user decision, 2026-11-05). One worker at a time owns
   `ft/ftcomputer.c`; the others work in `ft/ftremix/ftremixai*.c`, `ftcommoncatch1.c`, `ftcommondash.c` and
   `mnremixcpulevel.c`, which no Phase 5b package edits; registry edits (`port/fighter_registry.h`) are merged by the lead.

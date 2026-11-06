@@ -6,8 +6,11 @@ Status rules:
   a REMIX-TODO.
 - <Fighter>/<file>.asm: `ported` when the fighter has a port directory (decomp/src/ft/ftremix/<dir>) or is a data-only
   clone (no *Special.asm), `partial` when its port directory has a REMIX-TODO. <Fighter>/AI/*.asm belong to the AI area.
-- Every other file takes its status from STATUS below; a file missing there is `todo`. Update STATUS when a task of
-  docs/remix/ROADMAP.md lands, then rerun this script.
+- Every other file takes its area, port location and fallback status from STATUS below; a file missing there is `todo`.
+- The ledger (docs/remix/patch_audit.md) then decides: a file with an `open` item is `partial`; a file whose items are
+  all `done` or `n/a` is `ported` (`adapted` when STATUS says so), unless its code still has a REMIX-TODO. A file with no
+  ledger item keeps STATUS, except that `partial`/`todo` becomes `ported` when the scope map
+  (docs/remix/patch_audit_scopes.md) audited it: the audit gave every GAP or STUB scope a ledger item.
 
 Progress per area = (ported + adapted + partial / 2) / (rows that are not n/a).
 """
@@ -21,6 +24,16 @@ FT_REMIX = ROOT / "decomp/src/ft/ftremix"
 IT_REMIX = ROOT / "decomp/src/it/itremix"
 OUTPUT = ROOT / "docs/remix/parity.md"
 FEATURES = ROOT / "tools/remix_asm_features.tsv"
+LEDGER = ROOT / "docs/remix/patch_audit.md"
+SCOPES = ROOT / "docs/remix/patch_audit_scopes.md"
+
+ASM_REF = re.compile(r"([A-Za-z0-9_/]+\.asm)\b(?::(\d+))?")
+ASM_INCLUDE = re.compile(r'^\s*include\s+"([^"]+\.asm)"', re.MULTILINE)
+TABLE_PATCH = re.compile(r"^\s*Character\.table_patch_start\(\s*(\w+)", re.MULTILINE)
+TABLE_NAME = re.compile(r"`(\w+)`")
+FILE_HEADING = re.compile(r"^#####\s+([A-Za-z0-9_/]+\.asm)")
+LEDGER_ROW = re.compile(r"^\| ([A-Z]{2}-\d+) \| ([^|]+?) \| ([^|]*) \| ([^|]*) \|")
+LEDGER_STATES = ("open", "done", "n/a")
 
 SKIP_DIRS = {"Moveset", "costumes", "css", "Req", "stages", "Random", "gfx", "music", "sounds", "Sounds", "1p"}
 
@@ -39,7 +52,7 @@ AREAS = ["fighters", "items", "stages", "audio", "menus_modes", "ai", "infra"]
 # file -> (area, status, port location / note). Status: ported | adapted | partial | todo | n/a.
 # adapted = the feature exists for the player through a documented port deviation; it counts as done.
 STATUS = {
-    "Character.asm": ("fighters", "partial", "port/remix/remix_roster.cpp, ftremix*; jab 3 / rapid jab tables open (patch_audit.md GP-1)"),
+    "Character.asm": ("fighters", "partial", "port/remix/remix_roster.cpp, ftremix*"),
     "Action.asm": ("fighters", "ported", "ftremixvanillaprocs.c, remix_action_layout.h"),
     "moveset.asm": ("fighters", "ported", "ftremixcommand.c"),
     "command.asm": ("fighters", "partial", "ftremixcommand.c"),
@@ -56,13 +69,13 @@ STATUS = {
     "samusshared.asm": ("fighters", "partial", "ftremixsamusshared.c, ftremixsamusshared2.c"),
     "yoshishared.asm": ("fighters", "partial", "ftremixyoshishared.c"),
     "CustomGrabAction.asm": ("fighters", "partial", "ftremixpianoshared.c, fighter_registry custom_capture_*"),
-    "DragonKingHUD.asm": ("stages", "todo", "Dragon King HUD not ported (patch_audit.md ST)"),
+    "DragonKingHUD.asm": ("stages", "todo", "ifremixdragonkinghud.c"),
     "KirbyHats.asm": ("fighters", "partial", "ftremixkirbycopy.c, ftremixkirbyhats.c, ftremixkirbypower.c"),
-    "Size.asm": ("fighters", "partial", "ftremixsize*.c (phases a, b, c partial)"),
+    "Size.asm": ("fighters", "partial", "ftremixsize*.c"),
     "GFX.asm": ("fighters", "ported", "lbremixgfx.c, ftparam.c"),
     "GFXRoutine.asm": ("fighters", "ported", "gmremixcolscripts.c"),
-    "CharEnvColor.asm": ("fighters", "partial", "ftremixenvcolor.c (display list fixes open)"),
-    "Reflect.asm": ("fighters", "partial", "ftremixreflect.c (CPU hooks in M7)"),
+    "CharEnvColor.asm": ("fighters", "partial", "ftremixenvcolor.c"),
+    "Reflect.asm": ("fighters", "partial", "ftremixreflect.c"),
     "Toggles.asm": ("menus_modes", "partial", "remix_toggles.cpp, PortMenu.cpp (Remix section)"),
     "Hitstun.asm": ("fighters", "ported", "ftparam.c"),
     "DI.asm": ("fighters", "ported", "ftremixdi.c"),
@@ -80,23 +93,23 @@ STATUS = {
     "Parry.asm": ("fighters", "ported", "ftremixparry.c"),
     "Rage.asm": ("fighters", "ported", "ftremixrage.c"),
     "ChargeSmashAttacks.asm": ("fighters", "ported", "ftremixchargesmash.c"),
-    "Speed.asm": ("fighters", "partial", "ftremixspeed.c (training wiring open)"),
-    "SingleButtonMode.asm": ("fighters", "partial", "ftremixsinglebutton.c (entry wiring open)"),
+    "Speed.asm": ("fighters", "partial", "ftremixspeed.c"),
+    "SingleButtonMode.asm": ("fighters", "partial", "ftremixsinglebutton.c"),
     "Japan.asm": ("fighters", "partial", "ftremixhitlag.c, shieldstun, jstunsleep, japanesesounds"),
-    "SpecialZoom.asm": ("fighters", "partial", "gmremixspecialzoom*.c (stage hide open)"),
+    "SpecialZoom.asm": ("fighters", "partial", "gmremixspecialzoom*.c"),
     "Combo.asm": ("fighters", "ported", "ftremixcombo.c"),
     "Accessibility.asm": ("fighters", "ported", "ifscreenflash.c, efremixscreenshake.c, gmremixaccessibility.c"),
-    "Pause.asm": ("menus_modes", "partial", "ftremixpause.c (Disable HUD, music, legend open)"),
+    "Pause.asm": ("menus_modes", "partial", "ftremixpause.c"),
     "Knockback.asm": ("fighters", "partial", "ftremixknockback.c"),
-    "Hitbox.asm": ("fighters", "partial", "ftremixhitbox.c (display open)"),
+    "Hitbox.asm": ("fighters", "partial", "ftremixhitbox.c"),
     "Damage.asm": ("fighters", "partial", "ftremixdamage.c"),
     "Poison.asm": ("fighters", "ported", "ftremixpoison.c"),
     "Costumes.asm": ("menus_modes", "partial", "CSS port (costume tables)"),
     "Item.asm": ("items", "partial", "itremixspawn.c, itmanager.c, mnvsitemswitch.c"),
-    "MagnifyingGlass.asm": ("items", "partial", "gmremixmagnify.c (not seen: needs a fighter off screen)"),
+    "MagnifyingGlass.asm": ("items", "partial", "gmremixmagnify.c"),
     "Stages.asm": ("stages", "partial", "grremixstage.c, mnmaps.c"),
     "Hazards.asm": ("stages", "partial", "grremixhazards_*.c, grremixgating.c"),
-    "FD.asm": ("audio", "partial", "scvsbattle.c (FD music); intro timer and FD clones open (patch_audit.md MS)"),
+    "FD.asm": ("audio", "partial", "scvsbattle.c (FD music)"),
     "Surface.asm": ("stages", "partial", "grremixsurface.c"),
     "Blastzone.asm": ("stages", "partial", "grremixblastzone.c"),
     "Spawn.asm": ("stages", "partial", "grremixspawn.c"),
@@ -111,60 +124,60 @@ STATUS = {
     "Color.asm": ("infra", "n/a", "constants"),
     "Joypad.asm": ("infra", "ported", "ftremixtauntbutton.c (Taunt Button mask and jump guard)"),
     "PAL.asm": ("infra", "n/a", "N64 TV type"),
-    "Boot.asm": ("menus_modes", "partial", "title logo in mntitle.c; splash after the N64 logo open (patch_audit.md MS)"),
-    "SRAM.asm": ("menus_modes", "partial", "lbBackup records + port config for toggles (T4.1); Remix save blocks not mapped yet"),
+    "Boot.asm": ("menus_modes", "partial", "title logo in mntitle.c, mnremixsplash.c"),
+    "SRAM.asm": ("menus_modes", "partial", "lbBackup records (port_save.cpp); toggles and panels as CVars"),
     "Widescreen.asm": ("infra", "n/a", "out of scope (4:3)"),
     "FPS.asm": ("infra", "adapted", "FPS Display toggle, port/remix/remix_display_settings.cpp"),
     "CharacterSelect.asm": ("menus_modes", "partial", "CSS port (port/css_*, mnplayers*)"),
-    "AI.asm": ("ai", "partial", "ftremixai*.c, ftcomputer.c hooks (ROADMAP T7.1, leftovers in T8.2)"),
-    "VanillaLv10Attacks.asm": ("ai", "partial", "ftremixailv10.c (PREVENT routines of vanilla fighters in T8.2)"),
+    "AI.asm": ("ai", "partial", "ftremixai*.c, ftcomputer.c hooks"),
+    "VanillaLv10Attacks.asm": ("ai", "partial", "ftremixailv10.c"),
     "AA.asm": ("menus_modes", "ported", "remix_display_settings.cpp (MSAA)"),
     "ComboMeter.asm": ("menus_modes", "ported", "ifremixcombometer.c, ifremixcombohits.c"),
     "InputDelay.asm": ("menus_modes", "ported", "ftremixinputdelay.c"),
-    "TimedStock.asm": ("menus_modes", "partial", "gmremixtimedstock*.c; results exit wait 370 instead of 410 (patch_audit.md OP)"),
+    "TimedStock.asm": ("menus_modes", "partial", "gmremixtimedstock*.c"),
     "Stereo.asm": ("audio", "ported", "lbcommon.c fix_sfx_pan_"),
     "FGM.asm": ("audio", "ported", "Torch RemixAudioFactory"),
     "midi.asm": ("audio", "ported", "Torch RemixAudioFactory, audio_bridge.cpp"),
-    "Stamina.asm": ("menus_modes", "partial", "ftremixstamina*.c, gmremixstamina*.c (T6.1a, leftovers in T8.2)"),
-    "TugOfWar.asm": ("menus_modes", "partial", "gmremixtugofwar*.c (T6.1b, leftovers in T8.2)"),
-    "KingOfTheHill.asm": ("menus_modes", "partial", "gmremixkoth*.c, mnremixgoalpicker.c (T6.1c)"),
-    "TagTeam.asm": ("menus_modes", "partial", "gmremixtagteam*.c (T6.1d)"),
-    "Smashketball.asm": ("menus_modes", "partial", "gmremixsmashketball*.c, itremixbasketball.c (T6.1e)"),
-    "TwelveCharBattle.asm": ("menus_modes", "partial", "gmremixtwelvecb*.c (T6.1f, CSS of 24 portraits in T8.2)"),
-    "StockMode.asm": ("menus_modes", "partial", "gmremixstockmode.c (Last mode open)"),
+    "Stamina.asm": ("menus_modes", "partial", "ftremixstamina*.c, gmremixstamina*.c"),
+    "TugOfWar.asm": ("menus_modes", "partial", "gmremixtugofwar*.c"),
+    "KingOfTheHill.asm": ("menus_modes", "partial", "gmremixkoth*.c, mnremixgoalpicker.c"),
+    "TagTeam.asm": ("menus_modes", "partial", "gmremixtagteam*.c"),
+    "Smashketball.asm": ("menus_modes", "partial", "gmremixsmashketball*.c, itremixbasketball.c"),
+    "TwelveCharBattle.asm": ("menus_modes", "partial", "gmremixtwelvecb*.c"),
+    "StockMode.asm": ("menus_modes", "partial", "gmremixstockmode.c"),
     "Teams.asm": ("menus_modes", "partial", "scmanager.c, ftremixstamina*.c"),
-    "Training.asm": ("menus_modes", "partial", "sc1ptrainingmode.c, remix_training.* (Z menu as port menu; per-port chain, Music and Stage BG open)"),
+    "Training.asm": ("menus_modes", "partial", "sc1ptrainingmode.c, remix_training.* (Z menu as port menu)"),
     "Practice_1P.asm": ("menus_modes", "partial", "gmremixpractice.c"),
-    "SinglePlayer.asm": ("menus_modes", "partial", "sc1premix*.c (T6.2, leftovers in T8.2)"),
+    "SinglePlayer.asm": ("menus_modes", "partial", "sc1premix*.c"),
     "SinglePlayerModes.asm": ("menus_modes", "partial", "sc1premixintro/allstar/multiman*.c"),
-    "Bonus.asm": ("menus_modes", "partial", "sc1premixbonusexit.c, sc1premixmultiman.c (Bonus 2 records in T8.2)"),
+    "Bonus.asm": ("menus_modes", "partial", "sc1premixbonusexit.c, sc1premixmultiman.c"),
     "HRC.asm": ("menus_modes", "partial", "sc1premixhrc*.c"),
     "CharacterDataScreen.asm": ("menus_modes", "partial", "mnremixchardata.c, mncharacters.c"),
-    "Credits.asm": ("menus_modes", "partial", "scstaffroll.c (glyphs and speed assist open)"),
+    "Credits.asm": ("menus_modes", "partial", "scstaffroll.c"),
     "Gallery.asm": ("menus_modes", "partial", "mnremixgallery.c"),
-    "GameEnd.asm": ("menus_modes", "partial", "gmremixgameend.c (mode rows open)"),
+    "GameEnd.asm": ("menus_modes", "partial", "gmremixgameend.c"),
     "Handicap.asm": ("menus_modes", "partial", "ftremixhandicap.c"),
     "InputDisplay.asm": ("menus_modes", "partial", "ftremixinputdisplay.c"),
     "PlayerTag.asm": ("menus_modes", "partial", "ifremixplayertag.c"),
     "resultsscreen.asm": ("menus_modes", "partial", "mnremixwinbgm.c, mnvsresults.c"),
-    "Shield.asm": ("menus_modes", "partial", "ftremixshield.c (Costume and egg open)"),
-    "Transitions.asm": ("menus_modes", "partial", "lbtransition.c (logo open)"),
-    "VsStats.asm": ("menus_modes", "partial", "mnremixvsstats.c (page and trackers open)"),
-    "PokemonAnnouncer.asm": ("fighters", "ported", "ifremixannouncer.c, ifremixhitannouncer.c (throw announcement open in ftcommonthrow.c)"),
+    "Shield.asm": ("menus_modes", "partial", "ftremixshield.c"),
+    "Transitions.asm": ("menus_modes", "partial", "lbtransition.c"),
+    "VsStats.asm": ("menus_modes", "partial", "mnremixvsstats.c"),
+    "PokemonAnnouncer.asm": ("fighters", "ported", "ifremixannouncer.c, ifremixhitannouncer.c"),
     "OnHit.asm": ("fighters", "ported", "ftremixchartables.c ftRemixRunOnHit"),
-    "SinglePlayerMenus.asm": ("menus_modes", "partial", "mnremix1pmode.c; CSS header, announcer and tally items open (patch_audit.md OP)"),
+    "SinglePlayerMenus.asm": ("menus_modes", "partial", "mnremix1pmode.c"),
     "VsRemixMenu.asm": ("menus_modes", "ported", "mnremixvsmode.c"),
     "Menu.asm": ("infra", "n/a", "replaced by the port menu (ROADMAP T4.1 deviation)"),
     "Walljump.asm": ("infra", "n/a", "all patches are commented out in the Remix 2.0.1 build"),
     "Practice.asm": ("menus_modes", "ported", "ftremixzcancel.c (Flash On Z-Cancel), ftremixoverlay.c (Spawned Fear overlay n/a, M11)"),
-    "CharacterSelectDebugMenu.asm": ("menus_modes", "partial", "remix_player_panel.cpp (the CSS panel menu is the debug menu open)"),
+    "CharacterSelectDebugMenu.asm": ("menus_modes", "partial", "remix_player_panel.cpp, mnremixcsspanelmenu*.c"),
     "SwordTrail.asm": ("fighters", "ported", "ftremixswordtrail.c"),
     "Skeleton.asm": ("fighters", "ported", "ftremixskeleton.c (per-port force)"),
     "AerialAttackFastFall.asm": ("fighters", "ported", "ftremixaerialfastfall.c"),
     "DKMode.asm": ("fighters", "ported", "ftremixdkmode.c (port variable: the RAM image is read-only)"),
     "Cheats.asm": ("menus_modes", "ported", "only the unlock word is live in the asm (Cheats.asm:19-37 is commented out); unlock all is a port toggle"),
     "Crash.asm": ("infra", "adapted", "N64 crash debugger; the port crash handler logs the backtrace without the button sequence"),
-    "VsDemo.asm": ("menus_modes", "partial", "scremixvsdemo.c (Remix name in the demo and the port 3 rule open)"),
+    "VsDemo.asm": ("menus_modes", "partial", "scremixvsdemo.c"),
     "timeouts.asm": ("menus_modes", "ported", "mnremixtimeouts.c"),
     "Settings.asm": ("menus_modes", "ported", "scremixtournament.c (tournament rules)"),
     "SinglePlayerEnemy.asm": ("menus_modes", "ported", "sc1premixenemy*.c (all seven groups)"),
@@ -186,7 +199,7 @@ def has_todo(paths) -> bool:
 def fighter_row(folder: str, asm: Path) -> tuple:
     rel = asm.relative_to(SRC).as_posix()
     if "/AI/" in rel:
-        return ("ai", "ported", "ftremixaitables.c reads the attack table from the Remix image (T7.1)")
+        return ("ai", "ported", "ftremixaitables.c reads the attack table from the Remix image")
     port_dir = FIGHTER_DIRS.get(folder)
     if port_dir is None:
         return ("fighters", "ported", "data-only clone (roster)")
@@ -213,14 +226,163 @@ def collect_rows() -> list:
             continue
         if len(parts) == 1:
             area, status, where = STATUS.get(parts[0], (area_of_top_level(parts[0]), "todo", ""))
+            code_open = False
         elif parts[0] == "items":
             area, status, where = item_row(asm)
+            code_open = status == "partial"
         else:
             area, status, where = fighter_row(parts[0], asm)
-        rows.append((asm.relative_to(SRC).as_posix(), area, status, where))
+            code_open = status == "partial"
+        rows.append((asm.relative_to(SRC).as_posix(), area, status, where, code_open))
     if not rows:
         sys.exit(f"no .asm files under {SRC}")
     return rows
+
+
+def includer_map(paths: list, sources: dict) -> dict:
+    """Maps a skipped include (e.g. css/DpadControl.asm, lowercased) to the row path that includes it."""
+    includers = {}
+    for path in paths:
+        for included in ASM_INCLUDE.findall(sources[path]):
+            if any(part in SKIP_DIRS for part in Path(included).parts[:-1]):
+                includers.setdefault(included.lower(), path)
+    return includers
+
+
+def table_patchers(paths: list, sources: dict) -> dict:
+    """Maps a Character table name to the row paths that patch an entry of it (plus Character.asm, which declares it)."""
+    patchers = {}
+    for path in paths:
+        for table in TABLE_PATCH.findall(sources[path]):
+            patchers.setdefault(table, {"Character.asm"}).add(path)
+    return patchers
+
+
+class AsmResolver:
+    """Maps the .asm references the audit docs write (any case, with or without folder, maybe with a line) to rows."""
+
+    def __init__(self, paths: list):
+        sources = {path: (SRC / path).read_text(errors="ignore") for path in paths}
+        self.line_counts = {path: text.count("\n") + 1 for path, text in sources.items()}
+        self.by_path = {path.lower(): path for path in paths}
+        self.by_name = {}
+        for path in paths:
+            self.by_name.setdefault(Path(path).name.lower(), []).append(path)
+        self.includers = includer_map(paths, sources)
+        self.tables = table_patchers(paths, sources)
+
+    def files(self, name: str, line: str = "") -> list:
+        """Rows for one reference; a cited line past the end of a same-name match picks the file that has it."""
+        key = name.lower()
+        if key in self.includers:
+            return [self.includers[key]]
+        candidates = [self.by_path[key]] if key in self.by_path else self.by_name.get(Path(key).name, [])
+        if line and len(candidates) <= 1:
+            longer = [path for path in self.by_name.get(Path(key).name, []) if self.line_counts[path] >= int(line)]
+            if candidates and self.line_counts[candidates[0]] < int(line) and longer:
+                return longer
+        return candidates
+
+    def cell_files(self, cell: str) -> list:
+        """Rows for every .asm reference of a ledger or scope-map cell."""
+        return [path for name, line in ASM_REF.findall(cell) for path in self.files(name, line)]
+
+    def table_files(self, cell: str) -> list:
+        """Rows that patch the Character tables a CT cell names in backticks."""
+        return [path for table in TABLE_NAME.findall(cell) for path in sorted(self.tables.get(table, ()))]
+
+
+def ledger_item_files(item_id: str, cells: tuple, heading, resolver: AsmResolver) -> list:
+    """Row paths of an item: the .asm of its asm cell, else of its scope cell, else the files patching the tables it
+    names (Character.asm, which declares them, when every row is commented out), else the section file."""
+    asm_cell, scope_cell = cells
+    paths = resolver.cell_files(asm_cell) or resolver.cell_files(scope_cell)
+    if not paths and item_id.startswith("CT-"):
+        paths = resolver.table_files(asm_cell + " " + scope_cell) or resolver.files("Character.asm")
+    if not paths and heading:
+        paths = resolver.files(heading)
+    return sorted(set(paths))
+
+
+def load_ledger(resolver: AsmResolver) -> dict:
+    """Maps each row path to its ledger items, as (id, state) with state one of LEDGER_STATES."""
+    items = {}
+    unplaced = []
+    heading = None
+    for number, line in enumerate(LEDGER.read_text().splitlines(), 1):
+        if line.startswith("#"):
+            match = FILE_HEADING.match(line)
+            heading = match.group(1) if match else None
+            continue
+        match = LEDGER_ROW.match(line)
+        if not match:
+            continue
+        item_id, state_cell, asm_cell, scope_cell = match.groups()
+        state = state_cell.split()[0]
+        if state not in LEDGER_STATES:
+            sys.exit(f"{LEDGER.relative_to(ROOT)}:{number}: {item_id} state {state!r}, expected one of {LEDGER_STATES}")
+        paths = ledger_item_files(item_id, (asm_cell, scope_cell), heading, resolver)
+        if not paths:
+            unplaced.append(item_id)
+        for path in paths:
+            items.setdefault(path, []).append((item_id, state))
+    if unplaced:
+        sys.exit(f"ledger items with no .asm row (name the file in the asm column): {', '.join(unplaced)}")
+    return items
+
+
+def load_audited(resolver: AsmResolver) -> set:
+    """Row paths with at least one line in the per-scope map (a line names its file, or sits under its heading)."""
+    audited = set()
+    heading = None
+    for line in SCOPES.read_text().splitlines():
+        if line.startswith("#"):
+            match = FILE_HEADING.match(line)
+            heading = match.group(1) if match else None
+            continue
+        if not line.startswith("- "):
+            continue
+        paths = resolver.cell_files(line)
+        if not paths and heading:
+            paths = resolver.files(heading)
+        audited.update(paths)
+    return audited
+
+
+def ledger_status(fallback: str, code_open: bool, items: list, audited: bool) -> str:
+    """Status of one row from its fallback (STATUS or the code check) and its ledger items."""
+    if code_open or any(state == "open" for _, state in items):
+        return "partial"
+    if items:
+        return "adapted" if fallback == "adapted" else "ported"
+    if fallback in ("partial", "todo") and audited:
+        return "ported"
+    return fallback
+
+
+def ledger_note(items: list) -> str:
+    """Short ledger summary for the Port column: counts per state and the open IDs."""
+    if not items:
+        return ""
+    counts = {state: sum(1 for _, s in items if s == state) for state in LEDGER_STATES}
+    note = f"ledger: {counts['done']} done, {counts['n/a']} n/a, {counts['open']} open"
+    open_ids = sorted({item_id for item_id, state in items if state == "open"},
+                      key=lambda item_id: (item_id.split("-")[0], int(item_id.split("-")[1])))
+    return note + (f" ({', '.join(open_ids)})" if open_ids else "")
+
+
+def apply_ledger(rows: list) -> list:
+    """Rows with the ledger status and the ledger note added to the port location."""
+    resolver = AsmResolver([row[0] for row in rows])
+    items = load_ledger(resolver)
+    audited = load_audited(resolver)
+    result = []
+    for path, area, status, where, code_open in rows:
+        own = items.get(path, [])
+        final = ledger_status(status, code_open, own, path in audited)
+        note = ledger_note(own)
+        result.append((path, area, final, "; ".join(part for part in (where, note) if part)))
+    return result
 
 
 def summary_lines(rows: list) -> list:
@@ -250,11 +412,11 @@ def load_features() -> dict:
 
 
 def main() -> None:
-    rows = collect_rows()
+    rows = apply_ledger(collect_rows())
     features = load_features()
     out = ["# Smash Remix 2.0.1 parity (generated by tools/gen_remix_parity.py; do not edit by hand)", "",
-           "One row per Remix `.asm`. Update `STATUS` in the script when a `ROADMAP.md` item closes. The patch-level view,",
-           "with every open item, is `patch_audit.md`.", ""]
+           "One row per Remix `.asm`. The status comes from the item states of `patch_audit.md` (a file with an open item",
+           "is `partial`); rerun the script after a ledger state changes. The Port column lists the open IDs of each file.", ""]
     out += summary_lines(rows)
     out += ["", "| File | Feature | Area | Status | Port |", "|---|---|---|---|---|"]
     out += [f"| `{path}` | {features.get(path, '')} | {area} | {status} | {where} |" for path, area, status, where in rows]

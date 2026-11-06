@@ -224,7 +224,7 @@ After each change:
 4. **Patch audit**: `.toolchain/host/venv/bin/python -I tools/audit_remix_patches.py [--out patches.tsv]` lists every `OS.patch_start` of the Remix with asm file and line, scope, ROM and RAM address, the decomp function it lands in (the overlay is
    chosen by checking which file's function starts fall on stack-frame prologues of the vanilla ROM at that address delta) and a status: `hooked` (the function body names a Remix symbol or `REGION_REMIX`), `ambiguous-hooked`, `unhooked`,
    `no-function` or `symbolic`. An `unhooked` row is a triage item: the port may implement the patch elsewhere (a caller, a data table, a Torch factory) or the patch may be missing. Run it before and after porting a scope;
-   `tools/gen_remix_parity.py` regenerates `parity.md`.
+   after a ledger state changes, `tools/gen_remix_parity.py` regenerates `parity.md` from the item states of `patch_audit.md` (a file with an open item is `partial`).
 5. **In the game**: the smoke tests run the real binary headless (`dangerouslyDisableSandbox` for the window server; never rebuild while a sweep runs): `vs.sh <fkinds> <input> <name> [frames]`, `special_matrix.sh <fkind>...` (NSP/DSP/USP),
    `stage_sweep.sh`, `hazard_sweep.sh <stage>`, `item_cpu_sweep.sh [kind]`, `stage_select_sweep.sh`, `css.sh <input> <name>`. Look at the screenshots (`sheet.py`) instead of trusting `rc`. A run passes when `rc=0`, the screenshots exist, the log has no
    abort/assert/fatal line and the effect is visible (a fighter move, an item event in `[remix-item]`, a hazard acting, a toggle changed with `SSB64_REMIX_TOGGLES="Title=value"`). A crash with a `CAMetalLayer nextDrawable` line is a macOS
