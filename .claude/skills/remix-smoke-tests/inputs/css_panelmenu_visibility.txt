@@ -1,0 +1,15 @@
+# VS CSS (scene 16), SSB64_REMIX_TOGGLES="CSS Panel Menu=1": P1 picks Mario, opens the panel menu with its button (panel x + 4,
+# y 130; a CSS press lands at the hand + (20, 3)), presses the right arrow of Visibility (Cloaked) and closes the menu. The log
+# shows "css panel menu: port 0 open", "item 2 = 1", "closed"; the Mario model on the card disappears (shots 360, 400).
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+200 220 0 - 0 -80
+225 243 0 - -80 0
+250 251 0 A
+260 272 0 - 80 0
+275 291 0 - 0 -80
+300 301 0 A
+310 322 0 - -80 0
+325 341 0 - 0 80
+350 351 0 A

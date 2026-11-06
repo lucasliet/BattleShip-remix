@@ -1,0 +1,8 @@
+# VS CSS (scene 16): both ports pick a fighter, nobody presses START. With SSB64_REMIX_TAG_NAMES="2=afk" the CSS presses
+# START by itself (the log enters scene 21); without it the CSS stays.
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+100 119 1 - 0 80
+120 127 1 - 80 0
+150 152 1 A
