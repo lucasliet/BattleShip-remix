@@ -1,3 +1,0 @@
-# P1 Kirby (copy power forced at frame ~405 by SSB64_REMIX_KIRBY_COPY_TEST) jumps and holds B in the air for 90 frames: Dark Samus hat = aerial charge (status 0x1AD = 429), then releases.
-460 464 0 - 0 80
-472 560 0 B 0 0

@@ -1,2 +1,0 @@
-# P1 presses A once at frame 300 (picks the highlighted button of a menu, e.g. the Main Menu).
-300 304 0 A 0 0

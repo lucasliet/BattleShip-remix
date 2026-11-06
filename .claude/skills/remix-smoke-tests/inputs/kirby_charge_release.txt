@@ -1,3 +1,0 @@
-# P1 Kirby on the ground holds B for 90 frames (Charge Shot / Shadow Ball charge), releases (shot, recoil), then charges and fires again.
-460 550 0 B 0 0
-650 740 0 B 0 0

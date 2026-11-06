@@ -1,2 +1,0 @@
-# P1 stays at the spawn point and holds B (neutral special) from frame 420 to 1400: an inhale (Kirby, Dedede) catches a CPU that walks in.
-420 1400 0 B 0 0

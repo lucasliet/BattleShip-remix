@@ -1,8 +1,0 @@
-# P1 Wario: neutral special with L held through the move (first time: alternate voice FGM 0x300 = 768), then two plain
-# neutral specials (voice 0x2FB = 763). The voice plays some frames into the move, so L stays held until frame 600.
-# Run with SSB64_REMIX_PANEL="TauntButton.1=5" so L is not the taunt button.
-490 499 0 L 0 0
-500 501 0 B+L 0 0
-502 600 0 L 0 0
-650 651 0 B 0 0
-800 801 0 B 0 0

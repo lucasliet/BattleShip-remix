@@ -1,4 +1,0 @@
-# CSS cursor calibration: P1 moves up at stick 80 for 20 frames (100-119), then right at stick 80 for 20 frames
-# (130-149); take shots every 5 frames to read the start position and the speed in pixels per frame.
-100 119 0 - 0 80
-130 149 0 - 80 0

@@ -1,6 +1,0 @@
-# VS CSS (scene 16): P1 takes its token to Link, D-pad up (variant), A. Gives Link, or Master Hand with
-# SSB64_REMIX_TAG_NAMES="20=<any name>" (shot at 200).
-100 128 0 - 0 80
-129 157 0 - 80 0
-170 171 0 DU 0 0
-185 186 0 A 0 0

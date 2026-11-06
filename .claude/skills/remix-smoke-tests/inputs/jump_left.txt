@@ -1,2 +1,0 @@
-# P1 runs left and jumps repeatedly (X), falling with no up special
-460 1500 0 - -80 0
