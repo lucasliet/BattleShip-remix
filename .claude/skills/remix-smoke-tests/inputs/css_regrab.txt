@@ -1,0 +1,7 @@
+# VS CSS (SSB64_START_SCENE=16): P1 picks the first portrait as css_pick_mario.txt, then presses A on its placed token
+# at frame 230 (grabs it again: mnPlayersVSSetCursorGrab) and places it again at 270.
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+230 232 0 A
+270 272 0 A

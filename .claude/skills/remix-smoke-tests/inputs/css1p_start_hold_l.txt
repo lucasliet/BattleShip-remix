@@ -1,0 +1,7 @@
+# 1P CSS (SSB64_START_SCENE=17) as css1p_pick_start.txt, then L held from frame 300 to 4000, so the GAME SET of an
+# SSB64_SPGAME_AUTOWIN stage sees L held (Practice_1P.asm hold_l_to_retry_: OP-34).
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+200 202 0 START
+300 4000 0 L

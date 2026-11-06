@@ -1,0 +1,26 @@
+# P1 (left platform, faces right) holds down-B (PSI Magnet) from frame 480 to 1200; P2 (human Fox, right platform) turns left and fires a straight laser (B) every 20 frames.
+# Use with SSB64_VS_P2_HUMAN=1: an absorbing down special (Ness, Lucas) takes the lasers and heals (lldb: ftRemixAbsorbHealAmount).
+470 474 1 - -80 0
+480 482 0 B 0 -80
+483 1200 0 B 0 0
+500 501 1 B 0 0
+520 521 1 B 0 0
+540 541 1 B 0 0
+560 561 1 B 0 0
+580 581 1 B 0 0
+600 601 1 B 0 0
+620 621 1 B 0 0
+640 641 1 B 0 0
+660 661 1 B 0 0
+680 681 1 B 0 0
+700 701 1 B 0 0
+720 721 1 B 0 0
+740 741 1 B 0 0
+760 761 1 B 0 0
+780 781 1 B 0 0
+800 801 1 B 0 0
+820 821 1 B 0 0
+840 841 1 B 0 0
+860 861 1 B 0 0
+880 881 1 B 0 0
+900 901 1 B 0 0

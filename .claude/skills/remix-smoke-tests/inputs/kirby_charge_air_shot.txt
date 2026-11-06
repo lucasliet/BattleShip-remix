@@ -1,0 +1,8 @@
+# P1 Kirby (copy forced at frame ~405 by SSB64_REMIX_KIRBY_COPY_TEST) holds B on the ground until the charge is full and
+# stored, then jumps and taps B to fire the stored shot in the air (the aerial shoot recoil path), twice.
+460 640 0 B 0 0
+700 704 0 - 0 80
+712 714 0 B 0 0
+800 980 0 B 0 0
+1040 1044 0 - 0 80
+1052 1054 0 B 0 0

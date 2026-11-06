@@ -1,0 +1,10 @@
+# Bonus CSS (SSB64_START_SCENE=19 or 20) as css1p_pick_start.txt (pick the first portrait, START), then L held from frame
+# 300 to 3000 while P1 walks right (600-1000) and left (1100-1500) to fall off the bonus stage, so the failure GAME SET
+# of the Bonus practice sees L held (Practice_1P.asm hold_l_to_retry_bonus_1/_2: OP-34, OP-35).
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+200 202 0 START
+300 3000 0 L
+600 1000 0 L 80 0
+1100 1500 0 L -80 0

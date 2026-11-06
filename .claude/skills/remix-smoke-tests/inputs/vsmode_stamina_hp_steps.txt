@@ -1,0 +1,16 @@
+# VS mode menu (SSB64_START_SCENE=9): D-pad down to Rule, D-pad right four times (Time -> Stock -> Time Team ->
+# Stock Team -> Stamina), D-pad down to the Time/Stock row (HP with the Stamina rule), then R twice and L once (step 1
+# each), stick right twice and left once (step 10 each, snapping to 1/10/990/999) and D-pad right once (step 1): MD-20.
+100 101 0 DD
+130 131 0 DR
+150 151 0 DR
+170 171 0 DR
+190 191 0 DR
+220 221 0 DD
+250 251 0 R
+280 281 0 R
+310 311 0 L
+340 343 0 - 80 0
+380 383 0 - 80 0
+420 423 0 - -80 0
+460 461 0 DR

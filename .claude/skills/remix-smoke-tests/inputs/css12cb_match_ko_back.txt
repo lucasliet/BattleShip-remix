@@ -1,0 +1,20 @@
+# 12CB CSS (SSB64_START_SCENE=16, SSB64_REMIX_MODE=12cb, SSB64_CSS_STOCKS=1): P1 picks as css_pick_mario.txt (lands on
+# Link in the 12CB grid), P2 moves up from its panel into the right grid and presses A, START at 200, A on the stage
+# select at 300; in the match P1 walks right off the stage (frames 700-1100, again 1500-1900), the match ends and START
+# every 150 frames from 2400 leaves the results back to the CSS (A only opens the match stats), 12CB re-entry, MD-7/MD-8.
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+100 130 1 - 0 80
+150 152 1 A
+200 202 0 START
+300 302 0 A
+700 1100 0 - 80 0
+1500 1900 0 - 80 0
+2400 2402 0 START
+2550 2552 0 START
+2700 2702 0 START
+2850 2852 0 START
+3000 3002 0 START
+3150 3152 0 START
+3300 3302 0 START

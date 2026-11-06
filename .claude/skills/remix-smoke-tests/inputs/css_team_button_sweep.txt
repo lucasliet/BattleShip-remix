@@ -1,0 +1,22 @@
+# VS CSS in Team Battle: P1 moves its cursor up and slightly right from its panel towards its team button and presses A
+# every 4 frames on the way (frames 100-180), so one press lands on the button (hit test of MN-11).
+100 180 0 - 20 60
+104 105 0 A 20 60
+108 109 0 A 20 60
+112 113 0 A 20 60
+116 117 0 A 20 60
+120 121 0 A 20 60
+124 125 0 A 20 60
+128 129 0 A 20 60
+132 133 0 A 20 60
+136 137 0 A 20 60
+140 141 0 A 20 60
+144 145 0 A 20 60
+148 149 0 A 20 60
+152 153 0 A 20 60
+156 157 0 A 20 60
+160 161 0 A 20 60
+164 165 0 A 20 60
+168 169 0 A 20 60
+172 173 0 A 20 60
+176 177 0 A 20 60

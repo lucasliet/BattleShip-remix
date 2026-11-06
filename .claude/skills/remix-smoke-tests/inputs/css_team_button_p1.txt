@@ -1,0 +1,10 @@
+# VS CSS in Team Battle: P1 places its token on the first portrait (A at 160, the empty cursor is then at x 88, y 54),
+# moves 15 frames left and 20 frames down (4 px per frame at stick 80) to x 28, y 134 on its team button, and presses A
+# at 225 and 255 (each press changes the team: MN-11 hit test, mnPlayersVSCheckTeamSelectInRange).
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+180 194 0 - -80 0
+198 217 0 - 0 -80
+225 226 0 A
+255 256 0 A

@@ -1,0 +1,12 @@
+# P1 walks right, then holds the down special (B + stick down) for 30, 60, 90, 120 and 150 frames with 150-frame gaps,
+# so a charging down special (Dedede's minion: charge level 0 Waddle Dee, 1 Waddle Doo, 2 Gordo) reaches each level
+# (IT-11 Waddle Doo beam).
+420 470 0 - 60 0
+500 530 0 B 0 -80
+680 740 0 B 0 -80
+890 980 0 B 0 -80
+1130 1250 0 B 0 -80
+1400 1550 0 B 0 -80
+1700 1760 0 B 0 -80
+1900 1960 0 B 0 -80
+2100 2160 0 B 0 -80

@@ -1,0 +1,6 @@
+# VS CSS (SSB64_START_SCENE=16): P1 picks the first portrait as css_pick_mario.txt (A at 160), then presses A once more
+# at 175 with an empty cursor, so lldb can read the cursor position on the empty-cursor A path (calibration).
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+175 177 0 A

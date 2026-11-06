@@ -1,0 +1,15 @@
+# 1P CSS (SSB64_START_SCENE=17, SSB64_REMIX_1P_MODE=allstar, SSB64_REMIX_TAG_NAMES='2=afk' so the Rest Area is left
+# after 120 frames) as css1p_pick_start.txt; in the first match P1 walks right off the stage (frames 1000-1400) and loses
+# one stock, then stays; with SSB64_SPGAME_AUTOWIN the match is won, A every 150 frames from 2600 moves through the stage
+# clear, and the next match shows whether the percent of the survived match carries over (OP-23).
+100 128 0 - 0 80
+129 140 0 - 80 0
+160 162 0 A
+200 202 0 START
+1000 1400 0 - 80 0
+2600 2602 0 A
+2750 2752 0 A
+2900 2902 0 A
+3050 3052 0 A
+3200 3202 0 A
+3350 3352 0 A

@@ -1,0 +1,11 @@
+# Mushroom Kingdom (SSB64_VS_STAGE=8), P1 Wario from the left spawn: jump, double jump left onto the upper-left ledge,
+# short hop (C-up) right onto the green pipe, then hold down: enters the pipe at about frame 700 (DokanStart).
+# Calibrated for Wario (`dok_p8`); other fighters have other jump heights and may miss the pipe.
+460 464 0 - 0 80
+465 474 0 - -60 0
+478 482 0 - 0 80
+483 492 0 - -60 0
+620 621 0 CU 0 0
+622 630 0 - 60 0
+690 720 0 - 0 -80
+760 790 0 - 0 -80

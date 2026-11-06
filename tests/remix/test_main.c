@@ -101,6 +101,7 @@ extern void remixTestCssPanelMenuRules(void);
 extern void remixTestCssVsModesRules(void);
 extern void remixTestPracticeRules(void);
 extern void remixTestPartImageRules(void);
+extern void remixTestEnvColorRules(void);
 extern void remixTestPipeTurnRules(void);
 extern void remixTestFighterEffectsRules(void);
 extern void remixTestVariantTuneRules(void);
@@ -219,6 +220,7 @@ int main(void)
     remixTestCssVsModesRules();
     remixTestPracticeRules();
     remixTestPartImageRules();
+    remixTestEnvColorRules();
     remixTestYoshiSharedRules();
     remixTestSpriteBitmapRow();
     remixTestSonicClassicRules();

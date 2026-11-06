@@ -1,0 +1,4 @@
+# P1 (left spawn) holds B (neutral special, inhale) from frame 420 to 1400; P2 (human, right spawn) walks left into it
+# from frame 440. Use with SSB64_VS_P2_HUMAN=1 on Final Destination: Kirby or Dedede catches P2 (ftCommonCaptureWaitKirbySetStatus).
+420 1400 0 B 0 0
+440 900 1 - -60 0

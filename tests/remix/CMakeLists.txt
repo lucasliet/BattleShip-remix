@@ -17,6 +17,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     test_1p_retry_rules.c
     test_1p_bonusstage_rules.c
     test_envmap_rules.c
+    test_envcolor_rules.c
     test_gameend_wait_rules.c
     test_1p_enemy_rules.c
     test_1p_afk_rules.c
@@ -196,6 +197,7 @@ add_executable(remix_mode_tests EXCLUDE_FROM_ALL
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixnessrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixpikarules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixpartimagerules.c
+    ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixenvcolorrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixyoshisharedrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixjumpaerialrules.c
     ${CMAKE_SOURCE_DIR}/decomp/src/ft/ftremix/ftremixthrownrules.c
