@@ -2253,7 +2253,21 @@ void PortMenu::UpdateElement() {
 }
 
 void PortMenu::Draw() {
+    NotifyUpdateOnce();
     Ship::Menu::Draw();
+}
+
+/* Shows one overlay notice per run when the boot-time update check finds a new release (the check itself runs when the About page is built). */
+void PortMenu::NotifyUpdateOnce() {
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
+    if (mUpdateNoticeShown || !ssb64::enhancements::IsUpdateAvailable()) {
+        return;
+    }
+    mUpdateNoticeShown = true;
+    Ship::Context::GetInstance()->GetWindow()->GetGui()->GetGameOverlay()->TextDrawNotification(
+        12.0f, true, "Update %s available: open the menu > About to install it.",
+        ssb64::enhancements::GetLatestVersion().c_str());
+#endif
 }
 
 void PortMenu::DrawElement() {

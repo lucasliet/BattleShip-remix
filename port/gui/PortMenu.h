@@ -29,6 +29,7 @@ class PortMenu : public Ship::Menu {
     void DrawElement() override;
     void UpdateElement() override;
     void Draw() override;
+    void NotifyUpdateOnce();
 #ifdef REGION_REMIX
     /**
      * Adds the Remix section after Settings. The menu is built when the window opens, before the game archive and
@@ -64,6 +65,7 @@ class PortMenu : public Ship::Menu {
     bool mMenuElementsInitialized = false;
 #ifdef REGION_REMIX
     bool mWasVisible = false;
+    bool mUpdateNoticeShown = false;
 #endif
 };
 
