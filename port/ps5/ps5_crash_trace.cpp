@@ -39,6 +39,38 @@ void TraceFrameChain(uintptr_t frame_pointer) {
     }
 }
 
+constexpr int kStackWordsScanned = 512;
+constexpr int kMaxCodePointers = 32;
+
+/**
+ * Traces stack words that point into the title's own code. System modules may run without frame
+ * pointers, so this finds the title's callers of a faulting library function; some hits are stale.
+ * The code range is taken around this file's handler, which lives in the same executable segment.
+ * @param stack_pointer the faulting thread's rsp
+ */
+void TraceStackCodePointers(uintptr_t stack_pointer) {
+    extern char __ehdr_start[] __attribute__((weak));
+    extern char etext[] __attribute__((weak));
+    const uintptr_t code_begin = reinterpret_cast<uintptr_t>(__ehdr_start);
+    const uintptr_t code_end = reinterpret_cast<uintptr_t>(etext);
+    if (code_begin == 0 || code_end <= code_begin || stack_pointer == 0) {
+        ps5_boot_trace("  stack scan skipped: no code range");
+        return;
+    }
+    const uintptr_t* stack = reinterpret_cast<const uintptr_t*>(stack_pointer);
+    int found = 0;
+    for (int index = 0; index < kStackWordsScanned && found < kMaxCodePointers; index++) {
+        const uintptr_t word = stack[index];
+        if (word < code_begin || word >= code_end) {
+            continue;
+        }
+        char line[64];
+        snprintf(line, sizeof(line), "  stack[%d] code=%#lx", index, static_cast<unsigned long>(word));
+        ps5_boot_trace(line);
+        found++;
+    }
+}
+
 void TraceFatalSignal(int signal_number, siginfo_t* info, void* context) {
     const ucontext_t* user_context = static_cast<const ucontext_t*>(context);
     char line[160];
@@ -49,6 +81,7 @@ void TraceFatalSignal(int signal_number, siginfo_t* info, void* context) {
     ps5_boot_trace(line);
     if (user_context != nullptr) {
         TraceFrameChain(static_cast<uintptr_t>(user_context->uc_mcontext.mc_rbp));
+        TraceStackCodePointers(static_cast<uintptr_t>(user_context->uc_mcontext.mc_rsp));
     }
     _Exit(128 + signal_number);
 }
