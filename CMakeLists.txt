@@ -1127,7 +1127,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
     add_custom_target(ssb64_ps5_title
         COMMAND ${CMAKE_COMMAND} -E env
             "PS5_EXTRA_SDK_LIBS=libScePad.so libSceUserService.so libSceSystemService.so libSceAudioOut.so libSceVideoOut.so"
-            "PS5_EXTRA_WRAPS=pthread_create"
+            "PS5_EXTRA_WRAPS=pthread_create lstat getcwd realpath"
             "PS5_APP_ASSETS=${SSB64_PS5_ASSETS_DIR}"
             bash ${CMAKE_SOURCE_DIR}/scripts/ps5/native-app-stage.sh ${CMAKE_BINARY_DIR}/ps5-app
             ${SSB64_PS5_TITLE_ID} $<TARGET_FILE:${PROJECT_NAME}> ${SSB64_PS5_PARAM_JSON}
