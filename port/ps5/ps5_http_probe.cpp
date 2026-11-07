@@ -5,6 +5,7 @@
 #ifdef __PS5__
 
 #include "enhancements/SwitchHttp.h"
+#include "enhancements/UpdateRelease.h"
 
 #include <cstdio>
 #include <string>
@@ -32,15 +33,13 @@ void Ps5RunHttpProbe(const std::string& titleDir) {
                                  std::to_string(page.httpStatus) + " error=" + page.error + " bytes=" +
                                  std::to_string(body.size()) + " head=" + body.substr(0, 80);
     ps5_boot_trace(pageLine.c_str());
-    ProbeDownload("github.com", "https://github.com/", titleDir);
-    const std::string assetMarker = "\"url\":\"https://api.github.com/repos/lucasliet/BattleShip-remix/releases/assets/";
-    const size_t at = body.find(assetMarker);
-    if (at == std::string::npos) {
-        ps5_boot_trace("http probe: no asset url in the release");
+    enhancements::ReleaseAsset release;
+    enhancements::ParseLatestRelease(body, "SHA256SUMS.txt", &release);
+    if (release.apiUrl.empty()) {
+        ps5_boot_trace("http probe: no SHA256SUMS.txt API url in the release");
         return;
     }
-    const size_t begin = at + 7;
-    ProbeDownload("asset", body.substr(begin, body.find('"', begin) - begin), titleDir);
+    ProbeDownload("asset", release.apiUrl, titleDir);
 }
 
 } // namespace ssb64

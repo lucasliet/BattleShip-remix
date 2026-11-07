@@ -54,6 +54,9 @@ constexpr uint32_t kTlsChecks = 0x01 | 0x04 | 0x08 | 0x10 | 0x20 | 0x80;
 constexpr size_t kMaxPageBytes = 1024 * 1024;
 constexpr size_t kReadChunkBytes = 64 * 1024;
 constexpr int kMaxRedirects = 5;
+constexpr const char* kAcceptJson = "application/vnd.github+json";
+// An asset's API URL answers with its JSON metadata unless the binary is the only accepted type.
+constexpr const char* kAcceptBinary = "application/octet-stream";
 
 struct HttpLibrary {
     int context = -1;
@@ -99,7 +102,7 @@ const HttpLibrary& Library() {
  */
 class Request {
   public:
-    explicit Request(const std::string& url) {
+    Request(const std::string& url, const char* accept) : mAccept(accept) {
         const HttpLibrary& library = Library();
         if (library.context < 0) {
             mError = library.error;
@@ -144,8 +147,7 @@ class Request {
      */
     HttpOutcome Send() {
         if (!mError.empty()) return HttpOutcome{false, 0, mError};
-        sceHttpAddRequestHeader(mRequest, "Accept", "application/vnd.github+json, application/octet-stream",
-                                kHeaderModeAdd);
+        sceHttpAddRequestHeader(mRequest, "Accept", mAccept, kHeaderModeAdd);
         const int sent = sceHttpSendRequest(mRequest, nullptr, 0);
         if (sent < 0) return HttpOutcome{false, 0, "send " + HexCode(sent)};
         int status = 0;
@@ -196,6 +198,7 @@ class Request {
     int mTemplate = -1;
     int mConnection = -1;
     int mRequest = -1;
+    const char* mAccept;
     std::string mError;
 };
 
@@ -206,12 +209,13 @@ bool IsRedirect(long status) {
 /**
  * Sends a GET and follows up to kMaxRedirects redirects, to HTTPS URLs only.
  * @param url the first URL
+ * @param accept the Accept header: JSON for the API, octet-stream for an asset's API URL
  * @param request receives the request whose response is final
  * @return ok for a final 2xx response
  */
-HttpOutcome OpenFollowingRedirects(std::string url, std::unique_ptr<Request>* request) {
+HttpOutcome OpenFollowingRedirects(std::string url, const char* accept, std::unique_ptr<Request>* request) {
     for (int redirect = 0; redirect <= kMaxRedirects; redirect++) {
-        *request = std::make_unique<Request>(url);
+        *request = std::make_unique<Request>(url, accept);
         HttpOutcome outcome = (*request)->Send();
         if (outcome.ok || !IsRedirect(outcome.httpStatus)) return outcome;
         url = (*request)->Location();
@@ -226,7 +230,7 @@ HttpOutcome OpenFollowingRedirects(std::string url, std::unique_ptr<Request>* re
 
 HttpOutcome HttpGetString(const std::string& url, std::string* responseBody) {
     std::unique_ptr<Request> request;
-    HttpOutcome outcome = OpenFollowingRedirects(url, &request);
+    HttpOutcome outcome = OpenFollowingRedirects(url, kAcceptJson, &request);
     if (!outcome.ok) return outcome;
     char chunk[4096];
     for (;;) {
@@ -243,7 +247,7 @@ HttpOutcome HttpGetString(const std::string& url, std::string* responseBody) {
 HttpOutcome HttpDownloadToFile(const std::string& url, const std::string& destinationPath,
                                const HttpProgressCallback& onProgress) {
     std::unique_ptr<Request> request;
-    HttpOutcome outcome = OpenFollowingRedirects(url, &request);
+    HttpOutcome outcome = OpenFollowingRedirects(url, kAcceptBinary, &request);
     if (!outcome.ok) return outcome;
     FILE* file = std::fopen(destinationPath.c_str(), "wb");
     if (file == nullptr) return HttpOutcome{false, outcome.httpStatus, "Could not create " + destinationPath + "."};
