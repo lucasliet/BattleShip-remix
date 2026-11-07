@@ -44,8 +44,6 @@
 #ifdef __PS5__
 extern "C" void ps5_boot_trace(const char* step);
 extern "C" void ps5_install_crash_trace(void);
-extern "C" void ps5_run_perf_probe(void);
-extern "C" void ps5_start_sampling_profiler(void);
 #define PS5_BOOT_TRACE(step) ps5_boot_trace(step)
 #else
 #define PS5_BOOT_TRACE(step) ((void)0)
@@ -1343,7 +1341,6 @@ int main(int argc, char* argv[]) {
 	PS5_BOOT_TRACE("main entered");
 #ifdef __PS5__
 	ps5_install_crash_trace();
-	ps5_start_sampling_profiler();
 #endif
 	/* Use an absolute path for ssb64.log so it lands in a predictable
 	 * place regardless of how the binary was launched (Finder / open /
