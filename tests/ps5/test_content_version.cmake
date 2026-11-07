@@ -1,21 +1,18 @@
 # Unit test of cmake/ps5_content_version.cmake. Run: cmake -P tests/ps5/test_content_version.cmake
 include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/ps5_content_version.cmake)
 
-set(failures 0)
-
-function(expect_version tag expected)
-    ps5_content_version("${tag}" actual)
+function(expect_version count expected)
+    ps5_content_version("${count}" actual)
     if(NOT actual STREQUAL expected)
-        message(SEND_ERROR "ps5_content_version(${tag}) = ${actual}, expected ${expected}")
+        message(SEND_ERROR "ps5_content_version(${count}) = ${actual}, expected ${expected}")
     endif()
 endfunction()
 
-expect_version("v2.0.1-port.5" "02.001.005")
-expect_version("v2.0.1-port.12" "02.001.012")
-expect_version("v2.1.0-port.1" "02.100.001")
-expect_version("v3.0.0" "03.000.000")
-expect_version("dev" "00.000.000")
-expect_version("v2.0.1-rc.1" "00.000.000")
+expect_version("0" "00.000.000")
+expect_version("42" "00.000.042")
+expect_version("999" "00.000.999")
+expect_version("1000" "00.001.000")
+expect_version("12345678" "12.345.678")
 
 set(template "${CMAKE_CURRENT_LIST_DIR}/../../assets/ps5/param.json")
 set(output "$ENV{TMPDIR}/ps5_param_test.json")

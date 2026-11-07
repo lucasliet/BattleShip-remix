@@ -1,37 +1,40 @@
-# PS5 contentVersion (NN.NNN.NNN in sce_sys/param.json) from the release tag, so the console and the homebrew
-# stores see each release as newer than the last:
-#   v<major>.<minor>.<patch>[-port.<n>]  ->  <major>.<minor*100+patch>.<n>, zero-padded
-#   v2.0.1-port.5                        ->  02.001.005
-# Anything else (dev builds, untagged trees) gives 00.000.000.
+# PS5 contentVersion (NN.NNN.NNN in sce_sys/param.json) for the console and the homebrew stores, which treat a
+# larger value as a newer release. It is the number of v* tags reachable from the built commit, written as an
+# eight-digit number: the release tag v2.0.1-port.5, the 42nd tag, gives 00.000.042. It grows by one with each
+# release whatever the version format; a build without git gives 00.000.000.
 
-function(_ps5_zero_pad value width out_var)
-    string(LENGTH "${value}" length)
-    while(length LESS width)
-        set(value "0${value}")
-        math(EXPR length "${length} + 1")
-    endwhile()
-    set(${out_var} "${value}" PARENT_SCOPE)
+# ps5_count_release_tags(<out_var>)
+function(ps5_count_release_tags out_var)
+    find_package(Git QUIET)
+    set(count 0)
+    if(Git_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} tag --merged HEAD --list "v*"
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE tags
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET)
+        if(NOT tags STREQUAL "")
+            string(REPLACE "\n" ";" tags "${tags}")
+            list(LENGTH tags count)
+        endif()
+    endif()
+    set(${out_var} "${count}" PARENT_SCOPE)
 endfunction()
 
-# ps5_content_version(<version> <out_var>)
-function(ps5_content_version version out_var)
-    if(NOT version MATCHES "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)(-port\\.([0-9]+))?$")
-        set(${out_var} "00.000.000" PARENT_SCOPE)
-        return()
+# ps5_content_version(<release_count> <out_var>)
+function(ps5_content_version release_count out_var)
+    if(NOT release_count MATCHES "^[0-9]+$" OR release_count GREATER 99999999)
+        message(FATAL_ERROR "PS5 contentVersion: '${release_count}' is not a count of 0..99999999")
     endif()
-    set(major "${CMAKE_MATCH_1}")
-    math(EXPR minor "${CMAKE_MATCH_2} * 100 + ${CMAKE_MATCH_3}")
-    set(port "${CMAKE_MATCH_5}")
-    if(port STREQUAL "")
-        set(port 0)
-    endif()
-    if(major GREATER 99 OR minor GREATER 999 OR port GREATER 999)
-        message(FATAL_ERROR "PS5 contentVersion: '${version}' does not fit NN.NNN.NNN")
-    endif()
-    _ps5_zero_pad("${major}" 2 major)
-    _ps5_zero_pad("${minor}" 3 minor)
-    _ps5_zero_pad("${port}" 3 port)
-    set(${out_var} "${major}.${minor}.${port}" PARENT_SCOPE)
+    set(digits "0000000${release_count}")
+    string(LENGTH "${digits}" length)
+    math(EXPR start "${length} - 8")
+    string(SUBSTRING "${digits}" ${start} 8 digits)
+    string(SUBSTRING "${digits}" 0 2 high)
+    string(SUBSTRING "${digits}" 2 3 middle)
+    string(SUBSTRING "${digits}" 5 3 low)
+    set(${out_var} "${high}.${middle}.${low}" PARENT_SCOPE)
 endfunction()
 
 # ps5_write_param_json(<template> <output> <content_version>)
