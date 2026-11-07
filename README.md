@@ -26,7 +26,7 @@ The few places where the port deliberately behaves differently from the assembly
 
 **None of Nintendo's assets (code, textures, audio, models, text, ROM data), and no Smash Remix ROM data, are checked into this repo or distributed with builds.** Every byte of game data is extracted on the first run from ROMs that *you* supply. If you do not own a legal copy of Super Smash Bros. for the Nintendo 64, you cannot build or run this project.
 
-The Remix needs only the Smash Remix 2.0.1 ROM, made by applying the Remix release patch to your own US ROM. A release asks for it on the first launch; a source build reads it from the repository root:
+The Remix needs only the Smash Remix 2.0.1 ROM, made from your own US ROM with the [Smash Remix web patcher](https://smashremix.net/patcher/) or the patch from the [Smash Remix releases](https://github.com/JSsixtyfour/smashremix/releases). A release asks for it on the first launch; a source build reads it from the repository root:
 
 | File | ROM | SHA-1 | MD5 |
 |------|-----|-------|-----|

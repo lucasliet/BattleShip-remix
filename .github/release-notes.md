@@ -16,9 +16,9 @@ The self-updaters (Android, Switch, desktop) offer this version automatically.
 
 No game data is included: you need your own ROM.
 
-- `baserom.remix.z64`: Smash Remix 2.0.1, made by applying the Remix 2.0.1 patch from the
-  [Smash Remix releases](https://github.com/JSsixtyfour/smashremix/releases) to your Super Smash Bros. NTSC-U v1.0 ROM
-  (SHA-1 `13716381ed5e29be2606e0f4724b18fd00789d04`; `.z64`, `.n64` or `.v64`).
+- `baserom.remix.z64`: Smash Remix 2.0.1, made from your Super Smash Bros. NTSC-U v1.0 ROM with the
+  [Smash Remix web patcher](https://smashremix.net/patcher/) (in the browser, nothing to install) or the Remix 2.0.1
+  patch from the [Smash Remix releases](https://github.com/JSsixtyfour/smashremix/releases) (ROM SHA-1 `13716381ed5e29be2606e0f4724b18fd00789d04`; `.z64`, `.n64` or `.v64`).
 
 **macOS, Linux, Windows:** run the app. On the first launch it asks for the ROM and extracts `BattleShip-Remix.o2r`
 into its app data folder. The macOS app is not notarized: the first time, right-click it and choose Open (or run

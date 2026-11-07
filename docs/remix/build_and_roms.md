@@ -115,8 +115,8 @@ body is `.github/release-notes.md` (write its Highlights, then publish). The Rem
 
 1. Download the package of your platform (`BattleShip-Remix.dmg`, `BattleShip-Remix-x86_64.AppImage`,
    `BattleShip-Remix-windows.zip`). It has no game data.
-2. Make the Smash Remix 2.0.1 ROM: apply the Remix 2.0.1 patch from the Releases tab of `JSsixtyfour/smashremix` to your own
-   Super Smash Bros. NTSC-U v1.0 ROM (`.z64`, `.n64` or `.v64`; check the SHA-1 in **Required ROMs**).
+2. Make the Smash Remix 2.0.1 ROM from your own Super Smash Bros. NTSC-U v1.0 ROM, with the web patcher at
+   https://smashremix.net/patcher/ or the Remix 2.0.1 patch from the Releases tab of `JSsixtyfour/smashremix` (`.z64`, `.n64` or `.v64`; check the SHA-1 in **Required ROMs**).
 3. Name it `baserom.remix.z64` (or `.n64` / `.v64`) and put it in the app data folder that the error dialog of the first
    launch prints, or next to the executable; or drag it onto the window of the first-run wizard.
 4. On the first launch the game runs Torch and writes `BattleShip-Remix.o2r` and its `.recipe` to the app data folder; a later
