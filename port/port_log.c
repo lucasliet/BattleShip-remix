@@ -16,6 +16,12 @@ void port_log_init(const char *path)
 {
 	if (sLogFile != NULL) return;
 	sLogFile = fopen(path, "w");
+#ifdef __PS5__
+	/* The title cannot attach a debugger; keep every line on disk so a crash still leaves the log. */
+	if (sLogFile != NULL) {
+		setvbuf(sLogFile, NULL, _IONBF, 0);
+	}
+#endif
 }
 
 void port_log_close(void)
