@@ -11,8 +11,6 @@
 
 #include <array>
 #include <cstdio>
-#include <pthread.h>
-#include <stdexcept>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -23,7 +21,6 @@ extern "C" void ps5_boot_trace(const char* step);
 namespace ssb64 {
 namespace {
 
-constexpr size_t kTorchStackSize = 64u * 1024u * 1024u;
 constexpr std::array<const char*, 3> kRomNames = { "baserom.remix.z64", "baserom.remix.n64", "baserom.remix.v64" };
 
 /**
@@ -64,52 +61,18 @@ std::filesystem::path FindRom(const std::filesystem::path& directory) {
     return {};
 }
 
-struct TorchJob {
-    std::filesystem::path rom;
-    std::string configDir;
-    std::string outputDir;
-    std::string outputPath;
-    std::string error;
-};
-
-void* RunTorchJob(void* argument) {
-    TorchJob* job = static_cast<TorchJob*>(argument);
-    try {
-        Companion* companion = new Companion(job->rom, ArchiveType::O2R, false, job->configDir, job->outputDir);
-        Companion::Instance = companion;
-        companion->Init(ExportType::Binary);
-        job->outputPath = companion->GetOutputPath();
-        Companion::Instance = nullptr;
-        delete companion;
-    } catch (const std::exception& error) {
-        job->error = error.what();
-    } catch (...) {
-        job->error = "non-standard exception";
-    }
-    return nullptr;
-}
-
 /**
- * Runs Torch on the ROM in a thread with a large stack: yaml-cpp recursion overflowed the main
- * thread's stack on the console (SIGBUS).
+ * Runs Torch on the ROM.
  * @return Torch's output path, empty when Torch rejected the ROM or its configuration
  */
 std::string RunTorch(const std::filesystem::path& rom, const std::string& configDir, const std::string& outputDir) {
-    TorchJob job{ rom, configDir, outputDir, {}, {} };
-    pthread_attr_t attributes;
-    pthread_attr_init(&attributes);
-    pthread_attr_setstacksize(&attributes, kTorchStackSize);
-    pthread_t thread;
-    const int created = pthread_create(&thread, &attributes, RunTorchJob, &job);
-    pthread_attr_destroy(&attributes);
-    if (created != 0) {
-        throw std::runtime_error("cannot start the extraction thread: error " + std::to_string(created));
-    }
-    pthread_join(thread, nullptr);
-    if (!job.error.empty()) {
-        throw std::runtime_error(job.error);
-    }
-    return job.outputPath;
+    Companion* companion = new Companion(rom, ArchiveType::O2R, false, configDir, outputDir);
+    Companion::Instance = companion;
+    companion->Init(ExportType::Binary);
+    const std::string outputPath = companion->GetOutputPath();
+    Companion::Instance = nullptr;
+    delete companion;
+    return outputPath;
 }
 
 bool FinalizeArchive(const std::filesystem::path& written, const std::filesystem::path& archive) {
