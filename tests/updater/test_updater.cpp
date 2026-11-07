@@ -172,6 +172,10 @@ void testInstallKeepsTargetWhenBackupCannotBeMade() {
 
 } // namespace
 
+#ifdef UPDATER_TESTS_HAVE_ZIP
+int RunZipInstallTests();
+#endif
+
 int main() {
     testTrustedUrlAcceptsOnlyGithubHttps();
     testParseFindsNamedAssetWithSize();
@@ -184,6 +188,10 @@ int main() {
     testInstallWorksWhenTargetIsMissing();
     testInstallRejectsBadDownloadsAndKeepsTarget();
     testInstallKeepsTargetWhenBackupCannotBeMade();
+
+#ifdef UPDATER_TESTS_HAVE_ZIP
+    s_failures += RunZipInstallTests();
+#endif
 
     if (s_failures != 0) {
         std::cerr << s_failures << " check(s) failed\n";
