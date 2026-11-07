@@ -72,6 +72,9 @@ void testInstallsFilesUnderTheRootAndKeepsOthers() {
     CHECK(ReadFile(title + "/baserom.remix.z64") == "rom");
     CHECK(!std::filesystem::exists(title + "/README.txt"));
     CHECK(!std::filesystem::exists(title + "/eboot.bin.part"));
+    const auto mode = std::filesystem::status(title + "/eboot.bin").permissions();
+    CHECK((mode & std::filesystem::perms::owner_exec) != std::filesystem::perms::none);
+    CHECK((mode & std::filesystem::perms::others_exec) != std::filesystem::perms::none);
 }
 
 void testRejectsUnsafePathsAndKeepsTheInstall() {

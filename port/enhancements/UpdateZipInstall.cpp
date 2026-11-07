@@ -13,6 +13,9 @@ namespace enhancements {
 namespace {
 
 constexpr size_t kCopyChunkBytes = 64 * 1024;
+// The PS5 refuses to launch a title whose eboot.bin lacks the execute bit, and fopen creates 0666
+// files; the files get the 0777 mode an FTP install gives them.
+constexpr mode_t kInstalledFileMode = 0777;
 
 struct PlannedFile {
     zip_uint64_t index;
@@ -87,7 +90,7 @@ bool ExtractEntry(zip_t* archive, zip_uint64_t index, const std::string& destina
         }
     }
     zip_fclose(entry);
-    return std::fclose(output) == 0 && ok;
+    return std::fclose(output) == 0 && ok && chmod(destination.c_str(), kInstalledFileMode) == 0;
 }
 
 void RemoveParts(const std::vector<PlannedFile>& plan, const std::string& titleDir) {
