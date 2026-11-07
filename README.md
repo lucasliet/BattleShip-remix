@@ -20,7 +20,7 @@ What the port covers:
 
 The few places where the port deliberately behaves differently from the assembly are listed in [`docs/remix/deviations.md`](docs/remix/deviations.md). Widescreen stays out of scope for the Remix build (4:3).
 
-[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .nro)** and **Android (arm64 .apk)** packages, and the built-in updater of the Remix build follows them. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
+[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .nro)**, **Android (arm64 .apk)** and **PlayStation 5 (homebrew title folder)** packages, and the built-in updater of the Remix build follows them. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
 
 ## No copyrighted assets are included in this repository
 
@@ -35,6 +35,14 @@ The Remix needs only the Smash Remix 2.0.1 ROM, made by applying the Remix relea
 The US ROM the patch is applied to is Super Smash Bros. NTSC-U v1.0 (`NALE`, SHA-1 `e2929e10fccc0aa84e5776227e798abc07cedabf`, MD5 `f7c52568a31aadf26e14dc2b6416b2ed`). A source build can also take it as `baserom.us.z64` (optional: dev-only stage images and the Remix source assembly script).
 
 The vanilla builds need only their own ROM: US as above, or JP (Nintendo All-Star! Dairantou Smash Brothers v1.0, `NALJ`, SHA-1 `4b71f0e01878696733eefa9c80d11c147ecb4984`, MD5 `66db457b130d31a286a23d6e4dd9726e`) with `-DSSB64_VERSION=jp`. A dump that does not match the hashes for its version will not work.
+
+## PlayStation 5
+
+The PS5 build is a native homebrew title (`PPSA99264`, built with ps5-payload-dev's SDK and ps5-opengl) for a
+jailbroken console with ShadowMountPlus. Unzip the release's `BattleShip-Remix-ps5-PPSA99264.zip` to `/data/homebrew/`
+(or an external drive) and copy your `baserom.remix.z64` into `PPSA99264/`; the first launch extracts
+`BattleShip-Remix.o2r` there. Everything the game writes (archive, saves, settings, `logs/`) stays in that folder.
+L3+R3 opens the port menu. Build steps: [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md#ps5-build-battleship-remix).
 
 ## Nintendo Switch
 

@@ -29,6 +29,13 @@ again.
 Smash Remix 2.0.1 ROM; it extracts `BattleShip-Remix.o2r` on the phone. It installs next to the vanilla BattleShip app.
 32-bit Android (armeabi-v7a) is not shipped yet.
 
+**PlayStation 5 (homebrew):** needs a jailbroken PS5 with ShadowMountPlus. Unzip
+`BattleShip-Remix-ps5-PPSA99264.zip` to `/data/homebrew/` (or the same folder on an external drive), so the game sits
+in `PPSA99264/`, copy your ROM into that folder as `baserom.remix.z64` (by FTP), and open BattleShip Remix from the
+Games row. The first launch extracts `BattleShip-Remix.o2r` into the same folder (a system notification tells when it
+starts and ends); saves, settings and logs stay there too. L3+R3 opens the port menu (the Create button belongs to the
+system).
+
 ## Files
 
 | File | Platform |
@@ -38,6 +45,7 @@ Smash Remix 2.0.1 ROM; it extracts `BattleShip-Remix.o2r` on the phone. It insta
 | `BattleShip-Remix-windows.zip` | Windows x64 |
 | `BattleShip-Remix-switch.zip` | Nintendo Switch homebrew (`.nro`, `f3d.o2r`, `config.yml`, `assets/`) |
 | `BattleShip-Remix-android.apk` | Android arm64-v8a, Android 7+ |
+| `BattleShip-Remix-ps5-PPSA99264.zip` | PlayStation 5 homebrew title folder (`PPSA99264/`) |
 | `SHA256SUMS.txt` | Checksums |
 
 Report bugs on [this repository's issue tracker](https://github.com/lucasliet/BattleShip-remix/issues), not on
