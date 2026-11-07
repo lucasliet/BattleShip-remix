@@ -6,6 +6,7 @@
 #ifdef __PS5__
 
 #include <SDL2/SDL.h>
+#include <imgui_impl_sdl2.h>
 
 namespace {
 
@@ -42,6 +43,11 @@ extern "C" bool port_drain_pending_menu_toggle(void) {
     const bool held = AnyControllerHoldsMenuChord();
     const bool pressed = held && !sChordWasHeld;
     sChordWasHeld = held;
+    if (pressed) {
+        // ImGui looks for gamepads at start and on SDL_CONTROLLERDEVICEADDED, which the PS5's SDL
+        // does not send for pads opened later; without this the menu opens but cannot be navigated.
+        ImGui_ImplSDL2_SetGamepadMode(ImGui_ImplSDL2_GamepadMode_AutoAll);
+    }
     return pressed;
 }
 
