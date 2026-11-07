@@ -156,7 +156,7 @@ running `build.sh us` and then `build.sh remix` reconfigures the same directory,
 4. Open it from the Homebrew Menu in full-memory mode (hold R while opening an installed game).
 
 The Home menu icon is a 256x256 JPEG embedded in the `.nro` by CMake (`assets/switch/icon.jpg` for the original, `assets/switch/icon-remix.jpg` for the Remix, with "SR"). Both
-are made from `assets/icon.png` by `.toolchain/host/venv/bin/python -I tools/gen_switch_icon.py` (Pillow only); the script also writes `assets/icon-remix.png`.
+are made from `assets/icon.png` and `assets/icon-remix.png` (the "SR" artwork) by `.toolchain/host/venv/bin/python -I tools/gen_platform_icons.py` (Pillow only), which also writes the PS5 `icon0.png` and the Android remix launcher foreground.
 
 ### In-game updater (Switch)
 
