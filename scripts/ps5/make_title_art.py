@@ -19,8 +19,10 @@ HEIGHT = 2160
 DXGI_FORMAT_BC7_UNORM = 98
 DDS_DIMENSION_TEXTURE2D = 3
 BANNER_TEXTURE_TOP = 460
-LOGO_WIDTH = 2600
-LOGO_TOP = 260
+# The home screen covers the top ~700 px (game row) and the bottom-left (title, Play button) at 4K.
+LOGO_WIDTH = 2000
+LOGO_TOP = 860
+LOGO_RIGHT_MARGIN = 200
 
 
 def compose_background(root: Path) -> Image.Image:
@@ -35,7 +37,7 @@ def compose_background(root: Path) -> Image.Image:
 
     logo = Image.open(root / "assets/SmashRemix.png").convert("RGBA")
     logo = logo.resize((LOGO_WIDTH, round(logo.height * LOGO_WIDTH / logo.width)), Image.LANCZOS)
-    canvas.alpha_composite(logo, ((WIDTH - LOGO_WIDTH) // 2, LOGO_TOP))
+    canvas.alpha_composite(logo, (WIDTH - LOGO_WIDTH - LOGO_RIGHT_MARGIN, LOGO_TOP))
     return canvas
 
 
