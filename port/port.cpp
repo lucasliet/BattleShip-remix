@@ -65,6 +65,9 @@ extern "C" void ps5_install_crash_trace(void);
 #endif
 #include "renderdoc_trigger.h"
 #include "port_log.h"
+#ifdef __PS5__
+#include "ps5/ps5_assets.h"
+#endif
 #include "port_input_script.h"
 #include "fighter_registry.h"
 #include "remix/remix_roster.h"
@@ -1017,11 +1020,10 @@ static int PortInitImpl(int argc, char* argv[]) {
 			return 1;
 		}
 #elif defined(__PS5__)
-		// PS5 native title: the archive lives in the writable data folder (/data/BattleShip-Remix).
-		std::error_code ec;
-		const std::string archive = Ship::Context::GetPathRelativeToAppDirectory(SSB64_O2R_NAME);
-		if (!std::filesystem::exists(archive, ec)) {
-			port_log("SSB64: missing %s\n", archive.c_str());
+		// PS5 native title: the archive lives in the writable data folder (/data/BattleShip-Remix) and is
+		// extracted there from the user's ROM; Torch's config ships in the title's assets folder.
+		if (!ssb64::Ps5EnsureGameArchive(Ship::Context::GetAppDirectoryPath(),
+		                                 Ship::Context::GetAppBundlePath() + "/assets")) {
 			PortShutdown();
 			return 1;
 		}

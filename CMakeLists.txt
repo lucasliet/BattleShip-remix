@@ -174,7 +174,7 @@ endif()
 # Android ships Torch as a SHARED library (libtorch_runner.so) inside the
 # APK so the first-run UI can extract the user's ROM on-device via JNI —
 # see the torch_runner target at the bottom of this file.
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+if (CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "PS5")
     set(USE_STANDALONE OFF CACHE BOOL "" FORCE)
 else()
     set(USE_STANDALONE ON CACHE BOOL "" FORCE)
@@ -268,7 +268,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
     # bottom of this file wraps it for JNI.
     add_subdirectory(torch ${CMAKE_BINARY_DIR}/torch)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "PS5")
-    # PS5: the archive is extracted elsewhere for now; no host Torch sidecar is needed.
+    # PS5: Torch is linked into the title as a static library and extracts the user's ROM on the
+    # console at first launch (port/ps5/ps5_assets.cpp).
+    add_subdirectory(torch ${CMAKE_BINARY_DIR}/torch)
 else()
     # Desktop: build Torch as a host executable via ExternalProject so it
     # can run at our build time to extract ROM assets.
@@ -1105,7 +1107,16 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
     add_dependencies(${PROJECT_NAME} libultraship)
     target_sources(${PROJECT_NAME} PRIVATE port/coroutine_x86_64.S)
     target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${PS5_OPENGL_PREFIX}/include)
-    target_link_libraries(${PROJECT_NAME} PRIVATE libultraship)
+    target_link_libraries(${PROJECT_NAME} PRIVATE libultraship torch)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/torch/src)
+    # Torch's config.yml and yamls/ go into the title's assets folder (/app0/assets).
+    set(SSB64_PS5_ASSETS_DIR ${CMAKE_BINARY_DIR}/ps5-assets)
+    add_custom_target(ssb64_ps5_assets
+        COMMAND ${CMAKE_COMMAND} -E rm -rf ${SSB64_PS5_ASSETS_DIR}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${SSB64_PS5_ASSETS_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/config.yml ${SSB64_PS5_ASSETS_DIR}/config.yml
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/yamls ${SSB64_PS5_ASSETS_DIR}/yamls
+        VERBATIM)
     # The SDK libc defines __assert(func, file, line, expr), like newlib on the Switch; rename the
     # decomp's IDO-style __assert stub in n64_stubs.c.
     target_compile_definitions(ssb64_game PRIVATE __assert=ssb64_ido_assert)
@@ -1116,10 +1127,11 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
         COMMAND ${CMAKE_COMMAND} -E env
             "PS5_EXTRA_SDK_LIBS=libScePad.so libSceUserService.so libSceSystemService.so libSceAudioOut.so libSceVideoOut.so"
             "PS5_EXTRA_WRAPS=pthread_create"
+            "PS5_APP_ASSETS=${SSB64_PS5_ASSETS_DIR}"
             bash ${CMAKE_SOURCE_DIR}/scripts/ps5/native-app-stage.sh ${CMAKE_BINARY_DIR}/ps5-app
             ${SSB64_PS5_TITLE_ID} $<TARGET_FILE:${PROJECT_NAME}> ${SSB64_PS5_PARAM_JSON}
             ${CMAKE_CURRENT_SOURCE_DIR}/assets/ps5/icon0.png
-        DEPENDS ${PROJECT_NAME}
+        DEPENDS ${PROJECT_NAME} ssb64_ps5_assets
         USES_TERMINAL
         VERBATIM
         COMMENT "Staging the PS5 title ${SSB64_PS5_TITLE_ID}")
