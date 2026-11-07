@@ -30,6 +30,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "PS5")
     set(DISABLE_SCRIPTING ON CACHE BOOL "PS5 titles have no executable-memory JIT" FORCE)
     set(LUS_ENABLE_POSTPROCESS_TRANSPILER OFF CACHE BOOL "PS5 uses packaged shaders" FORCE)
     set(BUILD_CROWD_CONTROL OFF CACHE BOOL "" FORCE)
+    # Matches libultraship's ps5.cmake: no console, so no default stdout logger in spdlog.
+    add_compile_definitions(SPDLOG_DISABLE_DEFAULT_LOGGER)
 endif()
 
 # Android needs ASM for the aarch64 coroutine context-switch
