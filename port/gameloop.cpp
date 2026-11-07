@@ -36,6 +36,7 @@
 
 #include <cstdio>
 #include <chrono>
+#include <spdlog/spdlog.h>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
@@ -681,6 +682,24 @@ static void port_screenshot_maybe_capture(int frame)
 	}
 }
 
+#ifdef __PS5__
+/* Temporary: the PS5 title runs 20-50x slower than real time; find the slow PortPushFrame phase. */
+#define PS5_PHASE_MARK(name) const auto name = std::chrono::steady_clock::now()
+#define PS5_PHASE_MS(a, b) std::chrono::duration<double, std::milli>((b) - (a)).count()
+#define PS5_PHASE_REPORT()                                                                                  \
+	do {                                                                                                    \
+		if (PS5_PHASE_MS(frameStart, idleDone) > 50.0) {                                                    \
+			SPDLOG_WARN("ps5 push phases ms: events={:.1f} resume={:.1f} drain={:.1f} idle={:.1f} submits={}", \
+			            PS5_PHASE_MS(frameStart, eventsDone), PS5_PHASE_MS(eventsDone, resumeDone),             \
+			            PS5_PHASE_MS(resumeDone, drainDone), PS5_PHASE_MS(drainDone, idleDone),                 \
+			            sDLSubmitsThisFrame);                                                                   \
+		}                                                                                                   \
+	} while (0)
+#else
+#define PS5_PHASE_MARK(name) ((void)0)
+#define PS5_PHASE_REPORT() ((void)0)
+#endif
+
 void PortPushFrame(void)
 {
 	// Process cheats safely before the frame updates
@@ -702,6 +721,7 @@ void PortPushFrame(void)
 			window->HandleEvents();
 		}
 	}
+	PS5_PHASE_MARK(eventsDone);
 	/* Propagate the previous frame's queued framebuffer (if any) to VI's
 	 * "current" slot. The scheduler's CheckReadyFramebuffer fnCheck reads
 	 * osViGetCurrent/NextFramebuffer to decide whether the slot the game
@@ -732,6 +752,7 @@ void PortPushFrame(void)
 	 *   Round 3+: Display list submitted, scheduler processes GFX task, etc.
 	 * Each thread runs until it yields at osRecvMesg(BLOCK) on empty queue. */
 	port_resume_service_threads();
+	PS5_PHASE_MARK(resumeDone);
 
 	port_enhancement_stage_hazards_tick();
 	port_widescreen_tick();
@@ -792,6 +813,7 @@ void PortPushFrame(void)
 	}
 #endif
 	port_drain_pending_display_list();
+	PS5_PHASE_MARK(drainDone);
 
 	/* TCC mod hook: GamePostUpdateEvent fires once per frame AFTER game
 	 * logic + GFX submission. Most common subscription point — game state
@@ -850,6 +872,8 @@ void PortPushFrame(void)
 			}
 		}
 	}
+	PS5_PHASE_MARK(idleDone);
+	PS5_PHASE_REPORT();
 	sDLSubmitsThisFrame = 0;
 
 	/* Feed the interpolation auto-throttle the wall duration of this tick;
