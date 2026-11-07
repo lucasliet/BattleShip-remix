@@ -10,8 +10,10 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <memory>
 #include <mutex>
 #include <string>
+#include <strings.h>
 #include <vector>
 
 extern "C" {
@@ -35,6 +37,7 @@ int sceHttpSendRequest(int requestId, const void* body, size_t size);
 int sceHttpGetStatusCode(int requestId, int* status);
 int sceHttpGetResponseContentLength(int requestId, int* result, size_t* length);
 int sceHttpReadData(int requestId, void* buffer, size_t size);
+int sceHttpGetAllResponseHeaders(int requestId, char** headers, size_t* size);
 }
 
 namespace ssb64 {
@@ -50,6 +53,7 @@ constexpr uint32_t kTimeoutMicroseconds = 15u * 1000u * 1000u;
 constexpr uint32_t kTlsChecks = 0x01 | 0x04 | 0x08 | 0x10 | 0x20 | 0x80;
 constexpr size_t kMaxPageBytes = 1024 * 1024;
 constexpr size_t kReadChunkBytes = 64 * 1024;
+constexpr int kMaxRedirects = 5;
 
 struct HttpLibrary {
     int context = -1;
@@ -106,7 +110,9 @@ class Request {
             mError = "template " + HexCode(mTemplate);
             return;
         }
-        sceHttpSetAutoRedirect(mTemplate, 1);
+        // The library's own redirects fail across hosts (send 0x80431073 on github.com's 302 to
+        // objects.githubusercontent.com), so OpenFollowingRedirects follows them.
+        sceHttpSetAutoRedirect(mTemplate, 0);
         sceHttpSetResolveTimeOut(mTemplate, kTimeoutMicroseconds);
         sceHttpSetConnectTimeOut(mTemplate, kTimeoutMicroseconds);
         sceHttpSetSendTimeOut(mTemplate, kTimeoutMicroseconds);
@@ -150,6 +156,29 @@ class Request {
     }
 
     /**
+     * @return the Location response header, empty when there is none
+     */
+    std::string Location() const {
+        char* headers = nullptr;
+        size_t size = 0;
+        if (sceHttpGetAllResponseHeaders(mRequest, &headers, &size) < 0 || headers == nullptr) return {};
+        const std::string text(headers, size);
+        size_t line = 0;
+        while (line < text.size()) {
+            size_t end = text.find("\r\n", line);
+            if (end == std::string::npos) end = text.size();
+            const std::string header = text.substr(line, end - line);
+            const size_t colon = header.find(':');
+            if (colon != std::string::npos && strncasecmp(header.c_str(), "location", colon) == 0 && colon == 8) {
+                const size_t value = header.find_first_not_of(' ', colon + 1);
+                return value == std::string::npos ? std::string() : header.substr(value);
+            }
+            line = end + 2;
+        }
+        return {};
+    }
+
+    /**
      * @return the response length, or 0 when the server did not send one
      */
     size_t ContentLength() const {
@@ -170,15 +199,38 @@ class Request {
     std::string mError;
 };
 
+bool IsRedirect(long status) {
+    return status == 301 || status == 302 || status == 303 || status == 307 || status == 308;
+}
+
+/**
+ * Sends a GET and follows up to kMaxRedirects redirects, to HTTPS URLs only.
+ * @param url the first URL
+ * @param request receives the request whose response is final
+ * @return ok for a final 2xx response
+ */
+HttpOutcome OpenFollowingRedirects(std::string url, std::unique_ptr<Request>* request) {
+    for (int redirect = 0; redirect <= kMaxRedirects; redirect++) {
+        *request = std::make_unique<Request>(url);
+        HttpOutcome outcome = (*request)->Send();
+        if (outcome.ok || !IsRedirect(outcome.httpStatus)) return outcome;
+        url = (*request)->Location();
+        if (url.rfind("https://", 0) != 0) {
+            return HttpOutcome{false, outcome.httpStatus, "redirect to a non-HTTPS location '" + url + "'"};
+        }
+    }
+    return HttpOutcome{false, 0, "more than " + std::to_string(kMaxRedirects) + " redirects"};
+}
+
 } // namespace
 
 HttpOutcome HttpGetString(const std::string& url, std::string* responseBody) {
-    Request request(url);
-    HttpOutcome outcome = request.Send();
+    std::unique_ptr<Request> request;
+    HttpOutcome outcome = OpenFollowingRedirects(url, &request);
     if (!outcome.ok) return outcome;
     char chunk[4096];
     for (;;) {
-        const int read = request.Read(chunk, sizeof chunk);
+        const int read = request->Read(chunk, sizeof chunk);
         if (read == 0) return outcome;
         if (read < 0) return HttpOutcome{false, outcome.httpStatus, "read " + HexCode(read)};
         if (responseBody->size() + static_cast<size_t>(read) > kMaxPageBytes) {
@@ -190,18 +242,18 @@ HttpOutcome HttpGetString(const std::string& url, std::string* responseBody) {
 
 HttpOutcome HttpDownloadToFile(const std::string& url, const std::string& destinationPath,
                                const HttpProgressCallback& onProgress) {
-    Request request(url);
-    HttpOutcome outcome = request.Send();
+    std::unique_ptr<Request> request;
+    HttpOutcome outcome = OpenFollowingRedirects(url, &request);
     if (!outcome.ok) return outcome;
     FILE* file = std::fopen(destinationPath.c_str(), "wb");
     if (file == nullptr) return HttpOutcome{false, outcome.httpStatus, "Could not create " + destinationPath + "."};
 
-    const size_t total = request.ContentLength();
+    const size_t total = request->ContentLength();
     std::vector<char> chunk(kReadChunkBytes);
     size_t received = 0;
     int lastPercent = -1;
     for (;;) {
-        const int read = request.Read(chunk.data(), chunk.size());
+        const int read = request->Read(chunk.data(), chunk.size());
         if (read == 0) break;
         if (read < 0 || std::fwrite(chunk.data(), 1, static_cast<size_t>(read), file) != static_cast<size_t>(read)) {
             outcome = HttpOutcome{false, outcome.httpStatus, read < 0 ? "read " + HexCode(read) : "write failed"};
