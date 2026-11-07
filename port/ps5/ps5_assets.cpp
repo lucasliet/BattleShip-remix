@@ -10,6 +10,7 @@
 #include "port_log.h"
 
 #include <array>
+#include <dirent.h>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -44,20 +45,27 @@ bool ArchiveIsCurrent(const std::filesystem::path& archive) {
 }
 
 /**
- * Finds the first N64 ROM dump in a folder; Torch checks its SHA-1 against config.yml.
+ * Finds the first N64 ROM dump in a folder; Torch checks its SHA-1 against config.yml. Uses
+ * opendir/readdir: std::filesystem::directory_iterator finds nothing in /app0 on the console.
  * @return the ROM path, or an empty path when there is none
  */
 std::filesystem::path FindRom(const std::filesystem::path& directory) {
-    std::error_code ec;
-    for (const auto& entry : std::filesystem::directory_iterator(directory, ec)) {
-        const std::string extension = entry.path().extension().string();
+    DIR* listing = opendir(directory.c_str());
+    if (listing == nullptr) {
+        Report("cannot list " + directory.string());
+        return {};
+    }
+    std::filesystem::path rom;
+    for (dirent* entry = readdir(listing); entry != nullptr && rom.empty(); entry = readdir(listing)) {
+        const std::filesystem::path candidate = directory / entry->d_name;
         for (const char* romExtension : kRomExtensions) {
-            if (entry.is_regular_file(ec) && extension == romExtension) {
-                return entry.path();
+            if (candidate.extension() == romExtension) {
+                rom = candidate;
             }
         }
     }
-    return {};
+    closedir(listing);
+    return rom;
 }
 
 /**
