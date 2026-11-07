@@ -2083,7 +2083,7 @@ void PortMenu::AddMenuAbout() {
     AddWidget(path, "Zorkats: C Modding Documentation", WIDGET_TEXT);
 
 
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__PS5__)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
     // BUILT-IN UPDATER — hidden on Android. App updates come through the
     // Play Store on mobile; a curl-driven GitHub-releases updater can't
     // replace a system-managed installation, and the curl shell-out
@@ -2259,7 +2259,7 @@ void PortMenu::Draw() {
 
 /* Shows one overlay notice per run when the boot-time update check finds a new release (the check itself runs when the About page is built). */
 void PortMenu::NotifyUpdateOnce() {
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__PS5__)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
     if (mUpdateNoticeShown || !ssb64::enhancements::IsUpdateAvailable()) {
         return;
     }
