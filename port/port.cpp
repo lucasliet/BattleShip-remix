@@ -1325,7 +1325,15 @@ int PortIsRunning(void) {
 
 } // extern "C"
 
+#ifdef __PS5__
+extern "C" void ps5_boot_trace(const char* step);
+#define PS5_BOOT_TRACE(step) ps5_boot_trace(step)
+#else
+#define PS5_BOOT_TRACE(step) ((void)0)
+#endif
+
 int main(int argc, char* argv[]) {
+	PS5_BOOT_TRACE("main entered");
 	/* Use an absolute path for ssb64.log so it lands in a predictable
 	 * place regardless of how the binary was launched (Finder / open /
 	 * shell from any cwd). SDL_GetPrefPath returns the OS app-data dir
@@ -1353,6 +1361,7 @@ int main(int argc, char* argv[]) {
 		}
 		port_log_init(logPath.c_str());
 	}
+	PS5_BOOT_TRACE("log opened");
 	port_log("SSB64: main entered\n");
 
 #ifdef __SWITCH__
@@ -1406,9 +1415,12 @@ int main(int argc, char* argv[]) {
 	portRenderDocInit();
 	port_log("SSB64: RenderDoc hook initialized\n");
 
+	PS5_BOOT_TRACE("PortInit start");
 	if (PortInit(argc, argv) != 0) {
+		PS5_BOOT_TRACE("PortInit failed");
 		return 1;
 	}
+	PS5_BOOT_TRACE("PortInit done");
 
 #if defined(__ANDROID__)
 	// === Android JNI cache warm-up ===
@@ -1482,6 +1494,7 @@ int main(int argc, char* argv[]) {
 
 	// Initialize the game boot sequence (coroutines, thread init, etc.)
 	PortGameInit();
+	PS5_BOOT_TRACE("PortGameInit done");
 
 	// Main frame loop — each iteration runs one frame of game logic
 	// and rendering through the coroutine system. PortPushFrame posts
@@ -1519,6 +1532,9 @@ int main(int argc, char* argv[]) {
 		const double frameMs =
 		    std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - frameStart).count();
 		frame++;
+		if (frame == 1 || frame == 60 || frame == 600) {
+			PS5_BOOT_TRACE(frame == 1 ? "frame 1" : frame == 60 ? "frame 60" : "frame 600");
+		}
 		if (frameMs > kSlowFrameMs) {
 			windowSlowFrames++;
 			windowSlowMs += frameMs;
