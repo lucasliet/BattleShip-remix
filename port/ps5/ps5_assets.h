@@ -12,4 +12,7 @@ namespace ssb64 {
  */
 bool Ps5EnsureGameArchive(const std::string& titleDir);
 
+/** Temporary HTTPS check (ps5_http_probe.cpp). */
+void Ps5RunHttpProbe(const std::string& titleDir);
+
 } // namespace ssb64
