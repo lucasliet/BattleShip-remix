@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <initializer_list>
 #include <signal.h>
 #include <sys/ucontext.h>
 #include <typeinfo>

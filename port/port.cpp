@@ -40,6 +40,14 @@
 #include "switch_assets.h"
 #endif
 #include "gui/PortMenu.h"
+
+#ifdef __PS5__
+extern "C" void ps5_boot_trace(const char* step);
+extern "C" void ps5_install_crash_trace(void);
+#define PS5_BOOT_TRACE(step) ps5_boot_trace(step)
+#else
+#define PS5_BOOT_TRACE(step) ((void)0)
+#endif
 #ifdef PORT_HIRES_ENABLED
 #include "hires/HiResHook.h"
 #include "hires/HiResPack.h"
@@ -1328,14 +1336,6 @@ int PortIsRunning(void) {
 }
 
 } // extern "C"
-
-#ifdef __PS5__
-extern "C" void ps5_boot_trace(const char* step);
-extern "C" void ps5_install_crash_trace(void);
-#define PS5_BOOT_TRACE(step) ps5_boot_trace(step)
-#else
-#define PS5_BOOT_TRACE(step) ((void)0)
-#endif
 
 int main(int argc, char* argv[]) {
 	PS5_BOOT_TRACE("main entered");
