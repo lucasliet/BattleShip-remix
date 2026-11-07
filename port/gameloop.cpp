@@ -47,8 +47,8 @@
 /* GBI trace system */
 #include "../debug_tools/gbi_trace/gbi_trace.h"
 
-#if defined(__ANDROID__)
-/* Defined in port/android_touch_overlay.cpp. Atomic flag drained on the
+#if defined(__ANDROID__) || defined(__PS5__)
+/* Defined in port/android_touch_overlay.cpp (port/ps5/ps5_menu_button.cpp on PS5). Atomic flag drained on the
  * SDL_main thread to honor the on-screen hamburger menu tap. */
 extern "C" bool port_drain_pending_menu_toggle(void);
 #endif
@@ -742,7 +742,7 @@ void PortPushFrame(void)
 #endif
 #endif
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__PS5__)
 	/* Hamburger menu button on the touch overlay sets an atomic flag in
 	 * port/android_touch_overlay.cpp; drain it here on the SDL_main thread
 	 * so the ImGui frame currently being built picks up the visibility
