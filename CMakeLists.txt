@@ -1109,14 +1109,19 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
     target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${PS5_OPENGL_PREFIX}/include)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship torch)
     target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/torch/src)
-    # Torch's config.yml and yamls/ go into the title's assets folder (/app0/assets).
+    # Torch's config.yml, yamls/ and the menu fonts go into the title's assets folder (/app0/assets);
+    # f3d.o2r and gamecontrollerdb.txt into the title folder itself.
     set(SSB64_PS5_ASSETS_DIR ${CMAKE_BINARY_DIR}/ps5-assets)
     add_custom_target(ssb64_ps5_assets
         COMMAND ${CMAKE_COMMAND} -E rm -rf ${SSB64_PS5_ASSETS_DIR}
         COMMAND ${CMAKE_COMMAND} -E make_directory ${SSB64_PS5_ASSETS_DIR}
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/config.yml ${SSB64_PS5_ASSETS_DIR}/config.yml
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/yamls ${SSB64_PS5_ASSETS_DIR}/yamls
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets/custom/fonts ${SSB64_PS5_ASSETS_DIR}/custom/fonts
+        COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_BINARY_DIR}/f3d.o2r
+        COMMAND ${CMAKE_COMMAND} -E tar cf ${CMAKE_BINARY_DIR}/f3d.o2r --format=zip shaders
         COMMAND ${CMAKE_COMMAND} -DROOT=${SSB64_PS5_ASSETS_DIR}/yamls -P ${CMAKE_SOURCE_DIR}/cmake/ps5_torch_filelists.cmake
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libultraship/src/fast
         VERBATIM)
     # The SDK libc defines __assert(func, file, line, expr), like newlib on the Switch; rename the
     # decomp's IDO-style __assert stub in n64_stubs.c.
@@ -1129,6 +1134,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
             "PS5_EXTRA_SDK_LIBS=libScePad.so libSceUserService.so libSceSystemService.so libSceAudioOut.so libSceVideoOut.so"
             "PS5_EXTRA_WRAPS=pthread_create lstat getcwd realpath"
             "PS5_APP_ASSETS=${SSB64_PS5_ASSETS_DIR}"
+            "PS5_APP_FILES=${CMAKE_BINARY_DIR}/f3d.o2r ${CMAKE_SOURCE_DIR}/gamecontrollerdb.txt"
             bash ${CMAKE_SOURCE_DIR}/scripts/ps5/native-app-stage.sh ${CMAKE_BINARY_DIR}/ps5-app
             ${SSB64_PS5_TITLE_ID} $<TARGET_FILE:${PROJECT_NAME}> ${SSB64_PS5_PARAM_JSON}
             ${CMAKE_CURRENT_SOURCE_DIR}/assets/ps5/icon0.png

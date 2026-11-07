@@ -7,6 +7,7 @@
 # Usage: native-app-stage.sh <app-dir> <title-id> <program.o> <param.json> [icon0.png]
 # Env:   PS5_EXTRA_SDK_LIBS  extra SDK stub libraries to link, e.g. "libScePad.so libSceAudioOut.so"
 #        PS5_APP_ASSETS      directory copied as <dist>/assets (optional)
+#        PS5_APP_FILES       files copied into the title folder's root (optional)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -81,6 +82,9 @@ if [[ -n "${PS5_APP_ASSETS:-}" ]]; then
     rm -rf "$APP/assets"
     cp -a "$PS5_APP_ASSETS" "$APP/assets"
 fi
+for app_file in ${PS5_APP_FILES:-}; do
+    cp "$app_file" "$APP/"
+done
 
 resource_dir="$("$PS5_CLANG" --print-resource-dir)"
 compiler_runtime="$resource_dir/lib/x86_64-unknown-linux-gnu/libclang_rt.builtins.a"
