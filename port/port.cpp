@@ -1025,7 +1025,6 @@ static int PortInitImpl(int argc, char* argv[]) {
 			PortShutdown();
 			return 1;
 		}
-		ssb64::Ps5RunHttpProbe(Ship::Context::GetAppBundlePath());
 #else
 		const std::string targetO2r =
 			Ship::Context::GetPathRelativeToAppDirectory(SSB64_O2R_NAME);
