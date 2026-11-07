@@ -39,8 +39,8 @@ void TraceFrameChain(uintptr_t frame_pointer) {
     }
 }
 
-constexpr int kStackWordsScanned = 512;
-constexpr int kMaxCodePointers = 32;
+constexpr int kStackWordsScanned = 4096;
+constexpr int kMaxCodePointers = 48;
 constexpr uintptr_t kCodeWindow = 0x1000000;
 constexpr uintptr_t kLowestCodeAddress = 0x1000;
 
@@ -83,8 +83,11 @@ void TraceFatalSignal(int signal_number, siginfo_t* info, void* context) {
     ps5_boot_trace(line);
     if (user_context != nullptr) {
         TraceFrameChain(static_cast<uintptr_t>(user_context->uc_mcontext.mc_rbp));
-        TraceStackCodePointers(static_cast<uintptr_t>(user_context->uc_mcontext.mc_rsp));
     }
+    // The console's ucontext layout does not match the SDK's FreeBSD header (rsp reads 0), so scan
+    // from this handler's own frame: it runs on the faulting thread's stack, below the crash site.
+    volatile uintptr_t stack_marker = 0;
+    TraceStackCodePointers(reinterpret_cast<uintptr_t>(&stack_marker));
     _Exit(128 + signal_number);
 }
 
