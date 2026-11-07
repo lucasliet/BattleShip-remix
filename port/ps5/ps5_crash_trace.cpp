@@ -16,10 +16,6 @@
 #include <cxxabi.h>
 
 extern "C" void ps5_boot_trace(const char* step);
-// Provided by the linker: the ELF header (start of the executable segment) and, from ps5-opengl's
-// ps5-pie.ld, the .eh_frame_hdr that opens the read-only segment right after the code.
-extern "C" char __ehdr_start[];
-extern "C" char __eh_frame_hdr_start[];
 
 namespace {
 
@@ -45,18 +41,22 @@ void TraceFrameChain(uintptr_t frame_pointer) {
 
 constexpr int kStackWordsScanned = 512;
 constexpr int kMaxCodePointers = 32;
+constexpr uintptr_t kCodeWindow = 0x1000000;
+constexpr uintptr_t kLowestCodeAddress = 0x1000;
 
 /**
  * Traces stack words that point into the title's own code. System modules may run without frame
  * pointers, so this finds the title's callers of a faulting library function; some hits are stale.
- * The code range runs from the ELF header to the read-only segment that follows the code.
+ * The linker-provided bounds read as 0 on the console, so the range is a window around this function,
+ * wide enough for the whole executable segment (~16 MB).
  * @param stack_pointer the faulting thread's rsp
  */
 void TraceStackCodePointers(uintptr_t stack_pointer) {
-    const uintptr_t code_begin = reinterpret_cast<uintptr_t>(__ehdr_start);
-    const uintptr_t code_end = reinterpret_cast<uintptr_t>(__eh_frame_hdr_start);
-    if (code_begin == 0 || code_end <= code_begin || stack_pointer == 0) {
-        ps5_boot_trace("  stack scan skipped: no code range");
+    const uintptr_t anchor = reinterpret_cast<uintptr_t>(&TraceStackCodePointers);
+    const uintptr_t code_begin = anchor > kCodeWindow + kLowestCodeAddress ? anchor - kCodeWindow : kLowestCodeAddress;
+    const uintptr_t code_end = anchor + kCodeWindow;
+    if (stack_pointer == 0) {
+        ps5_boot_trace("  stack scan skipped: no stack pointer");
         return;
     }
     const uintptr_t* stack = reinterpret_cast<const uintptr_t*>(stack_pointer);
