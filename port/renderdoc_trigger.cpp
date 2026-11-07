@@ -17,7 +17,7 @@
 
 #include "renderdoc_trigger.h"
 
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__PS5__)
 // RenderDoc has no libnx build (no dlopen, renderdoc_app.h rejects the
 // platform); keep the init/frame/shutdown contract as no-ops.
 extern "C" void portRenderDocInit(void) {}
@@ -227,4 +227,4 @@ extern "C" void portRenderDocShutdown(void)
     sRdocApi = nullptr;
 }
 
-#endif // __SWITCH__
+#endif // __SWITCH__ || __PS5__

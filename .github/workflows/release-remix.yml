@@ -1,6 +1,6 @@
 name: Release (Remix)
 
-# BattleShip-remix fork release: BattleShip-Remix for macOS, Linux, Windows and Nintendo Switch.
+# BattleShip-remix fork release: BattleShip-Remix for macOS, Linux, Windows, Nintendo Switch, Android and PS5.
 #
 # Triggered by a tag v* (for example v2.0.1-port.1), or by hand to test the builds (no Release is created then).
 # The release lands as a draft whose body is .github/release-notes.md plus the generated changelog; write the
@@ -255,9 +255,42 @@ jobs:
           path: dist/BattleShip-Remix-android.apk
           if-no-files-found: error
 
+  build-ps5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - name: Restore the PS5 toolchain
+        id: ps5-toolchain
+        uses: actions/cache@v4
+        with:
+          path: .toolchain/ps5
+          key: ps5-toolchain-${{ hashFiles('scripts/ps5/packages.lock', 'scripts/ps5/setup-toolchain.sh', 'scripts/ps5/build-gl-sdk.sh') }}
+      - name: Set up the PS5 toolchain
+        if: steps.ps5-toolchain.outputs.cache-hit != 'true'
+        run: |
+          scripts/ps5/setup-toolchain.sh
+          scripts/ps5/build-gl-sdk.sh
+      - name: Build the title
+        run: JOBS="$(nproc)" scripts/ps5/build.sh remix
+      - name: Package
+        run: |
+          mkdir -p dist
+          # The folder zip (PPSA99264/ at the top) goes to /data/homebrew or an external drive.
+          cp build-ps5/ps5-app/dist/PPSA99264.zip dist/BattleShip-Remix-ps5-PPSA99264.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remix-ps5
+          path: dist/BattleShip-Remix-ps5-PPSA99264.zip
+          if-no-files-found: error
+
   release:
     name: Publish draft release
-    needs: [build-macos, build-linux, build-windows, build-switch, build-android]
+    needs: [build-macos, build-linux, build-windows, build-switch, build-android, build-ps5]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -280,6 +313,7 @@ jobs:
             artifacts/BattleShip-Remix-switch.zip
             artifacts/BattleShip-Remix.nro
             artifacts/BattleShip-Remix-android.apk
+            artifacts/BattleShip-Remix-ps5-PPSA99264.zip
             artifacts/SHA256SUMS.txt
           body_path: .github/release-notes.md
           generate_release_notes: true

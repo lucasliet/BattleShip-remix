@@ -18,7 +18,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <signal.h>
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(__PS5__)
 #include <sys/ucontext.h>
 #endif
 #include <unistd.h>
@@ -27,7 +27,7 @@
  * the symbols aren't linkable. For the Android spike, stub these out — a
  * production build can either raise minSdk or use libunwind directly.
  */
-#if (defined(__ANDROID__) && __ANDROID_API__ < 33) || defined(__SWITCH__)
+#if (defined(__ANDROID__) && __ANDROID_API__ < 33) || defined(__SWITCH__) || defined(__PS5__)
 static inline int backtrace(void * /*frames*/[], int /*max*/) { return 0; }
 static inline void backtrace_symbols_fd(void *const /*frames*/[], int /*n*/, int /*fd*/) {}
 #else
@@ -328,7 +328,7 @@ size_t FormatHex(char *buf, uintptr_t value) {
  *
  * Only async-signal-safe operations are used: write(2), backtrace(3),
  * backtrace_symbols_fd(3), signal(2), raise(3). */
-#ifndef __SWITCH__
+#if !defined(__SWITCH__) && !defined(__PS5__)
 void CrashSignalHandler(int sig, siginfo_t *info, void *ucontext) {
     const char *name = "SIGUNKNOWN";
     switch (sig) {
@@ -372,7 +372,7 @@ void CrashSignalHandler(int sig, siginfo_t *info, void *ucontext) {
     sigaction(sig, &sa, nullptr);
     raise(sig);
 }
-#endif /* !__SWITCH__ */
+#endif /* !__SWITCH__ && !__PS5__ */
 #endif
 
 constexpr uint64_t kHangThresholdMs = 3000;
@@ -472,7 +472,7 @@ void WatchdogLoop() {
                             since_frame_ms, since_yield_ms, active_id, ThreadLabel(active_id), resume_elapsed_ms,
                             (unsigned)scene, port_diag_get_scene_name(scene), (unsigned)scene_prev, fc, yc);
 
-#if !defined(_WIN32) && !defined(__SWITCH__)
+#if !defined(_WIN32) && !defined(__SWITCH__) && !defined(__PS5__)
             /* Ask the main thread to dump its own backtrace via SIGUSR1. One
              * dump per hang is enough — clearing sBacktraceDone lets the next
              * distinct hang dump again. */
@@ -499,7 +499,7 @@ void WatchdogLoop() {
 extern "C" void port_watchdog_init(void) {
     bool expected = false;
     if (!sStarted.compare_exchange_strong(expected, true)) return;
-#if !defined(_WIN32) && !defined(__SWITCH__)
+#if !defined(_WIN32) && !defined(__SWITCH__) && !defined(__PS5__)
     sMainThread = pthread_self();
 
     /* Self-pipe for ProbeReadable (see comment there). Created up front

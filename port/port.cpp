@@ -40,6 +40,14 @@
 #include "switch_assets.h"
 #endif
 #include "gui/PortMenu.h"
+
+#ifdef __PS5__
+extern "C" void ps5_boot_trace(const char* step);
+extern "C" void ps5_install_crash_trace(void);
+#define PS5_BOOT_TRACE(step) ps5_boot_trace(step)
+#else
+#define PS5_BOOT_TRACE(step) ((void)0)
+#endif
 #ifdef PORT_HIRES_ENABLED
 #include "hires/HiResHook.h"
 #include "hires/HiResPack.h"
@@ -57,6 +65,9 @@
 #endif
 #include "renderdoc_trigger.h"
 #include "port_log.h"
+#ifdef __PS5__
+#include "ps5/ps5_assets.h"
+#endif
 #include "port_input_script.h"
 #include "fighter_registry.h"
 #include "remix/remix_roster.h"
@@ -710,7 +721,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	sContext->GetConfig()->SetString("Window.Backend.Name", "DirectX 11");
 #endif
 
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__PS5__)
 	/* No keyboard on the console: Minus (ImGuiKey_GamepadBack) only opens the port menu, and its Quit
 	 * button, when controller navigation is on. Keep a value the player already saved. */
 	if (sContext->GetConsoleVariables()->GetInteger("gControlNav", -1) < 0) {
@@ -935,7 +946,8 @@ static int PortInitImpl(int argc, char* argv[]) {
 		// Esc Menu screen, Toggle with Esc.
 		if (auto gui = window->GetGui()) {
 			port_log("SSB64: attaching Port menu ...\n");
-			gui->SetMenu(std::make_shared<ssb64::PortMenu>());
+			auto portMenu = std::make_shared<ssb64::PortMenu>();
+			gui->SetMenu(portMenu);
 #ifdef REGION_REMIX
 			gui->AddGuiWindow(remix_input_display_make_window());
 			gui->AddGuiWindow(remix_hud_text_make_window());
@@ -943,7 +955,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 			port_log("SSB64: Port menu attached\n");
 		}
 
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__) && !defined(__PS5__)
 		// Linux: WMs only show the app icon if SDL_SetWindowIcon is called
 		// on the live window. .ico/.icns paths are baked into the .exe /
 		// .app on Windows / macOS so this is a no-op there. Android pulls
@@ -1001,6 +1013,12 @@ static int PortInitImpl(int argc, char* argv[]) {
 			archive.clear();
 		}
 		if (!ssb64::SwitchAssetsAreCurrent(archive)) {
+			PortShutdown();
+			return 1;
+		}
+#elif defined(__PS5__)
+		// PS5 native title: the archive is extracted from the user's ROM into the title folder.
+		if (!ssb64::Ps5EnsureGameArchive(Ship::Context::GetAppBundlePath())) {
 			PortShutdown();
 			return 1;
 		}
@@ -1317,6 +1335,10 @@ int PortIsRunning(void) {
 } // extern "C"
 
 int main(int argc, char* argv[]) {
+	PS5_BOOT_TRACE("main entered");
+#ifdef __PS5__
+	ps5_install_crash_trace();
+#endif
 	/* Use an absolute path for ssb64.log so it lands in a predictable
 	 * place regardless of how the binary was launched (Finder / open /
 	 * shell from any cwd). SDL_GetPrefPath returns the OS app-data dir
@@ -1325,12 +1347,17 @@ int main(int argc, char* argv[]) {
 	 * Ship::Context will later use for the user's saves and o2r. */
 	{
 		std::string logPath;
+#ifdef __PS5__
+		/* No SDL pref path on the PS5 title; /app0 (the cwd) is read-only. */
+		logPath = Ship::PS5::GetDataDirectory() + "/ssb64.log";
+#else
 		if (char* p = SDL_GetPrefPath(NULL, "BattleShip")) {
 			logPath = std::string(p) + "ssb64.log";
 			SDL_free(p);
 		} else {
 			logPath = "ssb64.log";  // last-resort cwd fallback
 		}
+#endif
 		/* SSB64_LOG_PATH: debug/CI override so parallel smoke-test instances each write their own log. */
 		if (const char* override_path = std::getenv("SSB64_LOG_PATH")) {
 			if (override_path[0] != '\0') {
@@ -1339,6 +1366,7 @@ int main(int argc, char* argv[]) {
 		}
 		port_log_init(logPath.c_str());
 	}
+	PS5_BOOT_TRACE("log opened");
 	port_log("SSB64: main entered\n");
 
 #ifdef __SWITCH__
@@ -1392,9 +1420,12 @@ int main(int argc, char* argv[]) {
 	portRenderDocInit();
 	port_log("SSB64: RenderDoc hook initialized\n");
 
+	PS5_BOOT_TRACE("PortInit start");
 	if (PortInit(argc, argv) != 0) {
+		PS5_BOOT_TRACE("PortInit failed");
 		return 1;
 	}
+	PS5_BOOT_TRACE("PortInit done");
 
 #if defined(__ANDROID__)
 	// === Android JNI cache warm-up ===
@@ -1468,6 +1499,7 @@ int main(int argc, char* argv[]) {
 
 	// Initialize the game boot sequence (coroutines, thread init, etc.)
 	PortGameInit();
+	PS5_BOOT_TRACE("PortGameInit done");
 
 	// Main frame loop — each iteration runs one frame of game logic
 	// and rendering through the coroutine system. PortPushFrame posts
@@ -1505,6 +1537,9 @@ int main(int argc, char* argv[]) {
 		const double frameMs =
 		    std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - frameStart).count();
 		frame++;
+		if (frame == 1) {
+			PS5_BOOT_TRACE("frame 1");
+		}
 		if (frameMs > kSlowFrameMs) {
 			windowSlowFrames++;
 			windowSlowMs += frameMs;

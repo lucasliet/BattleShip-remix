@@ -203,3 +203,33 @@ ABIs: arm64-v8a is tested on a Samsung S25. armeabi-v7a compiles but is not test
 written for LP64), so releases ship arm64 only. There is no x86/x86_64 build (the coroutine backend has no x86 swap).
 Release signing reads `SSB64_RELEASE_KEYSTORE*` from the environment (repository secrets in CI); without them the APK is
 debug-signed.
+
+## PS5 build (BattleShip-Remix)
+
+A native PS5 title (`PPSA99264`, "BattleShip Remix") for jailbroken consoles with ShadowMountPlus. Built on a Linux
+x86_64 host (desk.local, or the `build-ps5` job of `release-remix.yml`) with a toolchain kept under `.toolchain/ps5`:
+
+```
+scripts/ps5/setup-toolchain.sh      # pinned SDK, LLVM 18, ps5-opengl, boilerplate, SDL (scripts/ps5/packages.lock)
+scripts/ps5/build-gl-sdk.sh         # ps5-opengl's GL SDK and its static SDL2
+scripts/ps5/build.sh remix          # build-ps5/ps5-app/dist/PPSA99264/ and PPSA99264.zip
+scripts/ps5/deploy.sh <ps5-ip> build-ps5/ps5-app/dist/PPSA99264   # FTP to /data/homebrew/PPSA99264, then a rescan
+```
+
+The title folder holds `eboot.bin`, `sce_sys/` (param.json, icon, `pic0.dds` from `scripts/ps5/make_title_art.py`),
+`sce_module/libc.prx`, `f3d.o2r`, `gamecontrollerdb.txt` and `assets/` (Torch's `config.yml` and `yamls/`, menu fonts).
+The user adds `baserom.remix.z64`; on the first launch `port/ps5/ps5_assets.cpp` runs Torch in the game and writes
+`BattleShip-Remix.o2r` and its `.recipe` next to it, with system notifications at start and end. The game's data
+directory is the title folder (`/app0`, writable for a folder install), so saves, settings and `logs/` stay there.
+
+What the title cannot do, and the workaround:
+
+| Restriction | Workaround |
+|---|---|
+| `opendir` on `/app0` fails | ROM looked up by name; Torch reads a `.torch-filelist` per yaml folder (`cmake/ps5_torch_filelists.cmake`) |
+| `lstat`, `getcwd`, `realpath` refused (EPERM) | `port/ps5/ps5_path_shims.c`, wrapped at link (as griches/PS5_Ghostship does) |
+| a named `std::locale` crashes (SIGBUS) | yaml-cpp uses `std::locale::classic()` (patched in torch's CMakeLists for PS5) |
+| every write to storage costs tens of ms | logs are buffered; Torch logs at `warn` |
+| the Create button opens the system menu | L3+R3 (or the touchpad) toggles the port menu (`port/ps5/ps5_menu_button.cpp`) |
+
+Logs over FTP: `/data/homebrew/PPSA99264/boot.txt` (boot steps, crash backtrace), `logs/BattleShip-Remix.log`.

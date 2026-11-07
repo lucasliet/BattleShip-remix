@@ -16,6 +16,13 @@ void port_log_init(const char *path)
 {
 	if (sLogFile != NULL) return;
 	sLogFile = fopen(path, "w");
+#ifdef __PS5__
+	/* Each write to /data costs tens of milliseconds on the console; unbuffered logging slowed the
+	 * game 20-50x. Crashes still reach the boot trace (port/ps5/ps5_crash_trace.cpp). */
+	if (sLogFile != NULL) {
+		setvbuf(sLogFile, NULL, _IOFBF, 64 * 1024);
+	}
+#endif
 }
 
 void port_log_close(void)

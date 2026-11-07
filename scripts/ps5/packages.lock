@@ -1,0 +1,43 @@
+{
+  "_comment": "PS5 homebrew toolchain pins (Linux x86_64 host). Read by scripts/ps5/setup-toolchain.sh. Snapshot 2026-11-06.",
+  "archives": {
+    "ps5-payload-sdk": {
+      "url": "https://github.com/ps5-payload-dev/sdk/releases/download/v0.42/ps5-payload-sdk.zip",
+      "filename": "ps5-payload-sdk-v0.42.zip",
+      "sha256": "8cfbc7cd5811e719eb4f0c47eea668d3dc7b40bc8ab11c4a5031d40c23ec02da",
+      "version": "v0.42"
+    },
+    "llvm": {
+      "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz",
+      "filename": "clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz",
+      "sha256": "54ec30358afcc9fb8aa74307db3046f5187f9fb89fb37064cdde906e062ebf36",
+      "version": "18.1.8"
+    }
+  },
+  "repositories": {
+    "ps5-opengl": {
+      "url": "https://github.com/mihawk-99/ps5-opengl.git",
+      "revision": "ec06d8c2da0359e274e409046f0a9586965e4010"
+    },
+    "ps5-native-app-boilerplate": {
+      "url": "https://github.com/lucasliet/ps5-native-app-boilerplate.git",
+      "revision": "4f531c4b517f80bcb6b1267135848168d2250047"
+    },
+    "SDL": {
+      "url": "https://github.com/ps5-payload-dev/SDL.git",
+      "revision": "8c56053f13ca13a0c050de613706ff69eb615836"
+    },
+    "PS5_PayloadSDK": {
+      "url": "https://github.com/mihawk-99/PS5_PayloadSDK.git",
+      "revision": "e105cf6f25801d9e9981812a89a3b74021d2d2a2"
+    },
+    "UFS2Tool": {
+      "url": "https://github.com/SvenGDK/UFS2Tool.git",
+      "revision": "b5307a60d5b4e3a68ba680e0e33cfadf05017c77"
+    }
+  },
+  "python": {
+    "version": "3.14",
+    "packages": ["meson==1.10.1", "mako", "pyyaml", "packaging", "ninja"]
+  }
+}

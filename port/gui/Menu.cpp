@@ -35,9 +35,16 @@ std::string FindMenuAssetPath(const std::string& relativePath) {
     // Use ssb64::RealAppBundlePath so AppImage / non-prefix-install layouts
     // resolve via /proc/self/exe instead of the literal CMAKE_INSTALL_PREFIX
     // that Ship::Context::GetAppBundlePath() returns under NON_PORTABLE.
+#ifdef __PS5__
+    // getcwd faults in the PS5 title runtime; the loose assets live in the writable data folder.
+    std::filesystem::path secondaryRoot(Ship::Context::GetAppDirectoryPath());
+#else
+    std::error_code cwdError;
+    std::filesystem::path secondaryRoot = std::filesystem::current_path(cwdError);
+#endif
     std::vector<std::filesystem::path> roots = {
         std::filesystem::path(ssb64::RealAppBundlePath()),
-        std::filesystem::current_path(),
+        secondaryRoot,
     };
 
     for (const auto& root : roots) {
@@ -901,7 +908,7 @@ void Menu::DrawElement() {
     options2.tooltip = "Reset"
 #ifdef __APPLE__
                        " (Command-R)"
-#elif !defined(__SWITCH__) && !defined(__WIIU__)
+#elif !defined(__SWITCH__) && !defined(__WIIU__) && !defined(__PS5__)
                        " (Ctrl+R)"
 #else
                        ""
