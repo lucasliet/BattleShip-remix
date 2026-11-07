@@ -23,6 +23,11 @@ enum {
     kSampleIntervalNs = 2000000,
     kStartDelaySeconds = 15,
     kSpinWindowBytes = 512,
+    kCallerDepth = 3,
+    /* FreeBSD mcontext keeps rbp 11 words and rsp 3 words from rip; the console shifts all by 6. */
+    kRbpWordsBeforeRip = 11,
+    kRspWordsAfterRip = 3,
+    kStackWindowBytes = 4 * 1024 * 1024,
 };
 
 static pthread_t sProfiledThread;
@@ -30,6 +35,7 @@ static volatile int sRipWordIndex = -1;
 static volatile int sCalibrating;
 static volatile int sSpinRunning;
 static uintptr_t sSamples[kSampleCapacity];
+static uintptr_t sCallers[kSampleCapacity][kCallerDepth];
 static volatile int sSampleCount;
 
 __attribute__((noinline)) static void calibration_spin(void) {
@@ -48,6 +54,32 @@ static void record_calibration(const uintptr_t *words) {
     }
 }
 
+static int is_stack_address(uintptr_t address, uintptr_t anchor) {
+    return address > anchor && address < anchor + kStackWindowBytes && (address & 7u) == 0;
+}
+
+/**
+ * Records the return address at the interrupted rsp (callers of leaf system stubs) and the next
+ * frame-pointer return addresses.
+ * @param words the console ucontext as words
+ * @param callers receives kCallerDepth return addresses, 0 when unreadable
+ */
+static void record_callers(const uintptr_t *words, uintptr_t *callers) {
+    volatile uintptr_t anchor_marker = 0;
+    const uintptr_t anchor = (uintptr_t)&anchor_marker;
+    memset(callers, 0, sizeof(uintptr_t) * kCallerDepth);
+    uintptr_t rsp = words[sRipWordIndex + kRspWordsAfterRip];
+    if (is_stack_address(rsp, anchor)) {
+        callers[0] = *(const uintptr_t *)rsp;
+    }
+    uintptr_t rbp = words[sRipWordIndex - kRbpWordsBeforeRip];
+    for (int depth = 1; depth < kCallerDepth && is_stack_address(rbp, anchor); depth++) {
+        const uintptr_t *frame = (const uintptr_t *)rbp;
+        callers[depth] = frame[1];
+        rbp = frame[0];
+    }
+}
+
 static void on_sample_signal(int signal_number, siginfo_t *info, void *context) {
     (void)signal_number;
     (void)info;
@@ -57,10 +89,12 @@ static void on_sample_signal(int signal_number, siginfo_t *info, void *context) 
         return;
     }
     int index = sSampleCount;
-    if (sRipWordIndex >= 0 && index < kSampleCapacity) {
-        sSamples[index] = words[sRipWordIndex];
-        sSampleCount = index + 1;
+    if (sRipWordIndex < 0 || index >= kSampleCapacity) {
+        return;
     }
+    sSamples[index] = words[sRipWordIndex];
+    record_callers(words, sCallers[index]);
+    sSampleCount = index + 1;
 }
 
 static void sleep_ns(long nanoseconds) {
@@ -76,6 +110,10 @@ static void *calibration_signaler(void *unused) {
     }
     sSpinRunning = 0;
     return NULL;
+}
+
+static int compare_chains(const void *left, const void *right) {
+    return memcmp(left, right, sizeof(uintptr_t) * kCallerDepth);
 }
 
 static int compare_addresses(const void *left, const void *right) {
@@ -118,6 +156,47 @@ static void report_hottest(int count) {
     }
 }
 
+/**
+ * Traces the most frequent caller chains among the samples whose RIP is outside the title.
+ * @param count the number of samples
+ */
+static void report_system_callers(int count) {
+    static uintptr_t chains[kSampleCapacity][kCallerDepth];
+    int chain_count = 0;
+    for (int index = 0; index < count; index++) {
+        if (sSamples[index] >= 0x800000000ul) {
+            memcpy(chains[chain_count++], sCallers[index], sizeof(chains[0]));
+        }
+    }
+    qsort(chains, (size_t)chain_count, sizeof(chains[0]), compare_chains);
+    char line[128];
+    for (int reported = 0; reported < 20; reported++) {
+        int best_start = -1;
+        int best_length = 0;
+        for (int start = 0; start < chain_count;) {
+            int end = start;
+            while (end < chain_count && memcmp(chains[end], chains[start], sizeof(chains[0])) == 0) {
+                end++;
+            }
+            if (chains[start][0] != 1 && end - start > best_length) {
+                best_start = start;
+                best_length = end - start;
+            }
+            start = end;
+        }
+        if (best_start < 0) {
+            return;
+        }
+        snprintf(line, sizeof(line), "prof sys hits=%d code=%#lx code=%#lx code=%#lx", best_length,
+                 (unsigned long)chains[best_start][0], (unsigned long)chains[best_start][1],
+                 (unsigned long)chains[best_start][2]);
+        ps5_boot_trace(line);
+        for (int index = best_start; index < best_start + best_length; index++) {
+            chains[index][0] = 1;
+        }
+    }
+}
+
 static void *sampling_signaler(void *unused) {
     (void)unused;
     sleep_ns((long)kStartDelaySeconds * 1000000000L);
@@ -127,6 +206,7 @@ static void *sampling_signaler(void *unused) {
         pthread_kill(sProfiledThread, SIGUSR2);
     }
     sleep_ns(kSampleIntervalNs);
+    report_system_callers(sSampleCount);
     report_hottest(sSampleCount);
     return NULL;
 }
