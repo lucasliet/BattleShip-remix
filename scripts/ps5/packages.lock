@@ -21,7 +21,7 @@
     },
     "ps5-native-app-boilerplate": {
       "url": "https://github.com/drakmor/ps5-native-app-boilerplate.git",
-      "revision": "4f531c4b517f80bcb6b1267135848168d2250047"
+      "revision": "470695e0c557f99ff2df0e36e4df713c5e636526"
     },
     "SDL": {
       "url": "https://github.com/ps5-payload-dev/SDL.git",
