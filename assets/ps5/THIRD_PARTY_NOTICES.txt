@@ -1,0 +1,44 @@
+BattleShip Remix for PlayStation 5 (PPSA99264): licence notice
+==============================================================
+
+The PS5 build statically links GPL-3.0 components, so this PS5 title as a whole
+(eboot.bin and sce_module/) is distributed under the GNU General Public License,
+version 3 (full text in COPYING.GPL-3.0.txt next to this file). The port's own
+source code stays under the MIT License (LICENSE next to this file); MIT code is
+compatible with GPL-3.0.
+
+Complete corresponding source:
+  https://github.com/lucasliet/BattleShip-remix (the release tag of this build)
+  scripts/ps5/packages.lock in that tag pins every component below by revision.
+
+GPL-3.0 components linked into this title:
+
+  * ps5-opengl (OpenGL driver for the PS5 GPU, Mesa Gallium based)
+      https://github.com/mihawk-99/ps5-opengl
+      revision ec06d8c2da0359e274e409046f0a9586965e4010
+      Licensed under the GNU General Public License v3.0. Mesa parts keep their
+      own MIT-style notices in that source tree.
+
+  * ps5-native-app-boilerplate (native title runtime, libc.prx, link tooling)
+      https://github.com/lucasliet/ps5-native-app-boilerplate
+      revision 4f531c4b517f80bcb6b1267135848168d2250047
+      (fork of https://github.com/drakmor/ps5-native-app-boilerplate)
+      Licensed under the GNU General Public License v3.0.
+
+  * ps5-payload-sdk v0.42 (headers, runtime and libraries)
+      https://github.com/ps5-payload-dev/sdk
+      Licensed under the GNU General Public License v3.0.
+
+  * PS5_PayloadSDK platform layer
+      https://github.com/mihawk-99/PS5_PayloadSDK
+      revision e105cf6f25801d9e9981812a89a3b74021d2d2a2
+
+Other components:
+
+  * SDL2 (PS5 port)
+      https://github.com/ps5-payload-dev/SDL
+      revision 8c56053f13ca13a0c050de613706ff69eb615836
+      Licensed under the zlib License.
+
+No Nintendo, HAL Laboratory or Smash Remix ROM data is included: the game data
+is extracted on the console from the ROM the user supplies.

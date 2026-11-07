@@ -65,6 +65,8 @@ assets/*
 !assets/ps5/
 !assets/ps5/param.json
 !assets/ps5/icon0.png
+!assets/ps5/THIRD_PARTY_NOTICES.txt
+!assets/ps5/COPYING.GPL-3.0.txt
 !assets/macos_dmg_banner.png
 !assets/macos_dmg_banner-remix.png
 !assets/BattleShip.svg

@@ -137,3 +137,11 @@ below in satisfaction of the MIT attribution requirement.
       2. Altered source versions must be plainly marked as such, and must not be
         misrepresented as being the original software.
       3. This notice may not be removed or altered from any source distribution.
+PlayStation 5 build:
+
+  The PS5 title (BattleShip-Remix-ps5-PPSA99264.zip) statically links GPL-3.0
+  components (ps5-opengl, ps5-native-app-boilerplate, ps5-payload-sdk), so that
+  binary is distributed under the GNU General Public License v3.0. The source
+  in this repository stays under the MIT grant above. The list of components,
+  their pinned revisions and the GPL-3.0 text ship with the title and live in
+  `assets/ps5/THIRD_PARTY_NOTICES.txt` and `assets/ps5/COPYING.GPL-3.0.txt`.
