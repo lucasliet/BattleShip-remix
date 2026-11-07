@@ -2,4 +2,4 @@
 # C compiler for cmake/toolchains/PS5.cmake: the boilerplate's prospero-clang18 target wrapper
 # plus the flags every PS5 object needs, kept out of CMAKE_C_FLAGS so dependencies that reset
 # their flags (prism) cannot drop them.
-exec sh "$PS5_NATIVE_APP_TEMPLATE/tooling/prospero-clang18" -D__PS5__ -fPIC -ffunction-sections -fdata-sections "$@"
+exec sh "$PS5_NATIVE_APP_TEMPLATE/tooling/prospero-clang18" -D__PS5__ -fPIC -ffunction-sections -fdata-sections -fno-omit-frame-pointer "$@"

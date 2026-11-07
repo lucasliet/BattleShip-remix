@@ -5,6 +5,7 @@
  */
 #ifdef __PS5__
 
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
@@ -18,6 +19,26 @@ extern "C" void ps5_boot_trace(const char* step);
 
 namespace {
 
+constexpr int kMaxTracedFrames = 24;
+
+/**
+ * Walks the saved frame-pointer chain (the title is built with -fno-omit-frame-pointer) and traces
+ * each return address; frames inside system modules without frame pointers end the walk early.
+ * @param frame_pointer the faulting thread's rbp
+ */
+void TraceFrameChain(uintptr_t frame_pointer) {
+    for (int depth = 0; depth < kMaxTracedFrames && frame_pointer != 0 && (frame_pointer & 7u) == 0; depth++) {
+        const uintptr_t* frame = reinterpret_cast<const uintptr_t*>(frame_pointer);
+        char line[64];
+        snprintf(line, sizeof(line), "  frame %d ret=%#lx", depth, static_cast<unsigned long>(frame[1]));
+        ps5_boot_trace(line);
+        if (frame[0] <= frame_pointer) {
+            return;
+        }
+        frame_pointer = frame[0];
+    }
+}
+
 void TraceFatalSignal(int signal_number, siginfo_t* info, void* context) {
     const ucontext_t* user_context = static_cast<const ucontext_t*>(context);
     char line[160];
@@ -26,6 +47,9 @@ void TraceFatalSignal(int signal_number, siginfo_t* info, void* context) {
              user_context != nullptr ? static_cast<unsigned long>(user_context->uc_mcontext.mc_rip) : 0UL,
              reinterpret_cast<void*>(&TraceFatalSignal));
     ps5_boot_trace(line);
+    if (user_context != nullptr) {
+        TraceFrameChain(static_cast<uintptr_t>(user_context->uc_mcontext.mc_rbp));
+    }
     _Exit(128 + signal_number);
 }
 
