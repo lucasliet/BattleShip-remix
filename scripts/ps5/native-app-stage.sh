@@ -8,6 +8,7 @@
 # Env:   PS5_EXTRA_SDK_LIBS  extra SDK stub libraries to link, e.g. "libScePad.so libSceAudioOut.so"
 #        PS5_APP_ASSETS      directory copied as <dist>/assets (optional)
 #        PS5_APP_FILES       files copied into the title folder's root (optional)
+#        PS5_CMAKE           cmake used to zip the title folder again (default: cmake on PATH)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -82,9 +83,6 @@ if [[ -n "${PS5_APP_ASSETS:-}" ]]; then
     rm -rf "$APP/assets"
     cp -a "$PS5_APP_ASSETS" "$APP/assets"
 fi
-for app_file in ${PS5_APP_FILES:-}; do
-    cp "$app_file" "$APP/"
-done
 
 resource_dir="$("$PS5_CLANG" --print-resource-dir)"
 compiler_runtime="$resource_dir/lib/x86_64-unknown-linux-gnu/libclang_rt.builtins.a"
@@ -129,5 +127,14 @@ CXX="$T/llvm/bin/host-clang++" USE_CCACHE=0 make -C "$APP" --no-print-directory 
 dist="$APP/dist/$TITLE_ID"
 test -s "$dist/eboot.bin"
 test -s "$dist/sce_module/libc.prx"
+# The boilerplate's build copies only assets/ into the title; root files go in afterwards, and the
+# folder zip is made again so it carries them.
+if [[ -n "${PS5_APP_FILES:-}" ]]; then
+    for app_file in $PS5_APP_FILES; do
+        cp "$app_file" "$dist/"
+    done
+    rm -f "$APP/dist/$TITLE_ID.zip"
+    (cd "$APP/dist" && "${PS5_CMAKE:-cmake}" -E tar cf "$TITLE_ID.zip" --format=zip "$TITLE_ID")
+fi
 printf 'Native app: %s\n' "$dist"
 sha256sum "$dist/eboot.bin"

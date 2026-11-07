@@ -1134,6 +1134,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
             "PS5_EXTRA_SDK_LIBS=libScePad.so libSceUserService.so libSceSystemService.so libSceAudioOut.so libSceVideoOut.so"
             "PS5_EXTRA_WRAPS=pthread_create lstat getcwd realpath"
             "PS5_APP_ASSETS=${SSB64_PS5_ASSETS_DIR}"
+            "PS5_CMAKE=${CMAKE_COMMAND}"
             "PS5_APP_FILES=${CMAKE_BINARY_DIR}/f3d.o2r ${CMAKE_SOURCE_DIR}/gamecontrollerdb.txt"
             bash ${CMAKE_SOURCE_DIR}/scripts/ps5/native-app-stage.sh ${CMAKE_BINARY_DIR}/ps5-app
             ${SSB64_PS5_TITLE_ID} $<TARGET_FILE:${PROJECT_NAME}> ${SSB64_PS5_PARAM_JSON}
