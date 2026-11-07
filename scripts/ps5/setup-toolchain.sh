@@ -74,7 +74,8 @@ clone_pinned() {
         [[ $OFFLINE == 1 ]] && { echo "offline: $name lacks $rev" >&2; exit 2; }
         git -C "$dir" fetch -q origin
     fi
-    git -C "$dir" checkout -q "$rev"
+    # --force: the only local change is the chmod below, made again after the checkout.
+    git -C "$dir" checkout -q --force "$rev"
     echo "$name @ $(git -C "$dir" rev-parse --short HEAD)"
 }
 
