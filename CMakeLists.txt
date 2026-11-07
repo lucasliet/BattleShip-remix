@@ -1134,7 +1134,12 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
     target_compile_definitions(ssb64_game PRIVATE __assert=ssb64_ido_assert)
     # The title folder (eboot.bin, sce_sys, sce_module) from the relocatable program object.
     set(SSB64_PS5_TITLE_ID "PPSA99264")
-    set(SSB64_PS5_PARAM_JSON ${CMAKE_CURRENT_SOURCE_DIR}/assets/ps5/param.json)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ps5_content_version.cmake)
+    ps5_content_version("${BATTLESHIP_VERSION}" SSB64_PS5_CONTENT_VERSION)
+    set(SSB64_PS5_PARAM_JSON ${CMAKE_BINARY_DIR}/ps5-param.json)
+    ps5_write_param_json(${CMAKE_CURRENT_SOURCE_DIR}/assets/ps5/param.json ${SSB64_PS5_PARAM_JSON}
+                         ${SSB64_PS5_CONTENT_VERSION})
+    message(STATUS "PS5 contentVersion: ${SSB64_PS5_CONTENT_VERSION} (${BATTLESHIP_VERSION})")
     add_custom_target(ssb64_ps5_title
         COMMAND ${CMAKE_COMMAND} -E env
             "PS5_EXTRA_SDK_LIBS=libScePad.so libSceUserService.so libSceSystemService.so libSceAudioOut.so libSceVideoOut.so libSceHttp.so libSceSsl.so libSceNet.so"
