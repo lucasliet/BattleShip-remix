@@ -1116,6 +1116,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
         COMMAND ${CMAKE_COMMAND} -E make_directory ${SSB64_PS5_ASSETS_DIR}
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/config.yml ${SSB64_PS5_ASSETS_DIR}/config.yml
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/yamls ${SSB64_PS5_ASSETS_DIR}/yamls
+        COMMAND ${CMAKE_COMMAND} -DROOT=${SSB64_PS5_ASSETS_DIR}/yamls -P ${CMAKE_SOURCE_DIR}/cmake/ps5_torch_filelists.cmake
         VERBATIM)
     # The SDK libc defines __assert(func, file, line, expr), like newlib on the Switch; rename the
     # decomp's IDO-style __assert stub in n64_stubs.c.
