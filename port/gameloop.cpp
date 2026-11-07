@@ -51,9 +51,6 @@
 /* Defined in port/android_touch_overlay.cpp (port/ps5/ps5_menu_button.cpp on PS5). Atomic flag drained on the
  * SDL_main thread to honor the on-screen hamburger menu tap. */
 extern "C" bool port_drain_pending_menu_toggle(void);
-#if defined(__PS5__)
-extern "C" void port_trace_menu_navigation(bool menuVisible);
-#endif
 #endif
 
 #include "port_log.h"
@@ -768,13 +765,6 @@ void PortPushFrame(void)
 #endif
 		}
 	}
-#if defined(__PS5__)
-	{
-		auto context = Ship::Context::GetInstance();
-		port_trace_menu_navigation(context && context->GetWindow() && context->GetWindow()->GetGui() &&
-		                           context->GetWindow()->GetGui()->GetMenuOrMenubarVisible());
-	}
-#endif
 #endif
 
 	/* Render the staged display list now that all coroutines have yielded.
