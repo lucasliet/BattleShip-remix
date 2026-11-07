@@ -10,7 +10,7 @@
 #include "port_log.h"
 
 #include <array>
-#include <dirent.h>
+#include <cstdio>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -21,7 +21,7 @@ extern "C" void ps5_boot_trace(const char* step);
 namespace ssb64 {
 namespace {
 
-constexpr std::array<const char*, 3> kRomExtensions = { ".z64", ".n64", ".v64" };
+constexpr std::array<const char*, 3> kRomNames = { "baserom.remix.z64", "baserom.remix.n64", "baserom.remix.v64" };
 
 /**
  * Logs a message to both the port log and the boot trace, which survives a crash.
@@ -45,27 +45,20 @@ bool ArchiveIsCurrent(const std::filesystem::path& archive) {
 }
 
 /**
- * Finds the first N64 ROM dump in a folder; Torch checks its SHA-1 against config.yml. Uses
- * opendir/readdir: std::filesystem::directory_iterator finds nothing in /app0 on the console.
+ * Finds the ROM by name in a folder; Torch checks its SHA-1 against config.yml. The title cannot
+ * list /app0 (opendir fails there), so only the documented names are tried.
  * @return the ROM path, or an empty path when there is none
  */
 std::filesystem::path FindRom(const std::filesystem::path& directory) {
-    DIR* listing = opendir(directory.c_str());
-    if (listing == nullptr) {
-        Report("cannot list " + directory.string());
-        return {};
-    }
-    std::filesystem::path rom;
-    for (dirent* entry = readdir(listing); entry != nullptr && rom.empty(); entry = readdir(listing)) {
-        const std::filesystem::path candidate = directory / entry->d_name;
-        for (const char* romExtension : kRomExtensions) {
-            if (candidate.extension() == romExtension) {
-                rom = candidate;
-            }
+    for (const char* romName : kRomNames) {
+        const std::filesystem::path candidate = directory / romName;
+        FILE* file = fopen(candidate.c_str(), "rb");
+        if (file != nullptr) {
+            fclose(file);
+            return candidate;
         }
     }
-    closedir(listing);
-    return rom;
+    return {};
 }
 
 /**
@@ -106,7 +99,7 @@ bool Ps5EnsureGameArchive(const std::string& titleDir) {
     }
     const std::filesystem::path rom = FindRom(titleDir);
     if (rom.empty()) {
-        Report("no ROM (.z64/.n64/.v64) in " + titleDir + "; copy the Smash Remix ROM there");
+        Report("no baserom.remix.z64 (.n64/.v64) in " + titleDir + "; copy the Smash Remix ROM there");
         return false;
     }
     Report("extracting assets from " + rom.string());
