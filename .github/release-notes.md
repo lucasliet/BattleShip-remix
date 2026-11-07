@@ -1,14 +1,18 @@
 ## Highlights
 
-**New: PlayStation 5.** BattleShip-Remix now runs as a native homebrew title (`PPSA99264`, "BattleShip Remix") on
-jailbroken PS5 consoles with ShadowMountPlus. Unzip the folder to `/data/homebrew/` (or an external drive), drop your
-ROM in it, and the first launch converts it on the console, with system notifications while it works. Saves,
-settings and logs stay in the title folder. The touchpad, or L3+R3, opens the port menu, which works with the pad;
-its About page checks GitHub for new releases and installs them in place, starting with the next release.
+**PS5 in-game updater fixed.** The port.5 updater installed the new files without the execute permission, so the
+console refused to start the game afterwards ("The application could not be started"). Updates now install with the
+same permissions as a fresh install.
 
-**New artwork.** A new Smash Remix logo and "SR" icon on every platform: the macOS app and DMG background, the
-Windows executable, the Linux AppImage and window icon, the Android launcher, the Switch Home menu and the PS5 home
-screen tile and background.
+If you are on port.5, update through ProsperoStore or install the release zip again by FTP. If you already updated
+from the in-game menu and the game no longer starts, either reinstall the zip, or run `chmod 777` by FTP on every file
+in `/data/homebrew/PPSA99264/`. Updates from this release onward work from the in-game menu.
+
+**PS5 licence notices.** The PS5 title folder now ships `LICENSE`, `THIRD_PARTY_NOTICES.txt` and the GPL-3.0 text
+(the PS5 build links GPL-3.0 components: ps5-opengl, the native app runtime and the payload SDK).
+
+**Easier ROM.** The install steps point at the [Smash Remix web patcher](https://smashremix.net/patcher/), which makes
+the Remix ROM in the browser.
 
 The self-updaters (Android, Switch, desktop) offer this version automatically.
 
