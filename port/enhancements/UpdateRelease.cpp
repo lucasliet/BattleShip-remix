@@ -8,6 +8,16 @@ namespace enhancements {
 namespace {
 
 constexpr const char* kTrustedUrlPrefix = "https://github.com/";
+constexpr const char* kTrustedApiUrlPrefix = "https://api.github.com/repos/";
+
+bool HasTrustedPrefixAndPlainCharacters(const std::string& url, const char* prefix) {
+    if (url.rfind(prefix, 0) != 0) return false;
+
+    for (char c : url) {
+        if (c == '"' || c == '\'' || c == '\\' || c <= 0x20 || c == 0x7F) return false;
+    }
+    return true;
+}
 
 bool HasStringField(const nlohmann::json& object, const char* key) {
     return object.contains(key) && object[key].is_string();
@@ -31,12 +41,11 @@ const nlohmann::json* FindAssetByName(const nlohmann::json& release, const std::
 } // namespace
 
 bool IsTrustedDownloadUrl(const std::string& url) {
-    if (url.rfind(kTrustedUrlPrefix, 0) != 0) return false;
+    return HasTrustedPrefixAndPlainCharacters(url, kTrustedUrlPrefix);
+}
 
-    for (char c : url) {
-        if (c == '"' || c == '\'' || c == '\\' || c <= 0x20 || c == 0x7F) return false;
-    }
-    return true;
+bool IsTrustedApiUrl(const std::string& url) {
+    return HasTrustedPrefixAndPlainCharacters(url, kTrustedApiUrlPrefix);
 }
 
 ReleaseParseStatus ParseLatestRelease(const std::string& responseBody, const std::string& assetName,
@@ -55,6 +64,9 @@ ReleaseParseStatus ParseLatestRelease(const std::string& responseBody, const std
 
     outRelease->downloadUrl = url;
     outRelease->sizeBytes = ReadAssetSize(*asset);
+    if (HasStringField(*asset, "url") && IsTrustedApiUrl((*asset)["url"].get<std::string>())) {
+        outRelease->apiUrl = (*asset)["url"].get<std::string>();
+    }
     return ReleaseParseStatus::Ok;
 }
 

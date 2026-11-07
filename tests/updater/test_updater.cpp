@@ -26,7 +26,7 @@ const char* kReleaseBody = R"({
   "tag_name": "v2.0.1-port.3",
   "assets": [
     {"name": "BattleShip-Remix-switch.zip", "size": 5, "browser_download_url": "https://github.com/o/r/releases/download/v/BattleShip-Remix-switch.zip"},
-    {"name": "BattleShip-Remix.nro", "size": 1234, "browser_download_url": "https://github.com/o/r/releases/download/v/BattleShip-Remix.nro"}
+    {"name": "BattleShip-Remix.nro", "size": 1234, "url": "https://api.github.com/repos/o/r/releases/assets/42", "browser_download_url": "https://github.com/o/r/releases/download/v/BattleShip-Remix.nro"}
   ]
 })";
 
@@ -73,6 +73,23 @@ void testParseFindsNamedAssetWithSize() {
     CHECK(release.tag == "v2.0.1-port.3");
     CHECK(release.downloadUrl == "https://github.com/o/r/releases/download/v/BattleShip-Remix.nro");
     CHECK(release.sizeBytes == 1234);
+    CHECK(release.apiUrl == "https://api.github.com/repos/o/r/releases/assets/42");
+}
+
+void testTrustedApiUrlAcceptsOnlyGithubApiHttps() {
+    CHECK(IsTrustedApiUrl("https://api.github.com/repos/o/r/releases/assets/42"));
+    CHECK(!IsTrustedApiUrl("http://api.github.com/repos/o/r/releases/assets/42"));
+    CHECK(!IsTrustedApiUrl("https://api.github.com.evil.example/repos/o/r"));
+    CHECK(!IsTrustedApiUrl("https://github.com/o/r/releases/download/v1/x.nro"));
+    CHECK(!IsTrustedApiUrl("https://api.github.com/repos/o/r/a b"));
+    CHECK(!IsTrustedApiUrl(""));
+}
+
+void testParseLeavesApiUrlEmptyWhenUntrusted() {
+    const char* body = R"({"tag_name":"v1","assets":[{"name":"a.nro","url":"https://evil.example/repos/a","browser_download_url":"https://github.com/o/r/a.nro"}]})";
+    ReleaseAsset release;
+    CHECK(ParseLatestRelease(body, "a.nro", &release) == ReleaseParseStatus::Ok);
+    CHECK(release.apiUrl.empty());
 }
 
 void testParseKeepsTagWhenAssetIsMissing() {
@@ -158,6 +175,8 @@ void testInstallKeepsTargetWhenBackupCannotBeMade() {
 int main() {
     testTrustedUrlAcceptsOnlyGithubHttps();
     testParseFindsNamedAssetWithSize();
+    testTrustedApiUrlAcceptsOnlyGithubApiHttps();
+    testParseLeavesApiUrlEmptyWhenUntrusted();
     testParseKeepsTagWhenAssetIsMissing();
     testParseRejectsUntrustedUrl();
     testParseRejectsMalformedBodies();
