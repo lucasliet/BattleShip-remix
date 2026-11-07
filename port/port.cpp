@@ -946,11 +946,8 @@ static int PortInitImpl(int argc, char* argv[]) {
 		// Esc Menu screen, Toggle with Esc.
 		if (auto gui = window->GetGui()) {
 			port_log("SSB64: attaching Port menu ...\n");
-			PS5_BOOT_TRACE("PortMenu construct");
 			auto portMenu = std::make_shared<ssb64::PortMenu>();
-			PS5_BOOT_TRACE("PortMenu SetMenu");
 			gui->SetMenu(portMenu);
-			PS5_BOOT_TRACE("PortMenu set");
 #ifdef REGION_REMIX
 			gui->AddGuiWindow(remix_input_display_make_window());
 			gui->AddGuiWindow(remix_hud_text_make_window());
@@ -1540,8 +1537,8 @@ int main(int argc, char* argv[]) {
 		const double frameMs =
 		    std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - frameStart).count();
 		frame++;
-		if (frame == 1 || frame == 60 || frame == 600) {
-			PS5_BOOT_TRACE(frame == 1 ? "frame 1" : frame == 60 ? "frame 60" : "frame 600");
+		if (frame == 1) {
+			PS5_BOOT_TRACE("frame 1");
 		}
 		if (frameMs > kSlowFrameMs) {
 			windowSlowFrames++;
