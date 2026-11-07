@@ -1019,7 +1019,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
         AUTHOR "BattleShip"
         VERSION "${SSB64_VERSION}"
     )
-    # Home menu icon (256x256 JPEG, tools/gen_switch_icon.py). Without ICON the
+    # Home menu icon (256x256 JPEG, tools/gen_platform_icons.py). Without ICON the
     # .nro carries none and the Home menu shows the "?" placeholder.
     if (SSB64_VERSION STREQUAL "remix")
         set(SSB64_SWITCH_ICON ${CMAKE_CURRENT_SOURCE_DIR}/assets/switch/icon-remix.jpg)
