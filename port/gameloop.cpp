@@ -753,6 +753,16 @@ void PortPushFrame(void)
 		if (context && context->GetWindow() && context->GetWindow()->GetGui()
 		    && context->GetWindow()->GetGui()->GetMenu()) {
 			context->GetWindow()->GetGui()->GetMenu()->ToggleVisibility();
+#if defined(__PS5__)
+			/* The pad alone works the menu here: turn on ImGui's gamepad navigation as libultraship's
+			 * own toggle (Gui.cpp) does, or the menu opens but ignores the pad. */
+			ImGuiIO& io = ImGui::GetIO();
+			if (context->GetWindow()->GetGui()->GetMenuOrMenubarVisible()) {
+				io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+			} else {
+				io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
+			}
+#endif
 		}
 	}
 #endif

@@ -28,6 +28,7 @@ cmake -S "$ROOT" -B "$BUILD_DIR" -GNinja \
     -DCMAKE_TOOLCHAIN_FILE="$ROOT/cmake/toolchains/PS5.cmake" \
     -DPython3_EXECUTABLE="$HOST_PYTHON" \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_SCAN_FOR_MODULES=OFF \
     -DDISABLE_SCRIPTING=ON \
     -DSSB64_VERSION="$VER" \
     "$@"
