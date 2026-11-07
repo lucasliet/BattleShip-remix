@@ -16,6 +16,8 @@
 #include <cxxabi.h>
 
 extern "C" void ps5_boot_trace(const char* step);
+extern "C" char __ehdr_start[] __attribute__((weak));
+extern "C" char etext[] __attribute__((weak));
 
 namespace {
 
@@ -49,8 +51,6 @@ constexpr int kMaxCodePointers = 32;
  * @param stack_pointer the faulting thread's rsp
  */
 void TraceStackCodePointers(uintptr_t stack_pointer) {
-    extern char __ehdr_start[] __attribute__((weak));
-    extern char etext[] __attribute__((weak));
     const uintptr_t code_begin = reinterpret_cast<uintptr_t>(__ehdr_start);
     const uintptr_t code_end = reinterpret_cast<uintptr_t>(etext);
     if (code_begin == 0 || code_end <= code_begin || stack_pointer == 0) {
