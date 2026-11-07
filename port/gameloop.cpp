@@ -736,7 +736,7 @@ void PortPushFrame(void)
 	port_enhancement_stage_hazards_tick();
 	port_widescreen_tick();
 
-#if !defined(__ANDROID__) && !defined(__SWITCH__)
+#if !defined(__ANDROID__) && !defined(__SWITCH__) && !defined(__PS5__)
 #if !defined(BATTLESHIP_UWP)
 	ssb64::enhancements::TickDiscordPresence(); // DRP
 #endif

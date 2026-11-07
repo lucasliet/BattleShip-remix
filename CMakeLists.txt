@@ -24,10 +24,19 @@ if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     set(BUILD_CROWD_CONTROL OFF CACHE BOOL "" FORCE)
 endif()
 
+# PS5 native title (cmake/toolchains/PS5.cmake): no JIT, no subprocesses, no desktop shell
+# integrations; the title folder is staged by scripts/ps5/native-app-stage.sh (ssb64_ps5_title).
+if (CMAKE_SYSTEM_NAME STREQUAL "PS5")
+    set(DISABLE_SCRIPTING ON CACHE BOOL "PS5 titles have no executable-memory JIT" FORCE)
+    set(LUS_ENABLE_POSTPROCESS_TRANSPILER OFF CACHE BOOL "PS5 uses packaged shaders" FORCE)
+    set(BUILD_CROWD_CONTROL OFF CACHE BOOL "" FORCE)
+endif()
+
 # Android needs ASM for the aarch64 coroutine context-switch
 # (port/coroutine_aarch64.S). Enable it before any add_library/add_executable
 # call sees an .S source. ASM is preprocessed by clang on the way through.
-if (CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+if (CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch"
+    OR CMAKE_SYSTEM_NAME STREQUAL "PS5")
     enable_language(ASM)
 endif()
 
@@ -256,6 +265,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
     # was forced above). The libtorch_runner.so SHARED library at the
     # bottom of this file wraps it for JNI.
     add_subdirectory(torch ${CMAKE_BINARY_DIR}/torch)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "PS5")
+    # PS5: the archive is extracted elsewhere for now; no host Torch sidecar is needed.
 else()
     # Desktop: build Torch as a host executable via ExternalProject so it
     # can run at our build time to extract ROM assets.
@@ -587,6 +598,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/port_window_icon\\.cpp$")
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX
         "port/enhancements/(Updater|DiscordRichPresence|ShaderDownloader)\\.cpp$")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "PS5")
+    # Native title: no ucontext, no extraction wizard, no native dialogs, no window icon and no
+    # curl/discord shell integrations (updates come through the homebrew store).
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/coroutine_(posix|win32)\\.cpp$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/first_run\\.cpp$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/native_dialog\\.cpp$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/port_window_icon\\.cpp$")
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX
+        "port/enhancements/(Updater|UpdaterSwitch|SwitchHttp|DiscordRichPresence|ShaderDownloader)\\.cpp$")
 else()
     # The in-process libcurl updater only exists on Switch; the desktop updater shells out to curl.
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/(UpdaterSwitch|SwitchHttp)\\.cpp$")
@@ -602,7 +622,7 @@ endif()
 # Treat the generated icon header as a source so CMake schedules it ahead
 # of any port TU compilation (port_window_icon.cpp #includes it).
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP
-    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch" AND NOT CMAKE_SYSTEM_NAME STREQUAL "PS5")
     list(APPEND SSB64_SRC_PORT ${SSB64_ICON_GEN})
 endif()
 # Arrow + nameplate baked headers — added as sources so CMake schedules their
@@ -909,7 +929,7 @@ endif()
 # along with the rest of the network-dependent features).
 ################################################################################
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP
-    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch" AND NOT CMAKE_SYSTEM_NAME STREQUAL "PS5")
     # discord-rpc v3.4.0's CMakeLists declares cmake_minimum_required(VERSION 2.x),
     # which CMake 3.30+ refuses to honor. Force a baseline policy version for the
     # fetched subdir so the build still configures with current CMake.
@@ -1035,7 +1055,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${SSB64_CSS_GEN_DIR}                         # CSS icon baked headers (arrow_data.h)
 )
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT BATTLESHIP_UWP
-    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+    AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch" AND NOT CMAKE_SYSTEM_NAME STREQUAL "PS5")
     target_include_directories(${PROJECT_NAME} PRIVATE
         ${SSB64_ICON_GEN_DIR}                         # Generated icon header (port_icon_data.h)
         ${discord_rpc_SOURCE_DIR}/include             # Discord Rich Presence
@@ -1079,6 +1099,27 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     # IDO-style __assert(expr, file, line) stub in n64_stubs.c would collide
     # with it at link time, so rename the decomp one.
     target_compile_definitions(ssb64_game PRIVATE __assert=ssb64_ido_assert)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "PS5")
+    add_dependencies(${PROJECT_NAME} libultraship)
+    target_sources(${PROJECT_NAME} PRIVATE port/coroutine_x86_64.S)
+    target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${PS5_OPENGL_PREFIX}/include)
+    target_link_libraries(${PROJECT_NAME} PRIVATE libultraship)
+    # The SDK libc defines __assert(func, file, line, expr), like newlib on the Switch; rename the
+    # decomp's IDO-style __assert stub in n64_stubs.c.
+    target_compile_definitions(ssb64_game PRIVATE __assert=ssb64_ido_assert)
+    # The title folder (eboot.bin, sce_sys, sce_module) from the relocatable program object.
+    set(SSB64_PS5_TITLE_ID "PPSA99264")
+    set(SSB64_PS5_PARAM_JSON ${CMAKE_CURRENT_SOURCE_DIR}/assets/ps5/param.json)
+    add_custom_target(ssb64_ps5_title
+        COMMAND ${CMAKE_COMMAND} -E env
+            "PS5_EXTRA_SDK_LIBS=libScePad.so libSceUserService.so libSceSystemService.so libSceAudioOut.so libSceVideoOut.so libkernel_web.so"
+            bash ${CMAKE_SOURCE_DIR}/scripts/ps5/native-app-stage.sh ${CMAKE_BINARY_DIR}/ps5-app
+            ${SSB64_PS5_TITLE_ID} $<TARGET_FILE:${PROJECT_NAME}> ${SSB64_PS5_PARAM_JSON}
+            ${CMAKE_CURRENT_SOURCE_DIR}/assets/ps5/icon0.png
+        DEPENDS ${PROJECT_NAME}
+        USES_TERMINAL
+        VERBATIM
+        COMMENT "Staging the PS5 title ${SSB64_PS5_TITLE_ID}")
 elseif(BATTLESHIP_UWP)
     add_dependencies(${PROJECT_NAME} libultraship TorchExternal)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship SDL2 LIBUWP GLFW3)
@@ -1192,7 +1233,8 @@ endif()
 # these into the APK assets/ at Gradle time via android/app/build.gradle.kts).
 ################################################################################
 
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch"
+    AND NOT CMAKE_SYSTEM_NAME STREQUAL "PS5")
     configure_file(
         ${CMAKE_SOURCE_DIR}/gamecontrollerdb.txt
         ${CMAKE_BINARY_DIR}/gamecontrollerdb.txt
@@ -1370,7 +1412,8 @@ endif()
 # port/android_torch_bridge.cpp + RomImporter.java).
 ################################################################################
 
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android" AND NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch"
+    AND NOT CMAKE_SYSTEM_NAME STREQUAL "PS5")
 # Accept .z64 (big-endian), .n64 (little-endian), or .v64 (byteswapped).
 # (Switch builds never touch the baserom — assets ship prebuilt on SD.)
 # Torch's Cartridge::Normalize converts non-z64 byte orders in-memory.

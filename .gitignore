@@ -61,6 +61,9 @@ assets/*
 !assets/icon-remix.png
 !assets/switch/
 !assets/switch/*.jpg
+!assets/ps5/
+!assets/ps5/param.json
+!assets/ps5/icon0.png
 !assets/macos_dmg_banner.png
 !assets/BattleShip.svg
 !assets/SmashRemix.png

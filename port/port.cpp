@@ -710,7 +710,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	sContext->GetConfig()->SetString("Window.Backend.Name", "DirectX 11");
 #endif
 
-#ifdef __SWITCH__
+#if defined(__SWITCH__) || defined(__PS5__)
 	/* No keyboard on the console: Minus (ImGuiKey_GamepadBack) only opens the port menu, and its Quit
 	 * button, when controller navigation is on. Keep a value the player already saved. */
 	if (sContext->GetConsoleVariables()->GetInteger("gControlNav", -1) < 0) {
@@ -943,7 +943,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 			port_log("SSB64: Port menu attached\n");
 		}
 
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH__) && !defined(__PS5__)
 		// Linux: WMs only show the app icon if SDL_SetWindowIcon is called
 		// on the live window. .ico/.icns paths are baked into the .exe /
 		// .app on Windows / macOS so this is a no-op there. Android pulls
@@ -1001,6 +1001,15 @@ static int PortInitImpl(int argc, char* argv[]) {
 			archive.clear();
 		}
 		if (!ssb64::SwitchAssetsAreCurrent(archive)) {
+			PortShutdown();
+			return 1;
+		}
+#elif defined(__PS5__)
+		// PS5 native title: the archive lives in the writable data folder (/data/BattleShip-Remix).
+		std::error_code ec;
+		const std::string archive = Ship::Context::GetPathRelativeToAppDirectory(SSB64_O2R_NAME);
+		if (!std::filesystem::exists(archive, ec)) {
+			port_log("SSB64: missing %s\n", archive.c_str());
 			PortShutdown();
 			return 1;
 		}
