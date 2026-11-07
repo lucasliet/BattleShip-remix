@@ -1,11 +1,16 @@
 ## Highlights
 
-**Fix: fighters sinking into the floor.** Marth's and Roy's Dancing Blade (neutral special) drew the fighter buried up
-to the shoulders on its first two swings. Moves that copied hidden-joint animation flags from a vanilla parent fighter
-now follow their own Remix animation data; the same fix also applies to moves of Wario, Piano, Wolf, Mewtwo, Sheik,
-Dedede, Goemon, Banjo and Peach.
+**New: PlayStation 5.** BattleShip-Remix now runs as a native homebrew title (`PPSA99264`, "BattleShip Remix") on
+jailbroken PS5 consoles with ShadowMountPlus. Unzip the folder to `/data/homebrew/` (or an external drive), drop your
+ROM in it, and the first launch converts it on the console, with system notifications while it works. Saves,
+settings and logs stay in the title folder. The touchpad, or L3+R3, opens the port menu, which works with the pad;
+its About page checks GitHub for new releases and installs them in place, starting with the next release.
 
-The self-updaters added in the previous release (Android, Switch, desktop) offer this version automatically.
+**New artwork.** A new Smash Remix logo and "SR" icon on every platform: the macOS app and DMG background, the
+Windows executable, the Linux AppImage and window icon, the Android launcher, the Switch Home menu and the PS5 home
+screen tile and background.
+
+The self-updaters (Android, Switch, desktop) offer this version automatically.
 
 ## Install
 
