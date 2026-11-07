@@ -17,6 +17,7 @@
 #include <string>
 
 extern "C" void ps5_boot_trace(const char* step);
+extern "C" void ps5_notify(const char* message);
 
 namespace ssb64 {
 namespace {
@@ -30,6 +31,15 @@ constexpr std::array<const char*, 3> kRomNames = { "baserom.remix.z64", "baserom
 void Report(const std::string& message) {
     port_log("SSB64: %s\n", message.c_str());
     ps5_boot_trace(message.c_str());
+}
+
+/**
+ * Reports a message and shows it to the user as a system notification.
+ * @param message the line to record and show
+ */
+void Announce(const std::string& message) {
+    Report(message);
+    ps5_notify(("BattleShip Remix: " + message).c_str());
 }
 
 std::string ReadRecipe(const std::filesystem::path& archive) {
@@ -80,7 +90,7 @@ bool FinalizeArchive(const std::filesystem::path& written, const std::filesystem
     if (written != archive) {
         std::filesystem::rename(written, archive, ec);
         if (ec) {
-            Report("could not rename " + written.string() + " to " + archive.string() + ": " + ec.message());
+            Announce("could not rename " + written.string() + " to " + archive.string() + ": " + ec.message());
             return false;
         }
     }
@@ -99,15 +109,15 @@ bool Ps5EnsureGameArchive(const std::string& titleDir) {
     }
     const std::filesystem::path rom = FindRom(titleDir);
     if (rom.empty()) {
-        Report("no baserom.remix.z64 (.n64/.v64) in " + titleDir + "; copy the Smash Remix ROM there");
+        Announce("no baserom.remix.z64 (.n64/.v64) in " + titleDir + "; copy the Smash Remix ROM there");
         return false;
     }
-    Report("extracting assets from " + rom.string());
+    Announce("extracting the game files from your ROM, this takes a minute or two");
     try {
         const std::string written = RunTorch(rom, torchConfigDir, titleDir);
         std::error_code ec;
         if (written.empty() || !std::filesystem::exists(written, ec)) {
-            Report("Torch did not write an archive: unsupported ROM dump or missing " + torchConfigDir +
+            Announce("Torch did not write an archive: unsupported ROM dump or missing " + torchConfigDir +
                    "/config.yml");
             return false;
         }
@@ -115,10 +125,10 @@ bool Ps5EnsureGameArchive(const std::string& titleDir) {
             return false;
         }
     } catch (const std::exception& error) {
-        Report(std::string("asset extraction failed: ") + error.what());
+        Announce(std::string("asset extraction failed: ") + error.what());
         return false;
     }
-    Report("asset extraction done");
+    Announce("game files ready");
     return true;
 }
 
