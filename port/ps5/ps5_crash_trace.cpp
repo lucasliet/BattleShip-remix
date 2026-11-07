@@ -1,6 +1,6 @@
 /*
  * Crash reporting for the PS5 title, which has no debugger or console: a fatal signal or an
- * uncaught C++ exception appends its cause to the boot trace (/data/BattleShip-Remix/boot.txt).
+ * uncaught C++ exception appends its cause to the boot trace (/app0/boot.txt).
  * The load address of TraceFatalSignal is traced at install time so a faulting RIP maps back to eboot.elf.
  */
 #ifdef __PS5__

@@ -1,6 +1,6 @@
 /*
  * First-launch asset extraction on the PS5: the title cannot run a Torch sidecar, so Torch is linked
- * in (as on Android) and turns the user's ROM in /data/BattleShip-Remix into the game archive.
+ * in (as on Android) and turns the user's ROM in the title folder into the game archive.
  */
 #ifdef __PS5__
 
@@ -47,9 +47,9 @@ bool ArchiveIsCurrent(const std::filesystem::path& archive) {
  * Finds the first N64 ROM dump in a folder; Torch checks its SHA-1 against config.yml.
  * @return the ROM path, or an empty path when there is none
  */
-std::filesystem::path FindRom(const std::filesystem::path& dataDir) {
+std::filesystem::path FindRom(const std::filesystem::path& directory) {
     std::error_code ec;
-    for (const auto& entry : std::filesystem::directory_iterator(dataDir, ec)) {
+    for (const auto& entry : std::filesystem::directory_iterator(directory, ec)) {
         const std::string extension = entry.path().extension().string();
         for (const char* romExtension : kRomExtensions) {
             if (entry.is_regular_file(ec) && extension == romExtension) {
@@ -64,8 +64,8 @@ std::filesystem::path FindRom(const std::filesystem::path& dataDir) {
  * Runs Torch on the ROM and returns the archive it wrote.
  * @return Torch's output path, empty when Torch rejected the ROM or its configuration
  */
-std::string RunTorch(const std::filesystem::path& rom, const std::string& configDir, const std::string& dataDir) {
-    Companion* companion = new Companion(rom, ArchiveType::O2R, false, configDir, dataDir);
+std::string RunTorch(const std::filesystem::path& rom, const std::string& configDir, const std::string& outputDir) {
+    Companion* companion = new Companion(rom, ArchiveType::O2R, false, configDir, outputDir);
     Companion::Instance = companion;
     companion->Init(ExportType::Binary);
     std::string outputPath = companion->GetOutputPath();
@@ -90,24 +90,20 @@ bool FinalizeArchive(const std::filesystem::path& written, const std::filesystem
 
 } // namespace
 
-bool Ps5EnsureGameArchive(const std::string& dataDir, const std::string& titleDir) {
+bool Ps5EnsureGameArchive(const std::string& titleDir) {
     const std::string torchConfigDir = titleDir + "/assets";
-    const std::filesystem::path archive = std::filesystem::path(dataDir) / SSB64_O2R_NAME;
+    const std::filesystem::path archive = std::filesystem::path(titleDir) / SSB64_O2R_NAME;
     if (ArchiveIsCurrent(archive)) {
         return true;
     }
-    std::filesystem::path rom = FindRom(dataDir);
+    const std::filesystem::path rom = FindRom(titleDir);
     if (rom.empty()) {
-        rom = FindRom(titleDir);
-    }
-    if (rom.empty()) {
-        Report("no ROM (.z64/.n64/.v64) in " + dataDir + " or " + titleDir + "; copy the Smash Remix ROM to " +
-               dataDir);
+        Report("no ROM (.z64/.n64/.v64) in " + titleDir + "; copy the Smash Remix ROM there");
         return false;
     }
     Report("extracting assets from " + rom.string());
     try {
-        const std::string written = RunTorch(rom, torchConfigDir, dataDir);
+        const std::string written = RunTorch(rom, torchConfigDir, titleDir);
         std::error_code ec;
         if (written.empty() || !std::filesystem::exists(written, ec)) {
             Report("Torch did not write an archive: unsupported ROM dump or missing " + torchConfigDir +
