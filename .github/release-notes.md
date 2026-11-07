@@ -1,13 +1,11 @@
 ## Highlights
 
-**New: self-updating Android and Switch.** The game now downloads and installs new releases itself.
+**Fix: fighters sinking into the floor.** Marth's and Roy's Dancing Blade (neutral special) drew the fighter buried up
+to the shoulders on its first two swings. Moves that copied hidden-joint animation flags from a vanilla parent fighter
+now follow their own Remix animation data; the same fix also applies to moves of Wario, Piano, Wolf, Mewtwo, Sheik,
+Dedede, Goemon, Banjo and Peach.
 
-- Android: on launch the app checks for a new release, downloads the APK and asks Android to install it (one tap to
-  confirm). The first install from this release must be done by hand; later releases update in place. If you installed
-  a build signed with another key, uninstall it once first.
-- Switch: About > Check for updates downloads the new `BattleShip-Remix.nro` and replaces it on the SD card, then
-  Restart Game relaunches it. The release now also ships the bare `BattleShip-Remix.nro`.
-- Remix menu: every setting has a short tooltip explaining what it does.
+The self-updaters added in the previous release (Android, Switch, desktop) offer this version automatically.
 
 ## Install
 
