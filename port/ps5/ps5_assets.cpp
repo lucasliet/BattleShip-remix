@@ -90,14 +90,19 @@ bool FinalizeArchive(const std::filesystem::path& written, const std::filesystem
 
 } // namespace
 
-bool Ps5EnsureGameArchive(const std::string& dataDir, const std::string& torchConfigDir) {
+bool Ps5EnsureGameArchive(const std::string& dataDir, const std::string& titleDir) {
+    const std::string torchConfigDir = titleDir + "/assets";
     const std::filesystem::path archive = std::filesystem::path(dataDir) / SSB64_O2R_NAME;
     if (ArchiveIsCurrent(archive)) {
         return true;
     }
-    const std::filesystem::path rom = FindRom(dataDir);
+    std::filesystem::path rom = FindRom(dataDir);
     if (rom.empty()) {
-        Report("no ROM (.z64/.n64/.v64) in " + dataDir + "; copy the Smash Remix ROM there");
+        rom = FindRom(titleDir);
+    }
+    if (rom.empty()) {
+        Report("no ROM (.z64/.n64/.v64) in " + dataDir + " or " + titleDir + "; copy the Smash Remix ROM to " +
+               dataDir);
         return false;
     }
     Report("extracting assets from " + rom.string());

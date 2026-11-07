@@ -1022,8 +1022,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 #elif defined(__PS5__)
 		// PS5 native title: the archive lives in the writable data folder (/data/BattleShip-Remix) and is
 		// extracted there from the user's ROM; Torch's config ships in the title's assets folder.
-		if (!ssb64::Ps5EnsureGameArchive(Ship::Context::GetAppDirectoryPath(),
-		                                 Ship::Context::GetAppBundlePath() + "/assets")) {
+		if (!ssb64::Ps5EnsureGameArchive(Ship::Context::GetAppDirectoryPath(), Ship::Context::GetAppBundlePath())) {
 			PortShutdown();
 			return 1;
 		}
