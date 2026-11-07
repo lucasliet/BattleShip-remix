@@ -41,9 +41,16 @@ grep -qF "$heap_default" "$heap_source"
 sed -i "s/$heap_default/write_u64(result.data, result.heap_size, 0x10000000ULL);/" "$heap_source"
 
 # app_heap.c takes over malloc through --wrap; all six must be wrapped together.
+# PS5_EXTRA_WRAPS adds the title's own wraps (the game passes pthread_create, see
+# port/ps5/ps5_thread_stack.c).
+extra_wraps=""
+for wrapped_symbol in ${PS5_EXTRA_WRAPS:-}; do
+    extra_wraps+=" --wrap=$wrapped_symbol"
+done
 link_script="$APP/tools/build.sh"
 grep -qF -- '--eh-frame-hdr \' "$link_script"
-sed -i 's/--eh-frame-hdr \\/--eh-frame-hdr --wrap=fopen --wrap=malloc --wrap=calloc --wrap=realloc --wrap=free --wrap=posix_memalign --wrap=malloc_usable_size \\/' \
+wraps="--wrap=fopen${extra_wraps} --wrap=malloc --wrap=calloc --wrap=realloc --wrap=free --wrap=posix_memalign --wrap=malloc_usable_size"
+sed -i "s/--eh-frame-hdr \\\\/--eh-frame-hdr ${wraps} \\\\/" \
     "$link_script"
 
 cp "$TEMPLATE/tooling/native/ps5-pie.ld" "$APP/tooling/native/ps5-pie-base.ld"
