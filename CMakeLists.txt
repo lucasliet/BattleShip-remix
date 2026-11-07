@@ -381,10 +381,12 @@ add_custom_target(PrepareBuildInputs
 # launch. The PNG bytes are baked into the binary via tools/embed_icon.py
 # so port/port_window_icon.cpp doesn't have to chase the icon across
 # build/dev-tree/AppImage layouts. Region-aware: US uses assets/icon.png,
-# JP uses assets/icon-jp.png.
+# JP uses assets/icon-jp.png, Remix assets/icon-remix.png.
 set(SSB64_ICON_PNG ${CMAKE_CURRENT_SOURCE_DIR}/assets/icon.png)
 if(SSB64_VERSION STREQUAL "jp")
     set(SSB64_ICON_PNG ${CMAKE_CURRENT_SOURCE_DIR}/assets/icon-jp.png)
+elseif(SSB64_VERSION STREQUAL "remix")
+    set(SSB64_ICON_PNG ${CMAKE_CURRENT_SOURCE_DIR}/assets/icon-remix.png)
 endif()
 set(SSB64_ICON_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 set(SSB64_ICON_GEN ${SSB64_ICON_GEN_DIR}/port_icon_data.h)
@@ -1215,12 +1217,14 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT BATTLESHIP_UWP)
     target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
     # Embed the application icon (Explorer / taskbar / window). The .rc
     # is generated per-region from port/ssb64.rc.in: US embeds
-    # assets/icon.ico, JP embeds assets/icon-jp.ico. The icon also
+    # assets/icon.ico, JP assets/icon-jp.ico, Remix assets/icon-remix.ico. The icon also
     # surfaces as the .exe's Explorer thumbnail because RC resources
     # carry over to the PE's icon group.
     set(SSB64_RC_ICON_PATH "${CMAKE_SOURCE_DIR}/assets/icon.ico")
     if(SSB64_VERSION STREQUAL "jp")
         set(SSB64_RC_ICON_PATH "${CMAKE_SOURCE_DIR}/assets/icon-jp.ico")
+    elseif(SSB64_VERSION STREQUAL "remix")
+        set(SSB64_RC_ICON_PATH "${CMAKE_SOURCE_DIR}/assets/icon-remix.ico")
     endif()
     configure_file(
         ${CMAKE_SOURCE_DIR}/port/ssb64.rc.in

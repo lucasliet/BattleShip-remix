@@ -59,12 +59,14 @@ assets/*
 !assets/icon-jp.ico
 !assets/icon-jp.icns
 !assets/icon-remix.png
+!assets/icon-remix.ico
 !assets/switch/
 !assets/switch/*.jpg
 !assets/ps5/
 !assets/ps5/param.json
 !assets/ps5/icon0.png
 !assets/macos_dmg_banner.png
+!assets/macos_dmg_banner-remix.png
 !assets/BattleShip.svg
 !assets/SmashRemix.png
 !assets/readme-stats/

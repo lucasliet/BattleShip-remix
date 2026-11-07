@@ -151,9 +151,22 @@ cp "$ROOT/yamls/$VER/"*.yml "$APP/Contents/Resources/yamls/$VER/"
 # assets/icon-jp.icns (added with the JP bifurcation so a user with
 # both .app bundles sees distinct icons in Finder / Dock). The bundle
 # always names it AppIcon.icns to match Info.plist's CFBundleIconFile.
-ICNS_SRC="$ROOT/assets/icon.icns"
-[[ "$VER" == "jp" ]] && ICNS_SRC="$ROOT/assets/icon-jp.icns"
-cp "$ICNS_SRC" "$APP/Contents/Resources/AppIcon.icns"
+# Remix builds its .icns from assets/icon-remix.png (the "SR" artwork), as
+# scripts/macos/package-remix-contained.sh does.
+if [[ "$VER" == "remix" ]]; then
+    ICONSET="$(mktemp -d)/AppIcon.iconset"
+    mkdir -p "$ICONSET"
+    for size in 16 32 128 256 512; do
+        sips -z $size $size "$ROOT/assets/icon-remix.png" --out "$ICONSET/icon_${size}x${size}.png" >/dev/null
+        sips -z $((size * 2)) $((size * 2)) "$ROOT/assets/icon-remix.png" --out "$ICONSET/icon_${size}x${size}@2x.png" >/dev/null
+    done
+    iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
+    rm -rf "$(dirname "$ICONSET")"
+else
+    ICNS_SRC="$ROOT/assets/icon.icns"
+    [[ "$VER" == "jp" ]] && ICNS_SRC="$ROOT/assets/icon-jp.icns"
+    cp "$ICNS_SRC" "$APP/Contents/Resources/AppIcon.icns"
+fi
 
 # Bundle the ESC menu fonts. Menu.cpp::FindMenuAssetPath walks up from
 # RealAppBundlePath() (= Contents/Resources inside an .app on macOS)
@@ -458,6 +471,7 @@ echo "  signature verified ($SIGNING_MODE)"
 # script always emits a working DMG unless DMG_REQUIRE_STYLED=1 is set.
 DMG_VOLNAME="$APP_NAME"
 DMG_BG_SRC="$ROOT/assets/macos_dmg_banner.png"
+[[ "$VER" == "remix" ]] && DMG_BG_SRC="$ROOT/assets/macos_dmg_banner-remix.png"
 DMG_BG_LONG=600
 DMG="$DIST_DIR/$APP_NAME.dmg"
 DMG_STAGE="$DIST_DIR/dmg-stage"

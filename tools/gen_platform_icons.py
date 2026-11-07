@@ -9,6 +9,7 @@ Outputs:
   assets/switch/icon.jpg           256x256 JPEG for the original BattleShip .nro
   assets/switch/icon-remix.jpg     256x256 JPEG for the BattleShip-Remix .nro
   assets/ps5/icon0.png             512x512 RGB for the PS5 title (sce_sys/icon0.png)
+  assets/icon-remix.ico            Windows icon of BattleShip-Remix.exe (16 to 256 px)
   android/app/src/remix/res/drawable-nodpi/ic_launcher_foreground.png
                                    432x432 RGBA adaptive-icon foreground, tile in the safe zone
 
@@ -31,6 +32,7 @@ PS5_SIZE = 512
 ANDROID_CANVAS = 432
 # Adaptive icons crop to a 264 px circle-ish mask out of 432; the tile fits inside it.
 ANDROID_TILE = 288
+WINDOWS_ICON_SIZES = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
 
 
 def flatten_on_black(tile, size):
@@ -57,7 +59,8 @@ def main():
     flatten_on_black(remix, SWITCH_SIZE).save(ASSETS / "switch/icon-remix.jpg", "JPEG", quality=92, optimize=True)
     flatten_on_black(remix, PS5_SIZE).save(ASSETS / "ps5/icon0.png")
     write_android_foreground(remix, ANDROID_FOREGROUND)
-    print("wrote the Switch, PS5 and Android icons")
+    remix.save(ASSETS / "icon-remix.ico", sizes=WINDOWS_ICON_SIZES)
+    print("wrote the Switch, PS5, Android and Windows icons")
 
 
 if __name__ == "__main__":
