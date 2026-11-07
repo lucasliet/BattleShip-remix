@@ -935,7 +935,11 @@ static int PortInitImpl(int argc, char* argv[]) {
 		// Esc Menu screen, Toggle with Esc.
 		if (auto gui = window->GetGui()) {
 			port_log("SSB64: attaching Port menu ...\n");
-			gui->SetMenu(std::make_shared<ssb64::PortMenu>());
+			PS5_BOOT_TRACE("PortMenu construct");
+			auto portMenu = std::make_shared<ssb64::PortMenu>();
+			PS5_BOOT_TRACE("PortMenu SetMenu");
+			gui->SetMenu(portMenu);
+			PS5_BOOT_TRACE("PortMenu set");
 #ifdef REGION_REMIX
 			gui->AddGuiWindow(remix_input_display_make_window());
 			gui->AddGuiWindow(remix_hud_text_make_window());
@@ -1327,6 +1331,7 @@ int PortIsRunning(void) {
 
 #ifdef __PS5__
 extern "C" void ps5_boot_trace(const char* step);
+extern "C" void ps5_install_crash_trace(void);
 #define PS5_BOOT_TRACE(step) ps5_boot_trace(step)
 #else
 #define PS5_BOOT_TRACE(step) ((void)0)
@@ -1334,6 +1339,9 @@ extern "C" void ps5_boot_trace(const char* step);
 
 int main(int argc, char* argv[]) {
 	PS5_BOOT_TRACE("main entered");
+#ifdef __PS5__
+	ps5_install_crash_trace();
+#endif
 	/* Use an absolute path for ssb64.log so it lands in a predictable
 	 * place regardless of how the binary was launched (Finder / open /
 	 * shell from any cwd). SDL_GetPrefPath returns the OS app-data dir
