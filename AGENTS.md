@@ -113,6 +113,15 @@ Stale worktrees under `.claude/worktrees/` from past sessions are fine to remove
 
 ---
 
+## Releases
+
+A release is a `v*` tag pushed on `feature/remix-port`; `.github/workflows/release-remix.yml` builds every platform
+and publishes a draft whose body is `.github/release-notes.md`. Every new tag ships updated notes: before tagging,
+rewrite the `## Highlights` section of `.github/release-notes.md` for what this release changes (and the Install /
+Files sections when they change) and commit it, so the draft never repeats the previous release's text.
+
+---
+
 ## Agent Directives
 
 ### Pre-Work
