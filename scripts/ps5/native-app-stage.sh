@@ -70,6 +70,13 @@ done
 
 cp "$PARAM_JSON" "$APP/sce_sys/param.json"
 [[ -n "$ICON" ]] && cp "$ICON" "$APP/sce_sys/icon0.png"
+# Title background (scripts/ps5/make_title_art.py) in place of the boilerplate's art; no title sound.
+TITLE_ART="$(dirname "$ICON")/pic0.dds"
+if [[ -n "$ICON" && -s "$TITLE_ART" ]]; then
+    cp "$TITLE_ART" "$APP/sce_sys/pic0.dds"
+    cp "$TITLE_ART" "$APP/sce_sys/pic1.dds"
+    rm -f "$APP/sce_sys/snd0.at9"
+fi
 if [[ -n "${PS5_APP_ASSETS:-}" ]]; then
     rm -rf "$APP/assets"
     cp -a "$PS5_APP_ASSETS" "$APP/assets"
