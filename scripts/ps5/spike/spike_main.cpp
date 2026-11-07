@@ -80,7 +80,7 @@ void testRtti() {
 void testSharedPtr() {
     auto shared = std::make_shared<std::vector<int>>(1000, 3);
     std::weak_ptr<std::vector<int>> weak = shared;
-    bool ok = weak.lock() != nullptr && shared.use_count() == 1 && (*shared)[999] == 3;
+    bool ok = shared.use_count() == 1 && weak.lock() != nullptr && (*shared)[999] == 3;
     shared.reset();
     report("shared_ptr", ok && weak.expired());
 }

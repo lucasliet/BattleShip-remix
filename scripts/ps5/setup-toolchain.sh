@@ -111,6 +111,9 @@ EOF
 cat > "$T/llvm/bin/host-clang++" <<EOF
 #!/usr/bin/env bash
 LIBDIR="$T/llvm/lib/x86_64-unknown-linux-gnu"
+for argument in "\$@"; do
+    [[ "\$argument" == "-c" ]] && exec "$T/llvm/bin/clang++" -stdlib=libc++ "\$@"
+done
 exec "$T/llvm/bin/clang++" -stdlib=libc++ -nostdlib++ "\$@" "\$LIBDIR/libc++.a" "\$LIBDIR/libc++abi.a" "\$LIBDIR/libunwind.a" -lpthread -ldl
 EOF
 chmod +x "$T/llvm/bin/host-clang++"

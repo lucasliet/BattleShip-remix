@@ -107,7 +107,7 @@ for stub in agc_link_stub:libSceAgc agc_driver_link_stub:libSceAgcDriver; do
         "$APP/build/native-imports/$source_name.o"
 done
 
-CXX="$T/llvm/bin/host-clang++" make -C "$APP" --no-print-directory -j8 app HOST_CXX="$T/llvm/bin/host-clang++"
+CXX="$T/llvm/bin/host-clang++" USE_CCACHE=0 make -C "$APP" --no-print-directory -j8 app HOST_CXX="$T/llvm/bin/host-clang++"
 dist="$APP/dist/$TITLE_ID"
 test -s "$dist/eboot.bin"
 test -s "$dist/sce_module/libc.prx"
