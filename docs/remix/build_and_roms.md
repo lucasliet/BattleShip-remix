@@ -1,14 +1,8 @@
 # Builds and ROMs: BattleShip original (US) and BattleShip-Remix
 
-Covers the ROMs each build needs, which Remix version they are, and the desktop, test-package, Switch, Android and PS5 build commands. Code and scripts:
-`CMakeLists.txt` (`SSB64_VERSION`, `SSB64_APP_NAME`), `scripts/macos/`, `scripts/linux/`, `scripts/switch/`, `scripts/remix/`. Generic build steps for
-Linux and Windows are in `BUILDING.md`.
-
-The `.toolchain/` folder used by the commands below is not in git: the setup scripts create it inside the repository, with no package manager and no `sudo`. On macOS run
-`scripts/switch/setup-toolchain.sh` first (it downloads cmake, ninja and the Switch toolchain, and writes `.toolchain/env.sh`, which the other scripts need), then
-`scripts/macos/setup-host-deps.sh` (the desktop libraries). The desktop script does not build GLEW: `libGLEW.a` 2.1.0 has to be in `.toolchain/host/deps/lib` already
-(a known gap). On macOS the scripts expect `python3`, `curl`, `unzip`, `uv` and the Xcode command line tools (`clang++`, `git`) to be present. The PS5 build is Linux x86_64
-only, and the release workflow builds Android on Linux too (`scripts/ps5/setup-toolchain.sh` needs `git`, `curl`, `unzip`, `tar` with xz, `uv` and a host C compiler).
+Covers the ROMs each build needs, which Remix version they are, and the desktop, packaging, Switch, Android and PS5 build commands. Prerequisites and the
+generic steps for Linux, macOS and Windows are in `BUILDING.md`; this page adds what is specific to the Remix. Code and scripts: `CMakeLists.txt` (`SSB64_VERSION`,
+`SSB64_APP_NAME`) and the `scripts/` folder of each platform.
 
 No ROM and no `.o2r` enters git (`*.z64`, `build/`, `build-*/` and `dist/` are in `.gitignore`). Whoever clones the repository supplies the ROMs below and
 generates the `.o2r` on the desktop.
@@ -61,35 +55,34 @@ assembly from a US ROM. The vanilla ROM cannot stand in for `baserom.remix.z64`,
 The game code is compiled per region (`REGION_US` or `REGION_REMIX`), so each version is its own build with its own directory. The binary and `.o2r` names come from
 `SSB64_APP_NAME` (`CMakeLists.txt`). Both can exist side by side.
 
-## Desktop build of the original BattleShip (macOS, contained toolchain)
+## Desktop build
 
-Same commands as the Remix, changing the version and the directory. It only needs `baserom.us.z64`.
+Choose the product with `SSB64_VERSION` (`us` or `remix`, default `remix`) and use one build directory per product (table above):
+
+```bash
+cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DSSB64_VERSION=remix
+cmake --build build --target ssb64 -j 4
+```
+
+For the original BattleShip use `-B build-us -DSSB64_VERSION=us`; it only needs `baserom.us.z64`, and the `BattleShip` binary loads `BattleShip.o2r` and `f3d.o2r` from the directory
+where it runs (`ExtractAssets` generates them from the ROM). The Remix result in `build/` is `BattleShip-Remix` (the target is `ssb64`), `BattleShip-Remix.o2r`,
+`BattleShip-Remix.o2r.recipe` and `f3d.o2r`. A new file under `decomp/src` needs the `cmake -S ... -B ...` step again before the build.
+
+### Optional: desktop dependencies without a system install (macOS)
+
+Instead of installing the libraries on the system, two scripts put everything under a `.toolchain/` folder inside the repository (it is not in git). Run
+`scripts/switch/setup-toolchain.sh` first (it downloads cmake, ninja and the Switch toolchain, and writes `.toolchain/env.sh`, which the other scripts need), then
+`scripts/macos/setup-host-deps.sh` (libzip, nlohmann_json, tinyxml2, spdlog and SDL2 under `.toolchain/host/deps`). Neither uses a package manager or `sudo`; they expect `python3`,
+`curl`, `unzip`, `uv` and the Xcode command line tools. The desktop script does not build GLEW: `libGLEW.a` 2.1.0 has to be in `.toolchain/host/deps/lib` already (a known gap).
+Then configure with that cmake and ninja and point CMake at those libraries:
 
 ```bash
 PATH=$PWD/.toolchain/host/ninja:$PATH
-.toolchain/host/cmake/CMake.app/Contents/bin/cmake -S $PWD -B $PWD/build-us -GNinja -DCMAKE_BUILD_TYPE=Release \
-  -DSSB64_VERSION=us -DCMAKE_IGNORE_PREFIX_PATH="/opt/homebrew;/usr/local" \
-  -DCMAKE_PREFIX_PATH=$PWD/.toolchain/host/deps
-.toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build-us --target ssb64 -j 4
-(cd build-us && ./BattleShip)
+.toolchain/host/cmake/CMake.app/Contents/bin/cmake -S $PWD -B $PWD/build -GNinja -DCMAKE_BUILD_TYPE=Release -DSSB64_VERSION=remix \
+  -DCMAKE_IGNORE_PREFIX_PATH="/opt/homebrew;/usr/local" -DCMAKE_PREFIX_PATH=$PWD/.toolchain/host/deps
 ```
 
-The `BattleShip` binary loads `BattleShip.o2r` and `f3d.o2r` from the directory where it runs (`ExtractAssets` generates them from `baserom.us.z64`).
-
-## Desktop build of BattleShip-Remix (macOS, contained toolchain)
-
-Everything comes from `.toolchain/`: cmake and ninja from `scripts/switch/setup-toolchain.sh`, the libraries from `scripts/macos/setup-host-deps.sh`. `SSB64_VERSION` defaults to `remix`. Configure with Ninja and `Release`:
-
-```bash
-PATH=$PWD/.toolchain/host/ninja:$PATH
-.toolchain/host/cmake/CMake.app/Contents/bin/cmake -S $PWD -B $PWD/build -GNinja -DCMAKE_BUILD_TYPE=Release \
-  -DSSB64_VERSION=remix -DCMAKE_IGNORE_PREFIX_PATH="/opt/homebrew;/usr/local" \
-  -DCMAKE_PREFIX_PATH=$PWD/.toolchain/host/deps
-.toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j 4
-```
-
-Result in `build/`: `BattleShip-Remix` (the target is `ssb64`), `BattleShip-Remix.o2r`, `BattleShip-Remix.o2r.recipe`, `f3d.o2r`. Desktop dependencies:
-`scripts/macos/setup-host-deps.sh`. A new file under `decomp/src` needs the `cmake -S ... -B ...` step before the build.
+### Assets
 
 `ssb64` depends on `ExtractAssets`: with `baserom.remix.z64` present, the build runs `torch o2r baserom.remix.z64 -s <repo> -d build/extracted` and copies the result.
 It then redoes the `.o2r` only when Torch, `config.yml`, `yamls/remix/*.yml` or the ROM change. The `.recipe` (41 bytes) is the SHA-1 of those inputs
@@ -107,12 +100,10 @@ body is `.github/release-notes.md`. The Remix build's updater reads `lucasliet/B
 (`port/enhancements/Updater.cpp`). The inherited upstream workflows are disabled in the fork.
 
 - **macOS:** first make a Release build with `-DNON_PORTABLE=ON` in `build-macos-release/`, then run `scripts/macos/package-remix-contained.sh`. It reads the `.o2r`,
-  `f3d.o2r` and the icons from `build/` and writes `dist/desktop/BattleShip-Remix.app`, `.dmg` and `.zip`. It does not use dylibbundler: the libraries are static from
-  `.toolchain/host/deps`. Scratch files go to `$TMPDIR` (default `build-macos-release/`) and are removed on exit.
-- **Linux x86_64 (AppImage, via podman):** run `scripts/linux/package-remix-appimage.sh [build|package|all]`. It builds the image from `scripts/linux/Dockerfile.jammy`
-  (Ubuntu 22.04; CMake 3.31.6, appimagetool 1.9.1 and linuxdeploy `1-alpha-20251107-1` pinned by sha256) and calls `build-in-container.sh` and then
-  `package-in-container.sh`. Output goes to `build-linux-release/`. The volume `ssb64-linux-work` keeps the build tree between runs. On Apple silicon the amd64
-  image runs emulated, so the first build is slow.
+  `f3d.o2r` and the icons from `build/` and writes `dist/desktop/BattleShip-Remix.app`, `.dmg` and `.zip`. It does not use dylibbundler: it expects the static libraries of the optional macOS
+  setup above in `.toolchain/host/deps`. Scratch files go to `$TMPDIR` (default `build-macos-release/`) and are removed on exit.
+- **Linux x86_64 (AppImage):** run `scripts/linux/package-remix-appimage.sh [build|package|all]`. It needs podman, builds inside a container described by
+  `scripts/linux/Dockerfile.jammy` and writes to `build-linux-release/`.
 - The version comes from `DIST_VERSION`, default `2.0.1-port.<short HEAD>`. Check that the `.o2r.recipe` in `build/` matches the current Torch before packaging.
 
 ## Installing a release package of BattleShip-Remix
@@ -178,7 +169,7 @@ If the `.o2r` or Torch change (a new `.recipe`), rebuild the package: an old `.o
 
 1. `git submodule update --init --recursive`.
 2. Put `baserom.remix.z64` and `baserom.us.z64` in the root and check the SHA-1 against the table above (`shasum -a 1 baserom.*.z64`).
-3. `scripts/switch/setup-toolchain.sh` first (cmake, ninja, `.toolchain/env.sh`), then `scripts/macos/setup-host-deps.sh` (desktop libraries).
+3. The dependencies listed in `BUILDING.md` (on macOS, optionally the scripts under "Optional: desktop dependencies without a system install").
 4. Desktop build (above), then the Switch build and pack.
 5. For the Remix symbol map and the action tables: `scripts/remix/assemble-remix.sh` (writes `build/remixasm/remix.sym`), then
    `.toolchain/host/venv/bin/python -I tools/gen_remix_actions.py`.
@@ -211,7 +202,7 @@ debug-signed.
 ## PS5 build (BattleShip-Remix)
 
 A native PS5 title (`PPSA99264`, "BattleShip Remix") for jailbroken consoles with ShadowMountPlus. Built on a Linux
-x86_64 host (or the `build-ps5` job of `release-remix.yml`) with a toolchain kept under `.toolchain/ps5`:
+x86_64 host (or the `build-ps5` job of `release-remix.yml`) with a toolchain kept under `.toolchain/ps5`; `scripts/ps5/setup-toolchain.sh` needs `git`, `curl`, `unzip`, `tar` with xz, `uv` and a host C compiler:
 
 ```
 scripts/ps5/setup-toolchain.sh      # pinned SDK, LLVM 18, ps5-opengl, boilerplate, SDL (scripts/ps5/packages.lock)

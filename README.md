@@ -151,7 +151,7 @@ BattleShip, the port this fork builds on, was created by [JRickey](https://githu
 
 ## Building
 
-The Remix build (macOS desktop and Switch from a self-contained toolchain under `.toolchain/`, PS5 on Linux x86_64, Android on Linux (as in CI), and a Linux AppImage built in a podman container) is described in [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md). The generic BattleShip steps (including Windows) are in [BUILDING.md](BUILDING.md).
+The Remix build (ROMs, assets, desktop, Switch, Android and PS5) is described in [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md). The generic BattleShip steps (including Windows) are in [BUILDING.md](BUILDING.md).
 
 ## Architecture
 
