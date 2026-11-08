@@ -18,9 +18,9 @@ What the port covers:
 - the Remix menus and screens: the character select panel and its options, the Remix settings and toggles (in the port menu), Character Data, Sound Test, Gallery, credits, results and Match Stats;
 - the Remix audio banks (music and voices) and the CPU AI changes.
 
-The few places where the port deliberately behaves differently from the assembly are listed in [`docs/remix/deviations.md`](docs/remix/deviations.md). Widescreen stays out of scope for the Remix build (4:3).
+The few places where the port deliberately behaves differently from the assembly are listed in [`docs/remix/deviations.md`](docs/remix/deviations.md). The Remix screens are authored for 4:3: the optional Widescreen setting only widens battle scenes, and menus stretch.
 
-[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .nro)**, **Android (arm64 .apk)** and **PlayStation 5 (homebrew title folder)** packages, and the built-in updater of the Remix build follows them. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
+[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .nro)**, **Android (arm64 .apk)** and **PlayStation 5 (homebrew title folder)** packages, and the built-in updater of every platform follows them. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
 
 ## No copyrighted assets are included in this repository
 
@@ -57,6 +57,7 @@ sdmc:/switch/BattleShip-Remix/
 ├── f3d.o2r
 ├── config.yml
 ├── gamecontrollerdb.txt
+├── README.txt
 └── assets/
 ```
 
@@ -104,7 +105,7 @@ Everything below comes from BattleShip and is toggleable in-game from the ESC me
 ### Rendering (powered by libultraship / Fast3D)
 
 - Internal resolution scaling, MSAA anti-aliasing, three-point texture filtering
-- Full widescreen support, including ultrawide resolutions.
+- Optional widescreen for battle scenes, including ultrawide resolutions (menus stretch; off by default on the Switch)
 - Renderer backend selection (OpenGL / Metal / Direct3D), VSync, windowed-fullscreen, multi-window
 - **Post-process shader support** with an in-app shader-pack downloader
 
@@ -122,7 +123,7 @@ Everything below comes from BattleShip and is toggleable in-game from the ESC me
 
 ### Platform & quality-of-life
 
-- Runs natively on **macOS (Apple Silicon), Linux, Windows, and Android**
+- Runs natively on **macOS (Apple Silicon), Linux, Windows, Android, Nintendo Switch and PlayStation 5**
 - First-run ROM-extraction wizard, built-in update checker/downloader, and Discord Rich Presence
 
 ### Rollback netcode & online play
@@ -179,7 +180,7 @@ The port has three layers and they are kept deliberately separate:
 
 ### Asset pipeline
 
-`baserom.us.z64` is never read at runtime. At build time, **Torch** walks the ROM with the YAMLs under `yamls/us/` and emits `BattleShip.o2r` — a zip-format archive of typed resources (textures, sequences, sample banks, animations, reloc files). At launch, libultraship's resource manager mounts `BattleShip.o2r` + `f3d.o2r` and the port code requests resources by path. This is the same pipeline used by Ship of Harkinian, Starship, SpaghettiKart, etc.
+The ROM is never read at runtime. **Torch** walks it with the YAMLs under `yamls/<version>/` and emits the game archive (`BattleShip-Remix.o2r` for the Remix, `BattleShip.o2r` for vanilla) — a zip-format archive of typed resources (textures, sequences, sample banks, animations, reloc files). A release does this on the first launch from the ROM you supply; a source build does it during the build. At launch, libultraship's resource manager mounts the archive + `f3d.o2r` and the port code requests resources by path. A `.recipe` file next to the archive records which Torch revision, `config.yml` and YAMLs produced it, so the game re-extracts when they change. This is the same pipeline used by Ship of Harkinian, Starship, SpaghettiKart, etc.
 
 The relocatable-data files (fighter tables, item tables, effects, sprites) are SSB64-specific and required custom factories on the Torch side and a custom loader (`port/resource/RelocFileFactory.cpp`) on the runtime side.
 
@@ -211,7 +212,7 @@ The repo follows a single principle for changes to `decomp/src/`:
 
 > **Accuracy to game behavior > accuracy to ROM bytes.**
 
-That means IDO idioms that encode original N64 semantics — odd casts, `goto` flow, deliberate temporaries — are load-bearing and stay. But **compiler-compat shims** (warning suppressions, permissive flags, header shortcuts) that mask real bugs on modern LP64 toolchains do *not* survive. The most expensive lesson of the project was that `-Wno-implicit-function-declaration` was silently truncating 64-bit pointer returns to 32-bit `int` in dozens of places — see `docs/bugs/item_arrow_gobj_implicit_int_2026-04-20.md`. The shim is gone; the real declarations are in.
+That means IDO idioms that encode original N64 semantics — odd casts, `goto` flow, deliberate temporaries — are load-bearing and stay. But **compiler-compat shims** (warning suppressions, permissive flags, header shortcuts) that mask real bugs on modern LP64 toolchains do *not* survive. The most expensive lesson of the project was that `-Wno-implicit-function-declaration` was silently truncating 64-bit pointer returns to 32-bit `int` in dozens of places. The shim is gone; the real declarations are in.
 
 ### Naming prefixes
 
@@ -235,8 +236,6 @@ The decomp uses two-letter module prefixes throughout. Knowing them makes the so
 | `lb`   | Library (low-level utilities) |
 | `obj`  | GObj / DObj / OMObj — game-object wrappers |
 
-Full reference: [`docs/c_conventions.md`](docs/c_conventions.md).
-
 ### Endianness handling
 
 The N64 is big-endian; PC targets are little-endian. The port handles this in three layers:
@@ -245,13 +244,13 @@ The N64 is big-endian; PC targets are little-endian. The port handles this in th
 2. **Per-struct fixups** — small `portFixupStructU16` / `portFixupStructU8` helpers fix sub-word fields that the gross swap got wrong (e.g., `{u16, u8, u8}` patterns where the two `u8`s end up swapped).
 3. **Per-stream walkers** — animation events, spline interpolators, and other variable-length streams are halfswapped at file-bake time and need a per-stream un-halfswap on first access. These live in `port/port_aobj_fixup.{h,cpp}` and friends.
 
-If you find a new struct that reads garbage, the playbook in `docs/n64_reference.md` will tell you which layer it belongs in.
+If you find a new struct that reads garbage, work out which of the three layers it belongs in before patching the reads.
 
 ### Bitfield layout
 
-The IDO compiler packs small bitfields into preceding `u16` pad gaps, MSB-first. Modern compilers (Clang, GCC) on LE targets pack LSB-first into the next storage unit. Bitfield structs that travel through file data must be **rewritten under `#ifdef PORT`** to match the IDO physical layout — see `docs/debug_ido_bitfield_layout.md` for the workflow (compile + rabbitizer disasm to verify bit positions before porting).
+The IDO compiler packs small bitfields into preceding `u16` pad gaps, MSB-first. Modern compilers (Clang, GCC) on LE targets pack LSB-first into the next storage unit. Bitfield structs that travel through file data must be **rewritten under `#ifdef PORT`** to match the IDO physical layout (compile the original with IDO and disassemble with rabbitizer to verify the bit positions before porting).
 
-Patching the *reads* in game code instead of the *layout* is forbidden by team policy; the bug always comes back. See `feedback_struct_rewrite_over_overrides.md` in the project's memory for the long version.
+Patching the *reads* in game code instead of the *layout* is forbidden by team policy; the bug always comes back.
 
 ---
 
@@ -304,32 +303,29 @@ libultraship/ submodule — PC-native render / audio / input / resource mgr
 torch/        submodule — asset extractor (ROM → BattleShip.o2r)
 yamls/us/     Torch YAML extraction configs (some generated)
 tools/        Python helpers: reloc stubs, YAML gen, credits encoder
-docs/         architecture notes, bug write-ups, debugging guides
+docs/         build guide, deviations from the Remix, modding guide, developer notes
 debug_tools/  optional disasm / diff utilities (not required for a build)
 scripts/      packaging (.dmg / .AppImage / .zip), worktree helper
 ```
 
 ### Further reading
 
+- [`BUILDING.md`](BUILDING.md) — prerequisites and generic build steps (Linux, macOS, Windows)
+- [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md) — ROMs and hashes, and the desktop, Switch, Android and PS5 build and packaging steps
+- [`docs/remix/deviations.md`](docs/remix/deviations.md) — where the port deliberately differs from the Remix assembly
 - [`docs/modding.md`](docs/modding.md) — writing native C mods: the event catalog, function detours, and fighter override points
-- [`docs/architecture.md`](docs/architecture.md) — project status, ROM info, dependency map, source-tree layout
-- [`docs/c_conventions.md`](docs/c_conventions.md) — decomp naming prefixes, IDO idioms to preserve, code style, macros
-- [`docs/n64_reference.md`](docs/n64_reference.md) — RDRAM, RSP/RDP, GBI, audio, threading, endianness primer
-- [`docs/build_and_tooling.md`](docs/build_and_tooling.md) — CMake details, reloc stub regen, runtime logs, LP64 compat notes
-- [`docs/debug_gbi_trace.md`](docs/debug_gbi_trace.md) — capturing GBI traces from the port and a M64P plugin, diffing with `gbi_diff.py`
-- [`docs/debug_ido_bitfield_layout.md`](docs/debug_ido_bitfield_layout.md) — verifying ported struct bit positions against IDO output via rabbitizer
-- [`docs/bugs/README.md`](docs/bugs/README.md) — index of resolved bugs with per-bug root-cause and fix write-ups (~45 entries)
 
 ---
 
 ## Contributing
 
-PRs are welcome from anyone. If you're opening a bug report, the most useful things to include are:
+PRs are welcome from anyone. Bugs go through the [issue form](https://github.com/lucasliet/BattleShip-remix/issues/new/choose), which asks for what we need to act on a report:
 
-- SHA-1 of your `baserom.remix.z64` and `baserom.us.z64`
-- OS + architecture (especially macOS ARM64 vs x86_64, since LP64 bitfield layout has bitten us several times — see `docs/bugs/`)
-- The contents of `ssb64.log` from the run that reproduces the issue
-- A GBI trace if the issue is rendering-related (see `docs/debug_gbi_trace.md`)
+- Platform and game version (the "Version" line in the game menu); on Switch, also where the `.o2r` was generated
+- The exact fighter, stage and mode, and the steps to reproduce it
+- A screenshot for a graphics bug, or a video of the move for a gameplay bug
+- `ssb64.log` and `logs/BattleShip-Remix.log` from the run that reproduces the issue (both are overwritten on every launch, so copy them before opening the game again); on PS5 also `boot.txt`
+- SHA-1 of your ROM if extraction fails
 
 ## Credits & licensing
 

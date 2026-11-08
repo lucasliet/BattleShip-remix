@@ -4,7 +4,7 @@
 final-state reference: how Smash Remix 2.0.1 works (read from its source, `.toolchain/pkgs/smashremix-src/src`), how the port
 implements it, the deviations and how to test. The patch audit and its closed items, with the evidence of each, are in [`patch_audit.md`](patch_audit.md).
 
-ROMs (with SHA), Remix version and the desktop and Switch build steps: [`build_and_roms.md`](build_and_roms.md). Bug write-ups:
+ROMs (with SHA), Remix version and the desktop, Switch, Android and PS5 build steps: [`build_and_roms.md`](build_and_roms.md). Bug write-ups:
 [`../bugs/README.md`](../bugs/README.md) (`remix_*` files). In-game tests: skill `remix-smoke-tests`
 (`.claude/skills/remix-smoke-tests/`); unit tests: `tests/remix/` (`cmake --build build --target run_remix_mode_tests`).
 

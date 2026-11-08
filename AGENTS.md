@@ -11,7 +11,11 @@ Detailed reference material lives under `docs/`. Read the file that matches the 
 | Project status, ROM info, dependencies, source tree layout | `docs/architecture.md` |
 | C type system, decomp naming prefixes, code style, macros | `docs/c_conventions.md` |
 | RDRAM / RSP / RDP / GBI / audio / threading / controller / endianness | `docs/n64_reference.md` |
-| CMake build, reloc stub regen, runtime logs, LP64 compat notes | `docs/build_and_tooling.md` |
+| Build and package every platform (desktop, Switch, Android, PS5), ROMs and hashes, asset recipe, in-game updater | `docs/remix/build_and_roms.md` (generic prerequisites and Windows steps: `BUILDING.md`) |
+| Reloc stub regen, runtime logs, LP64 compat notes, asset recipe fingerprint | `docs/build_and_tooling.md` |
+| Switch, Android bring-up notes and the decisions behind them | `docs/switch_port_2026-10-12.md`, `docs/android_port_status_2026-05-01.md` |
+| Native C mods (event catalog, detours, fighter overrides) | `docs/modding.md` |
+| Netplay input staging and rollback boundary; per-frame state trace | `docs/netplay_architecture.md`, `docs/netcode_agent_rules.md`, `docs/state_trace.md` |
 | GBI trace capture (port + M64P plugin) and `gbi_diff.py` usage | `docs/debug_gbi_trace.md` |
 | IDO BE bitfield layout audit (compile + rabbitizer disasm to verify port struct bit positions) | `docs/debug_ido_bitfield_layout.md` |
 | Resolved bugs (index + per-bug root cause / fix write-ups) | `docs/bugs/README.md` |
@@ -29,18 +33,17 @@ When you fix a new significant bug, add an entry under `docs/bugs/` using the sl
 When asked to inspect GitHub issues, prefer the GitHub connector. If issue tools
 are not visible yet, first run tool discovery for "GitHub issue fetch/view" so
 the connector exposes `_fetch_issue` and `_fetch_issue_comments`, then fetch with
-`repository_full_name: "JRickey/BattleShip"`.
+`repository_full_name: "lucasliet/BattleShip-remix"`. This fork's issues live there; `JRickey/BattleShip`
+is the upstream BattleShip project and its issues are not this fork's.
 
-The local GitHub CLI is also authenticated as `JRickey` and has admin access to
-`JRickey/BattleShip`. If the human-formatted `gh issue view` output is blank or
-unreliable, use the JSON/template path instead:
+If the human-formatted `gh issue view` output is blank or unreliable, use the JSON/template path instead:
 
 ```bash
-gh issue view <number> -R JRickey/BattleShip --json number,title,state,author,body,url,comments,labels
+gh issue view <number> -R lucasliet/BattleShip-remix --json number,title,state,author,body,url,comments,labels
 ```
 
-Known-good check from 2026-06-01: issue #209 and its comments were accessible
-through both the connector and `gh --json`; #209 had no comments at that time.
+New issues arrive through `.github/ISSUE_TEMPLATE/bug_report.yml` (platform, version, ROM, fighter/stage/mode, steps,
+evidence, logs); blank issues are disabled.
 
 ---
 
@@ -109,7 +112,7 @@ Stale worktrees under `.claude/worktrees/` from past sessions are fine to remove
 
 - **Never use relative `build` paths in Bash tool calls** — Claude Code resets cwd between `Bash` calls. `cmake --build build` from the project root builds the main tree, not the worktree. Always use absolute paths: `cmake --build <worktree>/build ...`.
 - **Cap build parallelism at `-j 4` on the M1 16 GB machine.** Bare `-j` lets make spawn one clang per logical core; libultraship's Debug C++ TUs hold 1–2 GB resident each, so 8 in parallel push the laptop into swap and pin the fans for the whole compile. Always: `cmake --build <worktree>/build --target ssb64 -j 4`. Push to `-j 6` only when you know nothing else heavy is open. Worktree first-builds are full from-scratch (no shared cache with main tree), so this matters most the first time.
-- The binary loads `BattleShip.o2r` (ROM-derived, user-extracted) and `f3d.o2r` (shaders) from its CWD at launch; without them it exits with `archive ... does not exist`. `new-worktree.sh` symlinks both from the main tree's `build/` into the worktree's `build/`. If the main tree has never been extracted, run `cmake --build <main-tree>/build --target ExtractAssets` there first so the symlinks resolve. (`ssb64.o2r` was an early-development port-asset archive; it is no longer produced or loaded — the build never contains ROM-derived data beyond the user's own first-run `BattleShip.o2r`.)
+- The binary loads `BattleShip-Remix.o2r` (`BattleShip.o2r` for the vanilla build; ROM-derived, user-extracted) and `f3d.o2r` (shaders) from its CWD at launch; without them it exits with `archive ... does not exist`. `new-worktree.sh` symlinks both from the main tree's `build/` into the worktree's `build/`. If the main tree has never been extracted, run `cmake --build <main-tree>/build --target ExtractAssets` there first so the symlinks resolve. (`ssb64.o2r` was an early-development port-asset archive; it is no longer produced or loaded — the build never contains ROM-derived data beyond the user's own first-run `.o2r`.)
 
 ---
 

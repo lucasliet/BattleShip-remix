@@ -85,8 +85,10 @@ PATH=$PWD/.toolchain/host/ninja:$PATH
 ### Assets
 
 `ssb64` depends on `ExtractAssets`: with `baserom.remix.z64` present, the build runs `torch o2r baserom.remix.z64 -s <repo> -d build/extracted` and copies the result.
-It then redoes the `.o2r` only when Torch, `config.yml`, `yamls/remix/*.yml` or the ROM change. The `.recipe` (41 bytes) is the SHA-1 of those inputs
-(`<torch sha>:<config.yml sha>:<sha of each yaml>`); if it changes, the port re-extracts the `.o2r` by itself.
+It then redoes the `.o2r` only when Torch, `config.yml`, `yamls/remix/*.yml` or the ROM change. The `.recipe` (41 bytes) is the SHA-1 of
+`<tools/torch_extract_rev.txt>:<config.yml sha>:<sha of each yaml>` (`CMakeLists.txt`, `SSB64_ASSET_RECIPE_HASH`); if it changes, the port re-extracts
+the `.o2r` by itself. The Torch part is the pinned commit in `tools/torch_extract_rev.txt`, not the checked-out one: a Torch change that leaves the
+extracted data unchanged does not change the recipe. A change that does alter the output must update that file (`AGENTS.md`, "Asset extraction fingerprint").
 
 To redo only the assets: `cmake --build build --target ExtractAssets`.
 
@@ -95,16 +97,17 @@ To redo only the assets: `cmake --build build --target ExtractAssets`.
 These packages **embed `BattleShip-Remix.o2r`**, which is derived from the ROM. They are for personal use only and are never redistributed. A distributable package does
 not carry the `.o2r`: it is extracted from the user's ROM on first run, as `scripts/package-macos.sh`, `scripts/package-linux.sh` and
 `scripts/package-windows.ps1` do for every version. The fork's releases come from `.github/workflows/release-remix.yml`: a `v*` tag builds the
-macOS `.dmg` (ad-hoc signed, not notarized), the Linux AppImage, the Windows zip and the Switch SD-card zip (without `.o2r`), and opens a draft release whose
-body is `.github/release-notes.md`. The Remix build's updater reads `lucasliet/BattleShip-remix` releases
-(`port/enhancements/Updater.cpp`). The inherited upstream workflows are disabled in the fork.
+macOS `.dmg` (ad-hoc signed, not notarized), the Linux AppImage, the Windows zip, the Switch SD-card zip (without `.o2r`) plus the bare
+`BattleShip-Remix.nro` that the Switch updater downloads, the Android arm64 APK and the PS5 title zip, writes `SHA256SUMS.txt`, and opens a draft release whose
+body is `.github/release-notes.md`. Rewrite its `## Highlights` before tagging (`AGENTS.md`, "Releases"). The Remix build's updater reads
+`lucasliet/BattleShip-remix` releases (`port/enhancements/Updater.cpp`). The inherited upstream workflows (`release.yml`, `build*.yml`) are disabled in the fork.
 
 - **macOS:** first make a Release build with `-DNON_PORTABLE=ON` in `build-macos-release/`, then run `scripts/macos/package-remix-contained.sh`. It reads the `.o2r`,
   `f3d.o2r` and the icons from `build/` and writes `dist/desktop/BattleShip-Remix.app`, `.dmg` and `.zip`. It does not use dylibbundler: it expects the static libraries of the optional macOS
   setup above in `.toolchain/host/deps`. Scratch files go to `$TMPDIR` (default `build-macos-release/`) and are removed on exit.
 - **Linux x86_64 (AppImage):** run `scripts/linux/package-remix-appimage.sh [build|package|all]`. It needs podman, builds inside a container described by
   `scripts/linux/Dockerfile.jammy` and writes to `build-linux-release/`.
-- The version comes from `DIST_VERSION`, default `2.0.1-port.<short HEAD>`. Check that the `.o2r.recipe` in `build/` matches the current Torch before packaging.
+- The version comes from `DIST_VERSION`, default `2.0.1-port.<short HEAD>`. Check that the `.o2r.recipe` in `build/` matches the binary's recipe hash (the `SSB64 asset recipe hash` line of the CMake configure) before packaging.
 
 ## Installing a release package of BattleShip-Remix
 
@@ -153,17 +156,23 @@ running `build.sh us` and then `build.sh remix` reconfigures the same directory,
 The Home menu icon is a 256x256 JPEG embedded in the `.nro` by CMake (`assets/switch/icon.jpg` for the original, `assets/switch/icon-remix.jpg` for the Remix, with "SR"). Both
 are made from `assets/icon.png` and `assets/icon-remix.png` (the "SR" artwork) by `.toolchain/host/venv/bin/python -I tools/gen_platform_icons.py` (Pillow only), which also writes the PS5 `icon0.png` and the Android remix launcher foreground.
 
-### In-game updater (Switch)
+### In-game updater
 
-The About menu (Updates section) checks `releases/latest` of `lucasliet/BattleShip-remix` and, on "Download Update", downloads the bare release asset `BattleShip-Remix.nro`
+Every platform updates itself from `releases/latest` of `lucasliet/BattleShip-remix`:
+
+- **Desktop, Switch and PS5:** the About menu (Updates section). Desktop and the Switch also check at start-up and show a popup that offers the update and restarts the game after installing it (`port/gui/UpdatePopup.cpp`). The PS5 updater installs the release zip over the title folder (`UpdaterPS5.cpp`, `UpdateZipInstall.cpp`).
+- **Android:** a Java flow at app boot, not the C++ updater: `AppUpdater` reads the latest release, `UpdatePrompt` offers it in a dialog (the check waits at most 4 s and any failure or refusal goes on to the game), and the APK (`BattleShip-Remix-android.apk`) is downloaded straight into a `PackageInstaller` session; Android then asks the player to confirm the install (`InstallStatusReceiver`). Only release-tagged builds take part (`versionName` `v...`, set by the release CI); dev and debug builds never update themselves.
+
+On the Switch, "Download Update" downloads the bare release asset `BattleShip-Remix.nro`
 (the release workflow publishes it next to the zip) to `<running .nro>.part`, checks the size and the `NRO0` header, then swaps it over the running file (the old one
 stays as `.old` until the swap succeeds). "Restart Game" relaunches it through `envSetNextLoad`. Only the `.nro` is replaced: if a release also changes `f3d.o2r`,
 `config.yml`, `assets/` or needs a new `.o2r`/`.recipe`, those still have to be copied by hand. Code: `port/enhancements/UpdaterSwitch.cpp` (libcurl through the
 `switch-curl` portlib, pinned in `scripts/switch/packages.lock`; TLS is the console's own ssl service), shared logic and tests in `UpdateRelease.cpp`/`UpdateInstall.cpp`
 (`cmake --build build --target run_updater_tests`).
 
-If the `.o2r` or Torch change (a new `.recipe`), rebuild the package: an old `.o2r` on the SD card with a new `.nro` causes a storm of invalid reloc tokens. The game writes
-`ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, on the SD card; both are overwritten on every launch.
+If a release changes the extraction (a new `.recipe`), copy the newly extracted `.o2r` and `.recipe` to the SD card again: an old `.o2r` with a new `.nro` would cause a storm
+of invalid reloc tokens, so the game checks the `.recipe` first and shows an error screen (recipe missing, or the two recipes when they differ) instead of starting.
+The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, on the SD card; both are overwritten on every launch.
 
 ## Checklist for a fresh clone
 
@@ -215,7 +224,7 @@ The title folder holds `eboot.bin`, `sce_sys/` (param.json, icon, `pic0.dds` fro
 `sce_module/libc.prx`, `f3d.o2r`, `gamecontrollerdb.txt` and `assets/` (Torch's `config.yml` and `yamls/`, menu fonts).
 The user adds `baserom.remix.z64`; on the first launch `port/ps5/ps5_assets.cpp` runs Torch in the game and writes
 `BattleShip-Remix.o2r` and its `.recipe` next to it, with system notifications at start and end. The game's data
-directory is the title folder (`/app0`, writable for a folder install), so saves, settings and `logs/` stay there.
+directory is the title folder (`/app0`, writable for a folder install), so saves, settings, `ssb64.log`, `boot.txt` and `logs/` stay there.
 
 What the title cannot do, and the workaround:
 
@@ -227,4 +236,4 @@ What the title cannot do, and the workaround:
 | every write to storage costs tens of ms | logs are buffered; Torch logs at `warn` |
 | the Create button opens the system menu | L3+R3 (or the touchpad) toggles the port menu (`port/ps5/ps5_menu_button.cpp`) |
 
-Logs over FTP: `/data/homebrew/PPSA99264/boot.txt` (boot steps, crash backtrace), `logs/BattleShip-Remix.log`.
+Logs over FTP, all overwritten on every launch: `/data/homebrew/PPSA99264/ssb64.log` (port log), `boot.txt` (boot steps, crash backtrace) and `logs/BattleShip-Remix.log` (engine log).

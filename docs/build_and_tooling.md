@@ -11,7 +11,7 @@
   - `& 'C:\Program Files\CMake\bin\cmake.exe' --build .\build\x64`
 - Regenerate generated build inputs with:
   - `& 'C:\Program Files\CMake\bin\cmake.exe' --build .\build\x64 --target ExtractAssetHeaders`
-- The executable target is `ssb64`, but the produced binary is `BattleShip`.
+- The executable target is `ssb64`; the produced binary is `BattleShip-Remix` for the Remix build and `BattleShip` for `us` and `jp` (`SSB64_APP_NAME`).
 
 ### ROM version (Remix / US / JP)
 

@@ -42,6 +42,7 @@ system).
 | `BattleShip-Remix-x86_64.AppImage` | Linux x86_64 |
 | `BattleShip-Remix-windows.zip` | Windows x64 |
 | `BattleShip-Remix-switch.zip` | Nintendo Switch homebrew (`.nro`, `f3d.o2r`, `config.yml`, `assets/`) |
+| `BattleShip-Remix.nro` | The Switch `.nro` alone, which the in-game updater downloads |
 | `BattleShip-Remix-android.apk` | Android arm64-v8a, Android 7+ |
 | `BattleShip-Remix-ps5-PPSA99264.zip` | PlayStation 5 homebrew title folder (`PPSA99264/`) |
 | `SHA256SUMS.txt` | Checksums |

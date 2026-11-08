@@ -212,8 +212,8 @@ MOD_EXIT() {
   layout of many decomp structs (pointer fields collapse to `u32` reloc tokens).
   `mod.h` defines `PORT 1` before anything else for you — keep that include
   first, or cross-boundary struct reads return garbage.
-- **Logging.** `mod_log(fmt, ...)` writes to `%APPDATA%/BattleShip/ssb64.log`
-  (unbuffered) and works in both Debug and Release. `printf`/`stderr` only
+- **Logging.** `mod_log(fmt, ...)` writes to `ssb64.log` in the app data folder
+  (`%APPDATA%/BattleShip/` on Windows; overwritten on every launch; unbuffered) and works in both Debug and Release. `printf`/`stderr` only
   surface in the Debug-build console on Windows; in Release they go nowhere.
   Rely on `mod_log`.
 - **Hot reload.** The Mods menu's Reload action runs every mod's `ModExit`,

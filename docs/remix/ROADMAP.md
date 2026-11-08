@@ -1,7 +1,7 @@
 # Smash Remix 2.0.1 in the PC port: roadmap
 
 This is the **only plan** of the Remix implementation. Whoever works on the Remix (agent or human) follows this file in
-order, without opening work outside it. Widescreen / aspect ratio is **out of scope** (the game stays 4:3). The reference
+order, without opening work outside it. The Remix screens stay 4:3: widescreen is **out of scope** for the Remix work (the port's own optional Widescreen setting only widens battle scenes). The reference
 documentation is indexed in [`README.md`](README.md).
 
 ## How to use (work protocol)
@@ -50,6 +50,7 @@ open. The closed milestones are summarised in
 |---|---|
 | M0 to M10 | closed; open leftovers: T9.1b and T10.2 (user) |
 | **M11 Finalization** | Phases R, 1 to 8 done (Phase 8 on 2026-11-06) |
+| **M12 Platforms and releases** | PS5, Android, updater and the releases `v2.0.1-port.4` to `port.9` shipped (see **M12**) |
 
 - **Next step:** none for the lead; the user passes T9.1b and T10.2. Phase 5b closed on 2026-11-06: every ledger
   item is `done` or `n/a`, `parity.md` regenerated (no `partial` row).
@@ -176,7 +177,7 @@ asm has them. In `parity.md` every Remix file ends as `ported` or `adapted`, nev
 
 User decisions (2026-11-03): the reference emulator lives in `.toolchain/`, outside git (I8); test packages embed the `.o2r`
 (personal use, marked in the file name and script header), the final publishable packages carry no `.o2r` and extract it
-from the user's ROM on first run; CI builds `remix` in the matrix of `.github/workflows/release.yml`.
+from the user's ROM on first run; CI builds `remix` in the matrix of `.github/workflows/release.yml` (superseded: releases come from `release-remix.yml`, see **M12**).
 
 Closed phases:
 
@@ -452,8 +453,7 @@ Closed phases:
     `dist/desktop/BattleShip-Remix-2.0.1-port.07d89c8-macOS-arm64.dmg/.zip` (the bundled binary reaches a VS match, rc 0)
     and `build-linux-release/BattleShip-Remix-2.0.1-port.ab57e0f-linux-x86_64.AppImage` (podman amd64; the Dockerfile now
     zeroes the AppImage magic of linuxdeploy and appimagetool, which broke binfmt under emulation).
-  - [x] ~~Final packages without the `.o2r`~~ dropped (user decision 2026-11-06: no GitHub CI release; the `release.yml`
-    matrix entries and the install doc stay as written, unused). Original text: (macOS `.app`/`.dmg`/`.zip`, AppImage x86_64, Switch `.nro`): first confirm that
+  - [x] ~~Final packages without the `.o2r`~~ dropped on 2026-11-06 (no CI release then; superseded by `release-remix.yml`, see **M12**). Original text: (macOS `.app`/`.dmg`/`.zip`, AppImage x86_64, Switch `.nro`): first confirm that
     first-run extraction works for the Remix (the game asks for the user's Remix ROM and builds `BattleShip-Remix.o2r`), as
     for the US build; `remix` in the `release.yml` matrix (`scripts/package-macos.sh` and `scripts/package-linux.sh` accept
     `SSB64_VERSION=remix`); install doc (which ROM: vanilla plus the Remix 2.0.1 patch, and how extraction works).
@@ -480,6 +480,18 @@ Closed phases:
   there is no reference capture; the port credits
   (`p8r_credits`) roll without error.
   `parity.md`: 277 `ported`, 2 `adapted`, 10 `n/a`, 0 `partial`.
+
+### M12. Platforms and releases (after M11)
+
+Not part of the Remix port itself; recorded here so the plan matches what ships. Reference: `build_and_roms.md`, `AGENTS.md` ("Releases", "Asset extraction fingerprint", "Logs").
+
+- [x] Releases: a `v*` tag on `feature/remix-port` runs `.github/workflows/release-remix.yml` (macOS `.dmg`, Linux AppImage, Windows zip, Switch zip and bare `.nro`, Android arm64 APK, PS5 title zip, `SHA256SUMS.txt`) and opens a draft whose body is `.github/release-notes.md`. Tags `v2.0.1-port.4` to `port.9`. The inherited upstream workflows are disabled.
+- [x] PS5 native title `PPSA99264` (`scripts/ps5/`, `port/ps5/`), with its zip updater.
+- [x] Android arm64 APK (`dev.lucasliet.battleship.remix`), with its own boot-time updater (`AppUpdater`, `UpdatePrompt`, a `PackageInstaller` session).
+- [x] Updater: start-up popup on desktop and Switch with restart after install; Switch swaps the running `.nro`.
+- [x] Asset recipe: the Torch revision is pinned in `tools/torch_extract_rev.txt`, so unrelated Torch commits do not force a re-extraction; the Switch error screen tells a missing `.recipe` from a mismatch.
+- [x] Logs hold only the last run (`ssb64.log`, `logs/BattleShip-Remix.log`, PS5 `boot.txt`).
+- [x] Bug reports go through `.github/ISSUE_TEMPLATE/bug_report.yml`.
 
 ---
 
