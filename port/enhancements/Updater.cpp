@@ -431,7 +431,8 @@ void StartGameUpdate() {
                 fprintf(bat, "cd /d \"%s\"\n", exeDir.c_str());
                 fprintf(bat, "echo Update downloaded! Waiting for BattleShip to close before applying...\n");
                 fprintf(bat, ":wait\n");
-                fprintf(bat, "tasklist /FI \"IMAGENAME eq BattleShip.exe\" 2>NUL | find /I /N \"BattleShip.exe\">NUL\n");
+                fprintf(bat, "tasklist /FI \"IMAGENAME eq %s.exe\" 2>NUL | find /I /N \"%s.exe\">NUL\n",
+                        SSB64_APP_NAME, SSB64_APP_NAME);
                 fprintf(bat, "if \"%%ERRORLEVEL%%\"==\"0\" (\n");
                 fprintf(bat, "    timeout /t 1 /nobreak > NUL\n");
                 fprintf(bat, "    goto wait\n");
@@ -439,7 +440,7 @@ void StartGameUpdate() {
                 fprintf(bat, "echo Installing update...\n");
                 fprintf(bat, "tar -xf update_temp.zip\n");
                 fprintf(bat, "del update_temp.zip\n");
-                fprintf(bat, "start BattleShip.exe\n");
+                fprintf(bat, "start %s.exe\n", SSB64_APP_NAME);
                 fprintf(bat, "(goto) 2>nul & del \"%%~f0\"\n");
                 fclose(bat);
 
