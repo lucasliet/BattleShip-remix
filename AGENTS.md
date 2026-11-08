@@ -122,6 +122,12 @@ Files sections when they change) and commit it, so the draft never repeats the p
 
 ---
 
+## Asset extraction fingerprint
+
+The `.o2r` is re-extracted when its `.recipe` hash differs from the binary's; on the Switch that means copying a new `.o2r` from a desktop by hand. The hash covers `tools/torch_extract_rev.txt`, `config.yml` and `yamls/<region>/`, not the checked-out torch commit. When a change in `torch/` (or in `config.yml` / the yamls) alters what gets extracted, set `tools/torch_extract_rev.txt` to the new torch commit (`git -C torch rev-parse HEAD`) in the same change; for a torch change that leaves the output unchanged (PS5, logging, listing) leave the file alone. See `docs/build_and_tooling.md`.
+
+---
+
 ## Agent Directives
 
 ### Pre-Work
