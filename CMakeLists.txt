@@ -621,6 +621,10 @@ if(NOT CMAKE_SYSTEM_NAME STREQUAL "PS5")
     # Only the PS5 updater installs a release zip in place.
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/UpdateZipInstall\\.cpp$")
 endif()
+if(CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "PS5" OR BATTLESHIP_UWP)
+    # The start-up update popup drives the curl/libcurl updaters, which these platforms do not build.
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/gui/UpdatePopup\\.cpp$")
+endif()
 if(BATTLESHIP_UWP)
     # Xbox packages are updated as MSIX and cannot use these Win32
     # shell-out/IPC integrations.

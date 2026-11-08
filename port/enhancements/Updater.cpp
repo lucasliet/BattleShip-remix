@@ -14,8 +14,12 @@
 
 #include <nlohmann/json.hpp>
 
+#include <ship/Context.h>
+#include <ship/window/Window.h>
+
 #if defined(__linux__)
 #include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 #if defined(_WIN32)
@@ -39,6 +43,7 @@ static std::string s_latestVersion = "";
 static std::string s_downloadUrl = "";
 static std::string s_updateStatus = "";
 static std::string s_downloadStatus = "";
+static std::string s_restartPath = "";
 static std::mutex s_stringMutex; // Only locks when reading/writing the actual text
 
 namespace {
@@ -411,6 +416,7 @@ void StartGameUpdate() {
                 {
                     std::lock_guard<std::mutex> lock(s_stringMutex);
                     s_downloadStatus = "Update complete! Please restart the game.";
+                    s_restartPath = appImagePath;
                 }
                 s_downloadComplete.store(true);
             } else {
@@ -441,8 +447,8 @@ void StartGameUpdate() {
                     std::lock_guard<std::mutex> lock(s_stringMutex);
                     s_downloadStatus = "Update ready! Close the game to apply.";
                 }
-                s_downloadComplete.store(true);
                 ShellExecuteA(nullptr, "open", batPath.c_str(), nullptr, exeDir.c_str(), SW_SHOWNORMAL);
+                s_downloadComplete.store(true);
             } else {
                 std::lock_guard<std::mutex> lock(s_stringMutex);
                 s_downloadStatus = "Error: Failed to create updater script.";
@@ -472,6 +478,34 @@ void StartGameUpdate() {
 
         s_isDownloading.store(false);
     }).detach();
+}
+
+bool CanRestartAfterUpdate() {
+    if (!s_downloadComplete.load()) return false;
+#if defined(_WIN32)
+    return true;
+#elif defined(__linux__)
+    std::lock_guard<std::mutex> lock(s_stringMutex);
+    return !s_restartPath.empty();
+#else
+    return false;
+#endif
+}
+
+void RestartAfterUpdate() {
+    if (!CanRestartAfterUpdate()) return;
+#if defined(__linux__)
+    std::string path;
+    {
+        std::lock_guard<std::mutex> lock(s_stringMutex);
+        path = s_restartPath;
+    }
+    execl(path.c_str(), path.c_str(), static_cast<char*>(nullptr));
+    SetDownloadStatus("Error: Could not restart. Close and reopen the game.");
+#elif defined(_WIN32)
+    // update_game.bat waits for this process to exit, applies the zip and starts the new exe.
+    Ship::Context::GetInstance()->GetWindow()->Close();
+#endif
 }
 
 // OS-aware URL opener for Windows and Mac fallback

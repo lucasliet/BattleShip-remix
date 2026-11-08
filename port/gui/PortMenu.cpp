@@ -2127,7 +2127,6 @@ void PortMenu::AddMenuAbout() {
         }
     });
 
-#if defined(__SWITCH__)
     AddWidget(path, "Restart Game", WIDGET_BUTTON)
     .RaceDisable(false)
     .PreFunc([](WidgetInfo& info) {
@@ -2136,7 +2135,6 @@ void PortMenu::AddMenuAbout() {
     .Callback([](WidgetInfo&) {
         ssb64::enhancements::RestartAfterUpdate();
     });
-#endif
 
     // 4. Update result text
     AddWidget(path, "Update Status", WIDGET_TEXT)

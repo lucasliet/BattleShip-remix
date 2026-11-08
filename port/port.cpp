@@ -40,6 +40,9 @@
 #include "switch_assets.h"
 #endif
 #include "gui/PortMenu.h"
+#if !defined(__ANDROID__) && !defined(__PS5__) && !defined(BATTLESHIP_UWP)
+#include "gui/UpdatePopup.h"
+#endif
 
 #ifdef __PS5__
 extern "C" void ps5_boot_trace(const char* step);
@@ -951,6 +954,9 @@ static int PortInitImpl(int argc, char* argv[]) {
 #ifdef REGION_REMIX
 			gui->AddGuiWindow(remix_input_display_make_window());
 			gui->AddGuiWindow(remix_hud_text_make_window());
+#endif
+#if !defined(__ANDROID__) && !defined(__PS5__) && !defined(BATTLESHIP_UWP)
+			gui->AddGuiWindow(ssb64::MakeUpdatePopupWindow());
 #endif
 			port_log("SSB64: Port menu attached\n");
 		}
