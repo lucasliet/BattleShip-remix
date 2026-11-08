@@ -127,7 +127,8 @@ std::string GetLatestVersion();
 
 #if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
 // After a finished update, relaunch the freshly installed build: the homebrew loader on Switch, the AppImage on
-// Linux, the update script on Windows. CanRestartAfterUpdate is false on macOS, where the update opens the DMG.
+// Linux, the update script on Windows, the swapped .app on macOS. CanRestartAfterUpdate is true once the update is
+// staged on Switch, Linux, Windows and macOS (macOS swaps the .app on restart).
 bool CanRestartAfterUpdate();
 void RestartAfterUpdate();
 #endif

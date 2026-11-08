@@ -108,11 +108,7 @@ class UpdatePopupWindow : public Ship::GuiWindow {
     void DrawOffer() {
         ImGui::Text("BattleShip Remix %s is available (installed: %s).", enhancements::GetLatestVersion().c_str(),
                     BATTLESHIP_CURRENT_VERSION);
-#if defined(__APPLE__)
-        ImGui::TextUnformatted("Download it now? The disk image opens and you copy the app to Applications.");
-#else
         ImGui::TextUnformatted("Download and install it now? The game restarts when it finishes.");
-#endif
         if (mFocusPending) ImGui::SetKeyboardFocusHere();
         if (ImGui::Button("Update")) {
             enhancements::StartGameUpdate();

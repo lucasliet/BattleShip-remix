@@ -706,12 +706,14 @@ if [[ "$WANT_NOTARIZE" -eq 1 ]]; then
 fi
 
 # ── 6. Zip the .app for the in-game updater ──
-# ditto keeps symlinks, executable bits and resource forks that `zip -r` drops,
-# so the extracted bundle keeps a valid code signature.
+# ditto keeps the symlinks and executable bits that `zip -r` drops, so the
+# extracted bundle keeps a valid code signature. --norsrc leaves out the
+# AppleDouble (._*) entries, which the updater would otherwise unpack as
+# stray files inside the bundle.
 APP_ZIP="$DIST_DIR/$APP_NAME-macos.zip"
 step "Zipping $APP_NAME.app for the in-game updater"
 rm -f "$APP_ZIP"
-ditto -c -k --keepParent "$APP" "$APP_ZIP"
+ditto -c -k --norsrc --keepParent "$APP" "$APP_ZIP"
 [[ -f "$APP_ZIP" ]] || fail "app zip was not created at $APP_ZIP"
 
 # ── 7. Report ──

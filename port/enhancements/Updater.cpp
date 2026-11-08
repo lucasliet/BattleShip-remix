@@ -22,6 +22,17 @@
 #include <unistd.h>
 #endif
 
+#if defined(__APPLE__)
+#include "UpdateZipInstall.h"
+
+#include <mach-o/dyld.h>
+#include <unistd.h>
+
+#include <climits>
+#include <filesystem>
+#include <system_error>
+#endif
+
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -64,7 +75,7 @@ constexpr const char* kPlatformAssetName = "BattleShip-Remix-x86_64.AppImage";
 #elif defined(_WIN32)
 constexpr const char* kPlatformAssetName = "BattleShip-Remix-windows.zip";
 #elif defined(__APPLE__)
-constexpr const char* kPlatformAssetName = "BattleShip-Remix.dmg";
+constexpr const char* kPlatformAssetName = SSB64_APP_NAME "-macos.zip";
 #else
 constexpr const char* kPlatformAssetName = "";
 #endif
@@ -80,7 +91,7 @@ constexpr const char* kPlatformAssetName = "BattleShip-x86_64.AppImage";
 #elif defined(_WIN32)
 constexpr const char* kPlatformAssetName = "BattleShip-windows.zip";
 #elif defined(__APPLE__)
-constexpr const char* kPlatformAssetName = "BattleShip.dmg";
+constexpr const char* kPlatformAssetName = SSB64_APP_NAME "-macos.zip";
 #else
 constexpr const char* kPlatformAssetName = "";
 #endif
@@ -258,6 +269,140 @@ void ResetDownloadStateForNewCheck() {
     SetDownloadStatus("");
 }
 
+#if defined(__APPLE__)
+std::string BundleStagingPath(const std::string& bundle) {
+    return bundle + ".new";
+}
+
+std::string BundleBackupPath(const std::string& bundle) {
+    return bundle + ".old";
+}
+
+void RemoveTree(const std::string& path) {
+    std::error_code ignored;
+    std::filesystem::remove_all(path, ignored);
+}
+
+/**
+ * Finds the .app bundle that holds the running executable.
+ *
+ * @param outBundle Receives the real path of "<name>.app".
+ * @return false when the executable is not at "<name>.app/Contents/MacOS/<exe>".
+ */
+bool ResolveAppBundlePath(std::string* outBundle) {
+    char rawPath[PATH_MAX];
+    uint32_t rawSize = sizeof(rawPath);
+    if (_NSGetExecutablePath(rawPath, &rawSize) != 0) return false;
+
+    char realPath[PATH_MAX];
+    if (realpath(rawPath, realPath) == nullptr) return false;
+
+    const std::filesystem::path macOsDir = std::filesystem::path(realPath).parent_path();
+    const std::filesystem::path contentsDir = macOsDir.parent_path();
+    const std::filesystem::path bundle = contentsDir.parent_path();
+    if (macOsDir.filename() != "MacOS" || contentsDir.filename() != "Contents") return false;
+    if (bundle.extension() != ".app") return false;
+
+    *outBundle = bundle.string();
+    return true;
+}
+
+bool ParentIsWritable(const std::string& bundle) {
+    const std::string parent = std::filesystem::path(bundle).parent_path().string();
+    return access(parent.c_str(), W_OK) == 0;
+}
+
+/**
+ * Resolves the installed bundle and the download target next to it, reporting why when the
+ * app cannot be updated in place.
+ *
+ * @param outBundle Receives the installed bundle path.
+ * @param outZipPath Receives the hidden download path in the folder holding the bundle.
+ * @return false after setting the download status to an error.
+ */
+bool PrepareBundleUpdate(std::string* outBundle, std::string* outZipPath) {
+    if (!ResolveAppBundlePath(outBundle)) {
+        SetDownloadStatus("Error: Not running from an installed .app bundle.");
+        return false;
+    }
+    if (!ParentIsWritable(*outBundle)) {
+        SetDownloadStatus("Error: The folder holding the app is not writable; install the update from the release page.");
+        return false;
+    }
+    const std::filesystem::path parent = std::filesystem::path(*outBundle).parent_path();
+    *outZipPath = (parent / ("." SSB64_APP_NAME "-update.zip")).string();
+    return true;
+}
+
+bool IsStagedBundleComplete(const std::string& stagedBundle) {
+    const std::string executable = stagedBundle + "/Contents/MacOS/" SSB64_APP_NAME;
+    return access(executable.c_str(), X_OK) == 0;
+}
+
+void PublishStagedBundle(const std::string& bundle) {
+    {
+        std::lock_guard<std::mutex> lock(s_stringMutex);
+        s_restartPath = bundle;
+        s_downloadStatus = "Update ready! Restart the game to apply.";
+    }
+    s_downloadComplete.store(true);
+}
+
+/**
+ * Unpacks the downloaded zip into "<bundle>.new" and marks the update ready to apply on restart.
+ * The zip is removed in every case.
+ *
+ * @param zipPath Downloaded release zip.
+ * @param bundle Installed bundle the staged copy sits next to.
+ */
+void StageBundleUpdate(const std::string& zipPath, const std::string& bundle) {
+    const std::string staging = BundleStagingPath(bundle);
+    RemoveTree(staging);
+
+    const ZipExtractOptions options{SSB64_APP_NAME ".app/", ZipFileMode::FromArchive, true};
+    const ZipInstallStatus status = ExtractZipTo(zipPath, options, staging);
+    std::remove(zipPath.c_str());
+    if (status != ZipInstallStatus::Installed) {
+        SetDownloadStatus(std::string("Error: ") + DescribeZipInstallStatus(status));
+        return;
+    }
+    if (!IsStagedBundleComplete(staging)) {
+        RemoveTree(staging);
+        SetDownloadStatus("Error: The downloaded update is incomplete.");
+        return;
+    }
+    PublishStagedBundle(bundle);
+}
+
+/** Deletes the folder the previous update left behind; it was still running when it was renamed. */
+void RemoveStaleBundleBackup() {
+    std::string bundle;
+    if (!ResolveAppBundlePath(&bundle)) return;
+    RemoveTree(BundleBackupPath(bundle));
+}
+
+/**
+ * Replaces the installed bundle with "<bundle>.new" and starts it. The running process keeps
+ * executing from the renamed "<bundle>.old" folder.
+ *
+ * @param bundle Installed bundle path.
+ */
+void SwapBundleAndRelaunch(const std::string& bundle) {
+    const std::string backup = BundleBackupPath(bundle);
+    if (std::rename(bundle.c_str(), backup.c_str()) != 0) {
+        SetDownloadStatus("Error: Could not replace the app. Close and reopen the game.");
+        return;
+    }
+    if (std::rename(BundleStagingPath(bundle).c_str(), bundle.c_str()) != 0) {
+        std::rename(backup.c_str(), bundle.c_str());
+        SetDownloadStatus("Error: Could not replace the app. Close and reopen the game.");
+        return;
+    }
+    system(("open -n " + ShellSingleQuote(bundle)).c_str());
+    Ship::Context::GetInstance()->GetWindow()->Close();
+}
+#endif
+
 } // namespace
 
 void CheckForUpdatesAsync(bool force) {
@@ -273,6 +418,9 @@ void CheckForUpdatesAsync(bool force) {
     SetUpdateStatus("");
 
     std::thread([]() {
+#if defined(__APPLE__)
+        RemoveStaleBundleBackup();
+#endif
         std::string response;
         int exitCode = RunCapture(BuildCheckCommand(), [&](const std::string& line) {
             response += line;
@@ -390,8 +538,13 @@ void StartGameUpdate() {
         std::string cmd = BuildDownloadCommand(tempZip, url);
 
         #elif defined(__APPLE__)
-        std::string tempDmg = "/tmp/BattleShip_Update.dmg";
-        std::string cmd = BuildDownloadCommand(tempDmg, url);
+        std::string bundle;
+        std::string zipPath;
+        if (!PrepareBundleUpdate(&bundle, &zipPath)) {
+            s_isDownloading.store(false);
+            return;
+        }
+        std::string cmd = BuildDownloadCommand(zipPath, url);
         #endif
 
         auto onProgressLine = [](const std::string& line) {
@@ -455,13 +608,7 @@ void StartGameUpdate() {
                 s_downloadStatus = "Error: Failed to create updater script.";
             }
             #elif defined(__APPLE__)
-            {
-                std::lock_guard<std::mutex> lock(s_stringMutex);
-                s_downloadStatus = "Download complete! Opening DMG...";
-            }
-            s_downloadComplete.store(true);
-            std::string openCmd = "open \"" + tempDmg + "\"";
-            system(openCmd.c_str());
+            StageBundleUpdate(zipPath, bundle);
             #endif
         } else {
             {
@@ -473,7 +620,7 @@ void StartGameUpdate() {
             #elif defined(_WIN32)
             std::remove(tempZip.c_str());
             #elif defined(__APPLE__)
-            std::remove(tempDmg.c_str());
+            std::remove(zipPath.c_str());
             #endif
         }
 
@@ -485,7 +632,7 @@ bool CanRestartAfterUpdate() {
     if (!s_downloadComplete.load()) return false;
 #if defined(_WIN32)
     return true;
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__APPLE__)
     std::lock_guard<std::mutex> lock(s_stringMutex);
     return !s_restartPath.empty();
 #else
@@ -506,6 +653,13 @@ void RestartAfterUpdate() {
 #elif defined(_WIN32)
     // update_game.bat waits for this process to exit, applies the zip and starts the new exe.
     Ship::Context::GetInstance()->GetWindow()->Close();
+#elif defined(__APPLE__)
+    std::string bundle;
+    {
+        std::lock_guard<std::mutex> lock(s_stringMutex);
+        bundle = s_restartPath;
+    }
+    SwapBundleAndRelaunch(bundle);
 #endif
 }
 

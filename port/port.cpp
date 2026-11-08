@@ -42,6 +42,7 @@
 #include "first_run.h"
 #ifdef __SWITCH__
 #include "switch_assets.h"
+#include "switch_update_apply.h"
 #endif
 #include "gui/PortMenu.h"
 #if !defined(__ANDROID__) && !defined(__PS5__) && !defined(BATTLESHIP_UWP)
@@ -1406,6 +1407,18 @@ int main(int argc, char* argv[]) {
 	 * PostInitPhase half from Context::Init — without this PreInit call
 	 * there is no nxlink logging and applet-mode boots die on allocation. */
 	Ship::Switch::Init(Ship::SwitchPhase::PreInitPhase);
+	/* Finish an update the in-game updater staged: libultraship keeps
+	 * f3d.o2r and the game archive open once it starts, and HOS cannot
+	 * replace open files, so this has to happen before anything opens. */
+	if (argc >= 1 && argv[0] != nullptr) {
+		const std::string nroPath = argv[0];
+		const size_t separator = nroPath.find_last_of('/');
+		const bool isNro = nroPath.size() > 4 && nroPath.compare(nroPath.size() - 4, 4, ".nro") == 0;
+		if (isNro && separator != std::string::npos &&
+		    !ssb64::SwitchApplyPendingUpdate(nroPath.substr(0, separator))) {
+			return 1;
+		}
+	}
 #endif
 
 #ifdef __APPLE__

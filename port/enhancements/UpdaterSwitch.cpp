@@ -1,16 +1,20 @@
 // Nintendo Switch self-updater. Same public API as Updater.cpp (declared in enhancements.h), but it
-// talks to GitHub in-process with libcurl instead of shelling out, and replaces the running .nro
-// on the SD card. The homebrew loader keeps the running image in memory, so the file can be swapped
-// while the game is open; the new build starts the next time the game is launched.
+// talks to GitHub in-process with libcurl instead of shelling out. It downloads the release zip,
+// stages every file into "update-pending" next to the .nro and swaps the running .nro (the homebrew
+// loader keeps its image in memory). The other files are open during the session, so they are moved
+// into place by SwitchApplyPendingUpdate at the next boot; the new build starts on the next launch.
 #include "enhancements.h"
 
 #include "SwitchHttp.h"
 #include "UpdateInstall.h"
 #include "UpdateRelease.h"
+#include "UpdateStaging.h"
+#include "UpdateZipInstall.h"
 #include "port_log.h"
 
 #include <atomic>
 #include <cstdio>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -40,12 +44,15 @@ namespace {
 #if defined(REGION_REMIX)
 constexpr const char* kLatestReleaseApi =
     "https://api.github.com/repos/lucasliet/BattleShip-remix/releases/latest";
-constexpr const char* kNroAssetName = "BattleShip-Remix.nro";
 #else
 constexpr const char* kLatestReleaseApi =
     "https://api.github.com/repos/JRickey/BattleShip/releases/latest";
-constexpr const char* kNroAssetName = "BattleShip.nro";
 #endif
+
+constexpr const char* kZipAssetName = SSB64_APP_NAME "-switch.zip";
+constexpr const char* kZipRootPrefix = "switch/" SSB64_APP_NAME "/";
+constexpr const char* kStagedNroName = SSB64_APP_NAME ".nro";
+constexpr const char* kZipPartName = "update.zip.part";
 
 constexpr size_t kWorkerStackBytes = 512 * 1024;
 constexpr const char* kNroExtension = ".nro";
@@ -137,7 +144,7 @@ void PublishAvailableRelease(const ReleaseAsset& release) {
 
 void ApplyReleaseCheckResult(const std::string& responseBody) {
     ReleaseAsset release;
-    ReleaseParseStatus status = ParseLatestRelease(responseBody, kNroAssetName, &release);
+    ReleaseParseStatus status = ParseLatestRelease(responseBody, kZipAssetName, &release);
     if (status == ReleaseParseStatus::Malformed) {
         FailUpdateCheck("Unable to read update information.");
         return;
@@ -154,7 +161,7 @@ void ApplyReleaseCheckResult(const std::string& responseBody) {
         return;
     }
     if (status != ReleaseParseStatus::Ok) {
-        port_log("Updater: release %s has no usable %s asset\n", release.tag.c_str(), kNroAssetName);
+        port_log("Updater: release %s has no usable %s asset\n", release.tag.c_str(), kZipAssetName);
         FailUpdateCheck("Latest release has no update for this platform.");
         return;
     }
@@ -178,25 +185,73 @@ void FailDownload(const std::string& status) {
     s_isDownloading.store(false);
 }
 
-void RunDownload(const ReleaseAsset& release, const std::string& nroPath) {
-    const std::string partPath = nroPath + ".part";
-    HttpOutcome outcome = HttpDownloadToFile(release.downloadUrl, partPath, [](int percent) {
+std::string FolderOf(const std::string& path) {
+    const size_t separator = path.find_last_of('/');
+    if (separator == std::string::npos) return ".";
+    return path.substr(0, separator);
+}
+
+void RemoveTree(const std::string& path) {
+    std::error_code ignored;
+    std::filesystem::remove_all(path, ignored);
+}
+
+bool DownloadZip(const ReleaseAsset& release, const std::string& zipPath) {
+    HttpOutcome outcome = HttpDownloadToFile(release.downloadUrl, zipPath, [](int percent) {
         SetDownloadStatus("Downloading... " + std::to_string(percent) + "%");
     });
-    if (!outcome.ok) {
-        port_log("Updater: download failed (HTTP %ld): %s\n", outcome.httpStatus, outcome.error.c_str());
-        FailDownload("Download failed. " + outcome.error);
-        return;
-    }
+    if (outcome.ok) return true;
+
+    port_log("Updater: download failed (HTTP %ld): %s\n", outcome.httpStatus, outcome.error.c_str());
+    FailDownload("Download failed. " + outcome.error);
+    return false;
+}
+
+bool ExtractZipToPending(const std::string& zipPath, const std::string& pendingDir) {
+    RemoveTree(pendingDir);
+    ZipInstallStatus status = ExtractZipTo(zipPath, {kZipRootPrefix, ZipFileMode::Ignore, false}, pendingDir);
+    std::remove(zipPath.c_str());
+    if (status == ZipInstallStatus::Installed) return true;
+
+    RemoveTree(pendingDir);
+    port_log("Updater: unpacking the update failed: %s\n", DescribeZipInstallStatus(status));
+    FailDownload(DescribeZipInstallStatus(status));
+    return false;
+}
+
+bool SwapStagedNro(const std::string& pendingDir, const std::string& nroPath) {
+    InstallStatus status = InstallDownloadedNro(pendingDir + "/" + kStagedNroName, nroPath, 0);
+    if (status == InstallStatus::Installed) return true;
+
+    RemoveTree(pendingDir);
+    port_log("Updater: install failed: %s\n", DescribeInstallStatus(status));
+    FailDownload(DescribeInstallStatus(status));
+    return false;
+}
+
+bool MarkPendingComplete(const std::string& pendingDir) {
+    FILE* marker = std::fopen((pendingDir + "/" + kPendingMarkerName).c_str(), "wb");
+    if (marker != nullptr && std::fclose(marker) == 0) return true;
+
+    RemoveTree(pendingDir);
+    port_log("Updater: could not write the %s marker in %s\n", kPendingMarkerName, pendingDir.c_str());
+    FailDownload("Could not finish staging the update.");
+    return false;
+}
+
+void RunDownload(const ReleaseAsset& release, const std::string& nroPath) {
+    const std::string appDir = FolderOf(nroPath);
+    const std::string zipPath = appDir + "/" + kZipPartName;
+    const std::string pendingDir = appDir + "/" + kPendingFolderName;
+
+    if (!DownloadZip(release, zipPath)) return;
 
     SetDownloadStatus("Installing update...");
-    InstallStatus install = InstallDownloadedNro(partPath, nroPath, release.sizeBytes);
-    if (install != InstallStatus::Installed) {
-        std::remove(partPath.c_str());
-        port_log("Updater: install failed: %s\n", DescribeInstallStatus(install));
-        FailDownload(DescribeInstallStatus(install));
-        return;
-    }
+    if (!ExtractZipToPending(zipPath, pendingDir)) return;
+    // The marker goes in before the .nro swap: a swapped .nro without its companion files would be
+    // the one state the boot-time apply cannot repair.
+    if (!MarkPendingComplete(pendingDir)) return;
+    if (!SwapStagedNro(pendingDir, nroPath)) return;
 
     {
         std::lock_guard<std::mutex> lock(s_stringMutex);
