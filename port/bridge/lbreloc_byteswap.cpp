@@ -34,6 +34,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "port_frame_profile.h"
+
 extern "C" void port_log(const char *fmt, ...);
 extern "C" void port_trace(const char *fmt, ...);
 extern "C" int  portRelocFindContainingFile(const void *ptr, uintptr_t *out_base, size_t *out_size);
@@ -1105,7 +1107,16 @@ extern "C" void portEvictStructFixupsInRange(const void *begin, size_t size)
 	uintptr_t lo = reinterpret_cast<uintptr_t>(begin);
 	uintptr_t hi = lo + size;
 
+	/* The sets hold every fixed word of every loaded file, while a reload (the 1P VS card reloads an animation
+	 * file per Polygon every frame) evicts a few KB: probing each address of a small range beats walking the
+	 * whole set, which cost 35-40 ms of game logic per frame on the Switch. */
 	auto evict_set = [&](std::unordered_set<uintptr_t> &s) {
+		if (size < s.size()) {
+			for (uintptr_t addr = lo; addr < hi; addr++) {
+				s.erase(addr);
+			}
+			return;
+		}
 		for (auto it = s.begin(); it != s.end(); ) {
 			if (*it >= lo && *it < hi) it = s.erase(it);
 			else ++it;
@@ -1116,9 +1127,15 @@ extern "C" void portEvictStructFixupsInRange(const void *begin, size_t size)
 	evict_set(sDeswizzle4cFixups);
 	evict_set(sChainSlotAddrs);
 
-	for (auto it = sTexFixupExtent.begin(); it != sTexFixupExtent.end(); ) {
-		if (it->first >= lo && it->first < hi) it = sTexFixupExtent.erase(it);
-		else ++it;
+	if (size < sTexFixupExtent.size()) {
+		for (uintptr_t addr = lo; addr < hi; addr++) {
+			sTexFixupExtent.erase(addr);
+		}
+	} else {
+		for (auto it = sTexFixupExtent.begin(); it != sTexFixupExtent.end(); ) {
+			if (it->first >= lo && it->first < hi) it = sTexFixupExtent.erase(it);
+			else ++it;
+		}
 	}
 
 	sProtectedStructRanges.erase(
@@ -1524,7 +1541,7 @@ extern "C" int portRelocFixupTextureFromChain(void *file_base, size_t file_size,
 //
 // Idempotent at word granularity so overlapping runtime loads from different
 // starts cannot undo each other.
-extern "C" void portRelocFixupTextureAtRuntime(const void *addr, unsigned int num_bytes)
+static void portRelocFixupTextureAtRuntimeUnprofiled(const void *addr, unsigned int num_bytes)
 {
 	if (addr == nullptr || num_bytes == 0) return;
 
@@ -1617,6 +1634,16 @@ extern "C" void portRelocFixupTextureAtRuntime(const void *addr, unsigned int nu
 			             -1, -1, -1, addr, "already-fixed");
 		}
 		return;
+	}
+
+	/* An extent is recorded only after every word of its span is swapped, and eviction drops extents and words
+	 * together, so a covered request has nothing left to do. Without this the per-word scans below ran on every
+	 * texture load of every frame: the 1P VS card's 30 Polygons stuttered the Switch. */
+	{
+		auto covered_it = sTexFixupExtent.find(target);
+		if (covered_it != sTexFixupExtent.end() && covered_it->second >= num_bytes) {
+			return;
+		}
 	}
 
 	static unsigned int sRuntimeTexTraceCount = 0;
@@ -1730,7 +1757,7 @@ extern "C" void portRelocFixupTextureAtRuntime(const void *addr, unsigned int nu
 	portStageAuditNoteRuntimeTex((unsigned int)(fixed_words * 4));
 }
 
-extern "C" void portRelocFixupVertexAtRuntime(const void *addr, unsigned int num_vtx)
+static void portRelocFixupVertexAtRuntimeUnprofiled(const void *addr, unsigned int num_vtx)
 {
 	if (addr == nullptr || num_vtx == 0 || num_vtx > 32) return;
 
@@ -2386,4 +2413,28 @@ extern "C" void portMarkSyntheticSprite(void *sprite, void *bitmaps,
 			sDeswizzle4cFixups.insert(key);
 		}
 	}
+}
+
+extern "C" void portRelocFixupTextureAtRuntime(const void *addr, unsigned int num_bytes)
+{
+	if (!gPortFrameProfileEnabled)
+	{
+		portRelocFixupTextureAtRuntimeUnprofiled(addr, num_bytes);
+		return;
+	}
+	const uint64_t start_ns = port_frame_profile_now_ns();
+	portRelocFixupTextureAtRuntimeUnprofiled(addr, num_bytes);
+	port_frame_profile_add(PORT_PROFILE_TEX_FIXUP, start_ns);
+}
+
+extern "C" void portRelocFixupVertexAtRuntime(const void *addr, unsigned int num_vtx)
+{
+	if (!gPortFrameProfileEnabled)
+	{
+		portRelocFixupVertexAtRuntimeUnprofiled(addr, num_vtx);
+		return;
+	}
+	const uint64_t start_ns = port_frame_profile_now_ns();
+	portRelocFixupVertexAtRuntimeUnprofiled(addr, num_vtx);
+	port_frame_profile_add(PORT_PROFILE_VTX_FIXUP, start_ns);
 }

@@ -55,6 +55,7 @@ extern "C" bool port_drain_pending_menu_toggle(void);
 
 #include "port_log.h"
 #include "renderdoc_trigger.h"
+#include "port_frame_profile.h"
 
 /* Backbuffer screenshot capture — implemented in libultraship's DX11 backend.
  * Returns 1 on success, 0 on failure (silent). Never throws. */
@@ -750,7 +751,10 @@ void PortPushFrame(void)
 	 *   Round 2: Controller reads input, game logic runs one frame
 	 *   Round 3+: Display list submitted, scheduler processes GFX task, etc.
 	 * Each thread runs until it yields at osRecvMesg(BLOCK) on empty queue. */
+	const auto logicStart = std::chrono::steady_clock::now();
 	port_resume_service_threads();
+	const long long logic_us = std::chrono::duration_cast<std::chrono::microseconds>(
+		std::chrono::steady_clock::now() - logicStart).count();
 
 	port_enhancement_stage_hazards_tick();
 	port_widescreen_tick();
@@ -820,7 +824,10 @@ void PortPushFrame(void)
 		gPortGLDumpDraws = (vi >= sDumpDrawsFirst && vi <= sDumpDrawsLast) ? vi : 0;
 	}
 #endif
+	const auto renderStart = std::chrono::steady_clock::now();
 	port_drain_pending_display_list();
+	const long long render_us = std::chrono::duration_cast<std::chrono::microseconds>(
+		std::chrono::steady_clock::now() - renderStart).count();
 
 	/* TCC mod hook: GamePostUpdateEvent fires once per frame AFTER game
 	 * logic + GFX submission. Most common subscription point — game state
@@ -884,8 +891,38 @@ void PortPushFrame(void)
 	/* Feed the interpolation auto-throttle the wall duration of this tick;
 	 * if the host cannot sustain 60 ticks/s at the configured subframe
 	 * count, it steps the render rate down to protect the game clock. */
-	portInterpNoteTicDuration(std::chrono::duration_cast<std::chrono::microseconds>(
-		std::chrono::steady_clock::now() - frameStart).count());
+	{
+		const long long tic_us = std::chrono::duration_cast<std::chrono::microseconds>(
+			std::chrono::steady_clock::now() - frameStart).count();
+		portInterpNoteTicDuration(tic_us);
+		/* Stutters show up as single long tics; the periodic frame line below is too sparse to see them. */
+		static const long long sSlowTicUs = [] {
+			const char *env = std::getenv("SSB64_SLOW_FRAME_MS");
+			return (env != NULL) ? std::atoll(env) * 1000 : 25000LL;
+		}();
+		if ((tic_us > sSlowTicUs) || (logic_us > sSlowTicUs)) {
+			double dl_walk_ms = 0.0;
+			double end_frame_ms = 0.0;
+			auto ctx = Ship::Context::GetInstance();
+			auto fast_window = ctx ? std::dynamic_pointer_cast<Fast::Fast3dWindow>(ctx->GetWindow()) : nullptr;
+			if (fast_window) {
+				dl_walk_ms = fast_window->GetLastRunMs();
+				end_frame_ms = fast_window->GetLastEndFrameMs();
+			}
+			port_log("SSB64: slow frame %d took %.1f ms (game logic %.1f ms, render+present %.1f ms: "
+			         "dl walk %.1f ms, end frame %.1f ms)\n",
+			         sFrameCount, tic_us / 1000.0, logic_us / 1000.0, render_us / 1000.0, dl_walk_ms, end_frame_ms);
+			if (gPortFrameProfileEnabled) {
+				char profile[256];
+				port_frame_profile_take(profile, sizeof(profile));
+				port_log("SSB64: frame %d profile: %s\n", sFrameCount, profile);
+			}
+		}
+		if (gPortFrameProfileEnabled) {
+			char discarded[256];
+			port_frame_profile_take(discarded, sizeof(discarded));
+		}
+	}
 
 	/* Tell the hang watchdog a frame completed. */
 	port_watchdog_note_frame_end();

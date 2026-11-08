@@ -12,6 +12,10 @@
 
 #include <ship/Context.h>
 #include <ship/resource/ResourceManager.h>
+#include <ship/resource/archive/Archive.h>
+#include <ship/resource/archive/ArchiveManager.h>
+#include <ship/utils/binarytools/BinaryReader.h>
+#include <ship/utils/binarytools/MemoryStream.h>
 #include <spdlog/spdlog.h>
 
 #include <algorithm>
@@ -20,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #if defined(__unix__) || defined(__APPLE__)
@@ -31,6 +36,8 @@
 #include "resource/RelocPointerTable.h"
 #include "bridge/lbreloc_byteswap.h"
 #include "bridge/lbreloc_figatree.h"
+#include "bridge/reloc_size_cache.h"
+#include "port_frame_profile.h"
 
 extern "C" void port_aobj_register_halfswapped_range(void *base, unsigned long size);
 
@@ -535,6 +542,28 @@ void lbRelocAddForceStatusBufferFile(u32 id, void *addr)
  * pointer is registered in the token table and the 32-bit token is
  * written into the 4-byte slot.
  */
+/* A fighter's figatree heap holding an anim file with no extern deps, keyed by the heap start. ftMainSetStatus
+ * reloads the current anim on every status change, and the 1P VS card sets the status of all 30 Polygons every
+ * frame: 7.6 ms per frame on the Switch for 30 identical reloads. An entry dies when any other load overlaps it
+ * and on every scene setup, since heaps only bump within a scene. */
+struct PortForceHeapLoad
+{
+	u32 file_id;
+	uintptr_t end;
+	void *bump_end;
+};
+static std::unordered_map<uintptr_t, PortForceHeapLoad> sPortForceHeapLoads;
+
+/** Drops every recorded figatree heap load overlapping [lo, hi). */
+static void portForgetForceHeapLoadsInRange(uintptr_t lo, uintptr_t hi)
+{
+	for (auto it = sPortForceHeapLoads.begin(); it != sPortForceHeapLoads.end();)
+	{
+		const bool overlaps = (it->first < hi) && (lo < it->second.end);
+		it = overlaps ? sPortForceHeapLoads.erase(it) : std::next(it);
+	}
+}
+
 extern "C" void portRelocLoadFileFromBytes(
 	unsigned int    file_id,
 	void           *ram_dst,
@@ -548,6 +577,8 @@ extern "C" void portRelocLoadFileFromBytes(
 	unsigned int    extern_count,
 	int             force_figatree_fixup)
 {
+	portForgetForceHeapLoadsInRange(reinterpret_cast<uintptr_t>(ram_dst),
+	                                reinterpret_cast<uintptr_t>(ram_dst) + bytes_num);
 	/* portRelocIsFighterFigatreeFile looks up gRelocFileTable[file_id]
 	 * to match the "reloc_animations/" path prefix. Mod-registered file
 	 * IDs sit outside the vanilla table range so the path lookup fails
@@ -1003,7 +1034,21 @@ extern "C" void portRelocLoadFileFromBytesPrivate(
  * libultraship ResourceManager (i.e., the BattleShip.o2r /
  * BattleShip.fromsource.o2r pipeline).
  */
+static void lbRelocLoadAndRelocFileUnprofiled(u32 file_id, void *ram_dst, u32 bytes_num, s32 loc);
+static void portReleaseRelocFileSizeInfoCache(void);
+
 static void lbRelocLoadAndRelocFileTimed(u32 file_id, void *ram_dst, u32 bytes_num, s32 loc)
+{
+	const uint64_t profile_start_ns = gPortFrameProfileEnabled ? port_frame_profile_now_ns() : 0;
+	portReleaseRelocFileSizeInfoCache();
+	lbRelocLoadAndRelocFileUnprofiled(file_id, ram_dst, bytes_num, loc);
+	if (gPortFrameProfileEnabled)
+	{
+		port_frame_profile_add(PORT_PROFILE_FILE_LOAD, profile_start_ns);
+	}
+}
+
+static void lbRelocLoadAndRelocFileUnprofiled(u32 file_id, void *ram_dst, u32 bytes_num, s32 loc)
 {
 	auto relocFile = portLoadRelocResource(file_id);
 	if (!relocFile)
@@ -1032,6 +1077,106 @@ static void lbRelocLoadAndRelocFileTimed(u32 file_id, void *ram_dst, u32 bytes_n
 //                               //
 // // // // // // // // // // // //
 
+struct RelocFileSizeInfo
+{
+	size_t data_size;
+	std::vector<u16> extern_ids;
+};
+
+/* Enough for the reloc header and its extern id list in every vanilla and Remix file. */
+static constexpr size_t kRelocHeaderPrefixBytes = 512;
+
+/**
+ * Reads a reloc file's data size and extern ids from the first bytes of its archive entry, without
+ * decompressing or caching the whole resource (the stage select sizes all 216 stage files this way).
+ * Falls back to the full resource load when the header does not fit in the prefix.
+ * @return true when info was filled.
+ */
+static bool portReadRelocFileSizeInfoUncached(u32 file_id, RelocFileSizeInfo *info)
+{
+	if (file_id < RELOC_FILE_COUNT && gRelocFileTable[file_id] != NULL)
+	{
+		auto ctx = Ship::Context::GetInstance();
+		auto prefix = ctx ? ctx->GetResourceManager()->GetArchiveManager()->LoadFilePrefix(
+		                        gRelocFileTable[file_id], kRelocHeaderPrefixBytes)
+		                  : nullptr;
+		if (prefix != nullptr && prefix->Buffer->size() > OTR_HEADER_SIZE + 12)
+		{
+			Ship::BinaryReader reader(std::make_shared<Ship::MemoryStream>(prefix->Buffer, OTR_HEADER_SIZE));
+			reader.SetEndianness(static_cast<Ship::Endianness>(prefix->Buffer->at(0)));
+			reader.ReadUInt32();
+			reader.ReadUInt16();
+			reader.ReadUInt16();
+			const u32 extern_count = reader.ReadUInt32();
+			const size_t needed = OTR_HEADER_SIZE + 12 + (extern_count * sizeof(u16)) + sizeof(u32);
+			if (needed <= prefix->Buffer->size())
+			{
+				info->extern_ids.resize(extern_count);
+				for (u32 i = 0; i < extern_count; i++)
+				{
+					info->extern_ids[i] = reader.ReadUInt16();
+				}
+				info->data_size = reader.ReadUInt32();
+				return true;
+			}
+		}
+	}
+	auto relocFile = portLoadRelocResource(file_id);
+	if (!relocFile)
+	{
+		return false;
+	}
+	info->data_size = relocFile->Data.size();
+	info->extern_ids.assign(relocFile->ExternFileIds.begin(), relocFile->ExternFileIds.end());
+	return true;
+}
+
+/* Stage files share dependencies, so sizing all of them read about 5800 headers for a few hundred files;
+ * each read opens an archive entry on the SD card (600 ms on the Switch). Only the sizing burst needs
+ * it, so the next real file load releases it. */
+static std::unordered_map<u32, RelocFileSizeInfo> sRelocFileSizeInfoCache;
+
+static RelocFileSizeMap sLBRelocFileSizeCache;
+static bool sLBRelocFileSizeCacheLoaded = false;
+static bool sLBRelocFileSizeCacheDirty = false;
+
+/**
+ * Frees the header cache and stores newly computed file sizes on disk; called on every real file load,
+ * which never happens inside a sizing burst.
+ */
+static void portReleaseRelocFileSizeInfoCache(void)
+{
+	if (sLBRelocFileSizeCacheDirty)
+	{
+		portRelocSizeCacheSave(sLBRelocFileSizeCache);
+		sLBRelocFileSizeCacheDirty = false;
+	}
+	if (!sRelocFileSizeInfoCache.empty())
+	{
+		std::unordered_map<u32, RelocFileSizeInfo>().swap(sRelocFileSizeInfoCache);
+	}
+}
+
+/**
+ * Cached portReadRelocFileSizeInfoUncached: a file's header never changes while the game runs.
+ * @return true when info was filled.
+ */
+static bool portReadRelocFileSizeInfo(u32 file_id, RelocFileSizeInfo *info)
+{
+	auto cached = sRelocFileSizeInfoCache.find(file_id);
+	if (cached != sRelocFileSizeInfoCache.end())
+	{
+		*info = cached->second;
+		return true;
+	}
+	if (!portReadRelocFileSizeInfoUncached(file_id, info))
+	{
+		return false;
+	}
+	sRelocFileSizeInfoCache[file_id] = *info;
+	return true;
+}
+
 size_t lbRelocGetExternBytesNum(u32 file_id)
 {
 	s32 i;
@@ -1059,13 +1204,13 @@ size_t lbRelocGetExternBytesNum(u32 file_id)
 		}
 	}
 
-	auto relocFile = portLoadRelocResource(file_id);
-	if (!relocFile) { return 0; }
+	RelocFileSizeInfo info;
+	if (!portReadRelocFileSizeInfo(file_id, &info)) { return 0; }
 
-	size_t bytes_read = (u32)LBRELOC_CACHE_ALIGN(relocFile->Data.size());
+	size_t bytes_read = (u32)LBRELOC_CACHE_ALIGN(info.data_size);
 	sLBRelocExternFileIDs[sLBRelocExternFileIDsNum++] = file_id;
 
-	for (u16 dep_id : relocFile->ExternFileIds)
+	for (u16 dep_id : info.extern_ids)
 	{
 		bytes_read += lbRelocGetExternBytesNum(dep_id);
 	}
@@ -1073,15 +1218,31 @@ size_t lbRelocGetExternBytesNum(u32 file_id)
 	return bytes_read;
 }
 
+/* The stage select sizes every Remix stage file (216 ids) to pick its model heap, which cost 1.3 s on the
+ * Switch because each call loads the file and its dependencies; a file's size never changes while running.
+ * The sizes are also kept on disk (reloc_size_cache.h), so only the first boot after an asset change pays. */
 size_t lbRelocGetFileSize(u32 id)
 {
 	u32 file_ids_extern_buf[50];
 
+	if (!sLBRelocFileSizeCacheLoaded)
+	{
+		sLBRelocFileSizeCacheLoaded = true;
+		portRelocSizeCacheLoad(sLBRelocFileSizeCache);
+	}
+	auto cached = sLBRelocFileSizeCache.find(id);
+	if (cached != sLBRelocFileSizeCache.end())
+	{
+		return cached->second;
+	}
 	sLBRelocExternFileIDs = file_ids_extern_buf;
 	sLBRelocExternFileIDsNum = 0;
 	sLBRelocExternFileIDsMax = ARRAY_COUNT(file_ids_extern_buf);
 
-	return lbRelocGetExternBytesNum(id);
+	size_t size = lbRelocGetExternBytesNum(id);
+	sLBRelocFileSizeCache[id] = size;
+	sLBRelocFileSizeCacheDirty = true;
+	return size;
 }
 
 static constexpr double kLBRelocSlowLoadMs = 20.0;
@@ -1186,7 +1347,23 @@ void* lbRelocGetForceExternHeapFile(u32 id, void *heap)
 	 * portRelocTryResolvePointer before clamping. */
 	sLBRelocExternFileHeap = heap;
 	sLBRelocInternBuffer.force_status_buffer_num = 0;
-	return lbRelocGetForceExternBufferFile(id);
+
+	const uintptr_t file_alloc = LBRELOC_CACHE_ALIGN((uintptr_t)heap);
+	auto loaded = sPortForceHeapLoads.find(file_alloc);
+	if ((loaded != sPortForceHeapLoads.end()) && (loaded->second.file_id == id))
+	{
+		sLBRelocExternFileHeap = loaded->second.bump_end;
+		lbRelocAddForceStatusBufferFile(id, (void *)file_alloc);
+		return (void *)file_alloc;
+	}
+
+	void *file = lbRelocGetForceExternBufferFile(id);
+	auto relocFile = (file == (void *)file_alloc) ? portLoadRelocResource(id) : nullptr;
+	if ((relocFile != nullptr) && relocFile->ExternFileIds.empty())
+	{
+		sPortForceHeapLoads[file_alloc] = { id, file_alloc + relocFile->Data.size(), sLBRelocExternFileHeap };
+	}
+	return file;
 }
 
 /* Mod helper: same force-status-buffer reset that
@@ -1444,6 +1621,7 @@ bool portRelocDescribePointer(const void *ptr, uintptr_t *out_base, size_t *out_
 
 void lbRelocInitSetup(LBRelocSetup *setup)
 {
+	sPortForceHeapLoads.clear();
 	/* Note: the historical portRelocResetPointerTable() call used to live
 	 * here. It wholesale-invalidated every token in the table on every
 	 * scene init, which is what created the variant-1/2/3 stale-data crash

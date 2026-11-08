@@ -49,6 +49,31 @@
 #include "gui/UpdatePopup.h"
 #endif
 
+#ifdef __SWITCH__
+/**
+ * Applies the KEY=VALUE lines of an optional file next to the .nro as environment variables, so the
+ * SSB64_* debug overrides (start scene, stage, fighter) can be used on hardware, which has no shell.
+ */
+static void port_switch_load_env_file(const char* path)
+{
+	FILE* file = std::fopen(path, "r");
+	if (file == nullptr) {
+		return;
+	}
+	char line[256];
+	while (std::fgets(line, sizeof(line), file) != nullptr) {
+		line[std::strcspn(line, "\r\n")] = '\0';
+		char* separator = std::strchr(line, '=');
+		if (line[0] == '#' || separator == nullptr) {
+			continue;
+		}
+		*separator = '\0';
+		setenv(line, separator + 1, 1);
+	}
+	std::fclose(file);
+}
+#endif
+
 #ifdef __PS5__
 extern "C" void ps5_boot_trace(const char* step);
 extern "C" void ps5_install_crash_trace(void);
@@ -88,6 +113,7 @@ extern "C" void ps5_install_crash_trace(void);
 #include "focus.h"
 #include "remix/remix_command_hooks.h"
 #include "shaders/fast3d_shader_manifest.h"
+#include "port_frame_profile.h"
 
 #ifndef DISABLE_SCRIPTING
 #include <ship/scripting/ScriptLoader.h>
@@ -686,6 +712,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	{
 		extern void port_dl_ranges_init(void);
 		port_dl_ranges_init();
+		port_frame_profile_init();
 	}
 
 	/* App identity comes from CMake (SSB64_APP_NAME = "BattleShip" for US,
@@ -1379,6 +1406,9 @@ int main(int argc, char* argv[]) {
 	 * Ship::Context will later use for the user's saves and o2r. */
 	{
 		std::string logPath;
+#ifdef __SWITCH__
+		port_switch_load_env_file("env.txt");
+#endif
 #ifdef __PS5__
 		/* No SDL pref path on the PS5 title; /app0 (the cwd) is read-only. */
 		logPath = Ship::PS5::GetDataDirectory() + "/ssb64.log";

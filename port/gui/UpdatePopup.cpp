@@ -16,6 +16,19 @@ namespace {
 
 constexpr int32_t kUpdatePopupInputBlockId = 0x5550;
 
+/* The Switch SDL maps buttons by position: Nintendo A (right face button) arrives as GamepadFaceRight and
+ * Nintendo B (bottom) as GamepadFaceDown, the reverse of the Xbox layout. Pressing B on a docked Switch
+ * started the update before this swap. */
+#ifdef __SWITCH__
+constexpr ImGuiKey kConfirmKey = ImGuiKey_GamepadFaceRight;
+constexpr ImGuiKey kCancelKey = ImGuiKey_GamepadFaceDown;
+constexpr const char* kCloseGameLabel = "Close game (+)";
+#else
+constexpr ImGuiKey kConfirmKey = ImGuiKey_GamepadFaceDown;
+constexpr ImGuiKey kCancelKey = ImGuiKey_GamepadFaceRight;
+constexpr const char* kCloseGameLabel = "Close game (Start)";
+#endif
+
 enum class UpdateStage { Checking, Offered, Downloading, Finished, Dismissed };
 
 class UpdatePopupWindow : public Ship::GuiWindow {
@@ -110,12 +123,22 @@ class UpdatePopupWindow : public Ship::GuiWindow {
                     BATTLESHIP_CURRENT_VERSION);
         ImGui::TextUnformatted("Download and install it now? The game restarts when it finishes.");
         if (mFocusPending) ImGui::SetKeyboardFocusHere();
-        if (ImGui::Button("Update")) {
+        if (ImGui::Button("Update (A)") || PadPressed(kConfirmKey)) {
             enhancements::StartGameUpdate();
             mStage = UpdateStage::Downloading;
+            return;
         }
         ImGui::SameLine();
-        if (ImGui::Button("Later")) ReleaseInput();
+        if (ImGui::Button("Later (B)") || PadPressed(kCancelKey)) ReleaseInput();
+    }
+
+    /**
+     * Reads a pad button straight from ImGui, so the popup answers the pad even when ImGui's gamepad
+     * navigation has no focused item (docked Switch: the touch screen is out of reach).
+     * @return true on the frame the button goes down, never on the frame the popup first appears
+     */
+    bool PadPressed(ImGuiKey key) {
+        return !mFocusPending && ImGui::IsKeyPressed(key, false);
     }
 
     void DrawResult() {
@@ -127,10 +150,12 @@ class UpdatePopupWindow : public Ship::GuiWindow {
         }
         if (mFocusPending) ImGui::SetKeyboardFocusHere();
         if (needsManualInstall) {
-            if (ImGui::Button("Close game")) Ship::Context::GetInstance()->GetWindow()->Close();
+            if (ImGui::Button(kCloseGameLabel) || PadPressed(ImGuiKey_GamepadStart)) {
+                Ship::Context::GetInstance()->GetWindow()->Close();
+            }
             ImGui::SameLine();
         }
-        if (ImGui::Button("Continue")) ReleaseInput();
+        if (ImGui::Button("Continue (A)") || PadPressed(kConfirmKey)) ReleaseInput();
     }
 };
 

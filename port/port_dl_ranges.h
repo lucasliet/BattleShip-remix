@@ -50,6 +50,11 @@ void port_dl_range_unregister(const void *base);
  * before every deref. Should be O(N) for small N (~50 ranges). */
 int port_dl_check_addr(uintptr_t addr);
 
+/* port_dl_check_addr that also writes the span sharing addr's answer: the containing range for
+ * PORT_DL_IN_RANGE, the gap between registered ranges (and their walk-past windows) for PORT_DL_UNKNOWN,
+ * and an empty span otherwise. */
+int port_dl_range_lookup(uintptr_t addr, uintptr_t *range_base, size_t *range_size);
+
 /* Diagnostic-only: write a human-readable classification (label+offset)
  * into buf. Returns true if addr was in a registered range. */
 int port_dl_range_classify_str(uintptr_t addr, char *buf, size_t buf_size);
