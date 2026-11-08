@@ -1,9 +1,14 @@
 # Builds and ROMs: BattleShip original (US) and BattleShip-Remix
 
-Covers the ROMs each build needs, which Remix version they are, and the desktop, test-package and Switch build commands. Code and scripts:
+Covers the ROMs each build needs, which Remix version they are, and the desktop, test-package, Switch, Android and PS5 build commands. Code and scripts:
 `CMakeLists.txt` (`SSB64_VERSION`, `SSB64_APP_NAME`), `scripts/macos/`, `scripts/linux/`, `scripts/switch/`, `scripts/remix/`. Generic build steps for
-Linux and Windows are in `BUILDING.md`; the toolchain rules are in `AGENTS.md`.
-Test: the smoke tests in `.claude/skills/remix-smoke-tests/` run the built `build/BattleShip-Remix`.
+Linux and Windows are in `BUILDING.md`.
+
+The `.toolchain/` folder used by the commands below is not in git: the setup scripts create it inside the repository, with no package manager and no `sudo`. On macOS run
+`scripts/switch/setup-toolchain.sh` first (it downloads cmake, ninja and the Switch toolchain, and writes `.toolchain/env.sh`, which the other scripts need), then
+`scripts/macos/setup-host-deps.sh` (the desktop libraries). The desktop script does not build GLEW: `libGLEW.a` 2.1.0 has to be in `.toolchain/host/deps/lib` already
+(a known gap). On macOS the scripts expect `python3`, `curl`, `unzip`, `uv` and the Xcode command line tools (`clang++`, `git`) to be present. The PS5 build is Linux x86_64
+only, and the release workflow builds Android on Linux too (`scripts/ps5/setup-toolchain.sh` needs `git`, `curl`, `unzip`, `tar` with xz, `uv` and a host C compiler).
 
 No ROM and no `.o2r` enters git (`*.z64`, `build/`, `build-*/` and `dist/` are in `.gitignore`). Whoever clones the repository supplies the ROMs below and
 generates the `.o2r` on the desktop.
@@ -27,8 +32,7 @@ N64 header CRCs: Remix `34EE4749 1833C64C`; US `916B8B5B 780B85A4`. Both have th
 The JP ROM (`baserom.jp.z64`) is not used by the Remix.
 
 Without `baserom.us.z64` the Remix build compiles (the `DeriveStageAssets` target becomes a stub) and the stage select still shows every thumbnail:
-`port/css_icons/port_css_stage_assets.cpp` derives the background and icon from the wallpaper sprite in the extracted `.o2r`, as in every release build
-(checked 2026-11-06, run `nous_css`: no `css_icons` PNGs, Final Destination, Battlefield and Metal Cavern thumbnails present).
+`port/css_icons/port_css_stage_assets.cpp` derives the background and icon from the wallpaper sprite in the extracted `.o2r`, as in every release build.
 
 ## Which Remix version
 
@@ -74,7 +78,7 @@ The `BattleShip` binary loads `BattleShip.o2r` and `f3d.o2r` from the directory 
 
 ## Desktop build of BattleShip-Remix (macOS, contained toolchain)
 
-Everything comes from `.toolchain/` (see `AGENTS.md`). `SSB64_VERSION` defaults to `remix`. Configure with Ninja and `Release`:
+Everything comes from `.toolchain/`: cmake and ninja from `scripts/switch/setup-toolchain.sh`, the libraries from `scripts/macos/setup-host-deps.sh`. `SSB64_VERSION` defaults to `remix`. Configure with Ninja and `Release`:
 
 ```bash
 PATH=$PWD/.toolchain/host/ninja:$PATH
@@ -99,7 +103,7 @@ These packages **embed `BattleShip-Remix.o2r`**, which is derived from the ROM. 
 not carry the `.o2r`: it is extracted from the user's ROM on first run, as `scripts/package-macos.sh`, `scripts/package-linux.sh` and
 `scripts/package-windows.ps1` do for every version. The fork's releases come from `.github/workflows/release-remix.yml`: a `v*` tag builds the
 macOS `.dmg` (ad-hoc signed, not notarized), the Linux AppImage, the Windows zip and the Switch SD-card zip (without `.o2r`), and opens a draft release whose
-body is `.github/release-notes.md` (write its Highlights, then publish). The Remix build's updater reads `lucasliet/BattleShip-remix` releases
+body is `.github/release-notes.md`. The Remix build's updater reads `lucasliet/BattleShip-remix` releases
 (`port/enhancements/Updater.cpp`). The inherited upstream workflows are disabled in the fork.
 
 - **macOS:** first make a Release build with `-DNON_PORTABLE=ON` in `build-macos-release/`, then run `scripts/macos/package-remix-contained.sh`. It reads the `.o2r`,
@@ -130,7 +134,7 @@ game extracted a 59 MB `BattleShip-Remix.o2r` and booted to the Remix splash (`f
 The console never reads a ROM: the `.nro` is compiled with devkitA64 and the `.o2r` and its `.recipe` come from the desktop build of the same release (the game refuses to start when the `.recipe` is missing or its hash differs from the one baked into the `.nro`).
 
 ```bash
-scripts/switch/setup-toolchain.sh        # once; network only in this step
+scripts/switch/setup-toolchain.sh        # once; downloads cmake, ninja and devkitA64, so it needs the network (a download blocked by the host makes it exit with code 2)
 
 # Remix (default)
 scripts/switch/build.sh remix            # build-switch/BattleShip-Remix.nro
@@ -168,13 +172,13 @@ stays as `.old` until the swap succeeds). "Restart Game" relaunches it through `
 (`cmake --build build --target run_updater_tests`).
 
 If the `.o2r` or Torch change (a new `.recipe`), rebuild the package: an old `.o2r` on the SD card with a new `.nro` causes a storm of invalid reloc tokens. The game writes
-`BattleShip-Remix.log` next to the `.nro`, on the SD card.
+`ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, on the SD card; both are overwritten on every launch.
 
 ## Checklist for a fresh clone
 
 1. `git submodule update --init --recursive`.
 2. Put `baserom.remix.z64` and `baserom.us.z64` in the root and check the SHA-1 against the table above (`shasum -a 1 baserom.*.z64`).
-3. `scripts/macos/setup-host-deps.sh` (desktop) and `scripts/switch/setup-toolchain.sh` (Switch).
+3. `scripts/switch/setup-toolchain.sh` first (cmake, ninja, `.toolchain/env.sh`), then `scripts/macos/setup-host-deps.sh` (desktop libraries).
 4. Desktop build (above), then the Switch build and pack.
 5. For the Remix symbol map and the action tables: `scripts/remix/assemble-remix.sh` (writes `build/remixasm/remix.sym`), then
    `.toolchain/host/venv/bin/python -I tools/gen_remix_actions.py`.
@@ -207,7 +211,7 @@ debug-signed.
 ## PS5 build (BattleShip-Remix)
 
 A native PS5 title (`PPSA99264`, "BattleShip Remix") for jailbroken consoles with ShadowMountPlus. Built on a Linux
-x86_64 host (desk.local, or the `build-ps5` job of `release-remix.yml`) with a toolchain kept under `.toolchain/ps5`:
+x86_64 host (or the `build-ps5` job of `release-remix.yml`) with a toolchain kept under `.toolchain/ps5`:
 
 ```
 scripts/ps5/setup-toolchain.sh      # pinned SDK, LLVM 18, ps5-opengl, boilerplate, SDL (scripts/ps5/packages.lock)
