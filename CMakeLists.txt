@@ -721,13 +721,15 @@ message(STATUS "SSB64 app identity: ${SSB64_APP_NAME}")
 # re-extracts automatically when a binary update changes the recipe —
 # stale archives from older builds caused reloc-token storms and menu
 # crashes (issues #217/#221) until users manually re-extracted.
-execute_process(
-    COMMAND git -C ${CMAKE_CURRENT_SOURCE_DIR}/torch rev-parse HEAD
-    OUTPUT_VARIABLE SSB64_TORCH_SHA
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_QUIET)
+# The torch part of the fingerprint is a pinned revision, not the checked-out commit: a torch commit that does not
+# change what gets extracted (PS5 locale, file listing, logging) must not invalidate every user's .o2r, and on the
+# Switch the .o2r is copied from a desktop by hand. Bump tools/torch_extract_rev.txt to the new torch commit only when
+# a torch change alters the extraction output.
+set(SSB64_TORCH_REV_FILE ${CMAKE_CURRENT_SOURCE_DIR}/tools/torch_extract_rev.txt)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${SSB64_TORCH_REV_FILE})
+file(STRINGS ${SSB64_TORCH_REV_FILE} SSB64_TORCH_SHA LIMIT_COUNT 1)
 if(NOT SSB64_TORCH_SHA)
-    set(SSB64_TORCH_SHA "unknown-torch")
+    message(FATAL_ERROR "tools/torch_extract_rev.txt must hold the torch commit that last changed the extraction output")
 endif()
 file(SHA1 ${CMAKE_CURRENT_SOURCE_DIR}/config.yml SSB64_RECIPE_CONFIG_SHA1)
 set(SSB64_RECIPE_CONCAT "${SSB64_TORCH_SHA}:${SSB64_RECIPE_CONFIG_SHA1}")
