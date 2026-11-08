@@ -572,7 +572,7 @@ void PortGameInit(void)
 	 * progressed as far as it can without VI ticks. */
 	port_log("SSB64: Starting game coroutine (boot sequence)\n");
 	port_coroutine_resume(sGameCoroutine);
-	port_log("SSB64: Boot sequence yielded — entering frame loop\n");
+	port_log("SSB64: Boot sequence yielded — entering frame loop (t=%.0f ms)\n", port_log_uptime_ms());
 
 	/* Start the hang watchdog now that the boot chain has yielded back.
 	 * This avoids firing false alarms during the long synchronous boot. */
@@ -596,6 +596,25 @@ static bool sScreenshotEnabled = false;
 static bool sScreenshotAllFrames = false;
 static std::unordered_set<int> sScreenshotFrames;
 static std::string sScreenshotDir;
+
+/**
+ * Logs the shader programs Fast3D compiled on demand since the previous call, with their total compile
+ * time. Called next to the periodic frame log, so a stall on a console can be matched to shader compilation.
+ */
+static void portLogRuntimeShaderCompiles(void)
+{
+	static uint32_t sReportedCompiles = 0;
+	auto context = Ship::Context::GetInstance();
+	auto window = context ? std::dynamic_pointer_cast<Fast::Fast3dWindow>(context->GetWindow()) : nullptr;
+	if (!window) return;
+	auto interpreter = window->GetInterpreterWeak().lock();
+	if (!interpreter) return;
+	uint32_t compiles = interpreter->GetRuntimeShaderCompiles();
+	if (compiles == sReportedCompiles) return;
+	port_log("SSB64: Fast3D compiled %u shader(s) on demand (+%u, %.0f ms total)\n",
+	         compiles, compiles - sReportedCompiles, interpreter->GetRuntimeShaderCompileMs());
+	sReportedCompiles = compiles;
+}
 
 static void port_screenshot_init_once(void)
 {
@@ -888,6 +907,8 @@ void PortPushFrame(void)
 		double elapsed = std::chrono::duration<double>(now - sStartTime).count();
 		if (sFrameCount <= 60 || (sFrameCount % 60 == 0)) {
 			port_log("SSB64: Frame %d complete (t=%.2fs)\n", sFrameCount, elapsed);
+			portLogRuntimeShaderCompiles();
+			port_log_flush();
 		}
 	}
 }

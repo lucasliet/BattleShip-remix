@@ -53,6 +53,8 @@ The in-game updater downloads `BattleShip-Remix-switch.zip` (not the bare `.nro`
 - **GL stack = desktop GL 2.1 through Mesa Nouveau, not GLES.** The Fast3D shaders on the GL core path emit `#version 110/130`, the profile validated on SoH Switch. `USE_OPENGLES` stays Android-only.
 - **No crash handler of our own:** newlib has no execinfo; the HOS crash reporter does the job.
 - **Widescreen stays off on the Switch** (`kWidescreenDefault = 0` in `port/widescreen/widescreen.cpp`): Center4_3 left side bars on battle backdrops and offset the CSS fighters from the selector on hardware.
+- **Hi-res texture packs are opt-in** (`kHiResEnabledDefault = 0` on `__SWITCH__`, 256 MB LRU, 2048x2048 texel cap, no preload): the SSB Reloaded pack does not fit a 512 MB cache (79% hit rate after 30 minutes on hardware), so every new texture decoded a PNG on the render thread; the stage select took 1.5 s and 3 s frames and crowded matches stuttered.
+- **The game log is written only when the game quits from inside** (`port_log` block buffer flushed once a second; HOME kills the process). The per-frame trace lines are off unless `SSB64_TRACE=1`.
 - **Full-memory mode is required:** hold R while opening an installed game. Applet mode does not have enough memory.
 
 ## Hardware validation checklist

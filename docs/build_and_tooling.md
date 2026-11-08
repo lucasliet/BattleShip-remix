@@ -29,7 +29,7 @@ notes: `docs/jp_rom_compat_plan_2026-05-17.md`.
 
 ## Runtime Logs
 After running the game:
-- **Game trace log**: `ssb64.log` in the cwd — `port_log()` output (boot sequence, thread creation, frame milestones). Overwritten each run.
+- **Game trace log**: `ssb64.log` in the cwd — `port_log()` output (boot sequence, thread creation, frame milestones). Overwritten each run. The per-frame diagnostics (`port_trace()`: every `ftMainSetStatus`, every `gcEjectGObj`, item collision probes) are written only with `SSB64_TRACE=1` in the environment; left on, they produced 14 MB per half hour on the Switch and the SD-card writes stuttered the game. The log is block-buffered on the consoles (64 KB) and flushed once a second from the game loop, so a process the system kills (HOME on the Switch) loses at most the last second.
 - **LUS/spdlog log**: `logs/<app name>.log` (`logs/BattleShip-Remix.log` for the Remix build) — libultraship logging (resource loading, rendering, errors). Overwritten each run.
 - On Windows the binary lives at `build/Debug/ssb64.exe` (multi-config MSVC), on macOS/Linux at `build/ssb64` (single-config Make/Ninja).
 

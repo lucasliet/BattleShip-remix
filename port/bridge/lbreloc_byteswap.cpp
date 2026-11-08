@@ -35,6 +35,7 @@
 #include <vector>
 
 extern "C" void port_log(const char *fmt, ...);
+extern "C" void port_trace(const char *fmt, ...);
 extern "C" int  portRelocFindContainingFile(const void *ptr, uintptr_t *out_base, size_t *out_size);
 extern "C" int  portRelocFindFileIdAndBase(const void *ptr, uintptr_t *out_base);
 extern "C" bool portRelocDescribePointer(const void *ptr, uintptr_t *out_base, size_t *out_size,
@@ -1626,7 +1627,7 @@ extern "C" void portRelocFixupTextureAtRuntime(const void *addr, unsigned int nu
 		unsigned int descFileId = 0;
 		const char *descPath = nullptr;
 		int described = portRelocDescribePointer(addr, &descBase, &descSize, &descFileId, &descPath);
-		port_log("SSB64: runtimeTexFix addr=%p req=0x%x fileBase=%p fileSize=0x%zx off=0x%zx num=0x%x desc=%d file=%u descBase=%p descSize=0x%zx path=%s\n",
+		port_trace("SSB64: runtimeTexFix addr=%p req=0x%x fileBase=%p fileSize=0x%zx off=0x%zx num=0x%x desc=%d file=%u descBase=%p descSize=0x%zx path=%s\n",
 		         addr, num_bytes, (void*)fileBase, fileSize, target_offset, num_bytes,
 		         described, descFileId, (void*)descBase,
 		         descSize, descPath ? descPath : "(unknown)");

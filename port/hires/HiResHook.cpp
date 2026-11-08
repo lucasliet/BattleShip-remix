@@ -137,6 +137,7 @@ bool HiResHook(uint8_t fmt, uint8_t siz,
     if (CVarGetInteger("gHiResTextures.Enabled", ssb64::hires::kHiResEnabledDefault) == 0) {
         return false;
     }
+    ssb64::hires::HiResPack::Get().EnsureScanned();
 
     const ssb64::hires::DecodedTexture* dec =
         ssb64::hires::HiResPack::Get().Lookup(fmt, siz, rgba8, width, height);

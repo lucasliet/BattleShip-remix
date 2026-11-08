@@ -65,7 +65,8 @@ sdmc:/switch/BattleShip-Remix/
   have enough memory.
 - Always copy `BattleShip-Remix.o2r` **and** `BattleShip-Remix.o2r.recipe` together, from a desktop build of the **same release** as the `.nro`. The game compares the recipe in the `.recipe` file with the one inside the `.nro` and refuses to start on a mismatch (or if the `.recipe` is missing). Some releases keep the same recipe, so an older `.o2r` can still work; when it does not, the error screen shows both recipes. After an update that changes the asset pipeline, extract again with the new desktop build and copy both files again.
 - The in-game updater (About menu, or the popup at start-up) downloads `BattleShip-Remix-switch.zip`, replaces the `.nro` right away and stages the other files of the zip in an `update-pending/` folder next to it; they are moved into place the next time the game boots. Your `BattleShip-Remix.o2r` and `.recipe` are never touched, so after a release that changes the asset pipeline copy a freshly extracted pair again. If applying the staged files fails, the error screen names the file: delete `update-pending/` or reinstall from the zip.
-- The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, both overwritten on every launch; attach them to any Switch bug report.
+- The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, both overwritten on every launch; attach them to any Switch bug report. Quit the game from inside it rather than from the HOME menu: HOME kills the process and the end of the logs is lost.
+- Hi-res texture packs are off by default on the Switch (About menu to turn them on): the console cannot hold a whole pack in memory, and a pack that keeps missing the cache decodes textures while you play, which shows up as stutter when many new things appear on screen.
 - Build and packaging steps: [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md#switch-build-battleship-and-battleship-remix).
 
 ## How the Remix port was done and validated
@@ -112,7 +113,7 @@ Everything below comes from BattleShip and is toggleable in-game from the ESC me
 
 ### Textures & mods
 
-- **Hi-res texture packs** on desktop *and* Android (opt-in, read in place straight out of a `.zip`). Download GhostlyDark's pack from [evilgames.eu](https://evilgames.eu/texture-packs/ssb-reloaded.htm#pc).
+- **Hi-res texture packs** on desktop *and* Android and Switch (opt-in on the last two, read in place straight out of a `.zip`). Download GhostlyDark's pack from [evilgames.eu](https://evilgames.eu/texture-packs/ssb-reloaded.htm#pc).
 - **Native C mod support** — write mods in C, compiled at runtime (TinyCC), with hot-reload, function detours, and a documented engine/fighter event catalog. See [`docs/modding.md`](docs/modding.md). *(Desktop only; scripting is disabled on Android.)*
 
 ### Controls

@@ -177,7 +177,7 @@ Hardware validation of the Switch zip update and of the macOS in-place update on
 
 If a release changes the extraction (a new `.recipe`), copy the newly extracted `.o2r` and `.recipe` to the SD card again: an old `.o2r` with a new `.nro` would cause a storm
 of invalid reloc tokens, so the game checks the `.recipe` first and shows an error screen (recipe missing, or the two recipes when they differ) instead of starting.
-The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, on the SD card; both are overwritten on every launch.
+The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, on the SD card; both are overwritten on every launch. Quit the game from inside it when collecting them: HOME kills the process, the last second of the log is lost and ftpd may refuse to send a file the game still holds open.
 
 ## Checklist for a fresh clone
 

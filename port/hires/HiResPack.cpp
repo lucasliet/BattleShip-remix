@@ -30,6 +30,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <chrono>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
@@ -497,6 +498,9 @@ std::atomic<uint64_t> gPreloadWarmed{ 0 };
 std::vector<std::pair<HashKey, PackEntry>> gPreloadWork; // fixed after StartPreload
 std::vector<std::thread> gPreloadThreads;
 bool gPreloadStarted = false;
+// Set once Init() has walked (or tried to walk) mods/; stays false while the pack is disabled so the
+// first enable from the menu scans it lazily (EnsureScanned).
+bool gScanAttempted = false;
 
 void PreloadWorker() {
     // Private zip handles — libzip handles can't be shared across threads.
@@ -597,11 +601,19 @@ bool HiResPack::Init() {
     port_log("HiResPack: decoded-RGBA8 LRU budget = %d MB%s\n", budgetMB,
              kMaxPackTexels ? " (mobile per-texture upscale cap active)" : "");
 
+    if (CVarGetInteger("gHiResTextures.Enabled", kHiResEnabledDefault) == 0) {
+        port_log("HiResPack: disabled; %s is not scanned until the pack is enabled\n", gModsRoot.c_str());
+        return false;
+    }
+    gScanAttempted = true;
+
     if (!Directory::Exists(gModsRoot)) {
         port_log("HiResPack: %s does not exist; create it and drop a pack inside to enable\n",
                  gModsRoot.c_str());
         return false;
     }
+
+    const auto scanStart = std::chrono::steady_clock::now();
 
     // ListFiles' recursive iterator throws on a bad mods/ (locked subdir,
     // symlink loop, a file removed mid-walk) — catch it so a junk folder just
@@ -638,11 +650,17 @@ bool HiResPack::Init() {
         return false;
     }
 
-    port_log("HiResPack: scanned %s — %zu files, %zu indexed, %zu unparsed, %zu hash collisions, %zu zip(s)\n",
+    port_log("HiResPack: scanned %s — %zu files, %zu indexed, %zu unparsed, %zu hash collisions, %zu zip(s) in %.0f ms\n",
              gModsRoot.c_str(),
              mStats.scannedFiles, mStats.indexedTextures,
-             mStats.skippedFilenames, mStats.collisions, gOpenZips.size());
+             mStats.skippedFilenames, mStats.collisions, gOpenZips.size(),
+             std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - scanStart).count());
     return true;
+}
+
+void HiResPack::EnsureScanned() {
+    if (gScanAttempted) return;
+    Init();
 }
 
 void HiResPack::StartPreload() {

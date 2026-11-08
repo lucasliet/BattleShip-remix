@@ -940,7 +940,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 			port_log("SSB64: bootstrap InitResourceManager failed\n");
 			return 1;
 		}
-		port_log("SSB64: bootstrap ResourceManager OK\n");
+		port_log("SSB64: bootstrap ResourceManager OK (t=%.0f ms)\n", port_log_uptime_ms());
 	}
 
 	// See controlDeck note above re: scoping.
@@ -949,7 +949,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 		auto window = std::make_shared<Fast::Fast3dWindow>();
 		port_log("SSB64: calling InitWindow ...\n");
 		if (!sContext->InitWindow(window)) { port_log("SSB64: InitWindow failed\n"); return 1; }
-		port_log("SSB64: Window OK\n");
+		port_log("SSB64: Window OK (t=%.0f ms)\n", port_log_uptime_ms());
 
 		// Esc Menu screen, Toggle with Esc.
 		if (auto gui = window->GetGui()) {
@@ -1096,7 +1096,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 			port_log("SSB64: AddArchive failed for %s\n", ssb64o2r.c_str());
 			return 1;
 		}
-		port_log("SSB64: game archive registered\n");
+		port_log("SSB64: game archive registered (t=%.0f ms)\n", port_log_uptime_ms());
 	}
 
 	{
@@ -1276,7 +1276,7 @@ static int PortInitImpl(int argc, char* argv[]) {
 	}
 #endif
 
-	port_log("SSB64: init complete\n");
+	port_log("SSB64: init complete (t=%.0f ms)\n", port_log_uptime_ms());
 	return 0;
 }
 

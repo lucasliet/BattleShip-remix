@@ -45,7 +45,10 @@ namespace ssb64::hires {
 // working set (see kDefaultLruBudgetMB) plus its uncompressed GPU uploads can
 // push a phone past the OS low-memory-killer threshold, so a mobile user must
 // enable it deliberately rather than have a dropped-in pack allocate silently.
-#if defined(__ANDROID__)
+// The Switch is opt-in for the same reason, plus a slower CPU: a pack that
+// does not fit the cache decodes PNGs on the render thread whenever new
+// textures appear, which showed up as stutter in crowded matches.
+#if defined(__ANDROID__) || defined(__SWITCH__)
 inline constexpr int kHiResEnabledDefault = 0;
 #else
 inline constexpr int kHiResEnabledDefault = 1;
@@ -59,6 +62,8 @@ inline constexpr int kHiResEnabledDefault = 1;
 // make the cache thrash (re-decoding on every miss stalls the render thread).
 #if defined(__ANDROID__)
 inline constexpr int kDefaultLruBudgetMB = 128;
+#elif defined(__SWITCH__)
+inline constexpr int kDefaultLruBudgetMB = 256;
 #else
 inline constexpr int kDefaultLruBudgetMB = 512;
 #endif
@@ -69,7 +74,7 @@ inline constexpr int kMinLruBudgetMB = 16;
 // single pathological upscale can't blow the budget / GPU upload in one shot —
 // the LRU never evicts its just-inserted tail, so a lone over-budget entry
 // would otherwise exceed the cap outright. 0 = uncapped (desktop).
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__SWITCH__)
 inline constexpr uint32_t kMaxPackTexels = 2048u * 2048u; // 16 MB RGBA8
 #else
 inline constexpr uint32_t kMaxPackTexels = 0u;
@@ -81,7 +86,7 @@ inline constexpr uint32_t kMaxPackTexels = 0u;
 // preloading front-loads the pack's whole decoded working set, which is
 // exactly the allocation pattern the opt-in kHiResEnabledDefault guards
 // against on phones.
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(__SWITCH__)
 inline constexpr int kHiResPreloadDefault = 0;
 #else
 inline constexpr int kHiResPreloadDefault = 1;
@@ -125,6 +130,11 @@ public:
      * alive. Returns true if at least one mods/ subdirectory existed; the
      * pack itself is allowed to be empty. */
     bool Init();
+
+    /* Runs Init() if the pack was disabled at boot (Init() skips the mods/ walk then) and has not
+     * been scanned since: the hook calls it on the first lookup after the menu toggle turns the
+     * pack on, so an idle pack costs nothing at start-up on a console SD card. */
+    void EnsureScanned();
 
     /* Diagnostic snapshot of the last Init() pass. */
     const PackStats& Stats() const noexcept { return mStats; }

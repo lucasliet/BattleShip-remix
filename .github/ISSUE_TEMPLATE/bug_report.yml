@@ -119,6 +119,7 @@ body:
         Attach the logs from the game folder (the one that holds `BattleShip-Remix.o2r`), right after the bug:
         - `ssb64.log` and `logs/BattleShip-Remix.log` (the engine log): both are overwritten on every launch, so copy them before you open the game again. If one is large (older versions kept growing it), zip it.
         - PS5 only: `boot.txt`, if the game crashed before `ssb64.log` was written. On PS5 the folder is `/data/homebrew/PPSA99264/`.
+        - Switch only: close the game from inside it (pause, then quit), not from the HOME menu. HOME kills the process and the end of the logs is lost; some FTP servers also refuse to send a file the game still has open.
         If a file does not exist on your platform, skip it. Not needed for a bug that is only about how something looks, but it helps for crashes and freezes.
   - type: textarea
     id: extra
