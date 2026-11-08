@@ -1,0 +1,102 @@
+name: Bug report
+description: Something in the game looks or behaves wrong
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Reports we can act on need three things: **where** it happens (platform, version, fighter, stage, mode), **how** to make it happen again, and **evidence** (screenshot or video, plus the log).
+        "Some characters have bugs" cannot be fixed. "Up smash with Dr. Mario on Dream Land has no hitbox, video attached" can.
+        One bug per issue, please.
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Nintendo Switch
+        - PlayStation 5
+        - Android
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Game version
+      description: Shown as "Version" in the game menu, for example `v2.0.1-port.7`.
+      placeholder: v2.0.1-port.7
+    validations:
+      required: true
+  - type: dropdown
+    id: rom
+    attributes:
+      label: ROM
+      description: Which ROM did you extract the game data from?
+      options:
+        - Smash Remix ROM (BattleShip Remix)
+        - Super Smash Bros. 64 US (BattleShip)
+        - Super Smash Bros. 64 JP
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Fighter, stage and mode
+      description: Name the exact fighter(s), stage and game mode. If it only happens with some of them, list which ones and which ones you checked that are fine.
+      placeholder: "Dr. Mario (P1) vs Kirby (CPU), Dream Land, VS mode"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happens
+      description: What you see, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen again
+      description: Numbered steps from a fresh match or menu. Say which inputs you used (for example "hold up and press A on the ground, no C-stick").
+      placeholder: |
+        1. VS mode, Dr. Mario vs Kirby on Dream Land
+        2. Stand on the ground and press up + A
+        3. The attack plays but has no hitbox
+    validations:
+      required: true
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: How often
+      options:
+        - Every time
+        - Often
+        - Rarely
+        - Happened once
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: |
+        Drag a screenshot or a short video here. For a graphics bug, a screenshot is required; for a move or physics bug, a video of the move is required.
+        If you can, also show the same thing in the original game or the Smash Remix ROM on an emulator so we know what it should look like.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: |
+        Attach `ssb64.log` from the game folder, right after the bug (it is overwritten on every launch). On PS5 the logs are in `/data/homebrew/PPSA99264/logs/`.
+        Not needed for a bug that is only about how something looks, but it helps for crashes and freezes.
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Controller used, resolution or graphics settings you changed, mods or texture packs loaded, and whether it also happens on another platform.
