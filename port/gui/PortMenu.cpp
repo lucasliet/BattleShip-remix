@@ -2064,6 +2064,20 @@ void PortMenu::AddMenuAbout() {
     WidgetPath path = { "About", "Build", SECTION_COLUMN_1 };
     AddSidebarEntry("About", "Build", 1);
     AddWidget(path, "About", WIDGET_SEPARATOR_TEXT);
+#ifdef REGION_REMIX
+    AddWidget(path, "BattleShip Remix", WIDGET_TEXT);
+    AddWidget(path, "A fork of BattleShip that plays Smash Remix 2.0.1", WIDGET_TEXT);
+    AddWidget(path, "github.com/lucasliet/BattleShip-remix", WIDGET_TEXT);
+    AddWidget(path, "lucasliet: Smash Remix port, Android, Switch and PS5 builds", WIDGET_TEXT);
+    AddWidget(path, "Smash Remix team: the mod this fork ports", WIDGET_TEXT);
+    AddWidget(path, "github.com/JSsixtyfour/smashremix", WIDGET_TEXT);
+    AddWidget(path, "Harbour Masters and Kenix3: libultraship and Torch", WIDGET_TEXT);
+    AddWidget(path, "GhostlyDark: SSB Reloaded texture pack", WIDGET_TEXT);
+    AddWidget(path, "PS5 build: ps5-opengl, ps5-payload-sdk and ps5-native-app-boilerplate (GPL-3.0)", WIDGET_TEXT);
+    AddWidget(path, "Not affiliated with Nintendo, HAL Laboratory or Harbour Masters", WIDGET_TEXT);
+
+    AddWidget(path, "Original project", WIDGET_SEPARATOR_TEXT);
+#endif
     AddWidget(path, "BattleShip", WIDGET_TEXT);
     AddWidget(path, "Native Smash 64 PC port powered by libultraship", WIDGET_TEXT);
     AddWidget(path, "Built from the ssb-decomp-re decompilation", WIDGET_TEXT);
@@ -2081,7 +2095,6 @@ void PortMenu::AddMenuAbout() {
     AddWidget(path, "ElBateSoli: Raphnet Playtesting", WIDGET_TEXT);
     AddWidget(path, "MickleMoose: C Modding Toolkit Developer", WIDGET_TEXT);
     AddWidget(path, "Zorkats: C Modding Documentation", WIDGET_TEXT);
-
 
 #if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
     // BUILT-IN UPDATER — hidden on Android. App updates come through the
