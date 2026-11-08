@@ -1,14 +1,8 @@
 ## Highlights
 
-**Clearer Switch error for the extracted game data.** The "different version of the game" screen now says which
-problem you have: `BattleShip-Remix.o2r.recipe` is missing (copy both files, not only the `.o2r`), or the `.o2r` was
-extracted by another release (it shows both recipe hashes). It also prints the folder to copy the files to.
-
-**Fewer needless re-extractions.** The extracted data is now tied to a pinned extraction revision instead of whatever
-commit of the extractor was built, so unrelated changes no longer ask Switch users to copy a new `.o2r` by hand.
-
-**About page.** The About tab of the port menu credits BattleShip Remix, the Smash Remix team and the other components
-above the original BattleShip credits.
+**Logs only keep the last run.** The engine log (`logs/BattleShip-Remix.log`) used to grow with every launch and keep up
+to ten rotated copies (`BattleShip-Remix.1.log` ... `.10.log`, 10 MB each). It is now emptied at every launch, like
+`ssb64.log`. The old rotated copies are no longer used and can be deleted.
 
 The self-updaters (Android, Switch, desktop) offer this version automatically.
 
