@@ -62,8 +62,8 @@ sdmc:/switch/BattleShip-Remix/
 
 - Launch it from the Homebrew Menu in **full-memory mode** (hold R while opening an installed game, or use a forwarder). Applet mode does not
   have enough memory.
-- After an update that changes the asset pipeline (a new `.recipe`), copy the new `.o2r` too: an old `.o2r` with a new `.nro` breaks loading.
-- The game writes `BattleShip-Remix.log` next to the `.nro`; attach it to any Switch bug report.
+- Always copy `BattleShip-Remix.o2r` **and** `BattleShip-Remix.o2r.recipe` together, from a desktop build of the **same release** as the `.nro`. The game compares the recipe in the `.recipe` file with the one inside the `.nro` and refuses to start on a mismatch (or if the `.recipe` is missing). Some releases keep the same recipe, so an older `.o2r` can still work; when it does not, the error screen shows both recipes. After an update that changes the asset pipeline, extract again with the new desktop build and copy both files again.
+- The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, both overwritten on every launch; attach them to any Switch bug report.
 - Build and packaging steps: [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md#switch-build-battleship-and-battleship-remix).
 
 ## How the Remix port was done and validated

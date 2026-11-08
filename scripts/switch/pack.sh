@@ -42,7 +42,10 @@ $APP for Nintendo Switch (homebrew)
 
 1. Copy the switch/ folder to the root of the SD card.
 2. The .o2r files come from YOUR copy of the game (no assets are distributed).
-   If they are missing, extract them with the desktop build and copy them to switch/$APP/.
+   If they are missing, extract them with the desktop build of the SAME release as this .nro
+   and copy BOTH $APP.o2r and $APP.o2r.recipe to switch/$APP/.
+   The game refuses to start when the .recipe is missing or does not match this build, and the
+   error screen shows both recipes. After an update, extract again and copy both files again.
 3. Launch from the Homebrew Menu in full-memory mode (hold R while opening an
    installed game). Applet mode does not have enough memory.
 EOF

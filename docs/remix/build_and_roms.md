@@ -127,7 +127,7 @@ game extracted a 59 MB `BattleShip-Remix.o2r` and booted to the Remix splash (`f
 
 ## Switch build (BattleShip and BattleShip-Remix)
 
-The console never reads a ROM: the `.nro` is compiled with devkitA64 and the `.o2r` comes from the desktop build of the same version.
+The console never reads a ROM: the `.nro` is compiled with devkitA64 and the `.o2r` and its `.recipe` come from the desktop build of the same release (the game refuses to start when the `.recipe` is missing or its hash differs from the one baked into the `.nro`).
 
 ```bash
 scripts/switch/setup-toolchain.sh        # once; network only in this step

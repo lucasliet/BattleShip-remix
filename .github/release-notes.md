@@ -21,8 +21,9 @@ into its app data folder. The macOS app is not notarized: the first time, right-
 **Nintendo Switch:** the console does not read the ROM. Run a desktop build once to extract `BattleShip-Remix.o2r`
 and `BattleShip-Remix.o2r.recipe`, unzip `BattleShip-Remix-switch.zip` to the root of the SD card, copy the two files
 next to `BattleShip-Remix.nro` in `sdmc:/switch/BattleShip-Remix/`, and launch it in full-memory mode (hold R while
-opening an installed game). When a release changes the asset pipeline, copy the newly extracted `.o2r` and `.recipe`
-again.
+opening an installed game). Both files must come from a desktop build of the same release as the `.nro`: the game
+refuses to start if the `.recipe` is missing or does not match, and the error screen shows both recipes. When a release
+changes the asset pipeline, copy the newly extracted `.o2r` and `.recipe` again.
 
 **Android (arm64):** install `BattleShip-Remix-android.apk` (allow installs from unknown sources), open it and pick the
 Smash Remix 2.0.1 ROM; it extracts `BattleShip-Remix.o2r` on the phone. It installs next to the vanilla BattleShip app.
