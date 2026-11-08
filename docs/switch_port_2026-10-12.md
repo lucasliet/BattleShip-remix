@@ -26,7 +26,7 @@ user's ROM (baserom.remix.z64)                 BattleShip-Remix.nro  (ssb64 + LU
 | Layer | What was done |
 |---|---|
 | `libultraship` branch `ssb64-nx` | Switch support ported from Net64DD/main-nx (same structural generation; the nx delta is 27 files): SwitchImpl/SwitchController, `switch.cmake` (deps through FetchContent), the imgui-switch patch in the chain, `gfx_sdl2` (GL 2.1 core + glad + GetDisplaySize), Context/Gui/os.cpp/ResourceManager wiring |
-| `port/` (app) | `__SWITCH__` coroutine (aligned_alloc, no guard page), first run replaced by the asset check in `port/switch_assets.cpp`, crash-handler signals left at the libnx default, CMake exclusions, NRO packaging (`nx_generate_nacp`/`nx_create_nro`), the libcurl updater (`UpdaterSwitch.cpp`) |
+| `port/` (app) | `__SWITCH__` coroutine (aligned_alloc, no guard page), first run replaced by the asset check in `port/switch_assets.cpp`, crash-handler signals left at the libnx default, CMake exclusions, NRO packaging (`nx_generate_nacp`/`nx_create_nro`), the libcurl updater (`UpdaterSwitch.cpp`: downloads the switch zip, unpacks it into `update-pending/`, swaps the `.nro`) and the boot-time apply of the staged files (`switch_update_apply.cpp`) |
 | Toolchain | `scripts/switch/{setup-toolchain,build,pack,relocate-toolchain}.sh`: idempotent bootstrap, sha256 check against the lock, prefix relocation, offline bundle |
 
 CI: `.github/workflows/build-switch.yml` is disabled in the fork; the NRO is built by the `build-switch` job of `release-remix.yml` (devkitpro/devkita64 container with a dated tag; an ephemeral runner, so the local containment rule does not apply).
@@ -40,6 +40,12 @@ The console never reads a ROM and never extracts anything (libnx has no `std::sy
 - the recipes differ (the screen shows the first 8 characters of both). The `.o2r` and the `.nro` must come from the same release, because some releases change the extraction.
 
 The Details text (with the absolute destination folder) is also written to `ssb64.log`.
+
+## Updates
+
+The in-game updater downloads `BattleShip-Remix-switch.zip` (not the bare `.nro`) and unpacks it into `update-pending/` next to the running `.nro`. Once staging is complete it writes a `.complete` marker, and only then swaps the `.nro` right away, as before (a swapped `.nro` without its companion files is the one state the boot-time apply cannot repair); a pending folder without the marker is an interrupted update. At the next boot, before libultraship opens any file, `switch_update_apply.cpp` moves the pending files (`f3d.o2r`, `config.yml`, `gamecontrollerdb.txt`, `assets/`, `README.txt`) into place. HOS cannot replace open files and libnx `rename` does not overwrite, so each existing file is first moved aside as `.old`. If applying fails, the system error screen names the file and tells the player to delete the `update-pending` folder or reinstall from the zip.
+
+`BattleShip-Remix.o2r` and `.o2r.recipe` are not in the zip and are never touched: when a release changes the asset recipe, a freshly extracted pair is still copied from a desktop build (the asset check above explains it on screen). The bare `BattleShip-Remix.nro` asset stays published for one transitional release, because builds up to `v2.0.1-port.9` download it by name. Hardware validation of this flow has not been done yet.
 
 ## Decisions and reasons
 
@@ -62,4 +68,4 @@ The Remix hardware rounds are recorded in `docs/remix/ROADMAP.md` (T10.2). Items
 ## Open questions
 
 1. Default clock profile: should `SwitchProfiles::MAXIMUM` be applied at boot (`ApplyOverclock` in the Gui init)? Check power draw and temperature.
-2. Whether any other file besides the `.nro` should be replaced by the updater (today only the `.nro` is; `f3d.o2r`, `config.yml`, `assets/` and a new `.o2r`/`.recipe` are copied by hand).
+2. Resolved: the updater also replaces the other files of the release zip. They are staged in `update-pending/` and applied at the next boot (see **Updates**); the `.o2r` and `.recipe` stay manual.

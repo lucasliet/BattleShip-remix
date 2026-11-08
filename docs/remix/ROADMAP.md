@@ -485,10 +485,14 @@ Closed phases:
 
 Not part of the Remix port itself; recorded here so the plan matches what ships. Reference: `build_and_roms.md`, `AGENTS.md` ("Releases", "Asset extraction fingerprint", "Logs").
 
-- [x] Releases: a `v*` tag on `feature/remix-port` runs `.github/workflows/release-remix.yml` (macOS `.dmg`, Linux AppImage, Windows zip, Switch zip and bare `.nro`, Android arm64 APK, PS5 title zip, `SHA256SUMS.txt`) and opens a draft whose body is `.github/release-notes.md`. Tags `v2.0.1-port.4` to `port.9`. The inherited upstream workflows are disabled.
+- [x] Releases: a `v*` tag on `feature/remix-port` runs `.github/workflows/release-remix.yml` (macOS `.dmg`, Linux AppImage, Windows zip, Switch zip and bare `.nro`, macOS app zip, Android arm64 APK, PS5 title zip, `SHA256SUMS.txt`) and opens a draft whose body is `.github/release-notes.md`. Tags `v2.0.1-port.4` to `port.9`. The inherited upstream workflows are disabled.
 - [x] PS5 native title `PPSA99264` (`scripts/ps5/`, `port/ps5/`), with its zip updater.
 - [x] Android arm64 APK (`dev.lucasliet.battleship.remix`), with its own boot-time updater (`AppUpdater`, `UpdatePrompt`, a `PackageInstaller` session).
 - [x] Updater: start-up popup on desktop and Switch with restart after install; Switch swaps the running `.nro`.
+- [x] Switch updater installs the full switch zip: it unpacks into `update-pending/`, swaps the `.nro` and applies the other files at the next boot; `.o2r` and `.recipe` stay manual. The bare `.nro` asset stays for one transitional release.
+- [x] macOS updater installs the zipped `.app` in place (new `BattleShip-Remix-macos.zip` release asset; the new app is swapped in on restart).
+- [x] Windows updater script fixed for the Remix executable name (`update_game.bat` named `BattleShip.exe`).
+- [ ] Hardware validation of the Switch zip update and of the macOS in-place update on a real install (not done yet).
 - [x] Asset recipe: the Torch revision is pinned in `tools/torch_extract_rev.txt`, so unrelated Torch commits do not force a re-extraction; the Switch error screen tells a missing `.recipe` from a mismatch.
 - [x] Logs hold only the last run (`ssb64.log`, `logs/BattleShip-Remix.log`, PS5 `boot.txt`).
 - [x] Bug reports go through `.github/ISSUE_TEMPLATE/bug_report.yml`.

@@ -97,8 +97,8 @@ To redo only the assets: `cmake --build build --target ExtractAssets`.
 These packages **embed `BattleShip-Remix.o2r`**, which is derived from the ROM. They are for personal use only and are never redistributed. A distributable package does
 not carry the `.o2r`: it is extracted from the user's ROM on first run, as `scripts/package-macos.sh`, `scripts/package-linux.sh` and
 `scripts/package-windows.ps1` do for every version. The fork's releases come from `.github/workflows/release-remix.yml`: a `v*` tag builds the
-macOS `.dmg` (ad-hoc signed, not notarized), the Linux AppImage, the Windows zip, the Switch SD-card zip (without `.o2r`) plus the bare
-`BattleShip-Remix.nro` that the Switch updater downloads, the Android arm64 APK and the PS5 title zip, writes `SHA256SUMS.txt`, and opens a draft release whose
+macOS `.dmg` (ad-hoc signed, not notarized) and `BattleShip-Remix-macos.zip` (the `.app` zipped with `ditto`, which the macOS updater downloads), the Linux AppImage, the Windows zip, the Switch SD-card zip (without `.o2r`; the Switch updater downloads this zip) plus the bare
+`BattleShip-Remix.nro` (kept for one transitional release, because Switch builds up to `v2.0.1-port.9` download it by name; drop it in the release after the one that ships the zip updater), the Android arm64 APK and the PS5 title zip, writes `SHA256SUMS.txt`, and opens a draft release whose
 body is `.github/release-notes.md`. Rewrite its `## Highlights` before tagging (`AGENTS.md`, "Releases"). The Remix build's updater reads
 `lucasliet/BattleShip-remix` releases (`port/enhancements/Updater.cpp`). The inherited upstream workflows (`release.yml`, `build*.yml`) are disabled in the fork.
 
@@ -160,15 +160,20 @@ are made from `assets/icon.png` and `assets/icon-remix.png` (the "SR" artwork) b
 
 Every platform updates itself from `releases/latest` of `lucasliet/BattleShip-remix`:
 
-- **Desktop, Switch and PS5:** the About menu (Updates section). Desktop and the Switch also check at start-up and show a popup that offers the update and restarts the game after installing it (`port/gui/UpdatePopup.cpp`). The PS5 updater installs the release zip over the title folder (`UpdaterPS5.cpp`, `UpdateZipInstall.cpp`).
+- **Desktop, Switch and PS5:** the About menu (Updates section). Desktop and the Switch also check at start-up and show a popup that offers the update and restarts the game after installing it (`port/gui/UpdatePopup.cpp`). The PS5 updater installs the release zip over the title folder (`UpdaterPS5.cpp`, `UpdateZipInstall.cpp`). Windows runs `update_game.bat`, which waits for the game, unpacks the zip over it and restarts it; the script used to name `BattleShip.exe`, so for the Remix build (`BattleShip-Remix.exe`) it never waited, failed to unpack over the running executable and could not restart it, and it now uses the build's executable name.
+- **macOS:** the updater downloads `BattleShip-Remix-macos.zip` into the folder holding the `.app` (as a hidden file) and unpacks it as `BattleShip-Remix.app.new` next to the installed app. On restart it renames the running app to `BattleShip-Remix.app.old`, the new one to `BattleShip-Remix.app` and relaunches it; the `.old` folder is deleted at the next launch. The app must be an installed `.app` in a writable folder (for example Applications): a dev binary outside a bundle, or an app run from the mounted DMG, reports an error and the user installs from the release page. Files the app downloads carry no quarantine attribute, so an update applied this way does not need the right-click Open step that the DMG needs. The zip is made by `scripts/package-macos.sh` (`ditto`, which keeps symlinks and modes).
 - **Android:** a Java flow at app boot, not the C++ updater: `AppUpdater` reads the latest release, `UpdatePrompt` offers it in a dialog (the check waits at most 4 s and any failure or refusal goes on to the game), and the APK (`BattleShip-Remix-android.apk`) is downloaded straight into a `PackageInstaller` session; Android then asks the player to confirm the install (`InstallStatusReceiver`). Only release-tagged builds take part (`versionName` `v...`, set by the release CI); dev and debug builds never update themselves.
 
-On the Switch, "Download Update" downloads the bare release asset `BattleShip-Remix.nro`
-(the release workflow publishes it next to the zip) to `<running .nro>.part`, checks the size and the `NRO0` header, then swaps it over the running file (the old one
-stays as `.old` until the swap succeeds). "Restart Game" relaunches it through `envSetNextLoad`. Only the `.nro` is replaced: if a release also changes `f3d.o2r`,
-`config.yml`, `assets/` or needs a new `.o2r`/`.recipe`, those still have to be copied by hand. Code: `port/enhancements/UpdaterSwitch.cpp` (libcurl through the
-`switch-curl` portlib, pinned in `scripts/switch/packages.lock`; TLS is the console's own ssl service), shared logic and tests in `UpdateRelease.cpp`/`UpdateInstall.cpp`
+On the Switch, "Download Update" downloads the release asset `BattleShip-Remix-switch.zip` (no longer the bare `.nro`) and unpacks it into `update-pending/` next to the running `.nro`. Once staging is complete it writes a `.complete` marker in `update-pending/`, and only then swaps the `.nro` right away (the old one
+stays as `.old` until the swap succeeds). "Restart Game" relaunches it through `envSetNextLoad`. At the next boot, before libultraship opens any file, the pending files
+(`f3d.o2r`, `config.yml`, `gamecontrollerdb.txt`, `assets/`, `README.txt`) are moved into place: HOS cannot replace open files and libnx `rename` does not overwrite, so each existing file is first moved aside as `.old`.
+If applying fails, the system error screen names the file and tells the player to delete the `update-pending` folder or reinstall from the zip. The user's `BattleShip-Remix.o2r` and `.o2r.recipe` are not in the zip and are never touched:
+when a release changes the asset recipe, the user still copies a freshly extracted `.o2r` and `.recipe` from a desktop build. Builds up to `v2.0.1-port.9` download the bare `BattleShip-Remix.nro` by name, so that asset stays published for one transitional release.
+Code: `port/enhancements/UpdaterSwitch.cpp` and `port/switch_update_apply.cpp` (libcurl through the
+`switch-curl` portlib, pinned in `scripts/switch/packages.lock`; TLS is the console's own ssl service), shared logic and tests in `UpdateRelease.cpp`/`UpdateInstall.cpp`/`UpdateZipInstall.cpp`
 (`cmake --build build --target run_updater_tests`).
+
+Hardware validation of the Switch zip update and of the macOS in-place update on a real install has not been done yet.
 
 If a release changes the extraction (a new `.recipe`), copy the newly extracted `.o2r` and `.recipe` to the SD card again: an old `.o2r` with a new `.nro` would cause a storm
 of invalid reloc tokens, so the game checks the `.recipe` first and shows an error screen (recipe missing, or the two recipes when they differ) instead of starting.

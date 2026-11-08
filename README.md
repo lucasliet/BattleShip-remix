@@ -20,7 +20,7 @@ What the port covers:
 
 The few places where the port deliberately behaves differently from the assembly are listed in [`docs/remix/deviations.md`](docs/remix/deviations.md). The Remix screens are authored for 4:3: the optional Widescreen setting only widens battle scenes, and menus stretch.
 
-[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .nro)**, **Android (arm64 .apk)** and **PlayStation 5 (homebrew title folder)** packages, and the built-in updater of every platform follows them. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
+[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg and .zip)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .zip with the .nro)**, **Android (arm64 .apk)** and **PlayStation 5 (homebrew title folder)** packages, and the built-in updater of every platform installs from the package of its platform (on macOS the in-game update uses the .zip, the .dmg is for the first install). The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
 
 ## No copyrighted assets are included in this repository
 
@@ -64,6 +64,7 @@ sdmc:/switch/BattleShip-Remix/
 - Launch it from the Homebrew Menu in **full-memory mode** (hold R while opening an installed game, or use a forwarder). Applet mode does not
   have enough memory.
 - Always copy `BattleShip-Remix.o2r` **and** `BattleShip-Remix.o2r.recipe` together, from a desktop build of the **same release** as the `.nro`. The game compares the recipe in the `.recipe` file with the one inside the `.nro` and refuses to start on a mismatch (or if the `.recipe` is missing). Some releases keep the same recipe, so an older `.o2r` can still work; when it does not, the error screen shows both recipes. After an update that changes the asset pipeline, extract again with the new desktop build and copy both files again.
+- The in-game updater (About menu, or the popup at start-up) downloads `BattleShip-Remix-switch.zip`, replaces the `.nro` right away and stages the other files of the zip in an `update-pending/` folder next to it; they are moved into place the next time the game boots. Your `BattleShip-Remix.o2r` and `.recipe` are never touched, so after a release that changes the asset pipeline copy a freshly extracted pair again. If applying the staged files fails, the error screen names the file: delete `update-pending/` or reinstall from the zip.
 - The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, both overwritten on every launch; attach them to any Switch bug report.
 - Build and packaging steps: [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md#switch-build-battleship-and-battleship-remix).
 
