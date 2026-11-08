@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- The game and LUS pass UTF-8 char paths to libzip, spdlog and fstream, but std::filesystem and the
+     C runtime read narrow strings in the ANSI code page. A UTF-8 active code page (Windows 10 1903+)
+     makes both agree, so an install under "OneDrive\Área de Trabalho" can open f3d.o2r. -->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">UTF-8</activeCodePage>
+    </windowsSettings>
+  </application>
+</assembly>
