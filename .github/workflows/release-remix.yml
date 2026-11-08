@@ -50,7 +50,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: remix-macos
-          path: dist/BattleShip-Remix.dmg
+          path: |
+            dist/BattleShip-Remix.dmg
+            dist/BattleShip-Remix-macos.zip
           if-no-files-found: error
 
   build-linux:
@@ -306,8 +308,12 @@ jobs:
         run: (cd artifacts && sha256sum -- * > SHA256SUMS.txt && cat SHA256SUMS.txt)
       - uses: softprops/action-gh-release@v2
         with:
+          # artifacts/BattleShip-Remix.nro is kept for one transitional release: Switch builds up to
+          # v2.0.1-port.9 look for that asset by name. Drop it in the release after the one that ships
+          # the zip updater. (A comment inside the block below would be read as a file pattern.)
           files: |
             artifacts/BattleShip-Remix.dmg
+            artifacts/BattleShip-Remix-macos.zip
             artifacts/BattleShip-Remix-x86_64.AppImage
             artifacts/BattleShip-Remix-windows.zip
             artifacts/BattleShip-Remix-switch.zip

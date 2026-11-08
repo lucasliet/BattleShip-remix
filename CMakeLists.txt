@@ -617,8 +617,9 @@ else()
     # The in-process libcurl updater only exists on Switch; the desktop updater shells out to curl.
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/(UpdaterSwitch|SwitchHttp)\\.cpp$")
 endif()
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "PS5")
-    # Only the PS5 updater installs a release zip in place.
+if(NOT (CMAKE_SYSTEM_NAME STREQUAL "PS5" OR CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch" OR APPLE))
+    # The release zip is unpacked in place by the PS5, Switch and macOS updaters only: Linux swaps the
+    # AppImage and Windows runs update_game.bat.
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/UpdateZipInstall\\.cpp$")
 endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "PS5" OR BATTLESHIP_UWP)

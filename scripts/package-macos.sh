@@ -2,6 +2,10 @@
 # Builds BattleShip as a self-contained macOS .app bundle.
 #
 # Output: <repo-root>/dist/BattleShip.app
+#         <repo-root>/dist/BattleShip.dmg           — drag-and-drop installer
+#         <repo-root>/dist/BattleShip-macos.zip     — the .app zipped for the in-game
+#                                                     updater, which downloads it and
+#                                                     extracts it over the installed .app
 #
 # Layout produced:
 #   BattleShip.app/
@@ -701,11 +705,22 @@ if [[ "$WANT_NOTARIZE" -eq 1 ]]; then
         || fail "spctl assessment failed for notarized DMG"
 fi
 
-# ── 6. Report ──
+# ── 6. Zip the .app for the in-game updater ──
+# ditto keeps symlinks, executable bits and resource forks that `zip -r` drops,
+# so the extracted bundle keeps a valid code signature.
+APP_ZIP="$DIST_DIR/$APP_NAME-macos.zip"
+step "Zipping $APP_NAME.app for the in-game updater"
+rm -f "$APP_ZIP"
+ditto -c -k --keepParent "$APP" "$APP_ZIP"
+[[ -f "$APP_ZIP" ]] || fail "app zip was not created at $APP_ZIP"
+
+# ── 7. Report ──
 APP_KB=$(du -sk "$APP" | awk '{print $1}')
 DMG_KB=$(du -sk "$DMG" | awk '{print $1}')
+ZIP_KB=$(du -sk "$APP_ZIP" | awk '{print $1}')
 printf '\n\033[32m✓ Bundle: %s (%s KB)\033[0m\n' "$APP" "$APP_KB"
 printf '\033[32m✓ DMG:    %s (%s KB)\033[0m\n' "$DMG" "$DMG_KB"
+printf '\033[32m✓ ZIP:    %s (%s KB)\033[0m\n' "$APP_ZIP" "$ZIP_KB"
 printf '   To run from the bundle:        open "%s"\n' "$APP"
 printf '   To install from the DMG:       open "%s"  (then drag to Applications)\n' "$DMG"
 printf '   App-data: ~/Library/Application Support/%s/\n' "$APP_NAME"
