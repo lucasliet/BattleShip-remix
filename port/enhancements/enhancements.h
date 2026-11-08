@@ -125,7 +125,7 @@ std::string GetUpdateStatus();
 std::string GetDownloadStatus();
 std::string GetLatestVersion();
 
-#if !defined(__ANDROID__) && !defined(__PS5__) && !defined(BATTLESHIP_UWP)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
 // After a finished update, relaunch the freshly installed build: the homebrew loader on Switch, the AppImage on
 // Linux, the update script on Windows. CanRestartAfterUpdate is false on macOS, where the update opens the DMG.
 bool CanRestartAfterUpdate();
