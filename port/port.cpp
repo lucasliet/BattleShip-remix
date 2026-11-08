@@ -16,6 +16,10 @@
 #include <ship/resource/File.h>
 #include <algorithm>
 #include <chrono>
+#include <thread>
+#ifdef __PS5__
+#include <unistd.h>
+#endif
 #include <string>
 #include <vector>
 #include <cstdio>
@@ -1340,6 +1344,18 @@ int PortIsRunning(void) {
 
 } // extern "C"
 
+#ifdef __PS5__
+/* The graphics and audio teardown can block on the PS5 and leave a black screen; this ends the process when the
+ * shutdown does not finish in time. */
+static void ps5_exit_if_shutdown_hangs(void) {
+	std::thread([]() {
+		std::this_thread::sleep_for(std::chrono::seconds(3));
+		ps5_boot_trace("shutdown timed out");
+		_exit(0);
+	}).detach();
+}
+#endif
+
 int main(int argc, char* argv[]) {
 	PS5_BOOT_TRACE("main entered");
 #ifdef __PS5__
@@ -1602,12 +1618,22 @@ int main(int argc, char* argv[]) {
 
 	port_log("SSB64: main loop exited cleanly at frame=%d (WindowIsRunning=%d)\n",
 	         frame, WindowIsRunning());
+	PS5_BOOT_TRACE("main loop exited");
+#ifdef __PS5__
+	ps5_exit_if_shutdown_hangs();
+#endif
 
 	PortGameShutdown();
 	port_log("SSB64: PortGameShutdown returned\n");
+	PS5_BOOT_TRACE("PortGameShutdown returned");
 
 	PortShutdown();
+	PS5_BOOT_TRACE("PortShutdown returned");
 	portRenderDocShutdown();
+#ifdef __PS5__
+	/* Returning from main leaves the screen black on the PS5; ending the process hands control back to the home screen. */
+	_exit(0);
+#endif
 	return 0;
 
 	} catch (const std::exception& e) {
