@@ -1,12 +1,14 @@
 ## Highlights
 
-**Update popup at start (desktop and Switch).** The game now checks for a new release when it starts and offers it in
-a popup. Accepting downloads and installs it, then restarts the game: the AppImage on Linux, the update script on
-Windows and the homebrew loader on Switch. On macOS the disk image opens for you to copy the app, and the popup
-offers to close the game. Choosing Later goes on to the game.
+**Clearer Switch error for the extracted game data.** The "different version of the game" screen now says which
+problem you have: `BattleShip-Remix.o2r.recipe` is missing (copy both files, not only the `.o2r`), or the `.o2r` was
+extracted by another release (it shows both recipe hashes). It also prints the folder to copy the files to.
 
-**PS5 Exit fixed.** Choosing Exit in the port menu left a black screen, or reported a crash. It now closes the game and
-returns to the home screen.
+**Fewer needless re-extractions.** The extracted data is now tied to a pinned extraction revision instead of whatever
+commit of the extractor was built, so unrelated changes no longer ask Switch users to copy a new `.o2r` by hand.
+
+**About page.** The About tab of the port menu credits BattleShip Remix, the Smash Remix team and the other components
+above the original BattleShip credits.
 
 The self-updaters (Android, Switch, desktop) offer this version automatically.
 
