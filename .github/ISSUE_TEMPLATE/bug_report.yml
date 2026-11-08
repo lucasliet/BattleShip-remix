@@ -26,7 +26,30 @@ body:
     id: version
     attributes:
       label: Game version
-      description: Shown as "Version" in the game menu, for example `v2.0.1-port.7`.
+      description: The version on the device where the problem happens, shown as "Version" in the game menu, for example `v2.0.1-port.7`.
+      placeholder: v2.0.1-port.7
+    validations:
+      required: true
+  - type: dropdown
+    id: o2r-platform
+    attributes:
+      label: Switch only, where was the .o2r generated?
+      description: The Switch does not read the ROM, so you copy `BattleShip-Remix.o2r` and `BattleShip-Remix.o2r.recipe` from another platform. Say which one made them. Choose "Not on Switch" if your platform is not the Switch.
+      options:
+        - Not on Switch
+        - Windows
+        - Linux
+        - macOS
+        - Android
+        - PlayStation 5
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: o2r-version
+    attributes:
+      label: Switch only, game version that generated the .o2r
+      description: The version shown in the menu of the platform that made the `.o2r`, for example `v2.0.1-port.7`. Write `n/a` if your platform is not the Switch.
       placeholder: v2.0.1-port.7
     validations:
       required: true
