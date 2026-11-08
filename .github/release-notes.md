@@ -1,18 +1,12 @@
 ## Highlights
 
-**PS5 in-game updater fixed.** The port.5 updater installed the new files without the execute permission, so the
-console refused to start the game afterwards ("The application could not be started"). Updates now install with the
-same permissions as a fresh install.
+**Update popup at start (desktop and Switch).** The game now checks for a new release when it starts and offers it in
+a popup. Accepting downloads and installs it, then restarts the game: the AppImage on Linux, the update script on
+Windows and the homebrew loader on Switch. On macOS the disk image opens for you to copy the app, and the popup
+offers to close the game. Choosing Later goes on to the game.
 
-If you are on port.5, update through ProsperoStore or install the release zip again by FTP. If you already updated
-from the in-game menu and the game no longer starts, either reinstall the zip, or run `chmod 777` by FTP on every file
-in `/data/homebrew/PPSA99264/`. Updates from this release onward work from the in-game menu.
-
-**PS5 licence notices.** The PS5 title folder now ships `LICENSE`, `THIRD_PARTY_NOTICES.txt` and the GPL-3.0 text
-(the PS5 build links GPL-3.0 components: ps5-opengl, the native app runtime and the payload SDK).
-
-**Easier ROM.** The install steps point at the [Smash Remix web patcher](https://smashremix.net/patcher/), which makes
-the Remix ROM in the browser.
+**PS5 Exit fixed.** Choosing Exit in the port menu left a black screen, or reported a crash. It now closes the game and
+returns to the home screen.
 
 The self-updaters (Android, Switch, desktop) offer this version automatically.
 
