@@ -93,8 +93,11 @@ body:
     attributes:
       label: Log
       description: |
-        Attach `ssb64.log` from the game folder, right after the bug (it is overwritten on every launch). On PS5 the logs are in `/data/homebrew/PPSA99264/logs/`.
-        Not needed for a bug that is only about how something looks, but it helps for crashes and freezes.
+        Attach the logs from the game folder (the one that holds `BattleShip-Remix.o2r`), right after the bug:
+        - `ssb64.log`: the game log, overwritten on every launch, so copy it before you start the game again.
+        - `logs/BattleShip-Remix.log`: the engine log. It grows with every launch and can be large, so zip it.
+        - PS5 only: `boot.txt`, if the game crashed before `ssb64.log` was written. On PS5 the folder is `/data/homebrew/PPSA99264/`.
+        If a file does not exist on your platform, skip it. Not needed for a bug that is only about how something looks, but it helps for crashes and freezes.
   - type: textarea
     id: extra
     attributes:
