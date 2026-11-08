@@ -128,6 +128,12 @@ The `.o2r` is re-extracted when its `.recipe` hash differs from the binary's; on
 
 ---
 
+## Logs
+
+Every log file the port or libultraship creates holds only the last run: open it with truncate (or `rotate_on_open` with no backups), never append across launches, and never keep rotated copies. A new log writer follows the same rule.
+
+---
+
 ## Agent Directives
 
 ### Pre-Work

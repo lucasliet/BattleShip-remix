@@ -30,7 +30,7 @@ notes: `docs/jp_rom_compat_plan_2026-05-17.md`.
 ## Runtime Logs
 After running the game:
 - **Game trace log**: `ssb64.log` in the cwd — `port_log()` output (boot sequence, thread creation, frame milestones). Overwritten each run.
-- **LUS/spdlog log**: `logs/Super Smash Bros. 64.log` — libultraship logging (resource loading, rendering, errors). Cumulative.
+- **LUS/spdlog log**: `logs/<app name>.log` (`logs/BattleShip-Remix.log` for the Remix build) — libultraship logging (resource loading, rendering, errors). Overwritten each run.
 - On Windows the binary lives at `build/Debug/ssb64.exe` (multi-config MSVC), on macOS/Linux at `build/ssb64` (single-config Make/Ninja).
 
 ## IDO 7.1 Compiler Patterns
