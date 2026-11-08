@@ -4,8 +4,6 @@
 to ten rotated copies (`BattleShip-Remix.1.log` ... `.10.log`, 10 MB each). It is now emptied at every launch, like
 `ssb64.log`. The old rotated copies are no longer used and can be deleted.
 
-The self-updaters (Android, Switch, desktop) offer this version automatically.
-
 ## Install
 
 No game data is included: you need your own ROM.
