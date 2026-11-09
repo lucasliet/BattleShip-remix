@@ -277,6 +277,9 @@ jobs:
         run: |
           scripts/ps5/setup-toolchain.sh
           scripts/ps5/build-gl-sdk.sh
+      - name: Refresh the cached PS5 toolchain
+        if: steps.ps5-toolchain.outputs.cache-hit == 'true'
+        run: scripts/ps5/setup-toolchain.sh --offline
       - name: Build the title
         run: JOBS="$(nproc)" scripts/ps5/build.sh remix
       - name: Package

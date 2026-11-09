@@ -125,8 +125,10 @@ for name in $(uv run -q --no-project python -I -c 'import json,sys; print(" ".jo
 done
 
 echo "==> python venv"
-if [[ ! -x "$T/venv/bin/python" ]]; then
-    uv venv -q -p "$(lock_field python version)" "$T/venv"
+# A cached .toolchain/ps5 can hold a venv whose interpreter symlink points into uv's python
+# store, which the cache does not carry; recreate it when the interpreter no longer runs.
+if ! "$T/venv/bin/python" -I -c '' 2>/dev/null; then
+    uv venv -q --clear -p "$(lock_field python version)" "$T/venv"
 fi
 # shellcheck disable=SC2046
 uv pip install -q -p "$T/venv/bin/python" $(lock_field python packages)
