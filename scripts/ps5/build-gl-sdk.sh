@@ -29,7 +29,14 @@ fi
 
 if ! step_done ps5-opengl-sources; then
     echo "==> ps5-opengl sources (Mesa + PSBC + pinned repositories)"
-    make -C "$OPENGL_SRC" source-fetch
+    # fetch-sources.py has no retry; a reset connection on the Mesa download failed release CI.
+    # It skips what is already fetched, so running it again resumes.
+    for attempt in 1 2 3; do
+        make -C "$OPENGL_SRC" source-fetch && break
+        [[ $attempt == 3 ]] && { echo "ps5-opengl source-fetch failed after $attempt attempts" >&2; exit 1; }
+        echo "==> source-fetch failed (attempt $attempt), retrying in 15s"
+        sleep 15
+    done
     mark_done ps5-opengl-sources
 fi
 
