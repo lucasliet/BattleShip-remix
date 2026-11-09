@@ -15,6 +15,12 @@ platform instead of a single file.
   folder or reinstall from the zip.
 - **Windows:** fixed the updater. Its restart script looked for `BattleShip.exe` instead of `BattleShip-Remix.exe`, so it
   never waited for the game to close, could not unpack over the running executable and could not restart the game.
+  The game also launches from folders with non-ASCII names (for example `OneDrive\Área de Trabalho`): it used to crash
+  at startup when it could not open `f3d.o2r`.
+- **Nintendo Switch:** stage select starts faster, the 1P VS card animates smoothly, and the update popup works with the
+  controller's A, B and Start buttons. Boot and scene-load timings are written to the log, which is buffered and
+  flushed once a second. The hi-res texture pack is now opt-in (256 MB cache) and `mods/` is only scanned once it is on.
+- **Gameplay:** fixed Marth's hidden joint in the shared common-table statuses.
 
 Switch builds up to `v2.0.1-port.9` still download the bare `BattleShip-Remix.nro`, so that file stays in this release.
 Builds from this release on update from the Switch zip.
