@@ -116,10 +116,17 @@ body:
     attributes:
       label: Log
       description: |
-        Attach the logs from the game folder (the one that holds `BattleShip-Remix.o2r`), right after the bug:
-        - `ssb64.log` and `logs/BattleShip-Remix.log` (the engine log): both are overwritten on every launch, so copy them before you open the game again. If one is large (older versions kept growing it), zip it.
-        - PS5 only: `boot.txt`, if the game crashed before `ssb64.log` was written. On PS5 the folder is `/data/homebrew/PPSA99264/`.
-        - Switch only: close the game from inside it (pause, then quit), not from the HOME menu. HOME kills the process and the end of the logs is lost; some FTP servers also refuse to send a file the game still has open.
+        Attach `ssb64.log` (the port log) and `logs/BattleShip-Remix.log` (the engine log), right after the bug. Both are overwritten on every launch, so copy them before you open the game again. If one is large (older versions kept growing it), zip it.
+
+        If the first-run extraction of the ROM failed, also attach `logs/asset-extract.log`: it sits next to `logs/BattleShip-Remix.log`, and the error screen prints its full path after "Log:".
+
+        Where they are:
+        - **Windows:** `logs\BattleShip-Remix.log` is in the folder where you extracted the game. `ssb64.log` is in `%APPDATA%\BattleShip\`: paste that into the Explorer address bar.
+        - **macOS:** `~/Library/Application Support/BattleShip-Remix/logs/BattleShip-Remix.log` and `~/Library/Application Support/BattleShip/ssb64.log` (note: `BattleShip`, without `-Remix`). In Finder, Go > Go to Folder (Cmd+Shift+G) and paste the folder.
+        - **Linux:** `~/.local/share/BattleShip-Remix/logs/BattleShip-Remix.log` and `~/.local/share/BattleShip/ssb64.log` (`$XDG_DATA_HOME` instead of `~/.local/share` if you set it).
+        - **Switch:** both next to the `.nro`, in `sdmc:/switch/BattleShip-Remix/`. Close the game from inside it (pause, then quit), not from the HOME menu: HOME kills the process and the end of the logs is lost; some FTP servers also refuse to send a file the game still has open.
+        - **Android:** `Android/data/dev.lucasliet.battleship.remix/files/logs/BattleShip-Remix.log` on the phone storage (copy it with a computer over USB; most phones hide that folder from file managers). `ssb64.log` is in the app's private storage and cannot be copied.
+        - **PS5:** `/data/homebrew/PPSA99264/`, plus `boot.txt` if the game crashed before `ssb64.log` was written.
         If a file does not exist on your platform, skip it. Not needed for a bug that is only about how something looks, but it helps for crashes and freezes.
   - type: textarea
     id: extra
