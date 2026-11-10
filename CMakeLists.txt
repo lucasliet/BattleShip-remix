@@ -1201,7 +1201,9 @@ else()
     add_dependencies(${PROJECT_NAME} libultraship TorchExternal discord-rpc)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship discord-rpc)
     if (SSB64_TORCH_IN_PROCESS)
-        target_link_libraries(${PROJECT_NAME} PRIVATE torch)
+        # yaml-cpp too: Companion.h includes its headers, and on MSVC the exe needs yaml-cpp's
+        # YAML_CPP_STATIC_DEFINE or it imports YAML::Node from a DLL (LNK2019).
+        target_link_libraries(${PROJECT_NAME} PRIVATE torch yaml-cpp)
         target_compile_definitions(${PROJECT_NAME} PRIVATE SSB64_TORCH_IN_PROCESS)
     endif()
 endif()
