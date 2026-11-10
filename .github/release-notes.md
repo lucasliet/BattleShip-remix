@@ -1,29 +1,21 @@
 ## Highlights
 
-**The in-game updater installs the whole release on every platform.** It now downloads the package made for your
-platform instead of a single file.
+**Windows: the game no longer installs updates by itself.** Some antivirus programs flagged the update of
+`v2.0.1-port.10` as a threat: its helper script waited for the game to close, unpacked the new files over it, restarted
+it and deleted itself, which looks like malware to behavior-based scanners. The game itself was not the problem.
 
-- **macOS:** the update is installed in place. The app downloads `BattleShip-Remix-macos.zip`, unpacks the new app next
-  to the installed one and swaps it in when you restart the game; there is no need to open the DMG again. The app must be
-  an installed `.app` in a folder you can write to (for example Applications): a copy run from the mounted DMG reports an
-  error, and then you install from the release page. An update applied this way does not need the right-click Open step.
-- **Nintendo Switch:** the updater downloads `BattleShip-Remix-switch.zip`, replaces the `.nro` right away and stages
-  the other files of the zip (`f3d.o2r`, `config.yml`, `gamecontrollerdb.txt`, `assets/`, `README.txt`); they are moved
-  into place the next time the game boots. Your `BattleShip-Remix.o2r` and `.recipe` are never touched: when a release
-  changes the asset pipeline you still copy a freshly extracted pair from a desktop build, and the error screen explains it.
-  If applying the staged files fails, the error screen names the file and tells you to delete the `update-pending`
-  folder or reinstall from the zip.
-- **Windows:** fixed the updater. Its restart script looked for `BattleShip.exe` instead of `BattleShip-Remix.exe`, so it
-  never waited for the game to close, could not unpack over the running executable and could not restart the game.
-  The game also launches from folders with non-ASCII names (for example `OneDrive\Área de Trabalho`): it used to crash
-  at startup when it could not open `f3d.o2r`.
-- **Nintendo Switch:** stage select starts faster, the 1P VS card animates smoothly, and the update popup works with the
-  controller's A, B and Start buttons. Boot and scene-load timings are written to the log, which is buffered and
-  flushed once a second. The hi-res texture pack is now opt-in (256 MB cache) and `mods/` is only scanned once it is on.
-- **Gameplay:** fixed Marth's hidden joint in the shared common-table statuses.
+- **Windows:** when a new release is out, the game tells you at start-up and in Port Menu > About, and the button opens
+  this page. Download `BattleShip-Remix-windows-x64.zip` and extract it into your game folder, replacing the old files;
+  your saves, settings and `BattleShip-Remix.o2r` stay. The release check no longer starts `curl.exe` in the
+  background: the game reads the release information itself.
+- **Windows players on `v2.0.1-port.10` or older:** your game will not offer this update. The Windows zip has a new
+  name, so the old updater finds nothing to download and the old update script never runs again; Port Menu > About
+  just says "Latest release has no update for this platform." Download this release from this page once; from then on
+  the game tells you about new releases.
+- **All platforms:** Port Menu > About shows the installed version at the top.
 
+Nothing changed in the asset pipeline: on the Switch, keep the `BattleShip-Remix.o2r` and `.recipe` you already have.
 Switch builds up to `v2.0.1-port.9` still download the bare `BattleShip-Remix.nro`, so that file stays in this release.
-Builds from this release on update from the Switch zip.
 
 ## Install
 
@@ -35,7 +27,8 @@ No game data is included: you need your own ROM.
 
 **macOS, Linux, Windows:** run the app. On the first launch it asks for the ROM and extracts `BattleShip-Remix.o2r`
 into its app data folder. The macOS app is not notarized: the first time, right-click it and choose Open (or run
-`xattr -dr com.apple.quarantine /Applications/BattleShip-Remix.app`). Later updates install from inside the game.
+`xattr -dr com.apple.quarantine /Applications/BattleShip-Remix.app`). On macOS and Linux later updates install from
+inside the game; on Windows the game tells you about them and you extract the new zip into the game folder.
 
 **Nintendo Switch:** the console does not read the ROM. Run a desktop build once to extract `BattleShip-Remix.o2r`
 and `BattleShip-Remix.o2r.recipe`, unzip `BattleShip-Remix-switch.zip` to the root of the SD card, copy the two files
