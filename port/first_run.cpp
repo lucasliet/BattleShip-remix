@@ -23,6 +23,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include "win_utf8.h"
 #endif
 
 namespace fs = std::filesystem;
@@ -156,7 +157,7 @@ ExtractionResult BuildFailure(const std::string& error, const std::string& logPa
 
 std::string QuoteCommandArg(const std::string& arg) {
 #ifdef _WIN32
-    /* CreateProcessA argv parsing: double quotes, escape embedded quotes. */
+    /* CreateProcessW argv parsing: double quotes, escape embedded quotes. */
     std::string quoted = "\"";
     for (char c : arg) {
         if (c == '"') {
@@ -253,8 +254,8 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
     sa.bInheritHandle = TRUE;
 
     HANDLE logFile =
-        CreateFileA(logPath.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, CREATE_ALWAYS,
-                    FILE_ATTRIBUTE_NORMAL, nullptr);
+        CreateFileW(ssb64::Utf8ToWide(logPath).c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa,
+                    CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (logFile == INVALID_HANDLE_VALUE) {
         error = "Could not open extraction log for writing";
         return false;
@@ -262,7 +263,7 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
 
     SetFilePointer(logFile, 0, nullptr, FILE_END);
 
-    STARTUPINFOA si = {};
+    STARTUPINFOW si = {};
     si.cb = sizeof(si);
     si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_HIDE;
@@ -271,15 +272,12 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
     si.hStdError = logFile;
 
     PROCESS_INFORMATION pi = {};
-    std::vector<char> mutableCmd(commandLine.begin(), commandLine.end());
-    mutableCmd.push_back('\0');
-
-    std::vector<char> mutableCwd(workingDir.begin(), workingDir.end());
-    mutableCwd.push_back('\0');
+    std::wstring mutableCmd = ssb64::Utf8ToWide(commandLine);
+    const std::wstring wideCwd = ssb64::Utf8ToWide(workingDir);
 
     const BOOL started =
-        CreateProcessA(nullptr, mutableCmd.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr,
-                       mutableCwd.data(), &si, &pi);
+        CreateProcessW(nullptr, mutableCmd.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr,
+                       wideCwd.empty() ? nullptr : wideCwd.c_str(), &si, &pi);
     if (!started) {
         const DWORD code = GetLastError();
         CloseHandle(logFile);

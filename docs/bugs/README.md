@@ -6,6 +6,7 @@ This directory documents significant bugs encountered during the port, their sym
 
 | Date | Slug | Summary |
 |------|------|---------|
+| 2026-11-10 | [windows_smart_app_control_manifest](windows_smart_app_control_manifest_2026-11-10.md) | Smart App Control refused to open the Windows exe from port.10 on: the `activeCodePage` UTF-8 manifest element was the trigger; `main` sets a UTF-8 `LC_CTYPE` instead and the extraction uses the wide Win32 calls; the Windows updater stays notify-only |
 | 2026-11-10 | [windows_recipe_crlf_config](windows_recipe_crlf_config_2026-11-10.md) | The Switch rejected the `.o2r` extracted by Windows builds (issue #3): the Windows runner checked out `config.yml` with CRLF and the recipe hash took the bytes as they were; LF is pinned in `.gitattributes` and CMake hashes the recipe inputs with CRLF turned into LF |
 | 2026-11-08 | [switch_stage_select_and_vs_card_stutter](switch_stage_select_and_vs_card_stutter_2026-11-08.md) | Switch stage select froze 1.3 s and the 1P VS card ran at 54 ms per frame: header-only file sizing with an on-disk size cache, no per-frame reload of the same extern file, span-cached display list bounds checks; the update popup now answers the pad (Switch A/B swapped) |
 | 2026-11-07 | [ps5_unbuffered_log_slowdown](ps5_unbuffered_log_slowdown_2026-11-07.md) | The PS5 title ran 20-50x slow: both logs wrote every line to `/data`, which costs tens of ms per write on the console; logs are buffered and spdlog flushes on errors only |

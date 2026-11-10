@@ -1,17 +1,16 @@
 ## Highlights
 
-**Windows: the game no longer installs updates by itself.** Some antivirus programs flagged the update of
-`v2.0.1-port.10` as a threat: its helper script waited for the game to close, unpacked the new files over it, restarted
-it and deleted itself, which looks like malware to behavior-based scanners. The game itself was not the problem.
+**Windows: `v2.0.1-port.10` was blocked by Smart App Control.** On Windows 11 with Smart App Control on, Windows
+refused to open the port.10 executable ("Smart App Control blocked an app that may be unsafe"). The cause was a
+setting added to the executable in port.10 so the game opens from folders with accented names, such as
+`OneDrive\Área de Trabalho`. This release removes that setting and gets the same result another way, so the executable
+opens again and accented folders keep working, including the first-run extraction of the ROM.
 
-- **Windows:** when a new release is out, the game tells you at start-up and in Port Menu > About, and the button opens
-  this page. Download `BattleShip-Remix-windows-x64.zip` and extract it into your game folder, replacing the old files;
-  your saves, settings and `BattleShip-Remix.o2r` stay. The release check no longer starts `curl.exe` in the
-  background: the game reads the release information itself.
-- **Windows players on `v2.0.1-port.10` or older:** your game will not offer this update. The Windows zip has a new
-  name, so the old updater finds nothing to download and the old update script never runs again; Port Menu > About
-  just says "Latest release has no update for this platform." Download this release from this page once; from then on
-  the game tells you about new releases.
+- **Windows: the game no longer installs updates by itself.** When a new release is out, the game tells you at
+  start-up and in Port Menu > About, and the button opens this page. Download `BattleShip-Remix-windows-x64.zip` and
+  extract it into your game folder, replacing the old files; your saves, settings and `BattleShip-Remix.o2r` stay.
+- **Windows players on `v2.0.1-port.10` or older:** your game will not offer this update. Download this release from
+  this page once; from then on the game tells you about new releases.
 - **All platforms:** Port Menu > About shows the installed version at the top.
 - **Switch with files from Windows:** the `.o2r` and `.recipe` extracted by the Windows build are now accepted by the
   Switch ([#3](https://github.com/lucasliet/BattleShip-remix/issues/3)). Windows builds computed the recipe from a copy

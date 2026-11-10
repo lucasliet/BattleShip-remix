@@ -25,6 +25,7 @@ env:
 
 jobs:
   build-macos:
+    if: false
     runs-on: macos-15
     timeout-minutes: 40
     steps:
@@ -56,6 +57,7 @@ jobs:
           if-no-files-found: error
 
   build-linux:
+    if: false
     # jammy (glibc 2.35) so the AppImage runs on Steam Deck, Debian 12, Fedora 38+ and Ubuntu 22.04+.
     runs-on: ubuntu-22.04
     timeout-minutes: 30
@@ -128,6 +130,7 @@ jobs:
           if-no-files-found: error
 
   build-switch:
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 40
     container:
@@ -197,6 +200,7 @@ jobs:
           if-no-files-found: error
 
   build-android:
+    if: false
     # arm64-v8a only: the Remix C is not verified on ILP32 (armeabi-v7a) yet.
     runs-on: ubuntu-22.04
     timeout-minutes: 60
@@ -258,6 +262,7 @@ jobs:
           if-no-files-found: error
 
   build-ps5:
+    if: false
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     steps:
