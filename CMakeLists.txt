@@ -175,10 +175,12 @@ endif()
 # APK so the first-run UI can extract the user's ROM on-device via JNI —
 # see the torch_runner target at the bottom of this file.
 #
-# Windows links Torch into the game as well and extracts in-process: Smart App
-# Control refuses to start the unsigned torch.exe sidecar (CreateProcess error
-# 4551). The sidecar is still built for the ExtractAssets build step.
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+# Windows, macOS and Linux link Torch into the game as well and extract
+# in-process: Smart App Control refuses to start the unsigned torch.exe
+# sidecar (CreateProcess error 4551), and the other desktops follow so every
+# platform extracts the same way. The sidecar is still built for the
+# ExtractAssets build step.
+if (CMAKE_SYSTEM_NAME IN_LIST "Windows;Darwin;Linux")
     set(SSB64_TORCH_IN_PROCESS_DEFAULT ON)
 else()
     set(SSB64_TORCH_IN_PROCESS_DEFAULT OFF)

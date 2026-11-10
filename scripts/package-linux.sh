@@ -5,8 +5,7 @@
 #
 # AppDir layout produced (before appimagetool packs it):
 #   AppDir/
-#     usr/bin/BattleShip                 — main executable
-#     usr/bin/torch                      — sidecar for first-run extraction
+#     usr/bin/BattleShip                 — main executable; Torch is linked in for the first-run extraction
 #     usr/share/BattleShip/f3d.o2r       — Fast3D shaders (ROM-independent)
 #     usr/share/BattleShip/config.yml    — Torch extraction config
 #     usr/share/BattleShip/yamls/us/*.yml — Torch extraction recipes
@@ -101,9 +100,7 @@ rm -f "$F3D_O2R"
 
 # ── 3. Locate built artifacts ──
 GAME_BIN="$BUILD_DIR/$APP_NAME"   # CMake OUTPUT_NAME == SSB64_APP_NAME
-TORCH_BIN="$BUILD_DIR/TorchExternal/src/TorchExternal-build/torch"
 [[ -x "$GAME_BIN" ]] || fail "BattleShip binary not found at $GAME_BIN"
-[[ -x "$TORCH_BIN" ]] || fail "torch binary not found at $TORCH_BIN"
 
 # ── 4. Assemble AppDir ──
 step "Assembling $APPDIR"
@@ -111,7 +108,6 @@ rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/$APP_NAME/yamls/$VER"
 
 cp "$GAME_BIN"   "$APPDIR/usr/bin/$APP_NAME"
-cp "$TORCH_BIN"  "$APPDIR/usr/bin/torch"
 cp "$F3D_O2R"    "$APPDIR/usr/share/$APP_NAME/f3d.o2r"
 cp "$ROOT/gamecontrollerdb.txt" "$APPDIR/usr/share/$APP_NAME/gamecontrollerdb.txt"
 cp "$ROOT/config.yml" "$APPDIR/usr/share/$APP_NAME/config.yml"
@@ -260,7 +256,6 @@ if command -v linuxdeploy >/dev/null 2>&1; then
     linuxdeploy \
         --appdir "$APPDIR" \
         --executable "$APPDIR/usr/bin/$APP_NAME" \
-        --executable "$APPDIR/usr/bin/torch" \
         --desktop-file "$APPDIR/$APP_NAME.desktop" \
         --icon-file "$APPDIR/$APP_NAME.png"
 else
