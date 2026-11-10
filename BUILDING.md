@@ -152,9 +152,10 @@ Normally unnecessary (the build does these for you). Append the target to
 | `ExtractAssetHeaders` | Regenerate generated build-input headers |
 | `RegenerateRelocYamls` | Regenerate the checked-in reloc YAMLs |
 
-Packaged release builds ship no ROM: CMake installs a sidecar `torch` +
-`config.yml`, and the game extracts assets from a user-supplied ROM on
-first run instead of at build time.
+Packaged release builds ship no ROM: Torch is linked into the game
+(`SSB64_TORCH_IN_PROCESS`, on by default on desktop) and the package carries
+`config.yml` + `yamls/`, so the game extracts assets from a user-supplied ROM
+on first run instead of at build time.
 
 ---
 

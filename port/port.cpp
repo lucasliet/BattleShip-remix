@@ -22,6 +22,7 @@
 #endif
 #include <string>
 #include <vector>
+#include <clocale>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -1393,10 +1394,26 @@ static void ps5_exit_if_shutdown_hangs(void) {
 }
 #endif
 
+#if defined(_WIN32) && !defined(BATTLESHIP_UWP)
+/**
+ * Makes the C runtime and std::filesystem read and write narrow strings as UTF-8, as libzip, spdlog and SDL do, so
+ * an install under "OneDrive\Área de Trabalho" can open f3d.o2r. It must run before any path is built or opened.
+ * It replaces the activeCodePage manifest of 9f3d3de: Windows Smart App Control blocked the exes that carried it.
+ *
+ * @return true when the UTF-8 locale was set.
+ */
+static bool port_use_utf8_narrow_strings(void) {
+	return setlocale(LC_CTYPE, ".UTF-8") != nullptr;
+}
+#endif
+
 int main(int argc, char* argv[]) {
 	PS5_BOOT_TRACE("main entered");
 #ifdef __PS5__
 	ps5_install_crash_trace();
+#endif
+#if defined(_WIN32) && !defined(BATTLESHIP_UWP)
+	const bool utf8_narrow_strings = port_use_utf8_narrow_strings();
 #endif
 	/* Use an absolute path for ssb64.log so it lands in a predictable
 	 * place regardless of how the binary was launched (Finder / open /
@@ -1430,6 +1447,11 @@ int main(int argc, char* argv[]) {
 	}
 	PS5_BOOT_TRACE("log opened");
 	port_log("SSB64: main entered\n");
+#if defined(_WIN32) && !defined(BATTLESHIP_UWP)
+	if (!utf8_narrow_strings) {
+		port_log("SSB64: setlocale(LC_CTYPE, \".UTF-8\") failed; folders with accented names may not open\n");
+	}
+#endif
 
 #ifdef __SWITCH__
 	/* App-owned early Switch init: socket/nxlink stdio, applet-mode

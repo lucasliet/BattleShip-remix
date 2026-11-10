@@ -12,8 +12,7 @@
 #     Contents/
 #       Info.plist
 #       MacOS/
-#         BattleShip                 — main executable
-#         torch                      — sidecar for first-run extraction
+#         BattleShip                 — main executable; Torch is linked in for the first-run extraction
 #       Resources/
 #         f3d.o2r                    — Fast3D shader archive (ROM-independent)
 #         config.yml                 — Torch extraction config
@@ -136,9 +135,7 @@ rm -f "$F3D_O2R"
 # CMake's OUTPUT_NAME == SSB64_APP_NAME == $APP_NAME, so the binary is
 # named BattleShip (US) or BattleShip-JP (JP).
 SSB64_BIN="$BUILD_DIR/$APP_NAME"
-TORCH_BIN="$BUILD_DIR/TorchExternal/src/TorchExternal-build/torch"
 [[ -x "$SSB64_BIN" ]] || fail "BattleShip binary not found at $SSB64_BIN"
-[[ -x "$TORCH_BIN" ]] || fail "torch binary not found at $TORCH_BIN"
 
 # ── 3. Assemble the bundle ──
 step "Assembling $APP"
@@ -146,7 +143,6 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/yamls/$VER"
 
 cp "$SSB64_BIN"  "$APP/Contents/MacOS/$APP_NAME"
-cp "$TORCH_BIN"  "$APP/Contents/MacOS/torch"
 cp "$F3D_O2R"    "$APP/Contents/Resources/f3d.o2r"
 cp "$ROOT/gamecontrollerdb.txt" "$APP/Contents/Resources/gamecontrollerdb.txt"
 cp "$ROOT/config.yml" "$APP/Contents/Resources/config.yml"
@@ -249,10 +245,10 @@ cat > "$APP/Contents/Info.plist" <<EOF
 EOF
 
 # Make the binaries executable (cp preserves mode, but be defensive).
-chmod +x "$APP/Contents/MacOS/$APP_NAME" "$APP/Contents/MacOS/torch"
+chmod +x "$APP/Contents/MacOS/$APP_NAME"
 
 # ── 4a. Bundle Homebrew dylib dependencies (fixes #43) ──
-# CMake links BattleShip / torch against Homebrew dylibs (SDL2, GLEW,
+# CMake links BattleShip against Homebrew dylibs (SDL2, GLEW,
 # libzip, tinyxml2, spdlog, fmt, …) using their absolute install paths
 # (`/opt/homebrew/opt/<pkg>/lib/lib*.dylib`). On a developer machine the
 # .app launches fine because every load command resolves verbatim. On
@@ -267,7 +263,7 @@ chmod +x "$APP/Contents/MacOS/$APP_NAME" "$APP/Contents/MacOS/torch"
 #
 # `dylibbundler` (Homebrew package) automates all of that. `-of` =
 # overwrite-files (idempotent re-runs), `-b` = bundle transitive deps,
-# `-x` = files to fix (repeatable for torch alongside BattleShip),
+# `-x` = files to fix (repeatable),
 # `-d` = destination directory, `-p` = install_name prefix, `-cd` =
 # create destination, `-ns` = skip dylibbundler's own adhoc codesign
 # pass since the bundle-level `codesign --deep --force` below resigns
@@ -302,7 +298,6 @@ TCC_DYLIB="$(find "$BUILD_DIR" -name 'libtcc.dylib' -type f 2>/dev/null | head -
 [[ -n "$TCC_DYLIB" ]] && DYLIBBUNDLER_ARGS+=(-s "$(dirname "$TCC_DYLIB")")
 DYLIBBUNDLER_ARGS+=(
     -x "$APP/Contents/MacOS/$APP_NAME"
-    -x "$APP/Contents/MacOS/torch"
     -d "$APP/Contents/Frameworks/"
     -p "@executable_path/../Frameworks/")
 DB_TIMEOUT="$(command -v gtimeout || command -v timeout || true)"
@@ -355,7 +350,7 @@ fi
 # the binaries' load commands. Catches the case where dylibbundler missed a
 # transitive dep (rare, but worth failing loudly here rather than letting
 # the .app ship and hit the user with a runtime "Library not loaded:").
-for bin in "$APP/Contents/MacOS/$APP_NAME" "$APP/Contents/MacOS/torch"; do
+for bin in "$APP/Contents/MacOS/$APP_NAME"; do
     if otool -L "$bin" | grep -qE '(/opt/homebrew|/usr/local/Cellar)'; then
         echo "  remaining unbundled refs in $bin:" >&2
         otool -L "$bin" | grep -E '(/opt/homebrew|/usr/local/Cellar)' >&2
@@ -374,7 +369,7 @@ done
 # Done before codesign so the subsequent `codesign --force` re-seals the
 # final load commands. Version-independent (affects US and JP equally).
 step "De-duplicating LC_RPATH load commands"
-for bin in "$APP/Contents/MacOS/$APP_NAME" "$APP/Contents/MacOS/torch"; do
+for bin in "$APP/Contents/MacOS/$APP_NAME"; do
     rp='@executable_path/../Frameworks/'
     count_rpath() {
         otool -l "$1" | awk -v p="$rp" '

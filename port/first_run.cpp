@@ -2,6 +2,7 @@
 #include "app_paths.h"
 #include "native_dialog.h"
 #include "port_log.h"
+#include "torch_in_process.h"
 
 #include <libultraship/libultraship.h>
 #include <fast/Fast3dWindow.h>
@@ -23,6 +24,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include "win_utf8.h"
 #endif
 
 namespace fs = std::filesystem;
@@ -154,9 +156,10 @@ ExtractionResult BuildFailure(const std::string& error, const std::string& logPa
     return { false, {}, error, logPath };
 }
 
+#ifndef SSB64_TORCH_IN_PROCESS
 std::string QuoteCommandArg(const std::string& arg) {
 #ifdef _WIN32
-    /* CreateProcessA argv parsing: double quotes, escape embedded quotes. */
+    /* CreateProcessW argv parsing: double quotes, escape embedded quotes. */
     std::string quoted = "\"";
     for (char c : arg) {
         if (c == '"') {
@@ -182,6 +185,7 @@ std::string QuoteCommandArg(const std::string& arg) {
     return quoted;
 #endif
 }
+#endif
 
 std::string ResolveLogPath(const std::string& preferredLogPath, const std::string& sourceDir,
                            const std::string& destinationDir) {
@@ -202,6 +206,7 @@ std::string ResolveLogPath(const std::string& preferredLogPath, const std::strin
     return {};
 }
 
+#ifndef SSB64_TORCH_IN_PROCESS
 std::string FindTorchExecutable() {
     std::vector<std::string> candidates;
     for (const auto& base : {
@@ -253,8 +258,8 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
     sa.bInheritHandle = TRUE;
 
     HANDLE logFile =
-        CreateFileA(logPath.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, CREATE_ALWAYS,
-                    FILE_ATTRIBUTE_NORMAL, nullptr);
+        CreateFileW(ssb64::Utf8ToWide(logPath).c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa,
+                    CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (logFile == INVALID_HANDLE_VALUE) {
         error = "Could not open extraction log for writing";
         return false;
@@ -262,7 +267,7 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
 
     SetFilePointer(logFile, 0, nullptr, FILE_END);
 
-    STARTUPINFOA si = {};
+    STARTUPINFOW si = {};
     si.cb = sizeof(si);
     si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_HIDE;
@@ -271,15 +276,12 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
     si.hStdError = logFile;
 
     PROCESS_INFORMATION pi = {};
-    std::vector<char> mutableCmd(commandLine.begin(), commandLine.end());
-    mutableCmd.push_back('\0');
-
-    std::vector<char> mutableCwd(workingDir.begin(), workingDir.end());
-    mutableCwd.push_back('\0');
+    std::wstring mutableCmd = ssb64::Utf8ToWide(commandLine);
+    const std::wstring wideCwd = ssb64::Utf8ToWide(workingDir);
 
     const BOOL started =
-        CreateProcessA(nullptr, mutableCmd.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr,
-                       mutableCwd.data(), &si, &pi);
+        CreateProcessW(nullptr, mutableCmd.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr,
+                       wideCwd.empty() ? nullptr : wideCwd.c_str(), &si, &pi);
     if (!started) {
         const DWORD code = GetLastError();
         CloseHandle(logFile);
@@ -311,6 +313,7 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
     return true;
 #endif
 }
+#endif
 
 // Locate the directory that contains config.yml (the integrated extraction
 // config plus yamls/us/*.yml recipes used by standalone Torch.
@@ -457,12 +460,14 @@ ExtractionResult ExtractAssetsIfNeeded(const std::string& target_o2r_path, bool 
     }
     port_log("first_run: asset config dir -> %s\n", cfgDir.c_str());
 
+#ifndef SSB64_TORCH_IN_PROCESS
     const std::string torchExe = FindTorchExecutable();
     if (torchExe.empty()) {
         port_log("first_run: ERROR could not locate torch executable\n");
         return { false, {}, "Could not locate torch executable", {} };
     }
     port_log("first_run: torch executable -> %s\n", torchExe.c_str());
+#endif
 
     fs::create_directories(targetPath.parent_path());
     const fs::path workDir = fs::absolute(targetPath.parent_path() / "torch-work");
@@ -498,13 +503,19 @@ ExtractionResult ExtractAssetsIfNeeded(const std::string& target_o2r_path, bool 
         std::ofstream truncate(logPath, std::ios::trunc);
     }
 
+    std::string commandError;
+#ifdef SSB64_TORCH_IN_PROCESS
+    port_log("first_run: running Torch in-process on %s in %s\n", rom.c_str(), runDir.c_str());
+    AppendLogLine(logPath, "Torch (in-process) o2r " + rom + " -s " + runDir + " -d " + runDir);
+    const bool torchSucceeded = RunTorchInProcess(rom, runDir, runDir, logPath, commandError);
+#else
     const std::string commandLine = QuoteCommandArg(torchExe) + " o2r " + QuoteCommandArg(rom) +
                                     " -s " + QuoteCommandArg(runDir) + " -d " + QuoteCommandArg(runDir);
     port_log("first_run: > %s\n", commandLine.c_str());
     AppendLogLine(logPath, "Command: " + commandLine);
-
-    std::string commandError;
-    if (!RunTorchCommand(commandLine, runDir, logPath, commandError)) {
+    const bool torchSucceeded = RunTorchCommand(commandLine, runDir, logPath, commandError);
+#endif
+    if (!torchSucceeded) {
         port_log("first_run: ERROR extractor failed: %s\n", commandError.c_str());
         if (staleRecipe) {
             /* Re-extraction failed but the previous archive is untouched —
