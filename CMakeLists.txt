@@ -180,7 +180,8 @@ endif()
 # sidecar (CreateProcess error 4551), and the other desktops follow so every
 # platform extracts the same way. The sidecar is still built for the
 # ExtractAssets build step.
-if (CMAKE_SYSTEM_NAME IN_LIST "Windows;Darwin;Linux")
+set(SSB64_TORCH_IN_PROCESS_SYSTEMS Windows Darwin Linux)
+if (CMAKE_SYSTEM_NAME IN_LIST SSB64_TORCH_IN_PROCESS_SYSTEMS)
     set(SSB64_TORCH_IN_PROCESS_DEFAULT ON)
 else()
     set(SSB64_TORCH_IN_PROCESS_DEFAULT OFF)
