@@ -4,9 +4,9 @@
 #
 # Layout produced (extracted):
 #   BattleShip\
-#     BattleShip.exe             — main executable
-#     torch.exe                  — sidecar for first-run extraction
-#     f3d.o2r                    — Fast3D shader archive (ROM-independent)
+#     BattleShip.exe             — main executable; Torch is linked in and runs the first-run
+#                                  extraction (no torch.exe: Smart App Control blocks it)
+#     f3d.o2r                   — Fast3D shader archive (ROM-independent)
 #     config.yml                 — Torch extraction config
 #     yamls\us\*.yml             — Torch extraction recipes
 #     gamecontrollerdb.txt       — SDL controller mappings
@@ -132,17 +132,7 @@ if (-not (Test-Path $GameExe)) {
     # Fall back to non-multi-config layout (Ninja).
     $GameExe = Join-Path $BuildDir "$AppName.exe"
 }
-$TorchExe = $null
-foreach ($cand in @(
-    "TorchExternal\src\TorchExternal-build\Release\torch.exe",
-    "TorchExternal\src\TorchExternal-build\torch.exe",
-    "torch-install\bin\torch.exe"
-)) {
-    $p = Join-Path $BuildDir $cand
-    if (Test-Path $p) { $TorchExe = $p; break }
-}
 if (-not (Test-Path $GameExe))   { Fail "$AppName.exe not found at $GameExe" }
-if (-not $TorchExe)              { Fail "torch.exe not found in $BuildDir" }
 
 # ── 4. Stage the release tree ──
 Write-Step "Staging $StageDir"
@@ -151,7 +141,6 @@ New-Item -ItemType Directory -Path $StageDir | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $StageDir "yamls\$Ver") | Out-Null
 
 Copy-Item $GameExe        (Join-Path $StageDir "$AppName.exe")
-Copy-Item $TorchExe      (Join-Path $StageDir "torch.exe")
 Copy-Item $F3DO2R        (Join-Path $StageDir "f3d.o2r")
 Copy-Item (Join-Path $Root "gamecontrollerdb.txt") $StageDir
 Copy-Item (Join-Path $Root "config.yml") $StageDir
