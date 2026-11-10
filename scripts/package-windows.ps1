@@ -107,8 +107,7 @@ cmake -B $BuildDir $Root `
     -DCMAKE_BUILD_TYPE=Release `
     "-DDISABLE_SCRIPTING=$DisableScripting" `
     "-DSSB64_VERSION=$Ver" `
-    "-DPython3_EXECUTABLE=$PythonExe" `
-    | Out-Null
+    "-DPython3_EXECUTABLE=$PythonExe"
 if ($LASTEXITCODE -ne 0) { Fail "cmake configure failed" }
 
 Write-Step "Building BattleShip + torch"
