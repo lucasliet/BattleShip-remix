@@ -1258,7 +1258,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT BATTLESHIP_UWP)
         @ONLY)
     target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/port/ssb64.rc)
     if(NOT BATTLESHIP_UWP)
-        target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/port/ssb64.manifest)
+        # test/win-no-manifest: UTF-8 manifest removed to check whether it triggers Smart App Control
     endif()
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_options(${PROJECT_NAME} PRIVATE -Wl,-export-dynamic)
