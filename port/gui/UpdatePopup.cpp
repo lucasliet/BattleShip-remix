@@ -118,14 +118,37 @@ class UpdatePopupWindow : public Ship::GuiWindow {
                          ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize);
     }
 
-    void DrawOffer() {
+    void DrawVersionLine() {
         ImGui::Text("BattleShip Remix %s is available (installed: %s).", enhancements::GetLatestVersion().c_str(),
                     BATTLESHIP_CURRENT_VERSION);
+    }
+
+    void DrawOffer() {
+        if (!enhancements::CanInstallUpdateInGame()) {
+            DrawReleasePageOffer();
+            return;
+        }
+        DrawVersionLine();
         ImGui::TextUnformatted("Download and install it now? The game restarts when it finishes.");
         if (mFocusPending) ImGui::SetKeyboardFocusHere();
         if (ImGui::Button("Update (A)") || PadPressed(kConfirmKey)) {
             enhancements::StartGameUpdate();
             mStage = UpdateStage::Downloading;
+            return;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Later (B)") || PadPressed(kCancelKey)) ReleaseInput();
+    }
+
+    /** Offer for platforms that do not install updates themselves (Windows): open the release page. */
+    void DrawReleasePageOffer() {
+        DrawVersionLine();
+        ImGui::TextUnformatted("Download the zip from the release page and extract it into the game folder,");
+        ImGui::TextUnformatted("replacing the old files.");
+        if (mFocusPending) ImGui::SetKeyboardFocusHere();
+        if (ImGui::Button("Open release page (A)") || PadPressed(kConfirmKey)) {
+            enhancements::StartGameUpdate();
+            ReleaseInput();
             return;
         }
         ImGui::SameLine();

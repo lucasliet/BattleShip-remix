@@ -34,6 +34,8 @@
 #endif
 
 #if defined(_WIN32)
+#include "WindowsHttp.h"
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shellapi.h>
@@ -57,6 +59,8 @@ static std::string s_downloadStatus = "";
 static std::string s_restartPath = "";
 static std::mutex s_stringMutex; // Only locks when reading/writing the actual text
 
+void OpenReleasePage();
+
 namespace {
 
 #ifndef BATTLESHIP_CURRENT_VERSION
@@ -73,7 +77,9 @@ constexpr const char* kReleasePageUrl =
 #if defined(__linux__)
 constexpr const char* kPlatformAssetName = "BattleShip-Remix-x86_64.AppImage";
 #elif defined(_WIN32)
-constexpr const char* kPlatformAssetName = "BattleShip-Remix-windows.zip";
+// Renamed from BattleShip-Remix-windows.zip so v2.0.1-port.10, whose update_game.bat was flagged by
+// antivirus engines, finds no Windows asset and never runs that script again.
+constexpr const char* kPlatformAssetName = "BattleShip-Remix-windows-x64.zip";
 #elif defined(__APPLE__)
 constexpr const char* kPlatformAssetName = SSB64_APP_NAME "-macos.zip";
 #else
@@ -122,69 +128,8 @@ void SetDownloadStatus(const std::string& status) {
     s_downloadStatus = status;
 }
 
-#if defined(_WIN32)
-// Run a child process with stdout/stderr redirected and no console window.
-// Required on Windows because _popen() / system() shell through cmd.exe;
-// when called from a /SUBSYSTEM:WINDOWS binary, that creates a visible console.
-int RunCaptureNoWindow(std::string cmd,
-                       const std::function<void(const std::string&)>& onLine) {
-    HANDLE readPipe = nullptr;
-    HANDLE writePipe = nullptr;
-    SECURITY_ATTRIBUTES sa{};
-    sa.nLength = sizeof(sa);
-    sa.bInheritHandle = TRUE;
-    sa.lpSecurityDescriptor = nullptr;
-    if (!CreatePipe(&readPipe, &writePipe, &sa, 0)) return -1;
-    SetHandleInformation(readPipe, HANDLE_FLAG_INHERIT, 0);
-
-    STARTUPINFOA si{};
-    si.cb = sizeof(si);
-    si.dwFlags = STARTF_USESTDHANDLES;
-    si.hStdOutput = writePipe;
-    si.hStdError = writePipe;
-    si.hStdInput = nullptr;
-
-    PROCESS_INFORMATION pi{};
-    BOOL ok = CreateProcessA(nullptr, cmd.data(), nullptr, nullptr, TRUE,
-                             CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
-    CloseHandle(writePipe);
-    if (!ok) {
-        CloseHandle(readPipe);
-        return -1;
-    }
-
-    std::string line;
-    char buf[512];
-    DWORD got = 0;
-    while (ReadFile(readPipe, buf, sizeof(buf), &got, nullptr) && got > 0) {
-        for (DWORD i = 0; i < got; ++i) {
-            char c = buf[i];
-            if (c == '\r' || c == '\n') {
-                if (!line.empty()) {
-                    onLine(line);
-                    line.clear();
-                }
-            } else {
-                line += c;
-            }
-        }
-    }
-    if (!line.empty()) onLine(line);
-    CloseHandle(readPipe);
-
-    WaitForSingleObject(pi.hProcess, INFINITE);
-    DWORD code = 0;
-    GetExitCodeProcess(pi.hProcess, &code);
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    return static_cast<int>(code);
-}
-#endif
-
-int RunCapture(std::string cmd, const std::function<void(const std::string&)>& onLine) {
-#if defined(_WIN32)
-    return RunCaptureNoWindow(std::move(cmd), onLine);
-#else
+#if !defined(_WIN32)
+int RunCapture(const std::string& cmd, const std::function<void(const std::string&)>& onLine) {
     FILE* pipe = popen(cmd.c_str(), "r");
     if (!pipe) return -1;
 
@@ -200,7 +145,6 @@ int RunCapture(std::string cmd, const std::function<void(const std::string&)>& o
     }
     if (!currentLine.empty()) onLine(currentLine);
     return pclose(pipe);
-#endif
 }
 
 std::string CurlCommandPrefix() {
@@ -214,22 +158,29 @@ std::string CurlCommandPrefix() {
 }
 
 std::string BuildCheckCommand() {
-#if defined(_WIN32)
-    return std::string("curl -fLsS -m 10 -H \"User-Agent: BattleShip-Updater\" ") +
-           "\"" + kLatestReleaseApi + "\"";
-#else
     return CurlCommandPrefix() +
            " -fLsS -m 10 -H " + ShellSingleQuote("User-Agent: BattleShip-Updater") +
            " " + ShellSingleQuote(kLatestReleaseApi) + " 2>&1";
-#endif
 }
 
 std::string BuildDownloadCommand(const std::string& destPath, const std::string& url) {
-#if defined(_WIN32)
-    return "curl -fL -# -o \"" + destPath + "\" \"" + url + "\"";
-#else
     return CurlCommandPrefix() + " -fL -# -o " + ShellSingleQuote(destPath) +
            " " + ShellSingleQuote(url) + " 2>&1";
+}
+#endif
+
+/**
+ * Reads the latest-release JSON from the GitHub API. Windows uses WinHTTP inside the game process
+ * (no child process; see CanInstallUpdateInGame in enhancements.h); Linux and macOS shell out to curl.
+ *
+ * @param outJson Receives the response body.
+ * @return false when the request failed.
+ */
+bool FetchLatestReleaseJson(std::string* outJson) {
+#if defined(_WIN32)
+    return WindowsHttpGetString(kLatestReleaseApi, outJson);
+#else
+    return RunCapture(BuildCheckCommand(), [&](const std::string& line) { *outJson += line; }) == 0;
 #endif
 }
 
@@ -422,10 +373,7 @@ void CheckForUpdatesAsync(bool force) {
         RemoveStaleBundleBackup();
 #endif
         std::string response;
-        int exitCode = RunCapture(BuildCheckCommand(), [&](const std::string& line) {
-            response += line;
-        });
-        if (exitCode != 0) {
+        if (!FetchLatestReleaseJson(&response)) {
             s_updateCheckFailed.store(true);
             SetUpdateStatus("Unable to check for updates.");
             s_isCheckingForUpdates.store(false);
@@ -476,6 +424,9 @@ void CheckForUpdatesAsync(bool force) {
 }
 
 void StartGameUpdate() {
+#if defined(_WIN32)
+    OpenReleasePage();
+#else
     if (s_isDownloading.load()) return;
     s_isDownloading.store(true);
 
@@ -509,33 +460,6 @@ void StartGameUpdate() {
 
         std::string tempPath = std::string(appImagePath) + ".part";
         std::string cmd = BuildDownloadCommand(tempPath, url);
-
-        #elif defined(_WIN32)
-        // Anchor everything to the install directory — CWD can be anywhere
-        // (Start Menu launches use the user profile), and the .bat extracts
-        // over the game files, so it must run where BattleShip.exe lives.
-        std::string exeDir;
-        {
-            char exePath[MAX_PATH];
-            DWORD n = GetModuleFileNameA(nullptr, exePath, MAX_PATH);
-            if (n > 0 && n < MAX_PATH) {
-                std::string p(exePath, n);
-                size_t slash = p.find_last_of("\\/");
-                if (slash != std::string::npos) {
-                    exeDir = p.substr(0, slash);
-                }
-            }
-        }
-        if (exeDir.empty()) {
-            {
-                std::lock_guard<std::mutex> lock(s_stringMutex);
-                s_downloadStatus = "Error: Could not locate install directory.";
-            }
-            s_isDownloading.store(false);
-            return;
-        }
-        std::string tempZip = exeDir + "\\update_temp.zip";
-        std::string cmd = BuildDownloadCommand(tempZip, url);
 
         #elif defined(__APPLE__)
         std::string bundle;
@@ -576,37 +500,6 @@ void StartGameUpdate() {
                 std::lock_guard<std::mutex> lock(s_stringMutex);
                 s_downloadStatus = "Error: Failed to replace AppImage.";
             }
-            #elif defined(_WIN32)
-            std::string batPath = exeDir + "\\update_game.bat";
-            FILE* bat = fopen(batPath.c_str(), "w");
-            if (bat) {
-                fprintf(bat, "@echo off\n");
-                fprintf(bat, "cd /d \"%s\"\n", exeDir.c_str());
-                fprintf(bat, "echo Update downloaded! Waiting for BattleShip to close before applying...\n");
-                fprintf(bat, ":wait\n");
-                fprintf(bat, "tasklist /FI \"IMAGENAME eq %s.exe\" 2>NUL | find /I /N \"%s.exe\">NUL\n",
-                        SSB64_APP_NAME, SSB64_APP_NAME);
-                fprintf(bat, "if \"%%ERRORLEVEL%%\"==\"0\" (\n");
-                fprintf(bat, "    timeout /t 1 /nobreak > NUL\n");
-                fprintf(bat, "    goto wait\n");
-                fprintf(bat, ")\n");
-                fprintf(bat, "echo Installing update...\n");
-                fprintf(bat, "tar -xf update_temp.zip\n");
-                fprintf(bat, "del update_temp.zip\n");
-                fprintf(bat, "start %s.exe\n", SSB64_APP_NAME);
-                fprintf(bat, "(goto) 2>nul & del \"%%~f0\"\n");
-                fclose(bat);
-
-                {
-                    std::lock_guard<std::mutex> lock(s_stringMutex);
-                    s_downloadStatus = "Update ready! Close the game to apply.";
-                }
-                ShellExecuteA(nullptr, "open", batPath.c_str(), nullptr, exeDir.c_str(), SW_SHOWNORMAL);
-                s_downloadComplete.store(true);
-            } else {
-                std::lock_guard<std::mutex> lock(s_stringMutex);
-                s_downloadStatus = "Error: Failed to create updater script.";
-            }
             #elif defined(__APPLE__)
             StageBundleUpdate(zipPath, bundle);
             #endif
@@ -617,8 +510,6 @@ void StartGameUpdate() {
             }
             #if defined(__linux__)
             std::remove(tempPath.c_str());
-            #elif defined(_WIN32)
-            std::remove(tempZip.c_str());
             #elif defined(__APPLE__)
             std::remove(zipPath.c_str());
             #endif
@@ -626,13 +517,12 @@ void StartGameUpdate() {
 
         s_isDownloading.store(false);
     }).detach();
+#endif
 }
 
 bool CanRestartAfterUpdate() {
     if (!s_downloadComplete.load()) return false;
-#if defined(_WIN32)
-    return true;
-#elif defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__)
     std::lock_guard<std::mutex> lock(s_stringMutex);
     return !s_restartPath.empty();
 #else
@@ -650,9 +540,6 @@ void RestartAfterUpdate() {
     }
     execl(path.c_str(), path.c_str(), static_cast<char*>(nullptr));
     SetDownloadStatus("Error: Could not restart. Close and reopen the game.");
-#elif defined(_WIN32)
-    // update_game.bat waits for this process to exit, applies the zip and starts the new exe.
-    Ship::Context::GetInstance()->GetWindow()->Close();
 #elif defined(__APPLE__)
     std::string bundle;
     {

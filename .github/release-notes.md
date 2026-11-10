@@ -62,7 +62,7 @@ system).
 | `BattleShip-Remix.dmg` | macOS (Apple Silicon) |
 | `BattleShip-Remix-macos.zip` | macOS (Apple Silicon), the `.app` zipped; the in-game updater downloads it |
 | `BattleShip-Remix-x86_64.AppImage` | Linux x86_64 |
-| `BattleShip-Remix-windows.zip` | Windows x64 |
+| `BattleShip-Remix-windows-x64.zip` | Windows x64 |
 | `BattleShip-Remix-switch.zip` | Nintendo Switch homebrew (`.nro`, `f3d.o2r`, `config.yml`, `assets/`) |
 | `BattleShip-Remix.nro` | The Switch `.nro` alone, kept for builds up to `v2.0.1-port.9` (their updater downloads it); newer builds update from the Switch zip |
 | `BattleShip-Remix-android.apk` | Android arm64-v8a, Android 7+ |

@@ -2064,6 +2064,7 @@ void PortMenu::AddMenuAbout() {
     WidgetPath path = { "About", "Build", SECTION_COLUMN_1 };
     AddSidebarEntry("About", "Build", 1);
     AddWidget(path, "About", WIDGET_SEPARATOR_TEXT);
+    AddWidget(path, "Version: " + std::string(BATTLESHIP_CURRENT_VERSION), WIDGET_TEXT);
 #ifdef REGION_REMIX
     AddWidget(path, "BattleShip Remix", WIDGET_TEXT);
     AddWidget(path, "A fork of BattleShip that plays Smash Remix 2.0.1", WIDGET_TEXT);
@@ -2105,7 +2106,6 @@ void PortMenu::AddMenuAbout() {
     ssb64::enhancements::CheckForUpdatesAsync(false);
 
     AddWidget(path, "Updates", WIDGET_SEPARATOR_TEXT);
-    AddWidget(path, "Version: " + std::string(BATTLESHIP_CURRENT_VERSION), WIDGET_TEXT);
 
     // 1. "Checking for updates..." Text
     AddWidget(path, "Checking for updates...", WIDGET_TEXT)
@@ -2123,7 +2123,9 @@ void PortMenu::AddMenuAbout() {
         !ssb64::enhancements::IsUpdateAvailable();
 
         if (!info.isHidden) {
-            info.name = "Download Update: " + ssb64::enhancements::GetLatestVersion();
+            const char* action = ssb64::enhancements::CanInstallUpdateInGame() ? "Download Update: "
+                                                                               : "Open Release Page: ";
+            info.name = action + ssb64::enhancements::GetLatestVersion();
         }
     })
     .Callback([](WidgetInfo&) {

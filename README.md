@@ -20,7 +20,7 @@ What the port covers:
 
 The few places where the port deliberately behaves differently from the assembly are listed in [`docs/remix/deviations.md`](docs/remix/deviations.md). The Remix screens are authored for 4:3: the optional Widescreen setting only widens battle scenes, and menus stretch.
 
-[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg and .zip)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .zip with the .nro)**, **Android (arm64 .apk)** and **PlayStation 5 (homebrew title folder)** packages, and the built-in updater of every platform installs from the package of its platform (on macOS the in-game update uses the .zip, the .dmg is for the first install). The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
+[Releases](https://github.com/lucasliet/BattleShip-remix/releases) ship **macOS (Apple Silicon, .dmg and .zip)**, **Linux (x86_64 AppImage)**, **Windows (x64 .zip)**, **Nintendo Switch (homebrew .zip with the .nro)**, **Android (arm64 .apk)** and **PlayStation 5 (homebrew title folder)** packages, and the built-in updater of every platform installs from the package of its platform (on macOS the in-game update uses the .zip, the .dmg is for the first install). On Windows the updater only announces a new release and opens its page: download the zip and extract it into the game folder, replacing the old files. The vanilla BattleShip build (US Super Smash Bros.) still compiles from the same tree with `-DSSB64_VERSION=us`.
 
 ## No copyrighted assets are included in this repository
 

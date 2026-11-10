@@ -115,6 +115,20 @@ void TickDiscordPresence();
 
 // Updater functions
 void CheckForUpdatesAsync(bool force = false);
+/**
+ * Whether StartGameUpdate downloads and installs the release. False on Windows: antivirus engines flagged
+ * v2.0.1-port.10 while its update_game.bat swapped the running exe, so there StartGameUpdate only opens the
+ * release page and the player installs the zip by hand.
+ *
+ * @return false on Windows, true elsewhere.
+ */
+inline bool CanInstallUpdateInGame() {
+#if defined(_WIN32)
+    return false;
+#else
+    return true;
+#endif
+}
 void StartGameUpdate();
 bool IsUpdateAvailable();
 bool DidUpdateCheckFail();
@@ -127,8 +141,8 @@ std::string GetLatestVersion();
 
 #if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
 // After a finished update, relaunch the freshly installed build: the homebrew loader on Switch, the AppImage on
-// Linux, the update script on Windows, the swapped .app on macOS. CanRestartAfterUpdate is true once the update is
-// staged on Switch, Linux, Windows and macOS (macOS swaps the .app on restart).
+// Linux, the swapped .app on macOS. CanRestartAfterUpdate is true once the update is staged on Switch, Linux and
+// macOS (macOS swaps the .app on restart); never on Windows, which does not install updates itself.
 bool CanRestartAfterUpdate();
 void RestartAfterUpdate();
 #endif

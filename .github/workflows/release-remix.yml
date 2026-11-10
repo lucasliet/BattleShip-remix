@@ -124,7 +124,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: remix-windows
-          path: dist/BattleShip-Remix-windows.zip
+          path: dist/BattleShip-Remix-windows-x64.zip
           if-no-files-found: error
 
   build-switch:
@@ -318,7 +318,7 @@ jobs:
             artifacts/BattleShip-Remix.dmg
             artifacts/BattleShip-Remix-macos.zip
             artifacts/BattleShip-Remix-x86_64.AppImage
-            artifacts/BattleShip-Remix-windows.zip
+            artifacts/BattleShip-Remix-windows-x64.zip
             artifacts/BattleShip-Remix-switch.zip
             artifacts/BattleShip-Remix.nro
             artifacts/BattleShip-Remix-android.apk

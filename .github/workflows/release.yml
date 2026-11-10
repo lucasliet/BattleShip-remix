@@ -405,7 +405,7 @@ jobs:
           - version: remix
             enable_scripting: "0"
             artifact_name: BattleShip-windows-remix
-            artifact_path: dist/BattleShip-Remix-windows.zip
+            artifact_path: dist/BattleShip-Remix-windows-x64.zip
     steps:
       - uses: actions/checkout@v4
         with:

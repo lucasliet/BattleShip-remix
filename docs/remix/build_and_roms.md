@@ -79,8 +79,11 @@ Then configure with that cmake and ninja and point CMake at those libraries:
 ```bash
 PATH=$PWD/.toolchain/host/ninja:$PATH
 .toolchain/host/cmake/CMake.app/Contents/bin/cmake -S $PWD -B $PWD/build -GNinja -DCMAKE_BUILD_TYPE=Release -DSSB64_VERSION=remix \
-  -DCMAKE_IGNORE_PREFIX_PATH="/opt/homebrew;/usr/local" -DCMAKE_PREFIX_PATH=$PWD/.toolchain/host/deps
+  -DGLEW_USE_STATIC_LIBS=ON -DCMAKE_IGNORE_PREFIX_PATH="/opt/homebrew;/usr/local" -DCMAKE_PREFIX_PATH=$PWD/.toolchain/host/deps \
+  -DPython3_EXECUTABLE=$PWD/.toolchain/host/venv/bin/python3
 ```
+
+`GLEW_USE_STATIC_LIBS` makes CMake take the static `libGLEW.a`; without it the configure fails with "Could NOT find GLEW". `Python3_EXECUTABLE` picks the toolchain venv (Pillow) for the asset generators: `CMAKE_IGNORE_PREFIX_PATH` does not stop CMake from finding a Homebrew Python framework, which lacks Pillow, and the build then fails in `derive_stage_assets.py`.
 
 ### Assets
 
@@ -112,7 +115,7 @@ body is `.github/release-notes.md`. Rewrite its `## Highlights` before tagging (
 ## Installing a release package of BattleShip-Remix
 
 1. Download the package of your platform (`BattleShip-Remix.dmg`, `BattleShip-Remix-x86_64.AppImage`,
-   `BattleShip-Remix-windows.zip`). It has no game data.
+   `BattleShip-Remix-windows-x64.zip`). It has no game data.
 2. Make the Smash Remix 2.0.1 ROM from your own Super Smash Bros. NTSC-U v1.0 ROM, with the web patcher at
    https://smashremix.net/patcher/ or the Remix 2.0.1 patch from the Releases tab of `JSsixtyfour/smashremix` (`.z64`, `.n64` or `.v64`; check the SHA-1 in **Required ROMs**).
 3. Name it `baserom.remix.z64` (or `.n64` / `.v64`) and put it in the app data folder that the error dialog of the first
@@ -158,9 +161,10 @@ are made from `assets/icon.png` and `assets/icon-remix.png` (the "SR" artwork) b
 
 ### In-game updater
 
-Every platform updates itself from `releases/latest` of `lucasliet/BattleShip-remix`:
+Every platform except Windows updates itself from `releases/latest` of `lucasliet/BattleShip-remix`. The About menu shows the installed version (`BATTLESHIP_CURRENT_VERSION`) at the top on every platform.
 
-- **Desktop, Switch and PS5:** the About menu (Updates section). Desktop and the Switch also check at start-up and show a popup that offers the update and restarts the game after installing it (`port/gui/UpdatePopup.cpp`). The PS5 updater installs the release zip over the title folder (`UpdaterPS5.cpp`, `UpdateZipInstall.cpp`). Windows runs `update_game.bat`, which waits for the game, unpacks the zip over it and restarts it; the script used to name `BattleShip.exe`, so for the Remix build (`BattleShip-Remix.exe`) it never waited, failed to unpack over the running executable and could not restart it, and it now uses the build's executable name.
+- **Windows (notify only):** antivirus engines flagged `v2.0.1-port.10` while its `update_game.bat` waited for the game, unpacked the zip over the running exe, restarted it and deleted itself. Windows now only announces the release: the check reads the GitHub API with WinHTTP inside the game process (`WindowsHttp.cpp`, no `curl.exe` child), and the popup and the About button open the release page (`CanInstallUpdateInGame()` is false, `StartGameUpdate` calls `OpenReleasePage`). The player extracts the zip into the game folder. The asset is named `BattleShip-Remix-windows-x64.zip` from the release after port.10 on, so port.10, which looks for `BattleShip-Remix-windows.zip`, finds no Windows asset and never runs its script again.
+- **Desktop, Switch and PS5:** the About menu (Updates section). Desktop and the Switch also check at start-up and show a popup that offers the update and restarts the game after installing it (`port/gui/UpdatePopup.cpp`). The PS5 updater installs the release zip over the title folder (`UpdaterPS5.cpp`, `UpdateZipInstall.cpp`).
 - **macOS:** the updater downloads `BattleShip-Remix-macos.zip` into the folder holding the `.app` (as a hidden file) and unpacks it as `BattleShip-Remix.app.new` next to the installed app. On restart it renames the running app to `BattleShip-Remix.app.old`, the new one to `BattleShip-Remix.app` and relaunches it; the `.old` folder is deleted at the next launch. The app must be an installed `.app` in a writable folder (for example Applications): a dev binary outside a bundle, or an app run from the mounted DMG, reports an error and the user installs from the release page. Files the app downloads carry no quarantine attribute, so an update applied this way does not need the right-click Open step that the DMG needs. The zip is made by `scripts/package-macos.sh` (`ditto`, which keeps symlinks and modes).
 - **Android:** a Java flow at app boot, not the C++ updater: `AppUpdater` reads the latest release, `UpdatePrompt` offers it in a dialog (the check waits at most 4 s and any failure or refusal goes on to the game), and the APK (`BattleShip-Remix-android.apk`) is downloaded straight into a `PackageInstaller` session; Android then asks the player to confirm the install (`InstallStatusReceiver`). Only release-tagged builds take part (`versionName` `v...`, set by the release CI); dev and debug builds never update themselves.
 

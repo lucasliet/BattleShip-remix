@@ -614,12 +614,16 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "PS5")
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX
         "port/enhancements/(Updater|UpdaterSwitch|SwitchHttp|DiscordRichPresence|ShaderDownloader)\\.cpp$")
 else()
-    # The in-process libcurl updater only exists on Switch; the desktop updater shells out to curl.
+    # The in-process libcurl updater only exists on Switch; Linux and macOS shell out to curl.
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/(UpdaterSwitch|SwitchHttp)\\.cpp$")
+endif()
+if(NOT WIN32 OR BATTLESHIP_UWP)
+    # The Windows updater reads the release API with WinHTTP (no child process).
+    list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/WindowsHttp\\.cpp$")
 endif()
 if(NOT (CMAKE_SYSTEM_NAME STREQUAL "PS5" OR CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch" OR APPLE))
     # The release zip is unpacked in place by the PS5, Switch and macOS updaters only: Linux swaps the
-    # AppImage and Windows runs update_game.bat.
+    # AppImage and Windows only opens the release page.
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/UpdateZipInstall\\.cpp$")
 endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "PS5" OR BATTLESHIP_UWP)
@@ -1224,7 +1228,7 @@ endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT BATTLESHIP_UWP)
     target_link_options(${PROJECT_NAME} PRIVATE /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
-    target_link_libraries(${PROJECT_NAME} PRIVATE shell32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE shell32 winhttp)
     # DMA functions (osEPiStartDma, osPiStartDma) are provided by LUS.
     # Game DMA code is no-opped via #ifdef PORT in dma.c, so no /FORCE needed.
     target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
