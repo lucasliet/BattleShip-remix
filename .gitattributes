@@ -5,6 +5,11 @@
 # matches what generate_yamls.py writes on every platform.
 yamls/**/*.yml text eol=lf
 
+# config.yml and the torch revision feed the asset recipe hash (CMakeLists.txt). A CRLF checkout on the Windows release
+# runner changed that hash, so the Switch rejected the .o2r a Windows build extracted (issue #3).
+config.yml text eol=lf
+tools/torch_extract_rev.txt text eol=lf
+
 # Same logic for the other gitignored-but-actually-tracked codegen output.
 include/reloc_data.h text eol=lf
 port/resource/RelocFileTable.cpp text eol=lf

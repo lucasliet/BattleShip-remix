@@ -13,6 +13,10 @@ it and deleted itself, which looks like malware to behavior-based scanners. The 
   just says "Latest release has no update for this platform." Download this release from this page once; from then on
   the game tells you about new releases.
 - **All platforms:** Port Menu > About shows the installed version at the top.
+- **Switch with files from Windows:** the `.o2r` and `.recipe` extracted by the Windows build are now accepted by the
+  Switch ([#3](https://github.com/lucasliet/BattleShip-remix/issues/3)). Windows builds computed the recipe from a copy
+  of `config.yml` with Windows line endings, so their recipe never matched the Switch's. Because of this fix, the
+  Windows game extracts `BattleShip-Remix.o2r` again once on its first launch; macOS and Linux do not.
 
 Nothing changed in the asset pipeline: on the Switch, keep the `BattleShip-Remix.o2r` and `.recipe` you already have.
 Switch builds up to `v2.0.1-port.9` still download the bare `BattleShip-Remix.nro`, so that file stays in this release.
