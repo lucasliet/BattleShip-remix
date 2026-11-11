@@ -1,0 +1,26 @@
+{
+ "_comment": "Pacotes de host Linux x86_64 do devkitPro (snapshot de dkp-linux.db, 2026-11-11). Os pacotes 'any' (newlib, libnx, portlibs) continuam em packages.lock, secao 'libs'. setup-toolchain-linux.sh verifica cada sha256 contra estes pinos.",
+ "base_url": "https://pkg.devkitpro.org/packages/linux/x86_64",
+ "packages": {
+  "devkita64-binutils": {
+   "filename": "devkita64-binutils-2.46.0-1-x86_64.pkg.tar.zst",
+   "sha256": "0d61ad4946eb1080c6e645c41f0cfaac0a2eba5fec88426fef8f03363e933b5a"
+  },
+  "devkita64-gcc": {
+   "filename": "devkita64-gcc-16.1.0-1-x86_64.pkg.tar.zst",
+   "sha256": "8192b899f0a5fcfe10d11fa63a631b45310c0c8f0b98d88c7c283c16e9d6b0fa"
+  },
+  "general-tools": {
+   "filename": "general-tools-1.4.4-1-x86_64.pkg.tar.zst",
+   "sha256": "b6b59bd3d22d4f83a7f0668f749df7cf97b1f05083031e629d43ca4f4377c7b5"
+  },
+  "switch-tools": {
+   "filename": "switch-tools-1.13.1-1-x86_64.pkg.tar.zst",
+   "sha256": "de0a9473764d3c5205a7cc9b640e9e913c371b5684d526133384eb7e545c7dab"
+  },
+  "uam": {
+   "filename": "uam-1.1.0-1-x86_64.pkg.tar.xz",
+   "sha256": "ef1b6882021445c52f8b8feb2c1b20c973a0f8be49b0aa96895d643e1374fc62"
+  }
+ }
+}

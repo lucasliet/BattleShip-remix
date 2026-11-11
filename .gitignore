@@ -17,9 +17,9 @@ out/
 *~
 
 # Agents
-AGENTS.md
 .claude/
 .cache/
+.ai-memory.toml
 
 # Controller
 BattleShip.cfg.json
