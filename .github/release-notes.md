@@ -10,11 +10,20 @@ applied for code signing, which ends these blocks.
 - **macOS and Linux:** the ROM extractor now runs inside the game; the app and the AppImage no longer carry a separate
   `torch` program. The extracted files are the same.
 
-- **Windows: the game no longer installs updates by itself.** When a new release is out, the game tells you at
-  start-up and in Port Menu > About, and the button opens this page. Download `BattleShip-Remix-windows-x64.zip` and
-  extract it into your game folder, replacing the old files; your saves, settings and `BattleShip-Remix.o2r` stay.
-- **Windows players on `v2.0.1-port.10` or older:** your game will not offer this update. Download this release from
-  this page once; from then on the game tells you about new releases.
+- **Windows: the game no longer installs updates by itself.** To install an update, the old updater wrote a script
+  (`update_game.bat`) that waited for the game to close, unpacked the zip over the running executable, restarted the
+  game and deleted itself. Antivirus programs flag exactly that behavior, so some of them flagged the game. Now, when a
+  new release is out, the game only tells you at start-up and in Port Menu > About, and the button opens this page.
+  Download `BattleShip-Remix-windows-x64.zip` and extract it into your game folder, replacing the old files; your saves,
+  settings and `BattleShip-Remix.o2r` stay.
+- **Windows players on `v2.0.1-port.10` or older:** your game will not offer this update. The Windows zip has a new
+  name, `BattleShip-Remix-windows-x64.zip`, so the old updater, which looks for `BattleShip-Remix-windows.zip`, finds
+  nothing and never runs its script again. Download this release from this page once; from then on the game tells you
+  about new releases.
+- **PlayStation 5: hi-res texture packs load** ([#5](https://github.com/lucasliet/BattleShip-remix/issues/5)). The
+  console does not let the game list folders inside the title folder the usual way, so the game never found the pack in
+  `mods/`. It now lists the folder another way; a pack `.zip` or a folder of loose PNGs in `PPSA99264/mods/` works,
+  and it is on by default (Port Menu > Assets > Mods).
 - **All platforms:** Port Menu > About shows the installed version at the top.
 - **Switch with files from Windows:** the `.o2r` and `.recipe` extracted by the Windows build are now accepted by the
   Switch ([#3](https://github.com/lucasliet/BattleShip-remix/issues/3)). Windows builds computed the recipe from a copy
