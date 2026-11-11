@@ -113,7 +113,7 @@ Everything below comes from BattleShip and is toggleable in-game from the ESC me
 
 ### Textures & mods
 
-- **Hi-res texture packs** on desktop *and* Android and Switch (opt-in on the last two, read in place straight out of a `.zip`). Download GhostlyDark's pack from [evilgames.eu](https://evilgames.eu/texture-packs/ssb-reloaded.htm#pc).
+- **Hi-res texture packs** on desktop, Android, Switch and PS5 (opt-in on Android and Switch, read in place straight out of a `.zip`). Download GhostlyDark's pack from [evilgames.eu](https://evilgames.eu/texture-packs/ssb-reloaded.htm#pc).
 - **Native C mod support** — write mods in C, compiled at runtime (TinyCC), with hot-reload, function detours, and a documented engine/fighter event catalog. See [`docs/modding.md`](docs/modding.md). *(Desktop only; scripting is disabled on Android.)*
 
 ### Controls

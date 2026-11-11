@@ -4,6 +4,9 @@
 
 #include <libultraship/libultraship.h>
 #include <ship/utils/filesystemtools/Directory.h>
+#if defined(__PS5__)
+#include "../ps5/ps5_dir_list.h"
+#endif
 
 // stb_image's implementation lives in libultraship's stb_impl.c (see
 // libultraship/cmake/dependencies/common.cmake) — only include the header
@@ -619,7 +622,18 @@ bool HiResPack::Init() {
     // symlink loop, a file removed mid-walk) — catch it so a junk folder just
     // disables the pack instead of taking down boot.
     try {
+#if defined(__PS5__)
+        // The PS5 title is refused opendir under /app0, so Directory::ListFiles throws EPERM there.
+        std::vector<std::string> files;
+        std::string listError;
+        if (!ssb64::Ps5ListFilesRecursive(gModsRoot, &files, &listError)) {
+            port_log("HiResPack: cannot scan %s (%s); hi-res pack disabled this run\n", gModsRoot.c_str(),
+                     listError.c_str());
+            return false;
+        }
+#else
         auto files = Directory::ListFiles(gModsRoot); // recursive
+#endif
         std::sort(files.begin(), files.end()); // deterministic collision-winner
 
         for (const std::string& path : files) {

@@ -243,7 +243,7 @@ What the title cannot do, and the workaround:
 
 | Restriction | Workaround |
 |---|---|
-| `opendir` on `/app0` fails | ROM looked up by name; Torch reads a `.torch-filelist` per yaml folder (`cmake/ps5_torch_filelists.cmake`) |
+| `opendir` on `/app0` fails | ROM looked up by name; Torch reads a `.torch-filelist` per yaml folder (`cmake/ps5_torch_filelists.cmake`); the hi-res pack scan lists `mods/` with `open` + `getdents` (`port/ps5/ps5_dir_list.cpp`) |
 | `lstat`, `getcwd`, `realpath` refused (EPERM) | `port/ps5/ps5_path_shims.c`, wrapped at link (as griches/PS5_Ghostship does) |
 | a named `std::locale` crashes (SIGBUS) | yaml-cpp uses `std::locale::classic()` (patched in torch's CMakeLists for PS5) |
 | every write to storage costs tens of ms | logs are buffered; Torch logs at `warn` |
