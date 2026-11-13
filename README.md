@@ -128,17 +128,11 @@ Everything below comes from BattleShip and is toggleable in-game from the ESC me
 - Runs natively on **macOS (Apple Silicon), Linux, Windows, Android, Nintendo Switch and PlayStation 5**
 - First-run ROM-extraction wizard, built-in update checker/downloader, and Discord Rich Presence
 
-### Rollback netcode & online play
-
-Work in progress.
-
 ## About the BattleShip port
 
 BattleShip, the port this fork builds on, was created by [JRickey](https://github.com/JRickey). From its author:
 
 > This is a project that I started and developed alone with Claude until the v0.3-beta release. It took a little over a month of night and day work to get to the first beta release, and a massive 4 day long sprint working all day resolving bugs from v0.3-beta to v0.7-beta. As of now, this is no longer a pure AI project. Many people have offered their time playtesting, their knowledge of the game, or their experience with modding or competitive play; to bring improvements, bug fixes, new feature suggestions, and additions. Without them, the project would not be what it is today.
->
-> If you find anything that you would like to see improved, create an issue on Github. I'll fix it.
 >
 > This port was started when the original decomp was 96% complete code only. The remaining 4% was the internal debug menu and Libultra functions that aren't necessary to port the game. The relocatable data was also not decompiled at the time. The port was designed with this in mind, and it is why certain design decisions had to have been made. I like to move fast, obviously.
 >
