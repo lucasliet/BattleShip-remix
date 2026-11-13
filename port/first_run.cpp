@@ -241,6 +241,38 @@ std::string FindTorchExecutable() {
     return absolute.string();
 }
 
+constexpr const char* kTorchExitedPrefix = "Torch exited with code ";
+
+#ifdef _WIN32
+/**
+ * Describes a CreateProcess failure of torch.exe for the player. Windows security features block the
+ * unsigned extractor (Smart App Control, Microsoft Defender), and the bare error number says nothing.
+ *
+ * @param code GetLastError() after the failed CreateProcessW.
+ * @return The error text shown in the wizard, the message box and the extraction log.
+ */
+std::string DescribeTorchLaunchFailure(DWORD code) {
+    constexpr DWORD kAppControlBlocked = 4551;
+    constexpr DWORD kVirusInfected = 225;
+    constexpr DWORD kAccessDisabledByPolicy = 1260;
+    const std::string failure = "Failed to launch torch (CreateProcess error " + std::to_string(code) + ")";
+
+    if (code == kAppControlBlocked || code == kAccessDisabledByPolicy) {
+        return failure + ".\nWindows did not let torch.exe, the asset extractor that comes with the game, start.\n"
+                         "torch.exe has no digital signature, and Smart App Control (or another application\n"
+                         "control policy) stops unsigned programs it does not know yet.\n"
+                         "Please report it on the project's GitHub issues page with this log,\n"
+                         "so a release with a torch.exe that Windows already knows can fix it.";
+    }
+    if (code == kVirusInfected) {
+        return failure + ".\nMicrosoft Defender stopped torch.exe, the asset extractor that comes with the game.\n"
+                         "Please report it on the project's GitHub issues page with this log,\n"
+                         "so the file can be sent to Microsoft for review.";
+    }
+    return failure;
+}
+#endif
+
 bool RunTorchCommand(const std::string& commandLine, const std::string& workingDir,
                      const std::string& logPath, std::string& error) {
 #ifdef _WIN32
@@ -281,7 +313,7 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
     if (!started) {
         const DWORD code = GetLastError();
         CloseHandle(logFile);
-        error = "Failed to launch torch (CreateProcess error " + std::to_string(code) + ")";
+        error = DescribeTorchLaunchFailure(code);
         return false;
     }
 
@@ -294,7 +326,7 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
     CloseHandle(logFile);
 
     if (exitCode != 0) {
-        error = "Torch exited with code " + std::to_string(exitCode);
+        error = kTorchExitedPrefix + std::to_string(exitCode);
         return false;
     }
     return true;
@@ -303,7 +335,7 @@ bool RunTorchCommand(const std::string& commandLine, const std::string& workingD
         "cd " + QuoteCommandArg(workingDir) + " && " + commandLine + " > " + QuoteCommandArg(logPath) + " 2>&1";
     const int exitCode = std::system(shellCommand.c_str());
     if (exitCode != 0) {
-        error = "Torch exited with code " + std::to_string(exitCode);
+        error = kTorchExitedPrefix + std::to_string(exitCode);
         return false;
     }
     return true;
@@ -511,12 +543,14 @@ ExtractionResult ExtractAssetsIfNeeded(const std::string& target_o2r_path, bool 
                      "the existing (possibly stale) %s\n", SSB64_O2R_NAME);
             return { true, targetPath.string(), {}, logPath };
         }
+        const bool torchRan = commandError.rfind(kTorchExitedPrefix, 0) == 0;
         const std::string msg =
             "BattleShip failed to extract assets from your ROM.\n\n"
             "Error:\n  " + commandError +
             "\n\nCheck the extraction log for details:\n  " + logPath +
-            "\n\nThe most common cause is a non-NTSC-U-v1.0 ROM. Verify your "
-            "dump's SHA-1 matches a supported hash printed in that log.";
+            (torchRan ? "\n\nThe most common cause is a non-NTSC-U-v1.0 ROM. Verify your "
+                        "dump's SHA-1 matches a supported hash printed in that log."
+                      : "");
         if (!silent) {
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                                      "Asset extraction failed", msg.c_str(),
