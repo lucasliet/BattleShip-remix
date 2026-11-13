@@ -35,7 +35,8 @@ done
 for extra in gamecontrollerdb.txt config.yml; do
   [[ -f "$ROOT/$extra" ]] && cp "$ROOT/$extra" "$TARGET_DIR/"
 done
-[[ -d "$ROOT/assets" ]] && cp -a "$ROOT/assets" "$TARGET_DIR/"
+mkdir -p "$TARGET_DIR/assets/custom"
+cp -a "$ROOT/assets/custom/fonts" "$TARGET_DIR/assets/custom/"
 
 cat > "$TARGET_DIR/README.txt" <<EOF
 $APP for Nintendo Switch (homebrew)

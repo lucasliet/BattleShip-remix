@@ -185,11 +185,11 @@ EOF
 # Application icon. AppImage looks for <Icon>.png at the AppDir root and
 # (for hicolor integration) under usr/share/icons/hicolor/<size>/apps/.
 # Source is region-aware: US picks assets/icon.png, JP picks
-# assets/icon-jp.png (added with the JP application bifurcation so a
-# user with both installs sees distinct icons). We downscale a 256x256
+# assets/icon-jp.png and Remix assets/icon-remix.png, so a user with
+# several installs sees distinct icons. We downscale a 256x256
 # copy for the AppDir root (kept small to keep the AppImage lean) and
 # ship the full-resolution PNG in the hicolor 512x512 slot.
-ICON_SUFFIX=""; [[ "$VER" == "jp" ]] && ICON_SUFFIX="-jp"
+ICON_SUFFIX=""; [[ "$VER" == "jp" || "$VER" == "remix" ]] && ICON_SUFFIX="-$VER"
 ICON_SRC="$ROOT/assets/icon${ICON_SUFFIX}.png"
 [[ -f "$ICON_SRC" ]] || fail "missing assets/icon${ICON_SUFFIX}.png"
 mkdir -p "$APPDIR/usr/share/icons/hicolor/512x512/apps" \
