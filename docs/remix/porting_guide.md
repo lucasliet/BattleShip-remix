@@ -217,7 +217,7 @@ const ITRemixItemDesc dITRemixTurnipItemDesc =
 After each change:
 
 1. **Compile the file**: `scripts/remix/syntax-check.sh <file>` compiles one file with the flags of the game build (`build/compile_commands.json`); it must print `syntax-check OK: <file>` with no warning from your file.
-2. **Build**: `PATH=$PWD/.toolchain/host/ninja:$PATH .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j 4` (absolute paths; a new file needs `cmake -S $PWD -B $PWD/build` first). The vanilla build must
+2. **Build**: `PATH=$PWD/.toolchain/host/ninja:$PATH .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j <n>` (absolute paths; a new file needs `cmake -S $PWD -B $PWD/build` first). The vanilla build must
    still compile: configure `build-us` with `-DSSB64_VERSION=us` (`docs/remix/build_and_roms.md`) and build `ssb64` there.
 3. **Unit tests** for a pure rule: add `tests/remix/test_<topic>_rules.c` (suite `remixTest<Topic>Rules`, `CHECK_EQ` / `CHECK_TRUE` / `RUN_TEST` of `test_check.h`), register it in `test_main.c` and `tests/remix/CMakeLists.txt` with the
    `*rules.c` source, and run `cmake --build $PWD/build --target run_remix_mode_tests`. A test is trusted once mutating the rule makes it fail.

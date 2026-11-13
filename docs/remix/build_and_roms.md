@@ -61,8 +61,10 @@ Choose the product with `SSB64_VERSION` (`us` or `remix`, default `remix`) and u
 
 ```bash
 cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DSSB64_VERSION=remix
-cmake --build build --target ssb64 -j 4
+cmake --build build --target ssb64 -j <n>
 ```
+
+`<n>` is the number of compile jobs: the cores (`nproc` or `sysctl -n hw.ncpu`), at most one per 2 GB of free memory.
 
 For the original BattleShip use `-B build-us -DSSB64_VERSION=us`; it only needs `baserom.us.z64`, and the `BattleShip` binary loads `BattleShip.o2r` and `f3d.o2r` from the directory
 where it runs (`ExtractAssets` generates them from the ROM). The Remix result in `build/` is `BattleShip-Remix` (the target is `ssb64`), `BattleShip-Remix.o2r`,

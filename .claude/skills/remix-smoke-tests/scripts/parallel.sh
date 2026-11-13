@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: parallel.sh <jobs> <mode> [args...]     (JOBS = game instances at once, 3 or 4 is the sweet spot on a 16 GB Mac)
+# Usage: parallel.sh <jobs|auto> <mode> [args...]   (game instances at once; auto = cores - 2, capped at 1 per GB of free memory)
 #   matrix <fkind>...            NSP/DSP/USP of each fighter (special_matrix.sh logic, one instance per move)
 #   stages [first] [last]        stage sweep, default 41..215
 #   items  [kind]...             CPU item sweep (item_cpu_sweep.sh logic)
@@ -11,6 +11,23 @@ set -u
 HERE="$(builtin cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(builtin cd "$HERE/../../../.." && pwd)"
 JOBS="$1"; MODE="$2"; shift 2
+
+# auto_jobs -> cores minus two (compositor and the shell), at most one game per GB of available memory, at least 1
+auto_jobs() {
+  local cores mem_gb
+  if [[ "$(uname)" == "Darwin" ]]; then
+    cores=$(sysctl -n hw.ncpu)
+    mem_gb=$(( $(sysctl -n hw.memsize) / 2 / 1024 / 1024 / 1024 ))
+  else
+    cores=$(nproc)
+    mem_gb=$(( $(awk '/MemAvailable/ {print $2}' /proc/meminfo) / 1024 / 1024 ))
+  fi
+  local jobs=$(( cores - 2 ))
+  (( jobs > mem_gb )) && jobs=$mem_gb
+  (( jobs < 1 )) && jobs=1
+  echo "$jobs"
+}
+[[ "$JOBS" == "auto" ]] && JOBS=$(auto_jobs) && echo "parallel: $JOBS jobs"
 JOBDIR="$(mktemp -d)"
 LIST="$JOBDIR/list.txt"
 case "$MODE" in

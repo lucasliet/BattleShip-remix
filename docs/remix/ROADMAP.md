@@ -26,7 +26,7 @@ documentation is indexed in [`README.md`](README.md).
 
 - Toolchain and dependencies only in `.toolchain/` (no brew, system pip, sudo, `/opt`, `/usr/local`, `~/.cache`,
   `~/.cmake`). Python: `.toolchain/host/venv/bin/python -I`. `builtin cd`.
-- Build: `PATH=$PWD/.toolchain/host/ninja:$PATH .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j 4`
+- Build: `PATH=$PWD/.toolchain/host/ninja:$PATH .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j <n>`
   (absolute paths; a new file in `decomp/src` needs `cmake -S $PWD -B $PWD/build`).
 - ROM-derived bytes never go into versioned files. Authorised source: `.toolchain/pkgs/smashremix-src`.
 - No fallback to the parent fighter and no containment hacks: the behaviour is the Remix's. A necessary deviation is

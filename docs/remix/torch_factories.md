@@ -44,7 +44,7 @@ Remix tables and motion scripts addressed by raw `0x804xxxxx` pointers from it.
 
 ```
 .toolchain/host/cmake/CMake.app/Contents/bin/cmake -S torch -B build-torch   # sources are globbed, no network needed
-.toolchain/host/cmake/CMake.app/Contents/bin/cmake --build build-torch -j 4
+.toolchain/host/cmake/CMake.app/Contents/bin/cmake --build build-torch -j <n>
 ./build-torch/torch o2r baserom.remix.z64 -s $PWD -d build/remix-test/run1
 .toolchain/host/venv/bin/python -I tools/test_remix_blobs.py --o2r build/remix-test/run1/BattleShip.o2r
 ```

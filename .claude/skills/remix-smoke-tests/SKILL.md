@@ -11,17 +11,19 @@ Verification by running the real game headless with environment overrides, scree
 ## Before running
 
 1. Build (absolute paths; a new file under `decomp/src` needs `cmake -S $PWD -B $PWD/build` first):
-   - macOS (M1, 16 GB): `PATH=$PWD/.toolchain/host/ninja:$PATH .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j 4`
-   - Linux (20 threads, 31 GB): `cmake --build $PWD/build-linux --target ssb64 -j 12`; `build/` holds symlinks to the
-     binary and assets of `build-linux/`, so the scripts below run unchanged.
+   - macOS (contained toolchain): `PATH=$PWD/.toolchain/host/ninja:$PATH .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j <n>`
+   - Linux: `cmake --build <build dir> --target ssb64 -j <n>`. The scripts run the binary and assets from `build/`; when
+     the build directory is another one, symlink them into `build/`.
+   - Size `-j` from the machine's cores and memory (`nproc` or `sysctl -n hw.ncpu`).
 
    Run Bash with `dangerouslyDisableSandbox: true` (the game needs the window server).
 2. **Never rebuild while a sweep runs**: the sweep keeps launching `build/BattleShip-Remix`.
 3. Every run writes its own log and save (`SSB64_LOG_PATH`, `SSB64_SAVE_PATH`), so game batches run in parallel with
    `parallel.sh`; only validation by the lead counts (workers never run or sign off a batch).
-4. Prefer `parallel.sh` for sweeps: 6 jobs on the M1 (11 cores), 12 on the Linux machine (20 threads). The serial
+4. Prefer `parallel.sh auto ...` for sweeps: `auto` takes the cores minus two, capped at one game per GB of free memory
+   (it prints the count). The serial
    scripts stay for one-off runs. Never run two sweeps that write the same run name at once.
-   - Linux (Hyprland): a game window on a hidden workspace presents about one frame per second and its run times out;
+   - Linux with a tiling compositor: a game window on a hidden workspace presents about one frame per second and its run times out;
      keep the windows on the visible workspace. Tiled windows get different sizes, so only serial runs (or floating
      windows of one size) are pixel-identical for an A/B diff. There is no lldb: use `gdb -batch -x <cmds>` (delete a
      breakpoint before `call`ing a function that would hit it).
@@ -38,8 +40,8 @@ Verification by running the real game headless with environment overrides, scree
 | `hazard_sweep.sh <stage>...` | Three fighters on each stage for 4000 frames, a shot every 150 frames, one 5x5 sheet per stage (`hz_<stage>/sheet.png`). |
 | `item_cpu_sweep.sh [kind]...` | Mario idle + Kirby + Yoshi CPUs, every spawned item forced to `<kind>`, 3000 frames, item event counts. |
 | `stage_select_sweep.sh [gkind...]` | Stage select opened on each of the 85 selectable stages (`SSB64_MAPS_START_GKIND`), screenshot at frame 300 into `ss_<gkind>/`. |
-| `parallel.sh <jobs> matrix\|stages\|items\|hazards\|custom <args>` | The sweeps above with several game instances at once (own log and save per run through `SSB64_LOG_PATH` / `SSB64_SAVE_PATH`). 6 jobs ran 6 matrix runs in 19 s, against 19 s per run serially; 8 jobs gave no further gain on the M1's 11 cores. Windows still open in front, so keep the machine free. |
-| `parallel.sh <jobs> custom <file>` | One shell command per line of `<file>` (each a `vs.sh` or `css.sh` call with its own env), run `<jobs>` at a time, e.g. the Kirby copy batch. A run with `shots=0 metal_flake=1` is the Metal flake: rerun it alone. |
+| `parallel.sh <jobs|auto> matrix\|stages\|items\|hazards\|custom <args>` | The sweeps above with several game instances at once (own log and save per run through `SSB64_LOG_PATH` / `SSB64_SAVE_PATH`). With `auto`, N runs take about as long as one serial run. Windows still open in front, so keep the machine free. |
+| `parallel.sh <jobs|auto> custom <file>` | One shell command per line of `<file>` (each a `vs.sh` or `css.sh` call with its own env), run `<jobs>` at a time, e.g. the Kirby copy batch. A run with `shots=0 metal_flake=1` is the Metal flake: rerun it alone. |
 | `css.sh <input> <name> [frames]` | Character select (scene 16) flow driven by an input script. |
 | `scene.sh <scene> <input> <name> [frames]` | Same as `css.sh` with any start scene (17 is the 1P CSS: `inputs/css1p_pick_start.txt` picks and starts a 1P run). |
 | `lldb_count.sh <name> <fkinds\|-> <input> <frames> <spec>...` | The VS shortcut under lldb; prints the hit count of each probe on one `vs=` line (works with `parallel.sh custom`). Specs: `func`, `func@cond`, `file.c:line`, `ret:func@cond` (every `ret` of the function, the condition sees `$w0`, the return value). The build is Release: a line on a `return` inside an `if` often resolves to a merged line, which the summary marks `(->N)`; probe the pure rules function with `ret:` instead. Quote specs holding `>` `$` `(` `&` in a `custom` file, or the shell eats them. `crash=1` means the process stopped on a signal; a stop in `objc_msgSend` at launch with 0 frames is an lldb flake, rerun it. |

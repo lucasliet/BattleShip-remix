@@ -93,7 +93,7 @@ bytes each (`anim_file_id`, `command_offset`, `flags`). The two offsets are byte
 blob with the Python references (`tools/remix_dump_fighters.py`, `tools/remix_dump_audio.py`):
 
 ```
-cmake -S torch -B build-torch && cmake --build build-torch -j 4
+cmake -S torch -B build-torch && cmake --build build-torch -j <n>
 ./build-torch/torch o2r baserom.remix.z64 -s $PWD -d build/remix-test/run1
 .toolchain/host/venv/bin/python -I tools/test_remix_blobs.py --o2r build/remix-test/run1/BattleShip.o2r
 ```

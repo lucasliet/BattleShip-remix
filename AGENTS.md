@@ -111,7 +111,7 @@ Stale worktrees under `.claude/worktrees/` from past sessions are fine to remove
 ### Gotchas
 
 - **Never use relative `build` paths in Bash tool calls** — Claude Code resets cwd between `Bash` calls. `cmake --build build` from the project root builds the main tree, not the worktree. Always use absolute paths: `cmake --build <worktree>/build ...`.
-- **Cap build parallelism at `-j 4` on the M1 16 GB machine.** Bare `-j` lets make spawn one clang per logical core; libultraship's Debug C++ TUs hold 1–2 GB resident each, so 8 in parallel push the laptop into swap and pin the fans for the whole compile. Always: `cmake --build <worktree>/build --target ssb64 -j 4`. Push to `-j 6` only when you know nothing else heavy is open. Worktree first-builds are full from-scratch (no shared cache with main tree), so this matters most the first time. The Linux machine (20 threads, 31 GB) takes `-j 12`; these caps were measured per machine, so check `nproc`/`sysctl -n hw.ncpu` and memory before reusing one elsewhere.
+- **Cap build parallelism to what the machine's memory holds.** Bare `-j` lets the build spawn one compiler per logical core; libultraship's Debug C++ TUs hold 1–2 GB resident each, so on a 16 GB machine 8 in parallel push it into swap for the whole compile (`-j 4` there, `-j 6` when nothing else heavy is open). Size `-j` from the cores (`nproc` or `sysctl -n hw.ncpu`) and about 2 GB of free memory per job, and pass it explicitly: `cmake --build <worktree>/build --target ssb64 -j <n>`. Worktree first-builds are full from-scratch (no shared cache with main tree), so this matters most the first time.
 - The binary loads `BattleShip-Remix.o2r` (`BattleShip.o2r` for the vanilla build; ROM-derived, user-extracted) and `f3d.o2r` (shaders) from its CWD at launch; without them it exits with `archive ... does not exist`. `new-worktree.sh` symlinks both from the main tree's `build/` into the worktree's `build/`. If the main tree has never been extracted, run `cmake --build <main-tree>/build --target ExtractAssets` there first so the symlinks resolve. (`ssb64.o2r` was an early-development port-asset archive; it is no longer produced or loaded — the build never contains ROM-derived data beyond the user's own first-run `.o2r`.)
 
 ---
@@ -122,6 +122,39 @@ A release is a `v*` tag pushed on `feature/remix-port`; `.github/workflows/relea
 and publishes a draft whose body is `.github/release-notes.md`. Every new tag ships updated notes: before tagging,
 rewrite the `## Highlights` section of `.github/release-notes.md` for what this release changes (and the Install /
 Files sections when they change) and commit it, so the draft never repeats the previous release's text.
+
+---
+
+## Nothing private or temporary in the repository
+
+The repository and its submodules are public. Never commit, and check before every push (`git diff origin/<branch>..HEAD`):
+
+- private data of the owner or a tester: LAN or public IP addresses (consoles, machines), host names, user names,
+  e-mails other than the git identity, absolute home paths (`/home/<user>`, `/Users/<user>`), tokens or keys;
+- ROM-derived data: ROMs, `.o2r`, extracted assets, dumps, saves (`ssb64_save.bin`), `BattleShip.cfg.json` taken from a
+  device;
+- temporary or session material: scratchpad and `/tmp` paths, session ids, test logs and screenshots, one-off scripts or
+  inputs made for a single investigation, debug logging left in code.
+
+Docs name a device path by its role (`/data/homebrew/PPSA99264/`, "the console's FTP") and keep addresses in the
+owner's private notes. When something private already sits in unpushed commits, rewrite those commits before pushing;
+once pushed, tell the owner instead of rewriting public history.
+
+Smoke-test inputs and scripts (`.claude/skills/remix-smoke-tests/`) follow the same rule without being asked:
+
+- a new file goes into `inputs/` or `scripts/` only when it drives a flow that other fighters, stages or tasks will
+  reuse (a move, a menu path, a mode), with a header naming the scene, env and what to check;
+- an input made to reproduce one bug, one audit item or one question stays in the session scratchpad and is never
+  committed;
+- after a task is validated and its evidence recorded, delete its runs under `build/agent-shots/` and
+  `build/debug_traces/`; before ending a session, leave both empty unless an open task still needs a run.
+
+Temporary files outside the repository's history get the same cleanup, wherever the session created them, without
+being asked: redirected build logs (`configure*.log`,
+`compile*.log`), `git bundle`s and other transfer copies, test uploads to a device (a renamed `eboot.bin`), backups of a
+device's save or cfg once the test passed, `__pycache__`, build trees with no CMake cache or no script that uses them,
+and personal test packages that embed the `.o2r`. Keep the incremental build trees (`build*/` with a `CMakeCache.txt`,
+`android/app/.cxx`) and `.toolchain/`. When unsure whether something is still useful, list it with its size and ask.
 
 ---
 
