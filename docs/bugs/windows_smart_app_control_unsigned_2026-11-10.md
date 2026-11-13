@@ -52,6 +52,15 @@ new files.
   opened and extracted on the reporting machine. Code signing (SignPath Foundation application sent) is the fix that
   lasts.
 
+## Rollback of Torch inside the game (2026-11-12)
+
+Builds with Torch linked in kept being flagged by Smart App Control on Windows, and every Windows zip needed the
+`torch.exe` of `v2.0.1-port.9` inserted by hand. `SSB64_TORCH_IN_PROCESS` and `port/torch_in_process.cpp` are gone:
+Windows, macOS and Linux run the `torch` sidecar again and the three packages ship it next to the game, as before
+`6b39e06`. The UTF-8 changes above stay (`setlocale` in `main`, `CreateFileW` and `CreateProcessW` in `first_run.cpp`),
+so the sidecar starts from accented folders. The Windows zip is still published with the `torch.exe` of
+`v2.0.1-port.9` in place of the one CI builds.
+
 ## Verification
 
 - Build D with the `torch.exe` of `v2.0.1-port.9` next to it extracted the ROM from `OneDrive\Área de Trabalho` with

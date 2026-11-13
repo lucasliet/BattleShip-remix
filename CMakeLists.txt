@@ -174,21 +174,7 @@ endif()
 # Android ships Torch as a SHARED library (libtorch_runner.so) inside the
 # APK so the first-run UI can extract the user's ROM on-device via JNI —
 # see the torch_runner target at the bottom of this file.
-#
-# Windows, macOS and Linux link Torch into the game as well and extract
-# in-process: Smart App Control refused to start an unsigned torch.exe
-# sidecar (CreateProcess error 4551), and the other desktops follow so every
-# platform extracts the same way. The sidecar is still built for the
-# ExtractAssets build step.
-set(SSB64_TORCH_IN_PROCESS_SYSTEMS Windows Darwin Linux)
-if (CMAKE_SYSTEM_NAME IN_LIST SSB64_TORCH_IN_PROCESS_SYSTEMS)
-    set(SSB64_TORCH_IN_PROCESS_DEFAULT ON)
-else()
-    set(SSB64_TORCH_IN_PROCESS_DEFAULT OFF)
-endif()
-option(SSB64_TORCH_IN_PROCESS "Desktop: link Torch into the game and extract the ROM in-process"
-       ${SSB64_TORCH_IN_PROCESS_DEFAULT})
-if (CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "PS5" OR SSB64_TORCH_IN_PROCESS)
+if (CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "PS5")
     set(USE_STANDALONE OFF CACHE BOOL "" FORCE)
 else()
     set(USE_STANDALONE ON CACHE BOOL "" FORCE)
@@ -286,11 +272,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "PS5")
     # console at first launch (port/ps5/ps5_assets.cpp).
     add_subdirectory(torch ${CMAKE_BINARY_DIR}/torch)
 else()
-    if (SSB64_TORCH_IN_PROCESS)
-        # Static Torch for first-run extraction inside the game (port/torch_in_process.cpp). Not
-        # build/torch: that is where the sidecar binary lands on macOS and Linux.
-        add_subdirectory(torch ${CMAKE_BINARY_DIR}/torch-lib)
-    endif()
     # Desktop: build Torch as a host executable via ExternalProject so it
     # can run at our build time to extract ROM assets.
     ExternalProject_Add(TorchExternal
@@ -1200,12 +1181,6 @@ elseif(BATTLESHIP_UWP)
 else()
     add_dependencies(${PROJECT_NAME} libultraship TorchExternal discord-rpc)
     target_link_libraries(${PROJECT_NAME} PRIVATE libultraship discord-rpc)
-    if (SSB64_TORCH_IN_PROCESS)
-        # yaml-cpp too: Companion.h includes its headers, and on MSVC the exe needs yaml-cpp's
-        # YAML_CPP_STATIC_DEFINE or it imports YAML::Node from a DLL (LNK2019).
-        target_link_libraries(${PROJECT_NAME} PRIVATE torch yaml-cpp)
-        target_compile_definitions(${PROJECT_NAME} PRIVATE SSB64_TORCH_IN_PROCESS)
-    endif()
 endif()
 
 # macOS: the port calls CFPreferences* directly (ApplePressAndHoldEnabled fix

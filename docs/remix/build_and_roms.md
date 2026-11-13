@@ -121,11 +121,11 @@ body is `.github/release-notes.md`. Rewrite its `## Highlights` before tagging (
 3. Name it `baserom.remix.z64` (or `.n64` / `.v64`) and put it in the app data folder that the error dialog of the first
    launch prints, or next to the executable; or drag it onto the window of the first-run wizard.
 4. On the first launch the game runs Torch and writes `BattleShip-Remix.o2r` and its `.recipe` to the app data folder; a later
-   update of the asset pipeline re-extracts by itself. Torch is linked into the game (`SSB64_TORCH_IN_PROCESS`, on by
-   default for Windows, macOS and Linux; `port/torch_in_process.cpp`), so the packages ship no `torch` executable:
-   Smart App Control refused to start the unsigned `torch.exe`. Its log lines go to `logs/asset-extract.log` and the
-   game log. With the option off, the game runs the `torch` sidecar that every desktop build still makes for
-   `ExtractAssets`.
+   update of the asset pipeline re-extracts by itself. On Windows, macOS and Linux the game runs the `torch` sidecar
+   that the package ships next to it (`torch.exe` on Windows); its output goes to `logs/asset-extract.log`. Torch ran
+   inside the game in `v2.0.1-port.11` and went back to the sidecar after it: with Torch linked in, Smart App
+   Control flagged the game exe, so the Windows zip is published with an older `torch.exe` that it accepts, put in by
+   hand (`docs/bugs/windows_smart_app_control_unsigned_2026-11-10.md`).
 
 Checked on 2026-11-06 with `SHIP_HOME` pointing at an empty folder that held only `baserom.remix.z64` and `f3d.o2r`: the
 game extracted a 59 MB `BattleShip-Remix.o2r` and booted to the Remix splash (`first_run: extracted BattleShip-Remix.o2r`).
