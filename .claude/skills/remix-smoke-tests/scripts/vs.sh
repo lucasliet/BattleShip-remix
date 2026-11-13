@@ -13,9 +13,12 @@ input="$(builtin cd "$(dirname "$2")" && pwd)/$(basename "$2")"
 rm -f "$dir"/frame_*.png
 builtin cd "$ROOT/build" || exit 2
 frames=${4:-2200}
+# The game saves Remix settings changed by the input to BattleShip.cfg.json at once; put the file back after the run.
+rm -f "$dir/cfg_backup.json"; if [ -f BattleShip.cfg.json ]; then cp BattleShip.cfg.json "$dir/cfg_backup.json"; fi
 SSB64_START_SCENE=22 SSB64_VS_FKINDS=$1 SSB64_INPUT_SCRIPT=$input SSB64_MAX_FRAMES=$frames \
   SSB64_LOG_PATH=$dir/ssb64.log SSB64_SAVE_PATH=$dir/save.bin SSB64_AUDIO_DUMP_PATH=$dir/audio.wav SSB64_AUDIO_DUMP_SECONDS=${AUDIO_SECONDS:-16} SSB64_SCREENSHOT_FRAMES=${SHOTS:-600,900,1200,1500,1800,2100} SSB64_SCREENSHOT_DIR=$dir \
   timeout "${VS_TIMEOUT:-300}" ./BattleShip-Remix >"$dir/stdout.log" 2>&1
 rc=$?
+if [ -f "$dir/cfg_backup.json" ]; then mv "$dir/cfg_backup.json" BattleShip.cfg.json; else rm -f BattleShip.cfg.json; fi
 flake=$(grep -c "nextDrawable" "$dir/stdout.log" 2>/dev/null)
 echo "vs=$3 rc=$rc shots=$(ls "$dir"/*.png 2>/dev/null | wc -l | tr -d ' ') metal_flake=${flake:-0}"
