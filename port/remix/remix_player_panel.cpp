@@ -3,6 +3,7 @@
  */
 
 #include "remix_player_panel.h"
+#include "remix_cvar_save.h"
 
 #include <libultraship/bridge/consolevariablebridge.h>
 #include <spdlog/spdlog.h>
@@ -227,7 +228,7 @@ extern "C" void remix_panel_set(int option, int port, int value) {
     }
     const Option &entry = kOptions[option];
     sIsOverridden[option][port] = false;
-    CVarSetInteger(CVarName(entry, port).c_str(), Clamp(entry, value));
+    remix_cvar_set_saved(CVarName(entry, port).c_str(), Clamp(entry, value));
 }
 
 extern "C" const char *remix_panel_value_name(int option, int value) {

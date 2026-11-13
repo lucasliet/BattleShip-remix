@@ -3,6 +3,7 @@
  */
 
 #include "remix_toggles.h"
+#include "remix_cvar_save.h"
 
 #include <libultraship/bridge/consolevariablebridge.h>
 #include <spdlog/spdlog.h>
@@ -263,7 +264,7 @@ extern "C" void remix_toggle_set(uint32_t entry_addr, int value) {
     }
     const Toggle &toggle = sToggles[found->second];
     sOverrides.erase(found->second);
-    CVarSetInteger(toggle.cvar.c_str(), Clamp(toggle, value));
+    remix_cvar_set_saved(toggle.cvar.c_str(), Clamp(toggle, value));
 }
 
 extern "C" void remix_toggles_load_profile(int profile) {
@@ -274,7 +275,7 @@ extern "C" void remix_toggles_load_profile(int profile) {
     }
     for (size_t i = 0; i < sToggles.size(); i++) {
         sOverrides.erase(i);
-        CVarSetInteger(sToggles[i].cvar.c_str(), Clamp(sToggles[i], sToggles[i].defaults[profile]));
+        remix_cvar_set_saved(sToggles[i].cvar.c_str(), Clamp(sToggles[i], sToggles[i].defaults[profile]));
     }
 }
 

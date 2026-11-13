@@ -3,6 +3,7 @@
  */
 
 #include "remix_modes.h"
+#include "remix_cvar_save.h"
 
 #include <libultraship/bridge/consolevariablebridge.h>
 
@@ -67,7 +68,7 @@ extern "C" int remix_modes_smashketball_type(void) {
 }
 
 extern "C" void remix_modes_smashketball_set_type(int type) {
-    CVarSetInteger(REMIX_MODES_CVAR_SMASHKETBALL_TYPE, type != 0 ? 1 : 0);
+    remix_cvar_set_saved(REMIX_MODES_CVAR_SMASHKETBALL_TYPE, type != 0 ? 1 : 0);
 }
 
 extern "C" int remix_modes_tagteam_set_slot(int port, int slot, int fkind) {
@@ -81,6 +82,6 @@ extern "C" int remix_modes_tagteam_set_slot(int port, int slot, int fkind) {
             break;
         }
     }
-    CVarSetInteger(TagTeamCVar(port, slot).c_str(), choice);
+    remix_cvar_set_saved(TagTeamCVar(port, slot).c_str(), choice);
     return choice > 0 ? kRemixCssSlotIds[choice - 1] : -1;
 }

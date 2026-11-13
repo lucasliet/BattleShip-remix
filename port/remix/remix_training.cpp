@@ -3,6 +3,7 @@
  */
 
 #include "remix_training.h"
+#include "remix_cvar_save.h"
 
 #include <libultraship/bridge/consolevariablebridge.h>
 #include <ship/Context.h>
@@ -209,7 +210,7 @@ extern "C" void remix_training_set(int option, int value) {
     }
     const Option &entry = kOptions[option];
     sIsOverridden[option] = false;
-    CVarSetInteger(CVarName(entry).c_str(), Clamp(entry, value));
+    remix_cvar_set_saved(CVarName(entry).c_str(), Clamp(entry, value));
 }
 
 extern "C" void remix_training_reset(void) {
