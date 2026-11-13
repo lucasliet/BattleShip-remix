@@ -36,3 +36,6 @@ defaults once more at the first launch of the fixed build; from then on it is ke
     (before the fix the launch put back stereo and 0);
   - the save taken from the PS5 (signature 0, mono, adjust 14) is replaced by the defaults at the first launch, and a
     later change (mono, adjust 7) survives the launch after it.
+- PS5 (title over FTP, 2026-11-13): the first launch replaced the old signature-0 save, the sound option changed in the
+  game was still set after closing and reopening the title, and both copies of `ssb64_save.bin` read back over FTP
+  carry signature 666 with a valid checksum.
