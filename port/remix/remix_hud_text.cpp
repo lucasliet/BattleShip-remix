@@ -16,6 +16,7 @@
 #include "gui/Compat.h"
 
 #include "remix_font.h"
+#include "widescreen/widescreen.h"
 
 #include <algorithm>
 #include <array>
@@ -86,13 +87,32 @@ ImVec2 OverscanMargin() {
 }
 
 /**
- * Maps N64 screen units to window pixels: the largest 4:3 rectangle centred in the viewport work area shows the frame without
- * its overscan margin, exactly as the presented game image does. The two axes scale slightly differently (the margin is not 4:3).
+ * True when Gui::DrawGame presents the game over the whole work area: neither the 4:3 aspect correction nor the stretched-4:3
+ * Low Resolution Mode is on. Both are latched at boot (port.cpp), so toggling widescreen changes this only after a restart.
+ */
+bool GameImageFillsWorkArea() {
+    const auto cvars = Ship::Context::GetInstance()->GetConsoleVariables();
+
+    return !cvars->GetInteger(CVAR_PREFIX_ADVANCED_RESOLUTION ".Enabled", 0) && cvars->GetInteger("gLowResMode", 0) != 1;
+}
+
+/** Size of the window area the 2D frame covers: the whole work area when the image fills it with 2D stretched, else the largest centred 4:3. */
+ImVec2 FrameSize(const ImGuiViewport *viewport) {
+    if (GameImageFillsWorkArea() && (port_widescreen_stretches_2d() != 0)) {
+        return viewport->WorkSize;
+    }
+    const float fitScale = std::min(viewport->WorkSize.x / kN64ScreenWidth, viewport->WorkSize.y / kN64ScreenHeight);
+    return ImVec2(kN64ScreenWidth * fitScale, kN64ScreenHeight * fitScale);
+}
+
+/**
+ * Maps N64 screen units to window pixels: the area the 2D frame covers (FrameSize) shows the frame without its overscan margin,
+ * exactly as the presented game image does. The two axes scale slightly differently (the margin is not 4:3).
  */
 void GameRect(const ImGuiViewport *viewport, ImVec2 *origin, ImVec2 *scale) {
-    const float fitScale = std::min(viewport->WorkSize.x / kN64ScreenWidth, viewport->WorkSize.y / kN64ScreenHeight);
-    const float rectWidth = kN64ScreenWidth * fitScale;
-    const float rectHeight = kN64ScreenHeight * fitScale;
+    const ImVec2 frameSize = FrameSize(viewport);
+    const float rectWidth = frameSize.x;
+    const float rectHeight = frameSize.y;
     const ImVec2 margin = OverscanMargin();
 
     scale->x = rectWidth / (kN64ScreenWidth - 2.0f * margin.x);

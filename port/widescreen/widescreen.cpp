@@ -34,6 +34,10 @@ extern "C" int port_widescreen_enabled(void) {
     return widescreen_enabled() ? 1 : 0;
 }
 
+extern "C" int port_widescreen_stretches_2d(void) {
+    return (GfxGetUIAnchorMode() == 0) ? 1 : 0;
+}
+
 extern "C" float port_widescreen_clip_x_scale(void) {
     if (!widescreen_enabled()) {
         return 1.0f;

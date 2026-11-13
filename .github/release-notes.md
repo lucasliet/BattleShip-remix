@@ -9,6 +9,9 @@
 - **All platforms: Remix settings changed inside the game are saved right away.** The stage select hazard mode, the
   Training menu, the CSS panel, the Remix modes and the profile loaders only reached `BattleShip.cfg.json` when
   something else saved it, so closing the game from the system (PS5 button, swiping the app away on Android) lost them.
+- **All platforms: the Remix text drawn over the screen fits the widescreen picture.** With widescreen on, the CSS
+  panel menu text (Shield, Player Tag, Visibility...) of the 1P and 4P cards spilled into the next card; it now sits
+  inside its card, and the other Remix labels drawn the same way follow.
 - **Conker's up special: the tail spins and stays on the body**
   ([#7](https://github.com/lucasliet/BattleShip-remix/issues/7)). The same cause broke other Remix specials, now
   fixed too: Marina's neutral special drew her head apart from the body, Dragon King sank into the floor during his
