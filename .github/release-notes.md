@@ -6,6 +6,9 @@
   time. A save written by an older build is reset to the defaults once more at the first launch of this release;
   from then on it is kept. Item Switch and the VS rules (handicap and the like) are not part of the save in the original
   game or in Smash Remix, so they still start from their defaults. Port Menu settings were never affected.
+- **All platforms: Remix settings changed inside the game are saved right away.** The stage select hazard mode, the
+  Training menu, the CSS panel, the Remix modes and the profile loaders only reached `BattleShip.cfg.json` when
+  something else saved it, so closing the game from the system (PS5 button, swiping the app away on Android) lost them.
 - **Conker's up special: the tail spins and stays on the body**
   ([#7](https://github.com/lucasliet/BattleShip-remix/issues/7)). The same cause broke other Remix specials, now
   fixed too: Marina's neutral special drew her head apart from the body, Dragon King sank into the floor during his
