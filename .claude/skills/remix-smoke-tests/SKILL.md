@@ -53,9 +53,9 @@ Verification by running the real game headless with environment overrides, scree
 
 Outputs: `build/agent-shots/vs/<name>/` with `frame_<n>.png`, `stdout.log`, `ssb64.log`, `save.bin`.
 
-The game writes a Remix setting changed by an input (panel menu, Training, toggles) to `build/BattleShip.cfg.json` at
-once, so `vs.sh`, `css.sh` and `scene.sh` put that file back as it was after each run (and delete it when the run
-created it). A run started by hand, outside these scripts, must do the same, or the next runs inherit the change.
+The runs share `build/BattleShip.cfg.json`, and the game writes a Remix setting changed by an input (panel menu,
+Training, toggles) to it at once: later runs start with that setting. Copy the file before such a run and put it back
+when the next runs must not see the change; keep it when they test that the setting persists.
 
 Input scripts (`inputs/`). Line format: `<from> <to> <port> <buttons|-> [stick_x stick_y]`. Most files start with a header that
 says the scene and variables to run them with. Do not press A every few frames to pick an item up: the fighter stays locked in
