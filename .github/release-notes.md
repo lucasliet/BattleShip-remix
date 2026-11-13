@@ -1,34 +1,18 @@
 ## Highlights
 
-**Windows: `v2.0.1-port.10` was blocked by Smart App Control.** On Windows 11 with Smart App Control on, Windows
-refused to open the port.10 executable ("Smart App Control blocked an app that may be unsafe"). Our Windows builds are
-not signed yet, and Smart App Control blocks unsigned programs that Microsoft does not know, which a new build is.
-The Windows zip of this release opened and extracted the ROM on a machine with Smart App Control on, from a folder with
-an accented name (`OneDrive\Área de Trabalho`). If Windows still blocks it on yours, keep `v2.0.1-port.9` for now: we
-applied for code signing, which ends these blocks.
-
-- **macOS and Linux:** the ROM extractor now runs inside the game; the app and the AppImage no longer carry a separate
-  `torch` program. The extracted files are the same.
-
-- **Windows: the game no longer installs updates by itself.** To install an update, the old updater wrote a script
-  (`update_game.bat`) that waited for the game to close, unpacked the zip over the running executable, restarted the
-  game and deleted itself. Antivirus programs flag exactly that behavior, so some of them flagged the game. Now, when a
-  new release is out, the game only tells you at start-up and in Port Menu > About, and the button opens this page.
-  Download `BattleShip-Remix-windows-x64.zip` and extract it into your game folder, replacing the old files; your saves,
-  settings and `BattleShip-Remix.o2r` stay.
-- **Windows players on `v2.0.1-port.10` or older:** your game will not offer this update. The Windows zip has a new
-  name, `BattleShip-Remix-windows-x64.zip`, so the old updater, which looks for `BattleShip-Remix-windows.zip`, finds
-  nothing and never runs its script again. Download this release from this page once; from then on the game tells you
-  about new releases.
-- **PlayStation 5: hi-res texture packs load** ([#5](https://github.com/lucasliet/BattleShip-remix/issues/5)). The
-  console does not let the game list folders inside the title folder the usual way, so the game never found the pack in
-  `mods/`. It now lists the folder another way; a pack `.zip` or a folder of loose PNGs in `PPSA99264/mods/` works,
-  and it is on by default (Port Menu > Assets > Mods).
-- **All platforms:** Port Menu > About shows the installed version at the top.
-- **Switch with files from Windows:** the `.o2r` and `.recipe` extracted by the Windows build are now accepted by the
-  Switch ([#3](https://github.com/lucasliet/BattleShip-remix/issues/3)). Windows builds computed the recipe from a copy
-  of `config.yml` with Windows line endings, so their recipe never matched the Switch's. Because of this fix, the
-  Windows game extracts `BattleShip-Remix.o2r` again once on its first launch; macOS and Linux do not.
+- **All platforms: settings changed in the game are kept after a restart**
+  ([#6](https://github.com/lucasliet/BattleShip-remix/issues/6)). The game rejected its own save at every launch and
+  wrote the defaults back, so sound, screen adjust, VS and 1P records, unlocks and Remix bonus records were lost each
+  time. A save written by an older build is reset to the defaults once more at the first launch of this release;
+  from then on it is kept. Item Switch and the VS rules (handicap and the like) are not part of the save in the original
+  game or in Smash Remix, so they still start from their defaults. Port Menu settings were never affected.
+- **Conker's up special: the tail spins and stays on the body**
+  ([#7](https://github.com/lucasliet/BattleShip-remix/issues/7)). The same cause broke other Remix specials, now
+  fixed too: Marina's neutral special drew her head apart from the body, Dragon King sank into the floor during his
+  down special, and Banjo's down special and Dedede's and Peach's neutral specials showed a wrong pose.
+- **macOS, Linux and Windows: the ROM extractor is a separate program again.** The app, the AppImage and the Windows
+  zip carry the `torch` program next to the game, as up to `v2.0.1-port.10`. The extracted files are the same, and an
+  `.o2r` you already have is kept.
 
 Nothing changed in the asset pipeline: on the Switch, keep the `BattleShip-Remix.o2r` and `.recipe` you already have.
 Switch builds up to `v2.0.1-port.9` still download the bare `BattleShip-Remix.nro`, so that file stays in this release.
