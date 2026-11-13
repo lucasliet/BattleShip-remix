@@ -10,13 +10,21 @@ Verification by running the real game headless with environment overrides, scree
 
 ## Before running
 
-1. Build: `PATH=$PWD/.toolchain/host/ninja:$PATH .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j 4`
-   (absolute paths; a new file under `decomp/src` needs `cmake -S $PWD -B $PWD/build` first). Run Bash with
-   `dangerouslyDisableSandbox: true` (the game needs the window server).
+1. Build (absolute paths; a new file under `decomp/src` needs `cmake -S $PWD -B $PWD/build` first):
+   - macOS (M1, 16 GB): `PATH=$PWD/.toolchain/host/ninja:$PATH .toolchain/host/cmake/CMake.app/Contents/bin/cmake --build $PWD/build --target ssb64 -j 4`
+   - Linux (20 threads, 31 GB): `cmake --build $PWD/build-linux --target ssb64 -j 12`; `build/` holds symlinks to the
+     binary and assets of `build-linux/`, so the scripts below run unchanged.
+
+   Run Bash with `dangerouslyDisableSandbox: true` (the game needs the window server).
 2. **Never rebuild while a sweep runs**: the sweep keeps launching `build/BattleShip-Remix`.
 3. Every run writes its own log and save (`SSB64_LOG_PATH`, `SSB64_SAVE_PATH`), so game batches run in parallel with
    `parallel.sh`; only validation by the lead counts (workers never run or sign off a batch).
-4. Prefer `parallel.sh 6 ...` for sweeps (about 6x faster); the serial scripts stay for one-off runs. Never run two sweeps that write the same run name at once.
+4. Prefer `parallel.sh` for sweeps: 6 jobs on the M1 (11 cores), 12 on the Linux machine (20 threads). The serial
+   scripts stay for one-off runs. Never run two sweeps that write the same run name at once.
+   - Linux (Hyprland): a game window on a hidden workspace presents about one frame per second and its run times out;
+     keep the windows on the visible workspace. Tiled windows get different sizes, so only serial runs (or floating
+     windows of one size) are pixel-identical for an A/B diff. There is no lldb: use `gdb -batch -x <cmds>` (delete a
+     breakpoint before `call`ing a function that would hit it).
 5. Long sweeps (stage sweep about 10 s per stage, item sweep about 40 s per item) go in the background
    (`run_in_background`), then wait with Monitor on the `*_DONE` line; do not poll with sleep.
 
@@ -30,7 +38,7 @@ Verification by running the real game headless with environment overrides, scree
 | `hazard_sweep.sh <stage>...` | Three fighters on each stage for 4000 frames, a shot every 150 frames, one 5x5 sheet per stage (`hz_<stage>/sheet.png`). |
 | `item_cpu_sweep.sh [kind]...` | Mario idle + Kirby + Yoshi CPUs, every spawned item forced to `<kind>`, 3000 frames, item event counts. |
 | `stage_select_sweep.sh [gkind...]` | Stage select opened on each of the 85 selectable stages (`SSB64_MAPS_START_GKIND`), screenshot at frame 300 into `ss_<gkind>/`. |
-| `parallel.sh <jobs> matrix\|stages\|items\|hazards\|custom <args>` | The sweeps above with several game instances at once (own log and save per run through `SSB64_LOG_PATH` / `SSB64_SAVE_PATH`). 6 jobs ran 6 matrix runs in 19 s, against 19 s per run serially; 8 jobs gave no further gain on 11 cores. Windows still open in front, so keep the machine free. |
+| `parallel.sh <jobs> matrix\|stages\|items\|hazards\|custom <args>` | The sweeps above with several game instances at once (own log and save per run through `SSB64_LOG_PATH` / `SSB64_SAVE_PATH`). 6 jobs ran 6 matrix runs in 19 s, against 19 s per run serially; 8 jobs gave no further gain on the M1's 11 cores. Windows still open in front, so keep the machine free. |
 | `parallel.sh <jobs> custom <file>` | One shell command per line of `<file>` (each a `vs.sh` or `css.sh` call with its own env), run `<jobs>` at a time, e.g. the Kirby copy batch. A run with `shots=0 metal_flake=1` is the Metal flake: rerun it alone. |
 | `css.sh <input> <name> [frames]` | Character select (scene 16) flow driven by an input script. |
 | `scene.sh <scene> <input> <name> [frames]` | Same as `css.sh` with any start scene (17 is the 1P CSS: `inputs/css1p_pick_start.txt` picks and starts a 1P run). |
@@ -50,9 +58,9 @@ its jab combo; use the CPU item sweep instead.
 | Group | Inputs |
 |---|---|
 | Match basics (`vs.sh`) | `none.txt` (no input), `walk_right.txt` (P1 walks off the stage; with `SSB64_VS_STOCKS=1` the match ends and the results run), `nsp_tap.txt` / `dsp_tap.txt` / `usp_tap.txt` (walk right, then the special every 150 frames from 420), `dsp_hold_charge.txt` (held down special of growing length), `air_dodge.txt` (air dodge with Z; set the Air Dodging toggle), `pause_start.txt` (pause at 600), `pause_camera.txt` (Remix pause camera controls), `stats_view.txt` (results, Match Stats pages) |
-| Fighter checks (`vs.sh`, often `SSB64_VS_P2_HUMAN=1` on stage 16) | `nsp_kirby.txt` and `kirby_charge_air_shot.txt` (Kirby copy, with `SSB64_REMIX_KIRBY_COPY_TEST`), `inhale_walker.txt` (inhale catches P2), `nsp_bodyslam_vs_jab.txt` (Wario body slam into jabs), `reflect_test.txt` and `pkthunder_double_reflect.txt` (reflectors), `pipe_mk_left.txt` (Mushroom Kingdom pipe) |
-| VS CSS (`css.sh`, scene 16) | `css_pick_mario.txt` (both ports pick Mario, START at 200, A on the stage select at 300), `css_page3_stage.txt` (same, page 3 of the stage select), `css_pick_wait.txt` (picks, then waits on the stage select; with `SSB64_MAPS_START_GKIND`), `css_pick_four.txt` (four ports; with `SSB64_REMIX_MODE=<mode>` plays a 4-player match of each mode), `css_costume_cycle.txt`, `css_l_random.txt`, `css_falco_green_match.txt` (costumes), `css_hand_down.txt` (cursor limit), `css_place_then_regrab.txt` (grab a placed token again), `css_panelmenu_visibility.txt` (panel menu), `css12cb_match_ko_back.txt` (12-Character Battle) |
-| 1P and Bonus (`scene.sh`) | `css1p_pick_start.txt` (1P CSS pick and START), `css1p_start_smash_both.txt` (enemy KOs), `css1p_hold_l_then_start.txt` (practice retry with L), `allstar_ko_once.txt` and `allstar_a_presses.txt` (All-Star, with `SSB64_SPGAME_AUTOWIN`), `bonus_css_start_hold_l_fall.txt` (Bonus practice retry) |
+| Fighter checks (`vs.sh`, often `SSB64_VS_P2_HUMAN=1` on stage 16) | `nsp_kirby.txt` and `kirby_charge_air_shot.txt` (Kirby copy, with `SSB64_REMIX_KIRBY_COPY_TEST`), `inhale_walker.txt` (inhale catches P2), `grab_throw.txt` (R grab and throw of P2), `reflect_test.txt` (reflectors), `pipe_mk_left.txt` (Mushroom Kingdom pipe) |
+| VS CSS (`css.sh`, scene 16) | `css_pick_mario.txt` (both ports pick Mario, START at 200, A on the stage select at 300), `css_page3_stage.txt` (same, page 3 of the stage select), `css_pick_wait.txt` (picks, then waits on the stage select; with `SSB64_MAPS_START_GKIND`), `css_pick_four.txt` (four ports; with `SSB64_REMIX_MODE=<mode>` plays a 4-player match of each mode), `css_costume_cycle.txt`, `css_l_random.txt`, `css_falco_green_match.txt` (costumes), `css_panelmenu_visibility.txt` (panel menu), `css12cb_match_ko_back.txt` (12-Character Battle) |
+| 1P and Bonus (`scene.sh`) | `css1p_pick_start.txt` (1P CSS pick and START), `css1p_start_smash_both.txt` (enemy KOs), `css1p_hold_l_then_start.txt` (practice retry with L), `allstar_a_presses.txt` (All-Star, with `SSB64_SPGAME_AUTOWIN`), `bonus_css_start_hold_l_fall.txt` (Bonus practice retry) |
 | Training (`scene.sh` 18 or 54) | `training_css_pick.txt`, `training_oos_platform.txt` (`SSB64_TRAIN_FKINDS=0,8 SSB64_VS_STAGE=6 SSB64_REMIX_TRAINING="ShieldBreak=1;Oos=3"`, the log shows `training oos`), `training_tech_platform.txt` (same with `Tech=<1..5>;ShieldBreak=0;Percent2=30`, the log shows `training tech ... teched 1 status N`; Roll Left 73, Roll Right 74, In Place 81), `training_stickswap_advance.txt` and `training_stickless_menu.txt` (D-pad Control) |
 | Screens (`scene.sh`) | `chardata_lap.txt` (scene 58, R through every fighter), `data_gallery.txt` (58 to the Gallery and back), `gallery_controls.txt` (55 with `SSB64_START_GALLERY=1`), `soundtest_browse.txt` / `soundtest_wrap.txt` / `soundtest_afk_once.txt` (59; the last is the 7-minute AFK check) |
 
@@ -119,3 +127,12 @@ from `build/`, then filter the output with `sed -n '/stop reason/,$p'`.
 
 Record the evidence next to the task in `docs/remix/ROADMAP.md` (run name, stage id, event counts or what the
 screenshot shows). A significant bug fixed along the way gets a `docs/bugs/<topic>_<date>.md` entry and an index row.
+
+## Cleanup
+
+- An input made for one investigation (one bug, one audit item) lives in the session scratchpad, not in `inputs/`.
+  Add a file to `inputs/` only when it drives a flow other fighters, stages or tasks will reuse, with a header saying
+  the scene, env and what to look for.
+- When a task is validated and its evidence is recorded, delete its run folders:
+  `rm -rf build/agent-shots/vs/<prefix>_*` (sheets, frames, logs, saves, audio dumps). Before the end of a session,
+  empty `build/agent-shots/vs/` and `build/debug_traces/` unless a run is still referenced by an open task.

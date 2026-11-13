@@ -1,2 +1,0 @@
-# VS CSS (scene 16): P1 hand held down to the bottom limit (y 212 in Remix, 205 in vanilla). Shot at 225.
-100 220 0 - 0 -80

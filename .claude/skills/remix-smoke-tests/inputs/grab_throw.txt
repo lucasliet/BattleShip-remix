@@ -1,0 +1,6 @@
+# Use with SSB64_VS_P2_HUMAN=1 on Final Destination (16), fkinds <fighter>,8 (Kirby idle): P1 dashes right to Kirby,
+# grabs with R at 520 and throws forward at 555 (use stick -80 there for the back throw). SSB64_REMIX_FIGHTER_LOG=1 shows
+# Catch 166, CatchPull 167, CatchWait 168, ThrowF 169 / ThrowB 170 and Kirby's capture statuses; shots 510..700 every 6.
+440 482 0 - 80 0
+520 522 0 R 0 0
+555 575 0 - 80 0
