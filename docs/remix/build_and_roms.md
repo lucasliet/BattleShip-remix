@@ -109,7 +109,9 @@ body is `.github/release-notes.md`. Rewrite its `## Highlights` before tagging (
   `f3d.o2r` and the icons from `build/` and writes `dist/desktop/BattleShip-Remix.app`, `.dmg` and `.zip`. It does not use dylibbundler: it expects the static libraries of the optional macOS
   setup above in `.toolchain/host/deps`. Scratch files go to `$TMPDIR` (default `build-macos-release/`) and are removed on exit.
 - **Linux x86_64 (AppImage):** run `scripts/linux/package-remix-appimage.sh [build|package|all]`. It needs podman, builds inside a container described by
-  `scripts/linux/Dockerfile.jammy` and writes to `build-linux-release/`.
+  `scripts/linux/Dockerfile.jammy` and writes to `build-linux-release/`. To run the release script `scripts/package-linux.sh` on a Linux host
+  instead, `scripts/linux/setup-appimage-tools.sh` puts the same pinned `appimagetool` and `linuxdeploy` in `.toolchain/host/bin`; then
+  `PATH="$PWD/.toolchain/host/bin:$PATH" APPIMAGE_EXTRACT_AND_RUN=1 scripts/package-linux.sh`.
 - The version comes from `DIST_VERSION`, default `2.0.1-port.<short HEAD>`. Check that the `.o2r.recipe` in `build/` matches the binary's recipe hash (the `SSB64 asset recipe hash` line of the CMake configure) before packaging.
 
 ## Installing a release package of BattleShip-Remix
