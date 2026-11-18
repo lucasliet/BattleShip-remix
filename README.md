@@ -68,6 +68,7 @@ sdmc:/switch/BattleShip-Remix/
 - The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, both overwritten on every launch; attach them to any Switch bug report. Quit the game from inside it rather than from the HOME menu: HOME kills the process and the end of the logs is lost.
 - Hi-res texture packs are off by default on the Switch (About menu to turn them on): the console cannot hold a whole pack in memory, and a pack that keeps missing the cache decodes textures while you play, which shows up as stutter when many new things appear on screen.
 - Build and packaging steps: [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md#switch-build-battleship-and-battleship-remix).
+- **Nintendo Switch 2 (experimental):** the tree also builds a native Switch 2 `.nro` (libounce + OunceVK), contributed by the community. It is not built or tested for the releases and has no in-game updater, so it has to be built from source: [`docs/remix/build_and_roms.md`](docs/remix/build_and_roms.md#nintendo-switch-2-build-experimental).
 
 ## How the Remix port was done and validated
 
@@ -336,6 +337,7 @@ PRs are welcome from anyone. Bugs go through the [issue form](https://github.com
 - Reference ports I learned from but did not borrow code from: [SM64 PC Port](https://github.com/sm64-port/sm64-port) (SM64), [SpaghettiKart](https://github.com/HarbourMasters/SpaghettiKart) (MK64).
 - Smash Remix: [the Smash Remix team](https://github.com/JSsixtyfour/smashremix) — the mod this fork ports; its source was the reference for every routine. No Remix ROM data is included.
 - BattleShip port: [JRickey](https://github.com/JRickey), with an enormous amount of help, debugging, and feature suggestions from contributors in our Discord server.
+- Nintendo Switch 2 port (experimental, libounce + OunceVK): [@davidkalil10](https://github.com/davidkalil10).
 
 This project is **not affiliated with, endorsed by, or authorized by Nintendo.** It is a personal, non-commercial research and preservation effort. Do not upload ROMs, extracted `.o2r` archives, or any other Nintendo-owned data to issues or pull requests.
 

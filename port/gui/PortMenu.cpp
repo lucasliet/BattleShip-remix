@@ -1793,6 +1793,13 @@ void PortMenu::AddMenuAssets() {
     AddWidget(path, fmt::format("App directory: {}", Ship::Context::GetPathRelativeToAppDirectory("")), WIDGET_TEXT);
     AddWidget(path, fmt::format("Main archive: {}", Ship::Context::GetPathRelativeToAppDirectory(SSB64_O2R_NAME)),
               WIDGET_TEXT);
+#ifdef __SWITCH2__
+    {
+        std::error_code cwdEc;
+        const auto cwdStr = fs::current_path(cwdEc).generic_string();
+        AddWidget(path, fmt::format("Working directory: {}", cwdStr.empty() ? "<unknown>" : cwdStr), WIDGET_TEXT);
+    }
+#endif
 
 #ifdef PORT_HIRES_ENABLED
     path.sidebarName = "Mods";
@@ -2133,11 +2140,12 @@ void PortMenu::AddMenuAbout() {
     AddWidget(path, "MickleMoose: C Modding Toolkit Developer", WIDGET_TEXT);
     AddWidget(path, "Zorkats: C Modding Documentation", WIDGET_TEXT);
 
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH2__)
     // BUILT-IN UPDATER — hidden on Android. App updates come through the
     // Play Store on mobile; a curl-driven GitHub-releases updater can't
     // replace a system-managed installation, and the curl shell-out
     // (Updater.cpp) isn't built on Android in the first place.
+    // Also absent from the experimental Switch 2 build, which no release carries.
     // The background check still fires when the menu loads
     ssb64::enhancements::CheckForUpdatesAsync(false);
 
@@ -2351,7 +2359,7 @@ void PortMenu::Draw() {
 
 /* Shows one overlay notice per run when the boot-time update check finds a new release (the check itself runs when the About page is built). */
 void PortMenu::NotifyUpdateOnce() {
-#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP)
+#if !defined(__ANDROID__) && !defined(BATTLESHIP_UWP) && !defined(__SWITCH2__)
     if (mUpdateNoticeShown || !ssb64::enhancements::IsUpdateAvailable()) {
         return;
     }

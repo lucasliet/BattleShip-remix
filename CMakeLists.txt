@@ -604,6 +604,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/port_window_icon\\.cpp$")
     list(FILTER SSB64_SRC_PORT EXCLUDE REGEX
         "port/enhancements/(Updater|DiscordRichPresence|ShaderDownloader)\\.cpp$")
+    # NINTENDO_SWITCH2 and the __SWITCH2__ compile definition come from libounce's Switch2.cmake toolchain file.
+    if (NINTENDO_SWITCH2)
+        # Experimental build that no release carries: no updater, start-up popup or staged-update step.
+        list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/enhancements/(UpdaterSwitch|SwitchHttp)\\.cpp$")
+        list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/gui/UpdatePopup\\.cpp$")
+        list(FILTER SSB64_SRC_PORT EXCLUDE REGEX "port/switch_update_apply\\.cpp$")
+    endif()
 elseif (CMAKE_SYSTEM_NAME STREQUAL "PS5")
     # Native title: no ucontext, no extraction wizard, no native dialogs, no window icon and no
     # curl/discord shell integrations (updates come through the homebrew store).
@@ -1111,6 +1118,18 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
     # ship/audio/SDLAudioPlayer.h or imgui's imconfig.h need them directly.
     add_dependencies(${PROJECT_NAME} libultraship)
     target_sources(${PROJECT_NAME} PRIVATE port/coroutine_aarch64.S)
+    if (NINTENDO_SWITCH2)
+        target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE
+            ${DEVKITPRO}/portlibs/switch2/include
+        )
+        target_link_directories(${PROJECT_NAME} BEFORE PRIVATE
+            ${DEVKITPRO}/portlibs/switch2/lib
+            ${DEVKITPRO}/libounce/lib
+        )
+        target_link_options(${PROJECT_NAME} PRIVATE
+            "-Wl,-Map=${CMAKE_BINARY_DIR}/${SSB64_APP_NAME}-switch2.map"
+        )
+    endif()
     target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE
         ${DEVKITPRO}/portlibs/switch/include
         ${DEVKITPRO}/portlibs/switch/include/SDL2)

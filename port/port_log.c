@@ -13,6 +13,12 @@
 
 static FILE *sLogFile = NULL;
 static int sTraceEnabled = 0;
+#ifdef __SWITCH2__
+/* SSB64_LOG_STDOUT=1 (env.txt): also print every line to stdout, which nxlink carries, and flush the
+ * file on each call. A diagnostic for the experimental Switch 2 build, off by default because the
+ * per-call flush stutters on the SD card. */
+static int sStdoutMirrorEnabled = 0;
+#endif
 static struct timespec sLogStart;
 
 static double port_log_timespec_ms(const struct timespec *ts)
@@ -47,6 +53,10 @@ void port_log_init(const char *path)
 #endif
 	const char *trace = getenv("SSB64_TRACE");
 	sTraceEnabled = (trace != NULL && trace[0] != '\0' && trace[0] != '0');
+#ifdef __SWITCH2__
+	const char *mirror = getenv("SSB64_LOG_STDOUT");
+	sStdoutMirrorEnabled = (mirror != NULL && mirror[0] != '\0' && mirror[0] != '0');
+#endif
 }
 
 int port_trace_enabled(void)
@@ -70,11 +80,23 @@ int port_log_get_fd(void)
 
 void port_log(const char *fmt, ...)
 {
+#ifdef __SWITCH2__
+	if (sStdoutMirrorEnabled) {
+		va_list ap_out;
+		va_start(ap_out, fmt);
+		vprintf(fmt, ap_out);
+		va_end(ap_out);
+		fflush(stdout);
+	}
+#endif
 	if (sLogFile == NULL) return;
 	va_list ap;
 	va_start(ap, fmt);
 	vfprintf(sLogFile, fmt, ap);
 	va_end(ap);
+#ifdef __SWITCH2__
+	if (sStdoutMirrorEnabled) fflush(sLogFile);
+#endif
 	#if defined(BATTLESHIP_UWP)
 	/* Xbox Device Portal may terminate a failed UWP process before stdio's
 	 * normal-exit flush runs. Keep startup diagnostics durable so failures

@@ -1,6 +1,6 @@
 # Builds and ROMs: BattleShip original (US) and BattleShip-Remix
 
-Covers the ROMs each build needs, which Remix version they are, and the desktop, packaging, Switch, Android and PS5 build commands. Prerequisites and the
+Covers the ROMs each build needs, which Remix version they are, and the desktop, packaging, Switch, experimental Switch 2, Android and PS5 build commands. Prerequisites and the
 generic steps for Linux, macOS and Windows are in `BUILDING.md`; this page adds what is specific to the Remix. Code and scripts: `CMakeLists.txt` (`SSB64_VERSION`,
 `SSB64_APP_NAME`) and the `scripts/` folder of each platform.
 
@@ -18,6 +18,7 @@ Build trees keep the intermediate files; every finished deliverable goes to `dis
 | Linux | `build-bundle-linux-<version>/` (`scripts/package-linux.sh`); `build-linux-release/` (`scripts/linux/package-remix-appimage.sh`, binary only) | `BattleShip-Remix.AppDir/`, `BattleShip-Remix-x86_64.AppImage`; the test package as `BattleShip-Remix-<version>-linux-x86_64.AppImage` |
 | Windows | `build-bundle-win-<version>-<flavor>\` (`scripts/package-windows.ps1`) | `BattleShip-Remix\` (staged folder), `BattleShip-Remix-windows-x64.zip` |
 | Switch | `build-switch/` (`scripts/switch/build.sh`, `scripts/switch/pack.sh`) | `SD/switch/BattleShip-Remix/` (SD card layout), `battleship-switch-sdk.tar.zst` (`pack.sh --sdk`); in CI also `BattleShip-Remix-switch.zip` and `BattleShip-Remix.nro` |
+| Switch 2 (experimental) | `build-switch2/` (`scripts/switch/build-switch2.sh`) | none locally (the `.nro` stays in the build tree); the manual `build-switch2.yml` workflow keeps `BattleShip-Remix-switch2.zip` as a workflow artifact, never as a release asset |
 | Android | `android/app/build/` (Gradle) | `BattleShip-Remix-android.apk` (copied by the release CI; a local Gradle build leaves the APK under `android/app/build/outputs/apk/`) |
 | PS5 | `build-ps5/` (`scripts/ps5/build.sh`; the boilerplate stage stays in `build-ps5/ps5-app/`) | `PPSA99264/` (title folder), `BattleShip-Remix-ps5-PPSA99264.zip` (its top folder is `PPSA99264/`) |
 
@@ -183,7 +184,7 @@ are made from `assets/icon.png` and `assets/icon-remix.png` (the "SR" artwork) b
 
 ### In-game updater
 
-Every platform except Windows updates itself from `releases/latest` of `lucasliet/BattleShip-remix`. The About menu shows the installed version (`BATTLESHIP_CURRENT_VERSION`) at the top on every platform.
+Every platform except Windows updates itself from `releases/latest` of `lucasliet/BattleShip-remix` (the experimental Switch 2 build has no updater at all). The About menu shows the installed version (`BATTLESHIP_CURRENT_VERSION`) at the top on every platform.
 
 - **Windows (notify only):** antivirus engines flagged `v2.0.1-port.10` while its `update_game.bat` waited for the game, unpacked the zip over the running exe, restarted it and deleted itself. Windows now only announces the release: the check reads the GitHub API with WinHTTP inside the game process (`WindowsHttp.cpp`, no `curl.exe` child), and the popup and the About button open the release page (`CanInstallUpdateInGame()` is false, `StartGameUpdate` calls `OpenReleasePage`). The player extracts the zip into the game folder. The asset is named `BattleShip-Remix-windows-x64.zip` from the release after port.10 on, so port.10, which looks for `BattleShip-Remix-windows.zip`, finds no Windows asset and never runs its script again. The in-game install stays off: its ANSI Win32 calls read UTF-8 paths only while the exe carried the UTF-8 manifest, which `v2.0.1-port.11` dropped (`docs/bugs/windows_smart_app_control_unsigned_2026-11-10.md`: Smart App Control blocks new unsigned builds, and the manifest was the first suspect).
 - **Desktop, Switch and PS5:** the About menu (Updates section). Desktop and the Switch also check at start-up and show a popup that offers the update and restarts the game after installing it (`port/gui/UpdatePopup.cpp`). The PS5 updater installs the release zip over the title folder (`UpdaterPS5.cpp`, `UpdateZipInstall.cpp`).
@@ -204,6 +205,62 @@ Hardware validation of the Switch zip update and of the macOS in-place update on
 If a release changes the extraction (a new `.recipe`), copy the newly extracted `.o2r` and `.recipe` to the SD card again: an old `.o2r` with a new `.nro` would cause a storm
 of invalid reloc tokens, so the game checks the `.recipe` first and shows an error screen (recipe missing, or the two recipes when they differ) instead of starting.
 The game writes `ssb64.log` and `logs/BattleShip-Remix.log` next to the `.nro`, on the SD card; both are overwritten on every launch. Quit the game from inside it when collecting them: HOME kills the process, the last second of the log is lost and ftpd may refuse to send a file the game still holds open.
+
+## Nintendo Switch 2 build (experimental)
+
+A native Switch 2 `.nro` built with [ounce-devkit](https://github.com/ouncebrew/ounce-devkit): libounce (a libnx-compatible library) and
+OunceVK (EGL and OpenGL on Vulkan). It was contributed by the community and is **experimental**:
+
+- It is not built for the releases and nobody on the project tests it on hardware. No release carries a Switch 2 asset.
+- It has no in-game updater: the updater sources, the start-up popup and the staged-update step are left out of the build
+  (`NINTENDO_SWITCH2` in `CMakeLists.txt`, `__SWITCH2__` in `port/`), so the game never asks a release API for anything.
+- It must be built from source, with the commands below or with the manual workflow.
+
+`NINTENDO_SWITCH2` (CMake) and `__SWITCH2__` (C/C++) are set by libounce's `Switch2.cmake` toolchain file; `CMAKE_SYSTEM_NAME` stays
+`NintendoSwitch` and `__SWITCH__` stays defined, so the build is the Switch build plus what those two guard.
+
+### SDK setup and build
+
+```bash
+scripts/switch/setup-toolchain.sh          # once, as for the Switch (setup-toolchain-linux.sh on a Linux host)
+scripts/switch/setup-switch2-toolchain.sh  # once; adds ounce-devkit to .toolchain/opt/devkitpro (needs the network)
+scripts/switch/build-switch2.sh remix      # build-switch2/BattleShip-Remix.nro
+```
+
+`setup-switch2-toolchain.sh` downloads one archive, pinned by sha256, and unpacks `libounce/` and `portlibs/switch2/` next to the Switch
+toolchain; it does not change libnx or the Switch portlibs, so `scripts/switch/build.sh` keeps working. `build-switch2.sh` is
+`build.sh` with `libounce/cmake/Switch2.cmake` as the toolchain file and `build-switch2/` as the build tree, and it ends by running
+`tools/verify_switch2_package.py`, which fails when the `.nro` lacks the Switch 2 startup tag (`OUN0`) or the link map shows libnx or the
+Switch 1 EGL libraries (tests: `uv run --no-project python tests/test_switch2_package.py`).
+
+### Manual workflow
+
+`.github/workflows/build-switch2.yml` runs only from the Actions tab ("Run workflow"). It builds the Remix `.nro` in the devkitPro
+container, verifies it and uploads `BattleShip-Remix-switch2.zip` (the SD card folder) as a workflow artifact. It has read-only
+permissions and never creates or changes a release; `release-remix.yml` has no Switch 2 job.
+
+### SD card install
+
+The layout is the one of the Switch build, in `sdmc:/switch/BattleShip-Remix/`:
+
+1. Copy `switch/` from the workflow zip to the root of the SD card. From a local build, create `switch/BattleShip-Remix/` and copy
+   `build-switch2/BattleShip-Remix.nro`, `f3d.o2r`, `config.yml`, `gamecontrollerdb.txt` and `assets/custom/fonts/` into it. The
+   Switch 2 build does not make `f3d.o2r`: take it from `build/` of the desktop build, or zip the shaders with
+   `(cd libultraship/src/fast && cmake -E tar cf <folder>/f3d.o2r --format=zip shaders)`.
+2. Copy `BattleShip-Remix.o2r` and `BattleShip-Remix.o2r.recipe` from a desktop build of the same commit (made from your Smash Remix
+   2.0.1 ROM) into the same folder. The `.recipe` check is the one of the Switch build.
+3. Start the `.nro` from the homebrew loader of the console.
+
+When the loader starts the `.nro` with another working directory, the game switches to the folder of the `.nro` and, failing that, to
+`sdmc:/switch/BattleShip-Remix/` (`port_switch2_enter_app_directory` in `port/port.cpp`); `ssb64.log` and the Paths page of the port
+menu show the working directory in use.
+
+### Differences from the Switch build
+
+- OpenGL 3.3 core profile with GLSL 330 shaders (OunceVK), where the Switch uses a 2.1 context.
+- The CPU clock calls of the Switch (`clkrst`, `pcv`) are compiled out: the game never changes the clock rate.
+- `SSB64_LOG_STDOUT=1` in `env.txt` also prints every `ssb64.log` line to stdout, which nxlink carries, and flushes the file on each
+  line. It is off by default because the per-line flush stutters on the SD card. `ssb64.log` is still one file, overwritten on every launch.
 
 ## Checklist for a fresh clone
 

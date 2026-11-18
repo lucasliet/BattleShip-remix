@@ -11,7 +11,7 @@ Detailed reference material lives under `docs/`. Read the file that matches the 
 | Project status, ROM info, dependencies, source tree layout | `docs/architecture.md` |
 | C type system, decomp naming prefixes, code style, macros | `docs/c_conventions.md` |
 | RDRAM / RSP / RDP / GBI / audio / threading / controller / endianness | `docs/n64_reference.md` |
-| Build and package every platform (desktop, Switch, Android, PS5), ROMs and hashes, asset recipe, in-game updater | `docs/remix/build_and_roms.md` (generic prerequisites and Windows steps: `BUILDING.md`) |
+| Build and package every platform (desktop, Switch, experimental Switch 2, Android, PS5), ROMs and hashes, asset recipe, in-game updater | `docs/remix/build_and_roms.md` (generic prerequisites and Windows steps: `BUILDING.md`) |
 | Reloc stub regen, runtime logs, LP64 compat notes, asset recipe fingerprint | `docs/build_and_tooling.md` |
 | Switch, Android bring-up notes and the decisions behind them | `docs/switch_port_2026-10-12.md`, `docs/android_port_status_2026-05-01.md` |
 | Native C mods (event catalog, detours, fighter overrides) | `docs/modding.md` |

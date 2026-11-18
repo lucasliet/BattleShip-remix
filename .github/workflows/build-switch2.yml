@@ -1,0 +1,90 @@
+name: Build Switch 2 (experimental)
+
+# Manual build of the experimental Nintendo Switch 2 package (libounce + OunceVK). It is not part of any release
+# and is not tested on hardware: this workflow never publishes, and the zip only stays as a workflow artifact.
+# See docs/remix/build_and_roms.md ("Nintendo Switch 2 build (experimental)").
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-switch2:
+    name: Switch 2 (libounce + OunceVK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    container:
+      image: devkitpro/devkita64:20260219   # date-pinned
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install host deps
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends python3 python3-pil zip git ca-certificates curl xz-utils pkg-config
+          # The switch-tinyxml2 portlib is too old for libultraship; its FetchContent copy is used instead.
+          dkp-pacman -R --noconfirm switch-tinyxml2 || true
+          # CMake still looks for the Switch libcurl portlib; the image normally ships it already.
+          test -f /opt/devkitpro/portlibs/switch/lib/libcurl.a || dkp-pacman -Sy --noconfirm switch-curl
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Mark the checkout safe for git describe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Test the package verifier
+        run: python3 -I tests/test_switch2_package.py
+      - name: Install the Switch 2 devkit (pinned by sha256)
+        run: scripts/switch/setup-switch2-toolchain.sh /opt/devkitpro
+      - name: Configure
+        env:
+          DEVKITPRO: /opt/devkitpro
+        run: |
+          cmake -S . -B build-switch2 -GNinja \
+            -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/libounce/cmake/Switch2.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBATTLESHIP_SWITCH=ON \
+            -DDISABLE_SCRIPTING=ON \
+            -DSSB64_VERSION=remix
+      - name: Build NRO
+        env:
+          DEVKITPRO: /opt/devkitpro
+        run: cmake --build build-switch2 --target ssb64_nro -j "$(nproc)"
+      - name: Verify the Switch 2 package
+        run: |
+          app=BattleShip-Remix
+          python3 -I tools/verify_switch2_package.py \
+            --nro "build-switch2/$app.nro" \
+            --elf "build-switch2/$app.elf" \
+            --map "build-switch2/$app-switch2.map"
+      - name: Package SD card folder
+        run: |
+          app=BattleShip-Remix
+          dir="dist/switch2/SD/switch/$app"
+          mkdir -p "$dir"
+          cp "build-switch2/$app.nro" "$dir/"
+          (cd libultraship/src/fast && cmake -E tar cf "$GITHUB_WORKSPACE/$dir/f3d.o2r" --format=zip shaders)
+          cp gamecontrollerdb.txt config.yml "$dir/"
+          mkdir -p "$dir/assets/custom"
+          cp -a assets/custom/fonts "$dir/assets/custom/"
+          cat > "$dir/README.txt" <<EOF
+          $app for Nintendo Switch 2 (homebrew, experimental)
+
+          Community-contributed build, not tested on hardware by the project and not part of its releases.
+          It has no in-game updater: build a newer one from source.
+
+          1. Copy the switch/ folder to the root of the SD card.
+          2. Add your own BattleShip-Remix.o2r and BattleShip-Remix.o2r.recipe to switch/$app/.
+             They are not included: run the desktop build of the same commit once with your
+             Smash Remix 2.0.1 ROM and copy the two files it extracts (its app data folder) to this folder.
+          EOF
+          (cd dist/switch2/SD && zip -qr "$GITHUB_WORKSPACE/dist/switch2/$app-switch2.zip" switch)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remix-switch2-experimental
+          path: dist/switch2/BattleShip-Remix-switch2.zip
+          if-no-files-found: error
