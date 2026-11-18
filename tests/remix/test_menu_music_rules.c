@@ -94,6 +94,14 @@ static void testBgmVolumeResetsOnlyWhenMusicIsOnAndSilent(void)
     CHECK_TRUE(!gmRemixMenuMusicRulesVolumeResets(1, TEST_BGM_MAIN_MELEE));
 }
 
+static void testResultsBgmReplaysOnlyWhileTheScreenRuns(void)
+{
+    CHECK_TRUE(gmRemixMenuMusicRulesResultsBgmShouldReplay(1, 0));
+    CHECK_TRUE(!gmRemixMenuMusicRulesResultsBgmShouldReplay(0, 0));
+    CHECK_TRUE(!gmRemixMenuMusicRulesResultsBgmShouldReplay(1, 1));
+    CHECK_TRUE(!gmRemixMenuMusicRulesResultsBgmShouldReplay(0, 1));
+}
+
 void remixTestMenuMusicRules(void)
 {
     printf("menu music rules\n");
@@ -108,4 +116,5 @@ void remixTestMenuMusicRules(void)
     RUN_TEST(testRandomKeepsAnyOtherTrack);
     RUN_TEST(testSettingsCloseResetsWhenMusicIsOffOrSilent);
     RUN_TEST(testBgmVolumeResetsOnlyWhenMusicIsOnAndSilent);
+    RUN_TEST(testResultsBgmReplaysOnlyWhileTheScreenRuns);
 }

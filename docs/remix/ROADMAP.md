@@ -49,7 +49,7 @@ is indexed in [`README.md`](README.md).
 
 ## Current position
 
-**M14 is open (equivalence audit of the non-toggle logic, 2026-11-15); M0 to M13 are closed.** The Remix is playable
+**M16 is open (ledger re-audit follow-ups, 2026-11-18); M0 to M15 are closed.** The Remix is playable
 on every platform the releases ship, and the owner validated the listening pass, the Switch hardware and the updaters
 on 2026-11-15. Releases are not tracked here: they follow `AGENTS.md` ("Releases") and `build_and_roms.md`.
 
@@ -61,9 +61,10 @@ on 2026-11-15. Releases are not tracked here: they follow `AGENTS.md` ("Releases
 | M13 Toggle parity audit | closed 2026-11-15: 35 findings in 10 of the 11 batches, each fixed with a lead smoke test or kept as a `deviations.md` row |
 | M14 Equivalence audit of the non-toggle logic | done 2026-11-17 (T14.1 to T14.6 on 2026-11-16, T14.7 on 2026-11-17): 23 pilot findings, 116 from the 22 audit batches and 36 from the second pass on the parts first left uncovered, each fixed with a lead smoke test, kept as a `deviations.md` row or not reproduced; G04-4 (Random in the 12CB Custom set) implemented under T14.7 |
 | M15 Remix text in the game's display layers | done 2026-11-17: every Remix text is drawn by the game in the asm's display layers; the port overlay is gone |
+| M16 Ledger re-audit follow-ups | open: T16.1 done 2026-11-18 |
 
 - **Next step:** owner passes on the migrated screens; before any tag, build Windows and macOS (not buildable on the Linux machine) and rewrite the release notes Highlights.
-- **Last checkpoint:** M15 closed (2026-11-17): T15.3 and T15.4, overlay removed.
+- **Last checkpoint:** T16.1 (2026-11-18): the `prevent_results_bgm_on_css_` guard ported (`docs/bugs/results_bgm_replay_on_exit_2026-11-18.md`).
 - **Overall estimate:** 100% by the table at the end of this file, which counts presence (every asm patch hooked); the
   equivalence of the non-toggle logic is what M14 measures.
 
@@ -780,6 +781,23 @@ that covers them in Remix (room 0x39).
   path and its env var are removed; `text_layers.md` describes the built system. Lead runs: `lead_t153_pm` (four panel menus:
   the hands pass over Shield and the text sits inside each card) and `lead_t153_12cb` (12CB match). 8516 unit checks, 0
   failed. Built locally: desktop Linux, Switch, PS5 and Android; Windows and macOS were not built (no host).
+
+### M16. Ledger re-audit follow-ups (opened 2026-11-18)
+
+The 2026-11-18 independent re-audit (326 asm scopes of the 2.007 `OS.patch_start` patches that the hook detection
+flags as unhooked, symbolic or no-function, triaged against the port code without reading the ledger) confirmed every
+ledger verdict except one, `BGM.asm:1407 prevent_results_bgm_on_css_` (the ledger's `NA` named a mechanism that does
+not hold). Follow-ups land here.
+
+- [x] T16.1 Port the `prevent_results_bgm_on_css_` guard (2026-11-18): pure rule
+  `gmRemixMenuMusicRulesResultsBgmShouldReplay` (`gm/gmremixmenumusicrules.c`) applied in
+  `mn/mnvsmode/mnvsresults.c:3268`, the exit signal read from the results screen's own exit path (`scene_curr` off
+  `nSCKindVSResults` before its `syAudioStopBGMAll`). The A/B smoke run shows the race does not reproduce on PC (async
+  bridge stop), so the guard is preventive and asm-faithful rather than a visible fix; the ledger line and the bug
+  write-up say so (`docs/bugs/results_bgm_replay_on_exit_2026-11-18.md`). Unit test in `tests/remix/test_menu_music_rules.c`
+  (8520 checks, 0 failed); `ssb64` builds clean; lead runs `bgmgap_before` / `bgmgap_after` (1-stock match into the
+  results screen, START exit, `SSB64_BGM_LOG=1`): identical correct BGM sequences, one results-track play, the CSS
+  starting its own screen track.
 
 ---
 
