@@ -12,6 +12,12 @@
   starts, the loser slot shows the fighter that was rolled, and undo and reset bring the "?" back. The Custom legend
   hides while the panel menu of the token holder is open, and "Game NN" on the results appears with the results label.
 - **Input Display** is drawn as game sprites, in the layer Smash Remix uses, instead of a separate overlay.
+- **Every Smash Remix patch was re-checked against the port** (all 2,007 of the ROM hack's patches, read one by one
+  from its assembly source). One missing piece was found and fixed: leaving the VS results screen could restart its
+  music as the screen tore down, and with Menu Music on a Random setting the character select then kept the results
+  track instead of playing menu music. The exit guard Smash Remix uses is now in place; on desktop the race did not
+  actually trigger, so this matches Smash Remix behavior on every audio backend rather than changing anything audible
+  there.
 
 Nothing changed in the asset pipeline: on the Switch, keep the `BattleShip-Remix.o2r` and `.recipe` you already have.
 Switch builds up to `v2.0.1-port.9` still download the bare `BattleShip-Remix.nro`, so that file stays in this release.
