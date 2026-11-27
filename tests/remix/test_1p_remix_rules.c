@@ -129,6 +129,14 @@ static void testSonicFightsInGreenHillTwiceAsOftenAsCasino(void)
     CHECK_EQ(SC1PREMIX_1P_SONIC_STAGE_GHZ, sc1PRemix1PPickSonicStage(scriptedRandom));
 }
 
+static void testEveryKirbyTeamPowerButTheMagicHatLoadsItsFighterFiles(void)
+{
+    CHECK_EQ(1, sc1PRemix1PKirbyPowerHasFiles(0x38));
+    CHECK_EQ(1, sc1PRemix1PKirbyPowerHasFiles(0x44));
+    CHECK_EQ(1, sc1PRemix1PKirbyPowerHasFiles(0x1D));
+    CHECK_EQ(0, sc1PRemix1PKirbyPowerHasFiles(SC1PREMIX_1P_KIRBY_MAGIC_HAT_POWER));
+}
+
 static int lastRandom(int range)
 {
     return range - 1;
@@ -214,6 +222,7 @@ void remixTest1PRemixRules(void)
     RUN_TEST(testDistinctPicksNeverRepeat);
     RUN_TEST(testTheBossIsOneOfThree);
     RUN_TEST(testSonicFightsInGreenHillTwiceAsOftenAsCasino);
+    RUN_TEST(testEveryKirbyTeamPowerButTheMagicHatLoadsItsFighterFiles);
     RUN_TEST(testTheAllstarRunHasEveryFighterOnce);
     RUN_TEST(testTheAllstarRunUsesEachStageOnceWhenStagesAreFree);
     RUN_TEST(testTheAllstarRunFinishesWhenEveryFighterSharesOneStage);
