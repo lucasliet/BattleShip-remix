@@ -82,6 +82,17 @@ With the shortcut fixed, `scene.sh 52` with `SSB64_REMIX_1P_MODE=remix1p` logs t
 (`SSB64_SPGAME_STAGE=8`, 5000 frames) and each of the other 13 stages (2500 frames) with `rc=0`; `allstar` logs its run
 and `hrc` and a plain boot are unchanged.
 
+The checks that had used the inactive shortcut were run again through the fixed one, all with `rc=0`:
+
+| Check | Result |
+|---|---|
+| Giant stage (`SSB64_SPGAME_STAGE=6`) | one fighter with match state 1 (`lldb_count.sh`, `ret:ftRemixSizeGetMatchState`), drawn giant with its two allies |
+| Tiny Team (`SSB64_SPGAME_STAGE=9`) | three fighters with match state 2 |
+| All-Star Rest Area | one portrait at progress 0, two with `SSB64_ALLSTAR_PROGRESS=4`, three with `18` |
+| Records | a cleared run (`SSB64_SPGAME_STAGE=13 SSB64_SPGAME_AUTOWIN=400`, `inputs/allstar_a_presses.txt`, 12000 frames) shows its score on the Remix 1P CSS, and the standard 1P CSS on the same save still shows 0 |
+
+The record is written after the score screens: a run with no input stops on the stage clear screen and saves nothing.
+
 The standard 1P Kirby stage (`SSB64_REMIX_1P_MODE=standard`), the VS Kirby copy of Banjo and a VS Kirby spawning with
 the Banjo hat still run with `rc=0`.
 

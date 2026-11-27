@@ -1,5 +1,8 @@
 ## Highlights
 
+- **Remix 1P: the Kirby Team stage no longer crashes.** Two faults on that stage are fixed: a Kirby could appear as a
+  hat with no body and crash the game shortly after, and a Kirby whose copied power fires a projectile (Banjo's egg,
+  for example) crashed the game when it used its neutral special. Reported in issue #10.
 - **Remix text is drawn by the game, in front of or behind the same things as in Smash Remix.** The texts that Smash
   Remix adds (stock counts and the Manual stock marks, the panel menus, the 12-Character Battle texts, player tags,
   the match HUD of the Remix modes, Training rows, the pause legend, the stage select, Match Stats and more) were drawn
